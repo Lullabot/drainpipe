@@ -1,0 +1,26 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - composer install --no-dev
+    status:
+      - test -f ./vendor/composer/installed.json
+      - test -f ./vendor/composer/autoload.php
+  update:
+    cmds:
+      - ./vendor/bin/drush {{.CLI_ARGS}} --yes cache:clear plugin
+      - ./vendor/bin/drush {{.CLI_ARGS}} --yes updatedb --no-post-updates
+      # Run config:import twice to make sure we catch any config that didn't declare
+      # a dependency correctly. This is also useful when importing large config sets
+      # as it can sometimes hit an out of memory error.
+      - ./vendor/bin/drush {{.CLI_ARGS}} --yes config:import || true
+      - ./vendor/bin/drush {{.CLI_ARGS}} --yes config:import
+      - ./vendor/bin/drush {{.CLI_ARGS}} --yes updatedb --no-cache-clear
+      - ./vendor/bin/drush {{.CLI_ARGS}} --yes cache:rebuild
+  mainton:
+    cmds:
+      - ./vendor/bin/drush {{.CLI_ARGS}} --yes state:set system.maintenance_mode 1 --input-format=integer
+  maintoff:
+    cmds:
+      - ./vendor/bin/drush {{.CLI_ARGS}} --yes state:set system.maintenance_mode 0 --input-format=integer
