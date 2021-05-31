@@ -1,0 +1,11 @@
+#!/usr/bin/env php
+<?php
+$base = dirname(__FILE__);
+$os = php_uname('s');
+$args = array_splice($argv, 1);
+$command = $base . '/' . $os . '/task';
+print $command . "\n";
+if (!empty($args)) {
+    $command = $os . " " . implode(" ", $args);
+}
+passthru($command);

@@ -1,0 +1,5 @@
+{
+  "name": "Lullabot/drainpipe",
+  "description": "An automated build tool to allow projects to have a set standardized operations scripts.",
+  "bin": ["bin/linux/task"]
+}
