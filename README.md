@@ -1,9 +1,7 @@
 # Drainpipe
 ## Dependencies
-This project comes with the linux binary for [Task v3.4.3](https://github.com/go-task/task/releases/tag/v3.4.3).
-
-By adding additional task binaries in folders and naming them based on what `php_uname('s')` returns can enable
-additional OS support.
+This project requires [Task v3.4.3](https://github.com/go-task/task/releases/tag/v3.4.3) be installed.
+Other versions may be acceptable but this is the version the example Taskfile.yml has been tested with.
 ## Setup
 Copy Taskfile.yml to the root directory of your project and modify it as needed for your project.
 ## Usage
