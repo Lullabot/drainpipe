@@ -1,8 +1,7 @@
 # Drainpipe
 
 ## Dependencies
-This project requires [Task v3.4.3](https://github.com/go-task/task/releases/tag/v3.4.3) be installed.
-Other versions may be acceptable but this is the version the example Taskfile.yml has been tested with.
+This project requires [Task](https://github.com/go-task/task), [version 3 or later](https://taskfile.dev/#/taskfile_versions) to be installed.
 
 ## Setup
 Copy Taskfile.yml to the root directory of your project and modify it as needed for your project.
