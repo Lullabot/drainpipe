@@ -1,4 +1,7 @@
 {
-  "name": "Lullabot/drainpipe",
-  "description": "An automated build tool to allow projects to have a set standardized operations scripts."
+    "name": "lullabot/drainpipe",
+    "description": "An automated build tool to allow projects to have a set standardized operations scripts.",
+    "type": "library",
+    "license": "GPL-2.0-or-later",
+    "require": {}
 }
