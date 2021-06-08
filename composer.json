@@ -1,7 +1,9 @@
 {
     "name": "lullabot/drainpipe",
     "description": "An automated build tool to allow projects to have a set standardized operations scripts.",
-    "type": "library",
+    "type": "lullabot-drainpipe-installer",
     "license": "GPL-2.0-or-later",
-    "require": {}
+    "require": {
+        "lullabot/drainpipe-installer": "*"
+    }
 }
