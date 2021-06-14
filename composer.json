@@ -4,6 +4,6 @@
     "type": "lullabot-drainpipe-installer",
     "license": "GPL-2.0-or-later",
     "require": {
-        "lullabot/drainpipe-installer": "*"
+        "lullabot/drainpipe-installer": "dev-main"
     }
 }
