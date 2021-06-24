@@ -4,6 +4,8 @@
     "type": "lullabot-drainpipe-installer",
     "license": "GPL-2.0-or-later",
     "require": {
-        "lullabot/drainpipe-installer": "dev-main"
+        "lullabot/drainpipe-installer": "dev-main",
+        "webmozart/glob": "^4.3",
+        "webmozart/path-util": "^2.3"
     }
 }
