@@ -9,15 +9,17 @@ tasks:
     desc: Build Drupal for production usage.
     cmds:
       - composer install --no-dev --optimize-autoloader
-    sources:
-      - composer.json
-      - composer.lock
-    generates:
-      - ./vendor/composer/installed.json
-      - ./vendor/autoload.php
-    status:
-      - >
-        test -f ./vendor/composer/installed.json && grep -q '"dev": false' ./vendor/composer/installed.json
+    # Disabled until https://github.com/go-task/task/pull/477 is merged and
+    # released.
+    # sources:
+    #   - composer.json
+    #   - composer.lock
+    # generates:
+    #   - ./vendor/composer/installed.json
+    #   - ./vendor/autoload.php
+    # status:
+    #   - >
+    #     test -f ./vendor/composer/installed.json && grep -q '"dev": false' ./vendor/composer/installed.json
 
   update:
     desc: Run Drupal update tasks after deploying new code.
