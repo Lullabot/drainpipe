@@ -2,12 +2,14 @@ version: '3'
 
 tasks:
   build:
+    desc: Build Drupal for production usage.
     cmds:
       - composer install --no-dev
     status:
       - test -f ./vendor/composer/installed.json
       - test -f ./vendor/composer/autoload.php
   update:
+    desc: Run Drupal update tasks after deploying new code.
     cmds:
       - ./vendor/bin/drush {{.CLI_ARGS}} --yes cache:clear plugin
       - ./vendor/bin/drush {{.CLI_ARGS}} --yes updatedb --no-post-updates
@@ -19,8 +21,10 @@ tasks:
       - ./vendor/bin/drush {{.CLI_ARGS}} --yes updatedb --no-cache-clear
       - ./vendor/bin/drush {{.CLI_ARGS}} --yes cache:rebuild
   mainton:
+    desc: Turn on Maintenance Mode.
     cmds:
       - ./vendor/bin/drush {{.CLI_ARGS}} --yes state:set system.maintenance_mode 1 --input-format=integer
   maintoff:
+    desc: Turn off Maintenance Mode.
     cmds:
       - ./vendor/bin/drush {{.CLI_ARGS}} --yes state:set system.maintenance_mode 0 --input-format=integer
