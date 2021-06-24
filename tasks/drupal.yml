@@ -7,7 +7,16 @@ tasks:
       - composer install --no-dev --optimize-autoloader
     status:
       - test -f ./vendor/composer/installed.json
-      - test -f ./vendor/composer/autoload.php
+      - test -f ./vendor/autoload.php
+
+  build:dev:
+    desc: Build Drupal for development usage.
+    cmds:
+      - composer install
+    status:
+      - test -f ./vendor/composer/installed.json
+      - test -f ./vendor/autoload.php
+
   update:
     desc: Run Drupal update tasks after deploying new code.
     cmds:
