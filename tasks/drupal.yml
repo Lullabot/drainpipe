@@ -5,17 +5,29 @@ tasks:
     desc: Build Drupal for production usage.
     cmds:
       - composer install --no-dev --optimize-autoloader
+    sources:
+      - composer.json
+      - composer.lock
+    generates:
+      - ./vendor/composer/installed.json
+      - ./vendor/autoload.php
     status:
-      - test -f ./vendor/composer/installed.json
-      - test -f ./vendor/autoload.php
+      - >
+        test -f ./vendor/composer/installed.json && grep -q '"dev": true' ./vendor/composer/installed.json
 
   build:dev:
     desc: Build Drupal for development usage.
     cmds:
       - composer install
+    sources:
+      - composer.json
+      - composer.lock
+    generates:
+      - ./vendor/composer/installed.json
+      - ./vendor/autoload.php
     status:
-      - test -f ./vendor/composer/installed.json
-      - test -f ./vendor/autoload.php
+      - >
+        test -f ./vendor/composer/installed.json && grep -q '"dev": false' ./vendor/composer/installed.json
 
   update:
     desc: Run Drupal update tasks after deploying new code.
