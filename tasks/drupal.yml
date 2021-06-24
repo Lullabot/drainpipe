@@ -4,7 +4,7 @@ tasks:
   build:
     desc: Build Drupal for production usage.
     cmds:
-      - composer install --no-dev
+      - composer install --no-dev --optimize-autoloader
     status:
       - test -f ./vendor/composer/installed.json
       - test -f ./vendor/composer/autoload.php
