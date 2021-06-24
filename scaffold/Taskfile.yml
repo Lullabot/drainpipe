@@ -4,8 +4,3 @@ dotenv: ['.env']
 
 includes:
   drupal: ./vendor/lullabot/drainpipe/tasks/drupal.yml
-
-tasks:
-  default:
-    cmds:
-      - echo "Hello, world!"
