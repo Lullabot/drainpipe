@@ -1,24 +1,14 @@
 version: '3'
 
 tasks:
-  build:
+  # We intentionally do not include a command for development installations.
+  # Since we need to bootstrap fresh clones from git with `composer install`,
+  # being able to execute this task means that development files are already
+  # available.
+  build:prod:
     desc: Build Drupal for production usage.
     cmds:
       - composer install --no-dev --optimize-autoloader
-    sources:
-      - composer.json
-      - composer.lock
-    generates:
-      - ./vendor/composer/installed.json
-      - ./vendor/autoload.php
-    status:
-      - >
-        test -f ./vendor/composer/installed.json && grep -q '"dev": true' ./vendor/composer/installed.json
-
-  build:dev:
-    desc: Build Drupal for development usage.
-    cmds:
-      - composer install
     sources:
       - composer.json
       - composer.lock
@@ -41,10 +31,12 @@ tasks:
       - ./vendor/bin/drush {{.CLI_ARGS}} --yes config:import
       - ./vendor/bin/drush {{.CLI_ARGS}} --yes updatedb --no-cache-clear
       - ./vendor/bin/drush {{.CLI_ARGS}} --yes cache:rebuild
+
   maintenance:on:
     desc: Turn on Maintenance Mode.
     cmds:
       - ./vendor/bin/drush {{.CLI_ARGS}} --yes state:set system.maintenance_mode 1 --input-format=integer
+
   maintenance:off:
     desc: Turn off Maintenance Mode.
     cmds:
