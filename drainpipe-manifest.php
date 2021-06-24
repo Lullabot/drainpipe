@@ -68,5 +68,6 @@ if ($exclude) {
 }
 
 foreach ($paths as $path) {
+    $path = \Webmozart\PathUtil\Path::makeRelative((string) $path, getcwd());
     print "$path\n";
 }
