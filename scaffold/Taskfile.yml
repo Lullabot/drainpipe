@@ -1,0 +1,6 @@
+version: '3'
+
+dotenv: ['.env']
+
+includes:
+  drupal: ./vendor/lullabot/drainpipe/tasks/drupal.yml
