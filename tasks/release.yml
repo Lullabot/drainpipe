@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  snapshot:
+    desc: Creates a snapshot of the current working directory with files in .drainpipeignore excluded
+    cmds:
+      - if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && exit 1; fi
+      - if [ -d "{{.CLI_ARGS}}" ] || [ "" == "{{.CLI_ARGS}}" ]; then echo "Please provide a path to a directory that does not yet exist" && exit 1; fi
+      - cp -R . {{.CLI_ARGS}}
+      - mv {{.CLI_ARGS}}/.drainpipeignore {{.CLI_ARGS}}/.gitignore
+      - cd {{.CLI_ARGS}} && git add . && git clean -ffdX
+      - rm -rf {{.CLI_ARGS}}/.git
