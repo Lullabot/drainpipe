@@ -1,12 +1,12 @@
 version: '3'
 
 tasks:
-  snapshot:directory:
-    desc: "Creates a snapshot of the current working directory with files in .drainpipeignore excluded. The target directory should be provided as a cli argument e.g. task snapshot:directory -- /tmp/release"
+  directory:
+    desc: "Creates a snapshot of the current working directory with .git, files in .drainpipeignore, and .drainpipeignore excluded. The target directory should be provided as a cli argument e.g. task snapshot:directory -- /tmp/release"
     cmds:
-      - if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && exit 1; fi
       - if [ -d "{{.CLI_ARGS}}" ] || [ "" == "{{.CLI_ARGS}}" ]; then echo "Please provide a path to a directory that does not yet exist" && exit 1; fi
       - cp -R . {{.CLI_ARGS}}
+      - if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch {{.CLI_ARGS}}/.drainpipeignore; fi
       - |
         cd {{.CLI_ARGS}}
         rm -rf .git
@@ -15,13 +15,14 @@ tasks:
         git add .
         git clean -ffdX
         rm -rf .git
-  snapshot:archive:
+  archive:
     silent: true
     desc: "Creates a snapshot of the current working directory as an archive. Format options are tar, tar.gz, or zip. Usage: task snapshot:archive format=zip > ~/archive.zip"
     cmds:
       - |
         TMP_DIR=$(mktemp -d)
         cp -R . $TMP_DIR
+        if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch $TMP_DIR/.drainpipeignore; fi
         cd $TMP_DIR
         rm -rf .git
         git init
