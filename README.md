@@ -22,5 +22,11 @@ task drupal:update -- @mysite.dev
 
 ## Validation
 
-Your `Taskfile.yml` can be validated with the following command:
-`npx ajv-cli validate -s ./vendor/lullabot/drainpipe/taskfile-schema.json -d Taskfile.yml`
+Your `Taskfile.yml` can be validated with JSON Schema:
+```
+curl -O https://json.schemastore.org/taskfile.json
+npx ajv-cli validate -s taskfile.json -d Taskfile.yml
+```
+
+See [.github/workflows/validate-taskfile.yml](`.github/workflows/validate-taskfile.yml`)
+for an example of this in use.
