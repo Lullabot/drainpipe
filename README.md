@@ -19,3 +19,8 @@ or for a remote site:
 ```
 task drupal:update -- @mysite.dev
 ```
+
+## Validation
+
+Your `Taskfile.yml` can be validated with the following command:
+`npx ajv-cli validate -s ./vendor/lullabot/drainpipe/taskfile-schema.json -d Taskfile.yml`
