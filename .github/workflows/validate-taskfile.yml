@@ -1,4 +1,4 @@
-name: Valiate example Taskfile.yml
+name: Validate example Taskfile.yml
 on:
   push:
     branches:
