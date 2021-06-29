@@ -16,6 +16,7 @@ tasks:
         git config core.excludesFile .gitignore
         git add .
         git clean -ffdX
+        rm .gitignore
         rm -rf .git
   archive:
     silent: true
@@ -33,6 +34,7 @@ tasks:
         git config core.excludesFile .gitignore
         git add .
         git clean -ffdX
+        rm .gitignore
         git config user.email 'no-reply@lullabot.com'
         git config user.name 'Lullabot Drainpipe'
         git commit -m "Initial commit" --no-gpg-sign
