@@ -7,5 +7,7 @@ includes:
 
 tasks:
   default:
+    desc: "Example command"
     cmds:
       - echo "Hello, world!"
+
