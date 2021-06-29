@@ -1,5 +1,16 @@
 version: '3'
 
+vars:
+  PREPARE_DIRECTORY: |
+    rm -rf .git
+    git init
+    mv .drainpipeignore .gitignore
+    # Override global gitignore
+    git config core.excludesFile .gitignore
+    git add .
+    git clean -ffdX
+    rm .gitignore
+
 tasks:
   directory:
     desc: "Creates a snapshot of the current working directory with .git, .gitignore, files in .drainpipeignore, and .drainpipeignore itself excluded. The target directory should be provided as a cli argument e.g. task snapshot:directory -- /tmp/release"
@@ -9,14 +20,7 @@ tasks:
       - if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch {{.CLI_ARGS}}/.drainpipeignore; fi
       - |
         cd {{.CLI_ARGS}}
-        rm -rf .git
-        git init
-        mv .drainpipeignore .gitignore
-        # Override global gitignore
-        git config core.excludesFile .gitignore
-        git add .
-        git clean -ffdX
-        rm .gitignore
+        {{ .PREPARE_DIRECTORY }}
         rm -rf .git
   archive:
     silent: true
@@ -27,14 +31,7 @@ tasks:
         cp -R . $TMP_DIR
         if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch $TMP_DIR/.drainpipeignore; fi
         cd $TMP_DIR
-        rm -rf .git
-        git init
-        mv .drainpipeignore .gitignore
-        # Override global gitignore
-        git config core.excludesFile .gitignore
-        git add .
-        git clean -ffdX
-        rm .gitignore
+        {{ .PREPARE_DIRECTORY }}
         git config user.email 'no-reply@lullabot.com'
         git config user.name 'Lullabot Drainpipe'
         git commit -m "Initial commit" --no-gpg-sign
