@@ -12,6 +12,8 @@ tasks:
         rm -rf .git
         git init
         mv .drainpipeignore .gitignore
+        # Override global gitignore
+        git config core.excludesFile .gitignore
         git add .
         git clean -ffdX
         rm -rf .git
@@ -27,6 +29,8 @@ tasks:
         rm -rf .git
         git init
         mv .drainpipeignore .gitignore
+        # Override global gitignore
+        git config core.excludesFile .gitignore
         git add .
         git clean -ffdX
         git config user.email 'no-reply@lullabot.com'
