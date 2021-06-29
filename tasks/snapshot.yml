@@ -2,7 +2,7 @@ version: '3'
 
 tasks:
   directory:
-    desc: "Creates a snapshot of the current working directory with .git, files in .drainpipeignore, and .drainpipeignore excluded. The target directory should be provided as a cli argument e.g. task snapshot:directory -- /tmp/release"
+    desc: "Creates a snapshot of the current working directory with .git, .gitignore, files in .drainpipeignore, and .drainpipeignore itself excluded. The target directory should be provided as a cli argument e.g. task snapshot:directory -- /tmp/release"
     cmds:
       - if [ -d "{{.CLI_ARGS}}" ] || [ "" == "{{.CLI_ARGS}}" ]; then echo "Please provide a path to a directory that does not yet exist" && exit 1; fi
       - cp -R . {{.CLI_ARGS}}
