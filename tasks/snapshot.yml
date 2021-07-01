@@ -2,8 +2,8 @@ version: '3'
 
 vars:
   PREPARE_DIRECTORY: |
-    find . -type d -name ".git" | xargs rm -rf
-    find . -name ".gitignore" | xargs rm -rf
+    find . -type d -name ".git" -print0 | xargs -0 rm -rf
+    find . -name ".gitignore" -print0 | xargs -0 rm -rf
     git init
     mv .drainpipeignore .gitignore
     # Override global gitignore
