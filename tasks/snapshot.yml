@@ -1,0 +1,61 @@
+version: '3'
+
+vars:
+  PREPARE_DIRECTORY: |
+    find . -type d -name ".git" -print0 | xargs -0 rm -rf
+    find . -name ".gitignore" -print0 | xargs -0 rm -rf
+    git init
+    mv .drainpipeignore .gitignore
+    # Override global gitignore
+    git config core.excludesFile .gitignore
+    git config core.attributesfile .gitattributes
+    git add .
+    git clean -ffdX
+    rm .gitignore
+
+tasks:
+  directory:
+    desc: "Creates a snapshot of the current working directory e.g. task snapshot:directory -- /tmp/release"
+    summary: |
+      Creates a snapshot of the current working directory
+
+      .git, .gitignore, files listed in .drainpipeignore, and .drainpipeignore
+      itself are not added. .drainpipeignore uses the same format as gitignore.
+
+      The target directory should be provided as an argument:
+      task snapshot:directory -- /tmp/release
+    cmds:
+      - if [ -d "{{.CLI_ARGS}}" ] || [ "" == "{{.CLI_ARGS}}" ]; then echo "Please provide a path to a directory that does not yet exist" && exit 1; fi
+      - cp -pR . {{.CLI_ARGS}}
+      - if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch {{.CLI_ARGS}}/.drainpipeignore; fi
+      - |
+        cd {{.CLI_ARGS}}
+        {{ .PREPARE_DIRECTORY }}
+        rm -rf .git
+  archive:
+    silent: true
+    desc: "Creates a snapshot of the current working directory and exports as an archive. e.g. task snapshot:archive format=zip > ~/archive.zip"
+    summary: |
+      Creates a snapshot of the current working directory and exports as an archive.
+
+      Format options are:
+        - tar
+        - tar.gz
+        - zip
+
+      .git, .gitignore, files listed in .drainpipeignore, and .drainpipeignore
+      itself are not added. .drainpipeignore uses the same format as gitignore.
+
+      If your .gitattributes file contains export-ignore or export-subst, these
+      will be respected when exporting the archive.
+    cmds:
+      - |
+        TMP_DIR=$(mktemp -d)
+        cp -Rp . $TMP_DIR
+        if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch $TMP_DIR/.drainpipeignore; fi
+        cd $TMP_DIR
+        {{ .PREPARE_DIRECTORY }}
+        git config user.email 'no-reply@lullabot.com'
+        git config user.name 'Lullabot Drainpipe'
+        git commit -m "Initial commit" --no-gpg-sign
+        git archive --format={{.format}} HEAD
