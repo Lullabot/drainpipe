@@ -15,39 +15,41 @@ vars:
 
 tasks:
   directory:
-    desc: "Creates a snapshot of the current working directory e.g. task snapshot:directory -- /tmp/release"
+    desc: "Creates a snapshot of the current working directory"
     summary: |
       Creates a snapshot of the current working directory
 
       .git, .gitignore, files listed in .drainpipeignore, and .drainpipeignore
       itself are not added. .drainpipeignore uses the same format as gitignore.
 
-      The target directory should be provided as an argument:
-      task snapshot:directory -- /tmp/release
+        usage: task snapshot:directory o=/tmp/release
+
+        o=<file>   Write the archive to <file>
     cmds:
-      - if [ -d "{{.CLI_ARGS}}" ] || [ "" == "{{.CLI_ARGS}}" ]; then echo "Please provide a path to a directory that does not yet exist" && exit 1; fi
-      - cp -pR . {{.CLI_ARGS}}
-      - if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch {{.CLI_ARGS}}/.drainpipeignore; fi
+      - if [ -d "{{.o}}" ] || [ "" == "{{.o}}" ]; then echo "Please provide a path to a directory that does not yet exist" && exit 1; fi
+      - cp -pR . {{.o}}
+      - if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch {{.o}}/.drainpipeignore; fi
       - |
-        cd {{.CLI_ARGS}}
+        cd {{.o}}
         {{ .PREPARE_DIRECTORY }}
         rm -rf .git
   archive:
-    silent: true
-    desc: "Creates a snapshot of the current working directory and exports as an archive. e.g. task snapshot:archive format=zip > ~/archive.zip"
+    desc: "Creates a snapshot of the current working directory and exports as an archive"
+
     summary: |
       Creates a snapshot of the current working directory and exports as an archive.
-
-      Format options are:
-        - tar
-        - tar.gz
-        - zip
 
       .git, .gitignore, files listed in .drainpipeignore, and .drainpipeignore
       itself are not added. .drainpipeignore uses the same format as gitignore.
 
       If your .gitattributes file contains export-ignore or export-subst, these
       will be respected when exporting the archive.
+
+        usage: task snapshot:archive o=~/archive.tar.bz2
+
+        o=<file>   Write the archive to <file>. The compression format is
+                    inferred from the file extension. Format options are:
+                    tar, tar.bz2, tar.gz, tar.xz, zip
     cmds:
       - |
         TMP_DIR=$(mktemp -d)
@@ -58,4 +60,7 @@ tasks:
         git config user.email 'no-reply@lullabot.com'
         git config user.name 'Lullabot Drainpipe'
         git commit -m "Initial commit" --no-gpg-sign
-        git archive --format={{.format}} HEAD
+        git config tar.tar.xz.command "xz -c"
+        git config tar.tar.bz2.command "bzip2 -c"
+        git archive -o {{.o}} HEAD
+        test -f {{.o}}
