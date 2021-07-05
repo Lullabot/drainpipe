@@ -22,7 +22,9 @@ class InstallerScaffoldTest extends TestCase
     {
         parent::tearDownAfterClass();
 
-        unlink(self::PROJECT_PATH.'/.gitignore');
+        if (file_exists(self::PROJECT_PATH.'/.gitignore')) {
+            unlink(self::PROJECT_PATH.'/.gitignore');
+        }
         $clean = new Process(['git', 'clean', '-fdX'], self::PROJECT_PATH);
         $clean->run();
     }
