@@ -1,0 +1,2 @@
+# lullabot/drainpipe: Ignore generated files from Task.
+.task

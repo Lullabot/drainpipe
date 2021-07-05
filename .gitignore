@@ -1,1 +1,5 @@
 /vendor/
+.phpunit.result.cache
+tests/fixtures/drainpipe-test-project/*
+!tests/fixtures/drainpipe-test-project/composer.json
+.php-cs-fixer.cache

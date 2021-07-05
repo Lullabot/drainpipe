@@ -1,9 +1,29 @@
 {
     "name": "lullabot/drainpipe",
     "description": "An automated build tool to allow projects to have a set standardized operations scripts.",
-    "type": "lullabot-drainpipe-installer",
     "license": "GPL-2.0-or-later",
+    "type": "composer-plugin",
+    "autoload": {
+        "psr-4": {"Lullabot\\Drainpipe\\": "src/"}
+    },
+    "autoload-dev": {
+        "psr-4": {"Lullabot\\Drainpipe\\Tests\\Functional\\": "tests/src/functional/"}
+    },
     "require": {
-        "lullabot/drainpipe-installer": "dev-main"
+        "php": "^7.3||^8.0",
+        "composer-plugin-api": "^2.0",
+        "symfony/filesystem": "^2.8 || ^4.4.20 || ^5.0"
+    },
+    "require-dev": {
+        "composer/composer": "^2.0",
+        "symfony/process": "^5.3",
+        "phpunit/phpunit": "^9.5",
+        "friendsofphp/php-cs-fixer": "^3.0"
+    },
+    "extra": {
+        "class": [
+            "\\Lullabot\\Drainpipe\\TaskfileInstallerPlugin",
+            "\\Lullabot\\Drainpipe\\BinaryInstallerPlugin"
+        ]
     }
 }
