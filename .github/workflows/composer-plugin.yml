@@ -27,7 +27,5 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
       - run: composer install
       - run: ./vendor/bin/phpunit
-      - uses: actions/upload-artifact@v2
-        with:
-          name: my-artifact
-          path: tests/
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
