@@ -11,14 +11,14 @@
     },
     "require": {
         "php": "^7.3||^8.0",
-        "composer-plugin-api": "^2.0",
-        "symfony/filesystem": "^2.8 || ^4.4.20 || ^5.0"
+        "composer/composer": "^2.0",
+        "composer-plugin-api": "^2.0"
     },
     "require-dev": {
-        "composer/composer": "^2.0",
-        "symfony/process": "^5.3",
         "phpunit/phpunit": "^9.5",
-        "friendsofphp/php-cs-fixer": "^3.0"
+        "asm89/twig-lint": "^1.0",
+        "j13k/yaml-lint": "^1.1",
+        "mglaman/drupal-check": "^1.1"
     },
     "extra": {
         "class": [

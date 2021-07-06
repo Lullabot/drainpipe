@@ -1,0 +1,13 @@
+version: '3'
+
+tasks:
+  security:
+    cmds:
+      - ./vendor/bin/local-php-security
+      - ./vendor/bin/drush pm:security
+  lint:
+    cmds:
+      - ./vendor/bin/yaml-lint config/**/*.yml
+      - composer validate
+      - ./vendor/bin/twig-lint lint web/themes/custom
+      - ./vendor/bin/twig-lint lint web/modules/custom
