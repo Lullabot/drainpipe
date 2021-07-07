@@ -1,1 +1,13 @@
-scaffold/Taskfile.yml
+version: '3'
+
+dotenv: ['.env']
+
+includes:
+  drupal: ./tasks/drupal.yml
+  snapshot: ./tasks/snapshot.yml
+
+tasks:
+  default:
+    desc: "Example command"
+    cmds:
+      - echo "Hello, world!"

@@ -1,0 +1,15 @@
+{
+  "name": "lullabot/drainpipe-test-project",
+  "type": "project",
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../../../"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "lullabot/drainpipe": "*"
+  }
+}
