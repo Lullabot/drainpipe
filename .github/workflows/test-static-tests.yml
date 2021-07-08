@@ -1,4 +1,4 @@
-name: Composer Plugin
+name: Test Static Tests
 on:
   push:
     branches:
@@ -7,7 +7,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  Test-Composer-Plugin:
+  Test-Static-Tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,6 +15,7 @@ jobs:
         with:
           php-version: '7.4'
           tools: composer:v2
+          extensions: gd
       - name: Get composer cache directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -24,5 +25,14 @@ jobs:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
-      - run: composer install
-      - run: ./vendor/bin/phpunit
+      - name: Install Drupal
+        run: |
+          cd ../
+          mkdir drupal
+          cd drupal
+          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-external-test-project/composer.json .
+          composer install
+      - name: Run static tests
+        run: |
+          cd ../drupal
+          ./vendor/bin/task test:static

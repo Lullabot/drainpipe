@@ -1,0 +1,49 @@
+version: '3'
+
+# @todo allow these to be overridden.
+vars:
+  YAML_DIRS: 'web/**/*.yml'
+  TWIG_DIRS: 'web/modules web/profiles web/themes'
+  PHPSTAN_DIRS: 'web/modules web/themes web/sites'
+  PHPUNIT_DIRS: 'web/modules web/themes web/sites'
+
+tasks:
+  static:
+    desc: Runs all static tests
+    deps: [security, lint, phpstan, phpunit]
+  functional:
+    desc: Runs all tests that require a bootstrapped Drupal site
+    deps: [config]
+  security:
+    desc: Runs security checks for composer packages and Drupal contrib
+    cmds:
+      - ./vendor/bin/local-php-security-checker
+      - ./vendor/bin/drush pm:security
+  lint:
+    desc: Runs lint on composer, YAML, and Twig files
+    cmds:
+      - echo {{.YAML_DIRS}}
+      - composer validate
+      - |
+        DIRS_ARR=({{.YAML_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          ./vendor/bin/yaml-lint $DIR
+        done
+      - |
+        DIRS_ARR=({{.TWIG_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          ./vendor/bin/drainpipe-twig-linter lint $DIR
+        done
+  config:
+    desc: Verifies that exported config matches the config in Drupal
+    cmds:
+      - if [ $(./vendor/bin/drush config:status --format=string | wc -w) -gt 0 ]; then echo "Config export does not match"; drush config:status; exit 1; fi
+  phpstan:
+    dec: Runs PHPStan with mglaman/phpstan-drupal
+    cmds:
+      # @todo allow the config to be overridden locally.
+      - ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe/config/phpstan.neon {{.PHPSTAN_DIRS}}
+  phpunit:
+    desc: Runs PHPUnit
+    cmds:
+      - ./vendor/bin/phpunit {{.PHPUNIT_DIRS}}
