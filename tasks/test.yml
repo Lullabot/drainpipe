@@ -20,7 +20,7 @@ tasks:
       - ./vendor/bin/local-php-security-checker
       - ./vendor/bin/drush pm:security
   lint:
-    desc: Runs lint on composer, TAML, and Twig files
+    desc: Runs lint on composer, YAML, and Twig files
     cmds:
       - echo {{.YAML_DIRS}}
       - composer validate
