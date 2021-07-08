@@ -128,10 +128,10 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs->copy($gitignorePath, './.gitignore');
         } else {
             $contents = file_get_contents('./.gitignore');
-            if (!strpos('.task', $contents)) {
+            if (strpos($contents, '.task') === false) {
                 $this->io->warning(
                     sprintf(
-                    '.gitignore does not contain drainpipe ignores. Compare .gitignpre in the root of your repository with %s and update as needed.',
+                    '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
                         $gitignorePath
                     )
                 );
