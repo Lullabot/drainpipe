@@ -9,7 +9,7 @@
   ],
   "minimum-stability": "dev",
   "prefer-stable": true,
-  "require": {
-    "lullabot/drainpipe": "*"
+  "require-dev": {
+    "lullabot/drainpipe-dev": "*"
   }
 }

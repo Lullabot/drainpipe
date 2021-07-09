@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lullabot\DrainpipeInstaller\Tests\Functional;
+namespace Lullabot\DrainpipeDev\Tests\Functional;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Process;
@@ -29,20 +29,13 @@ class InstallerScaffoldTest extends TestCase
         $clean->run();
     }
 
-    public function testTaskfile(): void
+    public function testDevTaskfile(): void
     {
-        $this->assertEquals(sha1_file(self::PROJECT_PATH.'/vendor/lullabot/drainpipe/scaffold/Taskfile.yml'), sha1_file(self::PROJECT_PATH.'/Taskfile.yml'));
-    }
-
-    public function testGitIgnore(): void
-    {
-        $gitignore = file_get_contents(self::PROJECT_PATH.'/.gitignore');
-        $this->assertStringContainsString('.task', $gitignore);
+        $this->assertEquals(sha1_file(self::PROJECT_PATH.'/vendor/lullabot/drainpipe-dev/scaffold/Taskfile.dev.yml'), sha1_file(self::PROJECT_PATH.'/Taskfile.dev.yml'));
     }
 
     public function testBinaries(): void
     {
-        $this->assertFileExists(self::PROJECT_PATH.'/vendor/bin/task');
         $this->assertFileExists(self::PROJECT_PATH.'/vendor/bin/local-php-security-checker');
     }
 }
