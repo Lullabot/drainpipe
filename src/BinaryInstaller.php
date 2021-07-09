@@ -190,7 +190,9 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $httpDownloader = Factory::createHttpDownloader($this->io, $this->config);
         $parts = explode('/', $url);
         $fileName = array_pop($parts);
-        $cacheDestination = $this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version.\DIRECTORY_SEPARATOR.$fileName;
+        $cacheFolder = $this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version;
+        $cacheDestination = $cacheFolder.\DIRECTORY_SEPARATOR.$fileName;
+        $binDestination = $bin.\DIRECTORY_SEPARATOR.$binary;
 
         // Check the cache.
         $fs->ensureDirectoryExists($this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version);
@@ -198,7 +200,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             // Fetch a new copy of the binary.
             $httpDownloader->copy($url, $cacheDestination);
         } else {
-            $this->io->write(sprintf('Installing cached version of %s v%s (%s)', $binary, $version, $sha));
+            $this->io->write(sprintf('Using cached version of %s v%s (%s)', $binary, $version, $sha));
         }
 
         // Compare checksums.
@@ -207,26 +209,33 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         }
 
         if ('.tar.gz' === substr($url, -7)) {
-            // Remove the .tar file from the cache directory if it was
-            // previously extracted.
-            $fs->remove(substr($cacheDestination, 0, -3));
             $archive = new \PharData($cacheDestination);
             $archive->decompress();
             $archive = new \PharData(substr($cacheDestination, 0, -3));
-            $archive->extractTo($bin, $binary, true);
+            $archive->extractTo($cacheFolder, $binary, true);
             // Remove .tar
             $fs->remove(substr($cacheDestination, 0, -3));
         } elseif ('.zip' === substr($url, -4)) {
             $archive = new \ZipArchive();
             $archive->open($cacheDestination);
-            $archive->extractTo($bin, $binary);
-        } else {
-            $fs->copy($cacheDestination, $bin.\DIRECTORY_SEPARATOR.$binary);
+            $archive->extractTo($cacheFolder, $binary);
         }
 
         // Make executable.
         if ('windows' !== $this->platform) {
-            chmod($bin.\DIRECTORY_SEPARATOR.$binary, 0755);
+            chmod($cacheDestination, 0755);
+        }
+
+        // Check the vendor/bin directory first, otherwise we could hit a
+        // condition where task has called "composer install --no-dev" after
+        // "composer install" and tries to replace the task binary - this will
+        // fail because the binary is already being run and you'll get a "failed
+        // to open stream: Text file busy" error.
+        if (file_exists($binDestination) && hash_file('sha256', $binDestination) === hash_file('sha256', $cacheDestination)) {
+            $this->io->write(sprintf('%s v%s (%s) already exists in bin-dir, not overwriting.', $binary, $version, $sha));
+        }
+        else {
+            $fs->copy($cacheDestination, $bin.\DIRECTORY_SEPARATOR.$binary);
         }
     }
 }
