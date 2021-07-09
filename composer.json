@@ -16,7 +16,8 @@
         "symfony/yaml": "^4"
     },
     "require-dev": {
-        "composer/composer": "^2.0"
+        "composer/composer": "^2.0",
+        "phpunit/phpunit": "^7|^8|^9"
     },
     "extra": {
         "class": [
