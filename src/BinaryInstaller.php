@@ -191,6 +191,17 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $parts = explode('/', $url);
         $fileName = array_pop($parts);
         $cacheDestination = $this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version.\DIRECTORY_SEPARATOR.$fileName;
+        $binDestination = $bin.\DIRECTORY_SEPARATOR.$binary;
+
+        // Check the vendor/bin directory first, otherwise we could hit a
+        // condition where task has called "composer install --no-dev" after
+        // "composer install" and tries to replace the task binary - this will
+        // fail because the binary is already being run and you'll get a "failed
+        // to open stream: Text file busy" error.
+        if (file_exists($binDestination) && hash_file($hashalgo, $binDestination) === $sha) {
+            $this->io->write(sprintf('%s v%s (%s) already exists in bin-dir, not overwriting.', $binary, $version, $sha));
+            return;
+        }
 
         // Check the cache.
         $fs->ensureDirectoryExists($this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version);
@@ -207,9 +218,6 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         }
 
         if ('.tar.gz' === substr($url, -7)) {
-            // Remove the .tar file from the cache directory if it was
-            // previously extracted.
-            $fs->remove(substr($cacheDestination, 0, -3));
             $archive = new \PharData($cacheDestination);
             $archive->decompress();
             $archive = new \PharData(substr($cacheDestination, 0, -3));
@@ -226,7 +234,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
 
         // Make executable.
         if ('windows' !== $this->platform) {
-            chmod($bin.\DIRECTORY_SEPARATOR.$binary, 0755);
+            chmod($binDestination, 0755);
         }
     }
 }
