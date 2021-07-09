@@ -207,6 +207,9 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         }
 
         if ('.tar.gz' === substr($url, -7)) {
+            // Remove the .tar file from the cache directory if it was
+            // previously extracted.
+            $fs->remove(substr($cacheDestination, 0, -3));
             $archive = new \PharData($cacheDestination);
             $archive->decompress();
             $archive = new \PharData(substr($cacheDestination, 0, -3));
