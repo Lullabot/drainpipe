@@ -35,4 +35,4 @@ jobs:
       - name: Run static tests
         run: |
           cd ../drupal
-          ./vendor/bin/task test:static
+          ./vendor/bin/task -t Taskfile.dev.yml test:static

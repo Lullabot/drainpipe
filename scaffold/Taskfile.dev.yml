@@ -1,0 +1,12 @@
+version: '3'
+
+dotenv: ['.env']
+
+includes:
+  test: ./vendor/lullabot/drainpipe-dev/tasks/test.yml
+
+tasks:
+  default:
+    desc: "Example command"
+    cmds:
+      - echo "Hello, world!"

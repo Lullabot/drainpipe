@@ -11,7 +11,7 @@
   "repositories": [
     {
       "type": "path",
-      "url": "../drainpipe",
+      "url": "../drainpipe-dev",
       "options": {
         "symlink": false
       }
@@ -26,10 +26,11 @@
     "drupal/core": "^9.2",
     "drupal/core-composer-scaffold": "^9.2",
     "drupal/core-project-message": "^9.2",
-    "drupal/core-recommended": "^9.2"
+    "drupal/core-recommended": "^9.2",
+    "lullabot/drainpipe": "*"
   },
   "require-dev": {
-    "lullabot/drainpipe": "*"
+    "lullabot/drainpipe-dev": "*"
   },
   "conflict": {
     "drupal/drupal": "*"

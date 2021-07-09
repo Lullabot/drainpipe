@@ -42,7 +42,7 @@ tasks:
     dec: Runs PHPStan with mglaman/phpstan-drupal
     cmds:
       # @todo allow the config to be overridden locally.
-      - ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe/config/phpstan.neon {{.PHPSTAN_DIRS}}
+      - ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe-dev/config/phpstan.neon {{.PHPSTAN_DIRS}}
   phpunit:
     desc: Runs PHPUnit
     cmds:

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lullabot\Drainpipe;
+namespace Lullabot\DrainpipeDev;
 
 use Composer\Composer;
 use Composer\Config;
@@ -14,7 +14,7 @@ use Composer\Script\ScriptEvents;
 use Composer\Util\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 
-class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterface
+class DevTaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterface
 {
     /**
      * @var IOInterface
@@ -69,8 +69,7 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostInstallCmd(Event $event)
     {
-        $this->installTaskfile();
-        $this->installGitignore();
+        $this->installDevTaskfile();
     }
 
     /**
@@ -80,65 +79,40 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostUpdateCmd(Event $event)
     {
-        $this->installTaskfile();
-        $this->installGitignore();
+        $this->installDevTaskfile();
     }
 
     /**
      * Copies Taskfile.yml from the scaffold directory if it doesn't yet exist.
      */
-    private function installTaskfile(): void
+    private function installDevTaskfile(): void
     {
         $vendor = $this->config->get('vendor-dir');
-        $taskfilePath = $vendor.'/lullabot/drainpipe/scaffold/Taskfile.yml';
+        $taskfilePath = $vendor.'/lullabot/drainpipe-dev/scaffold/Taskfile.dev.yml';
 
-        if (!file_exists('./Taskfile.yml')) {
-            $this->io->write('<info>Creating initial Taskfile.yml...</info>');
+        if (!file_exists('./Taskfile.dev.yml')) {
+            $this->io->write('<info>Creating initial Taskfile.dev.yml...</info>');
             $fs = new Filesystem();
             $fs->copy(
                 $taskfilePath,
-                './Taskfile.yml'
+                './Taskfile.dev.yml'
             );
         } else {
             $scaffoldTaskFile = Yaml::parseFile($taskfilePath);
-            $projectTaskfile = Yaml::parseFile('./Taskfile.yml');
+            $projectTaskfile = Yaml::parseFile('./Taskfile.dev.yml');
             foreach ($scaffoldTaskFile['includes'] as $key => $value) {
                 if (empty($projectTaskfile['includes'][$key]) || $projectTaskfile['includes'][$key] !== $value) {
                     $this->io->warning(
-                        'Taskfile.yml has either been customized or requires review.'
+                        'Taskfile.dev.yml has either been customized or requires review.'
                     );
                     $this->io->warning(
                         sprintf(
-                            'Compare Taskfile.yml includes in the root of your repository with %s and update as needed.',
+                            'Compare Taskfile.dev.yml includes in the root of your repository with %s and update as needed.',
                             $taskfilePath
                         )
                     );
                     break;
                 }
-            }
-        }
-    }
-
-    /**
-     * Copies gitignore from the scaffold directory if it doesn't yet exist.
-     */
-    private function installGitignore(): void
-    {
-        $vendor = $this->config->get('vendor-dir');
-        $gitignorePath = $vendor.'/lullabot/drainpipe/scaffold/gitignore';
-        if (!file_exists('./.gitignore')) {
-            $this->io->write('<info>Creating initial .gitignore...</info>');
-            $fs = new Filesystem();
-            $fs->copy($gitignorePath, './.gitignore');
-        } else {
-            $contents = file_get_contents('./.gitignore');
-            if (strpos($contents, '.task') === false) {
-                $this->io->warning(
-                    sprintf(
-                    '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
-                        $gitignorePath
-                    )
-                );
             }
         }
     }
