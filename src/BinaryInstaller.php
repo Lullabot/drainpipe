@@ -77,7 +77,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
                 $this->config->get('cache-dir'),
                 'files',
                 'lullabot',
-                'drainpipe-installer',
+                'drainpipe',
                 'bin',
             ])
         );
@@ -192,6 +192,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $fileName = array_pop($parts);
         $cacheFolder = $this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version;
         $cacheDestination = $cacheFolder.\DIRECTORY_SEPARATOR.$fileName;
+        $cacheExtractedBinary = $cacheFolder.\DIRECTORY_SEPARATOR.$binary;
         $binDestination = $bin.\DIRECTORY_SEPARATOR.$binary;
 
         // Check the cache.
@@ -208,17 +209,19 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             throw new \Exception('SHA does not match for '.$binary);
         }
 
-        if ('.tar.gz' === substr($url, -7)) {
+        if ('.tar.gz' === substr($fileName, -7)) {
             $archive = new \PharData($cacheDestination);
             $archive->decompress();
             $archive = new \PharData(substr($cacheDestination, 0, -3));
             $archive->extractTo($cacheFolder, $binary, true);
             // Remove .tar
             $fs->remove(substr($cacheDestination, 0, -3));
-        } elseif ('.zip' === substr($url, -4)) {
+        } elseif ('.zip' === substr($fileName, -4)) {
             $archive = new \ZipArchive();
             $archive->open(substr($cacheDestination, 0, -4));
             $archive->extractTo($cacheFolder, $binary);
+        } else {
+            $fs->rename($cacheDestination, $cacheExtractedBinary);
         }
 
         // Check the vendor/bin directory first, otherwise we could hit a
@@ -226,11 +229,11 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         // "composer install" and tries to replace the task binary - this will
         // fail because the binary is already being run and you'll get a "failed
         // to open stream: Text file busy" error.
-        if (file_exists($binDestination) && hash_file('sha256', $binDestination) === hash_file('sha256', $cacheFolder.\DIRECTORY_SEPARATOR.$binary)) {
+        if (file_exists($binDestination) && hash_file('sha256', $binDestination) === hash_file('sha256', $cacheExtractedBinary)) {
             $this->io->write(sprintf('%s v%s (%s) already exists in bin-dir, not overwriting.', $binary, $version, $sha));
         }
         else {
-            $fs->copy($cacheFolder.\DIRECTORY_SEPARATOR.$binary, $binDestination);
+            $fs->copy($cacheExtractedBinary, $binDestination);
             // Make executable.
             if ('windows' !== $this->platform) {
                 chmod($binDestination, 0755);
