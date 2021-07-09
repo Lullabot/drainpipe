@@ -12,6 +12,7 @@ use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
 use Composer\Util\Filesystem;
+use Symfony\Component\Yaml\Yaml;
 
 class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterface
 {
@@ -99,18 +100,21 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 './Taskfile.yml'
             );
         } else {
-            $distHash = sha1_file($taskfilePath);
-            $repoHash = sha1_file('./Taskfile.yml');
-            if ($distHash !== $repoHash) {
-                $this->io->warning(
-                    'Taskfile.yml has either been customized or requires review.'
-                );
-                $this->io->warning(
-                    sprintf(
-                        'Compare Taskfile.yml in the root of your repository with %s and update as needed.',
-                        $taskfilePath
-                    )
-                );
+            $scaffoldTaskFile = Yaml::parseFile($taskfilePath);
+            $projectTaskfile = Yaml::parseFile('./Taskfile.yml');
+            foreach ($scaffoldTaskFile['includes'] as $key => $value) {
+                if (empty($projectTaskfile['includes'][$key]) || $projectTaskfile['includes'][$key] !== $value) {
+                    $this->io->warning(
+                        'Taskfile.yml has either been customized or requires review.'
+                    );
+                    $this->io->warning(
+                        sprintf(
+                            'Compare Taskfile.yml includes in the root of your repository with %s and update as needed.',
+                            $taskfilePath
+                        )
+                    );
+                    break;
+                }
             }
         }
     }
