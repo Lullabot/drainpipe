@@ -20,7 +20,8 @@
         "symfony/phpunit-bridge": "^5.3",
         "mglaman/phpstan-drupal": "^0.12.10",
         "drush/drush": "^10.5",
-        "symfony/yaml": "^4"
+        "symfony/yaml": "^4",
+        "lullabot/drainpipe": "*"
     },
     "require-dev": {
         "composer/composer": "^2.0"
