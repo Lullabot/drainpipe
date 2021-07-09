@@ -35,7 +35,6 @@ class DevTaskfileInstallerPlugin implements PluginInterface, EventSubscriberInte
     {
         $this->io = $io;
         $this->config = $composer->getConfig();
-        print_r('hello');
     }
 
     /**
