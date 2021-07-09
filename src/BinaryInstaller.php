@@ -195,7 +195,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $binDestination = $bin.\DIRECTORY_SEPARATOR.$binary;
 
         // Check the cache.
-        $fs->ensureDirectoryExists($this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version);
+        $fs->ensureDirectoryExists($cacheFolder);
         if (!$this->cache->isEnabled() || !file_exists($cacheDestination) || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $sha)) {
             // Fetch a new copy of the binary.
             $httpDownloader->copy($url, $cacheDestination);
@@ -217,13 +217,8 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $fs->remove(substr($cacheDestination, 0, -3));
         } elseif ('.zip' === substr($url, -4)) {
             $archive = new \ZipArchive();
-            $archive->open($cacheDestination);
+            $archive->open(substr($cacheDestination, 0, -4));
             $archive->extractTo($cacheFolder, $binary);
-        }
-
-        // Make executable.
-        if ('windows' !== $this->platform) {
-            chmod($cacheDestination, 0755);
         }
 
         // Check the vendor/bin directory first, otherwise we could hit a
@@ -231,11 +226,15 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         // "composer install" and tries to replace the task binary - this will
         // fail because the binary is already being run and you'll get a "failed
         // to open stream: Text file busy" error.
-        if (file_exists($binDestination) && hash_file('sha256', $binDestination) === hash_file('sha256', $cacheDestination)) {
+        if (file_exists($binDestination) && hash_file('sha256', $binDestination) === hash_file('sha256', $cacheFolder.\DIRECTORY_SEPARATOR.$binary)) {
             $this->io->write(sprintf('%s v%s (%s) already exists in bin-dir, not overwriting.', $binary, $version, $sha));
         }
         else {
-            $fs->copy($cacheDestination, $bin.\DIRECTORY_SEPARATOR.$binary);
+            $fs->copy($cacheFolder.\DIRECTORY_SEPARATOR.$binary, $binDestination);
+            // Make executable.
+            if ('windows' !== $this->platform) {
+                chmod($binDestination, 0755);
+            }
         }
     }
 }
