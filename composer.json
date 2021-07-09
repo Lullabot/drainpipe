@@ -12,20 +12,13 @@
     "require": {
         "php": "^7.3||^8.0",
         "composer-plugin-api": "^2.0",
-        "phpunit/phpunit": "^7|^8|^9",
-        "j13k/yaml-lint": "^1.1",
-        "sserbin/twig-linter": "^3.0",
-        "mockery/mockery": "^1.4",
-        "behat/mink": "^1.8",
-        "symfony/phpunit-bridge": "^5.3",
-        "mglaman/phpstan-drupal": "^0.12.10",
         "drush/drush": "^10.5",
         "symfony/yaml": "^4"
     },
     "require-dev": {
-        "composer/composer": "^2.0"
+        "composer/composer": "^2.0",
+        "phpunit/phpunit": "^7|^8|^9"
     },
-    "bin": ["bin/drainpipe-twig-linter"],
     "extra": {
         "class": [
             "\\Lullabot\\Drainpipe\\TaskfileInstallerPlugin",

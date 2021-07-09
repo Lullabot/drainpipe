@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lullabot\DrainpipeInstaller\Tests\Functional;
+namespace Lullabot\Drainpipe\Tests\Functional;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Process;
@@ -43,6 +43,5 @@ class InstallerScaffoldTest extends TestCase
     public function testBinaries(): void
     {
         $this->assertFileExists(self::PROJECT_PATH.'/vendor/bin/task');
-        $this->assertFileExists(self::PROJECT_PATH.'/vendor/bin/local-php-security-checker');
     }
 }
