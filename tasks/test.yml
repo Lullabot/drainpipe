@@ -46,4 +46,10 @@ tasks:
   phpunit:
     desc: Runs PHPUnit
     cmds:
+      # Ensure directories exist so PHPUnit doesn't complain.
+      - |
+        DIRS_ARR=({{.PHPUNIT_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          mkdir -p $DIR
+        done
       - ./vendor/bin/phpunit {{.PHPUNIT_DIRS}}
