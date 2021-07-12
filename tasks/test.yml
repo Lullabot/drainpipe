@@ -4,8 +4,8 @@ version: '3'
 vars:
   YAML_DIRS: 'web/**/*.yml'
   TWIG_DIRS: 'web/modules web/profiles web/themes'
-  PHPSTAN_DIRS: 'web/modules web/themes web/sites'
-  PHPUNIT_DIRS: 'web/modules web/themes web/sites'
+  PHPSTAN_DIRS: 'web/modules/custom web/themes/custom web/sites'
+  PHPUNIT_DIRS: 'web/modules/custom web/themes/custom web/sites'
 
 tasks:
   static:
