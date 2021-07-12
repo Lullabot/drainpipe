@@ -71,6 +71,7 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     {
         $this->installTaskfile();
         $this->installGitignore();
+        $this->installDdevCommand();
     }
 
     /**
@@ -82,6 +83,7 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     {
         $this->installTaskfile();
         $this->installGitignore();
+        $this->installDdevCommand();
     }
 
     /**
@@ -140,6 +142,20 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     )
                 );
             }
+        }
+    }
+
+    /**
+     *
+     */
+    private function installDdevCommand(): void
+    {
+        if (file_exists('./.ddev/config.yaml')) {
+            $vendor = $this->config->get('vendor-dir');
+            $ddevCommandPath = $vendor.'/lullabot/drainpipe/scaffold/ddev/task-command.sh';
+            $fs = new Filesystem();
+            $fs->ensureDirectoryExists('./.ddev/commands/web');
+            $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
         }
     }
 }
