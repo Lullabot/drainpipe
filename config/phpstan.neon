@@ -7,5 +7,7 @@ parameters:
 		- *Test.php
 		- *TestBase.php
 		- *default.settings.php
+		- sites/*/files/*
+		- sites/default/settings.ddev.php
 	# PHPStan Level 1
 	level: 1
