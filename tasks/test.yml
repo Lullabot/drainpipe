@@ -1,16 +1,21 @@
 version: '3'
 
-# @todo allow these to be overridden.
+# @todo allow these to be overridden or document them as required folder
+# structures. See also config/phpcs.xml and config/phpstan.neon
 vars:
   YAML_DIRS: 'web/**/*.yml'
   TWIG_DIRS: 'web/modules web/profiles web/themes'
-  PHPSTAN_DIRS: 'web/modules/custom web/themes/custom web/sites'
-  PHPUNIT_DIRS: 'web/modules/custom web/themes/custom web/sites'
+  TEST_DIRS: 'web/modules/custom web/themes/custom web/sites'
+  FUNC_ENSURE_DIRS: |
+    DIRS_ARR=({{.TEST_DIRS}})
+    for DIR in "${DIRS_ARR[@]}"; do
+      mkdir -p $DIR
+    done
 
 tasks:
   static:
     desc: Runs all static tests
-    deps: [security, lint, phpstan, phpunit]
+    deps: [security, lint, phpstan, phpunit, phpcs]
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
     deps: [config]
@@ -41,15 +46,24 @@ tasks:
   phpstan:
     dec: Runs PHPStan with mglaman/phpstan-drupal
     cmds:
-      # @todo allow the config to be overridden locally.
-      - ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe-dev/config/phpstan.neon {{.PHPSTAN_DIRS}}
+      - ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe-dev/config/phpstan.neon {{.TEST_DIRS}}
   phpunit:
     desc: Runs PHPUnit
     cmds:
-      # Ensure directories exist so PHPUnit doesn't complain.
       - |
-        DIRS_ARR=({{.PHPUNIT_DIRS}})
-        for DIR in "${DIRS_ARR[@]}"; do
-          mkdir -p $DIR
-        done
-      - ./vendor/bin/phpunit {{.PHPUNIT_DIRS}}
+        {{ .ENSURE_DIRS }}
+      - ./vendor/bin/phpunit {{.TEST_DIRS}}
+  phpcs:
+    desc: Runs PHPCS with Drupal Coding Standards
+    cmds:
+      - |
+        {{ .ENSURE_DIRS }}
+      - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
+      - ./vendor/bin/phpcs --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
+  autofix:
+    desc: Runs PHPCBF with Drupal Coding Standards to fix PHPCS violations
+    cmds:
+      - |
+        {{ .ENSURE_DIRS }}
+      - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
+      - ./vendor/bin/phpcbf --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}

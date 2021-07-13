@@ -1,13 +1,11 @@
 includes:
-	- ../../../mglaman/phpstan-drupal/extension.neon
+    - ../../../mglaman/phpstan-drupal/extension.neon
 
 parameters:
-	# Ignore tests
-	excludes_analyse:
-		- *Test.php
-		- *TestBase.php
-		- *default.settings.php
-		- *sites/*/files/*
-		- *settings.ddev.php
-	# PHPStan Level 1
-	level: 1
+    excludes_analyse:
+        - *sites/simpletest/*
+        - *default.settings.php
+        - *sites/*/files/*
+        - *settings.ddev.php
+    # PHPStan Level 1
+    level: 1
