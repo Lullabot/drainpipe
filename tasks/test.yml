@@ -51,19 +51,19 @@ tasks:
     desc: Runs PHPUnit
     cmds:
       - |
-        {{ .ENSURE_DIRS }}
+        {{ .FUNC_ENSURE_DIRS }}
       - ./vendor/bin/phpunit {{.TEST_DIRS}}
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
     cmds:
       - |
-        {{ .ENSURE_DIRS }}
+        {{ .FUNC_ENSURE_DIRS }}
       - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
       - ./vendor/bin/phpcs --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
   autofix:
     desc: Runs PHPCBF with Drupal Coding Standards to fix PHPCS violations
     cmds:
       - |
-        {{ .ENSURE_DIRS }}
+        {{ .FUNC_ENSURE_DIRS }}
       - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
       - ./vendor/bin/phpcbf --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
