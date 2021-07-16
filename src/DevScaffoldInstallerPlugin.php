@@ -189,21 +189,45 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
         ];
         if (!file_exists('./package.json')) {
             $yarn = new Process(['yarn', 'set', 'version', 'berry']);
-            $yarn->run();
+            $yarn->run(function($type, $buffer) {
+                if (Process::ERR === $type) {
+                    $this->io->write('ERR > '.$buffer);
+                } else {
+                    $this->io->write('OUT > '.$buffer);
+                }
+            });
             $yarn = new Process(['yarn', 'init']);
-            $yarn->run();
+            $yarn->run(function($type, $buffer) {
+                if (Process::ERR === $type) {
+                    $this->io->write('ERR > '.$buffer);
+                } else {
+                    $this->io->write('OUT > '.$buffer);
+                }
+            });
         }
         // Add dependencies.
         if (file_exists('yarn.lock')) {
             $yarn = new Process(array_merge(['yarn', 'add'], $dependencies, ['--dev']));
-            $yarn->run();
+            $yarn->run(function($type, $buffer) {
+                if (Process::ERR === $type) {
+                    $this->io->write('ERR > '.$buffer);
+                } else {
+                    $this->io->write('OUT > '.$buffer);
+                }
+            });
         } else if (file_exists('package-lock.json')) {
             $npm = new Process(array_merge(['npm', 'install'], $dependencies, ['--save-dev']));
-            $npm->run();
+            $npm->run(function($type, $buffer) {
+                if (Process::ERR === $type) {
+                    $this->io->write('ERR > '.$buffer);
+                } else {
+                    $this->io->write('OUT > '.$buffer);
+                }
+            });
         } else {
             $this->io->warning(
                 sprintf('Yarn or NPM lockfile not found, please manually install Nightwatch dependencies %s',
-                    explode(', ', $dependencies)
+                    implode(', ', $dependencies)
                 )
             );
         }
