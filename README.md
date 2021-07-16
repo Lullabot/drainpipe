@@ -65,8 +65,15 @@ If you are using DDEV, Drainpipe will have created a
 containers, as well as an example test in
 `test/nightwatch/example.nightwatch.js`.
 
-Nightwatch tests should have the suffixed `.nightwatch.js` to be recognised by
+Nightwatch tests must have the suffix `.nightwatch.js` to be recognised by
 the test runner.
+
+Whilst tests are running, you can view them in realtime through your browser.
+
+http://localhost:7900 for Chrome
+http://localhost:7901 for Firefox
+
+The password for all environments is `secret`.
 
 ### `test:autofix`
 
