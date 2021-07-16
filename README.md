@@ -24,9 +24,11 @@ DDEV is added later.
 composer create-project drupal/recommended-project drupal
 cd drupal
 ddev config
-composer require lullabot/drainpipe
-composer require lullabot/drainpipe-dev --dev
 ddev start
+ddev composer require lullabot/drainpipe
+ddev composer require lullabot/drainpipe-dev --dev
+# Restart is required to enable the provided Selenium containers
+ddev restart
 ```
 
 ## Usage
