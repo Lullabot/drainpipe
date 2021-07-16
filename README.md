@@ -30,7 +30,7 @@ ddev start
 
 ## Usage
 
-Helpers are provided as [Taskfiles](https://taskfile.dev/#/). A full list of
+Build tasks are provided as [Taskfiles](https://taskfile.dev/#/). A full list of
 available tasks can be shown by running `./vendor/bin/task --list` (or
 `ddev task --list` if you're using DDEV).
 
