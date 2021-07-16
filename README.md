@@ -4,7 +4,7 @@ Drainpipe is a composer package which provides a number of build tool helpers
 for a Drupal site, including:
 
 - Site and database updates
-- Artefact packaging for deployment to a hosting provider
+- Artifact packaging for deployment to a hosting provider
 - Test setups
 
 ## Installation
@@ -90,4 +90,3 @@ npx ajv-cli validate -s taskfile.json -d Taskfile.yml
 
 See [.github/workflows/validate-taskfile.yml](`.github/workflows/validate-taskfile.yml`)
 for an example of this in use.
-
