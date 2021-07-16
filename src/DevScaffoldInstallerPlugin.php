@@ -138,7 +138,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             $this->installScaffoldFile('docker-compose.selenium.yaml', $destination);
             // Make sure Selenium can access the Drupal site.
             $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
-            if (!in_array('', $ddevConfig['web_environment'])) {
+            if (!in_array('NIGHTWATCH_DRUPAL_URL=http://web', $ddevConfig['web_environment'])) {
                 $this->io->warning(
                     'You must run the following and then restart DDEV: ddev config --web-environment="NIGHTWATCH_DRUPAL_URL=http://web"'
                 );
