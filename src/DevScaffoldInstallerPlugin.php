@@ -175,14 +175,30 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             $this->installScaffoldFile('example.nightwatch.js', 'test/nightwatch/example.nightwatch.js');
         }
         // Install Nightwatch dependencies if there is no package.json.
-        // @todo don't do anything if yarn isn't present?
+        $dependencies = [
+            '@lullabot/nightwatch-drupal-commands@https://github.com/Lullabot/nightwatch-drupal-commands.git#main',
+            'nightwatch',
+            'nightwatch-accessibility',
+        ];
         if (!file_exists('./package.json')) {
             $yarn = new Process(['yarn', 'set', 'version', 'berry']);
             $yarn->run();
             $yarn = new Process(['yarn', 'init']);
             $yarn->run();
-            $yarn = new Process(['yarn', 'add', '@lullabot/nightwatch-drupal-commands@https://github.com/Lullabot/nightwatch-drupal-commands.git#main', 'nightwatch', 'nightwatch-accessibility', '--dev']);
+        }
+        // Add dependencies.
+        if (file_exists('yarn.lock')) {
+            $yarn = new Process(array_merge(['yarn', 'add'], $dependencies, ['--dev']));
             $yarn->run();
+        } else if (file_exists('package-lock.json')) {
+            $npm = new Process(array_merge(['npm', 'install'], $dependencies, ['--save-dev']));
+            $npm->run();
+        } else {
+            $this->io->warning(
+                sprintf('Yarn or NPM lockfile not found, please manually install Nightwatch dependencies %s',
+                    explode(', ', $dependencies)
+                )
+            );
         }
     }
 }

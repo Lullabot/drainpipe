@@ -5,9 +5,7 @@ const drupalCommandsPath = resolveToUnqualified('@lullabot/nightwatch-drupal-com
 module.exports = {
   // An array of folders (excluding subfolders) where your tests are located;
   // if this is not specified, the test source must be passed as the second argument to the test runner.
-  src_folders: [],
-
-  exclude : ['vendor', 'web/modules/contrib', 'web/themes/contrib', 'web/profiles/contrib'],
+  src_folders: ['test'],
 
   // See https://nightwatchjs.org/guide/working-with-page-objects/
   page_objects_path: '',
