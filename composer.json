@@ -31,7 +31,7 @@
     "extra": {
         "class": [
             "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin",
-            "\\Lullabot\\DrainpipeDev\\DevTaskfileInstallerPlugin"
+            "\\Lullabot\\DrainpipeDev\\DevScaffoldInstallerPlugin"
         ]
     }
 }
