@@ -11,6 +11,7 @@ for a Drupal site, including:
 
 ```
 composer require lullabot/drainpipe
+# Includes development dependencies, but only in the `require-dev` section. This step is required for Drainpipe to provide test helpers.
 composer require lullabot/drainpipe-dev --dev
 ```
 
