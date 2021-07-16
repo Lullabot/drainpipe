@@ -5,7 +5,7 @@ for a Drupal site, including:
 
 - Site and database updates
 - Artifact packaging for deployment to a hosting provider
-- Test setups
+- Automated testing setup with support for PHPUnit and Nightwatch tests
 
 ## Installation
 
