@@ -6,7 +6,7 @@ tasks:
   # being able to execute this task means that development files are already
   # available.
   build:prod:
-    desc: Build Drupal for production usage.
+    desc: Build Drupal for production usage
     cmds:
       - composer install --no-dev --optimize-autoloader
     # Disabled until https://github.com/go-task/task/pull/477 is merged and
@@ -22,24 +22,24 @@ tasks:
     #     test -f ./vendor/composer/installed.json && grep -q '"dev": false' ./vendor/composer/installed.json
 
   update:
-    desc: Run Drupal update tasks after deploying new code.
+    desc: Run Drupal update tasks after deploying new code
     cmds:
-      - ./vendor/bin/drush {{.CLI_ARGS}} --yes cache:clear plugin
-      - ./vendor/bin/drush {{.CLI_ARGS}} --yes updatedb --no-post-updates
+      - ./vendor/bin/drush {{.site}} --yes cache:clear plugin
+      - ./vendor/bin/drush {{.site}} --yes updatedb --no-post-updates
       # Run config:import twice to make sure we catch any config that didn't declare
       # a dependency correctly. This is also useful when importing large config sets
       # as it can sometimes hit an out of memory error.
-      - ./vendor/bin/drush {{.CLI_ARGS}} --yes config:import || true
-      - ./vendor/bin/drush {{.CLI_ARGS}} --yes config:import
-      - ./vendor/bin/drush {{.CLI_ARGS}} --yes updatedb --no-cache-clear
-      - ./vendor/bin/drush {{.CLI_ARGS}} --yes cache:rebuild
+      - ./vendor/bin/drush {{.site}} --yes config:import || true
+      - ./vendor/bin/drush {{.site}} --yes config:import
+      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
+      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
 
   maintenance:on:
-    desc: Turn on Maintenance Mode.
+    desc: Turn on Maintenance Mode
     cmds:
-      - ./vendor/bin/drush {{.CLI_ARGS}} --yes state:set system.maintenance_mode 1 --input-format=integer
+      - ./vendor/bin/drush {{.site}} --yes state:set system.maintenance_mode 1 --input-format=integer
 
   maintenance:off:
-    desc: Turn off Maintenance Mode.
+    desc: Turn off Maintenance Mode
     cmds:
-      - ./vendor/bin/drush {{.CLI_ARGS}} --yes state:set system.maintenance_mode 0 --input-format=integer
+      - ./vendor/bin/drush {{.site}} --yes state:set system.maintenance_mode 0 --input-format=integer
