@@ -14,9 +14,10 @@ composer require lullabot/drainpipe
 composer require lullabot/drainpipe-dev --dev
 ```
 
-There are a number of pre-configurations provided if you're using
-[DDEV](https://ddev.readthedocs.io/en/stable/), so either set DDEV up first
-before requiring this project, or run `composer update` if DDEV is added later.
+Drainpipe integrates with [DDEV](https://ddev.readthedocs.io/en/stable/), but
+will only add the relevant files when DDEV is detected in the repository. Either
+set DDEV up first before requiring this project, or run `composer update` if
+DDEV is added later.
 
 ```
 composer create-project drupal/recommended-project drupal
