@@ -72,4 +72,4 @@ tasks:
   nightwatch:
     desc: Runs Nighwatch functional browser tests
     cmds:
-      - yarn nightwatch --env {{.NIGHTWATCH_ENV}} .
+      - yarn nightwatch --env {{.NIGHTWATCH_ENV}}
