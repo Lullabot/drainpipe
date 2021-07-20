@@ -182,21 +182,18 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      */
     private function installNightwatchConfig(): void
     {
+        $fs = new Filesystem();
+
         if (!file_exists('./nightwatch.conf.js')) {
             $this->installScaffoldFile('nightwatch.conf.js', 'nightwatch.conf.js');
         }
         // Install an example test if none exist.
         if (!file_exists('./test/nightwatch')) {
-            $fs = new Filesystem();
             $fs->ensureDirectoryExists('./test/nightwatch');
             $this->installScaffoldFile('example.nightwatch.js', 'test/nightwatch/example.nightwatch.js');
         }
-        // Install Nightwatch dependencies if there is no package.json.
-        $dependencies = [
-            '@lullabot/nightwatch-drupal-commands@https://github.com/Lullabot/nightwatch-drupal-commands.git#main',
-            'nightwatch',
-            'nightwatch-accessibility',
-        ];
+
+        // Create a new yarn project if there is no existing node dependencies.
         if (!file_exists('./package.json')) {
             $yarn = new Process(['yarn', 'set', 'version', 'berry']);
             $yarn->run(function($type, $buffer) {
@@ -215,25 +212,47 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
                 }
             });
         }
-        // Add dependencies.
-        if (file_exists('yarn.lock')) {
-            if ($this->environment === 'ddev') {
-                $this->io->warn(sprintf('Please run "yarn add %s" followed by "ddev yarn"', implode(' ', $dependencies)));
-            } else {
-                $this->io->warn(sprintf('Please run "yarn add %s"', implode(' ', $dependencies)));
-            }
-        } else if (file_exists('package-lock.json')) {
-            if ($this->environment === 'ddev') {
-                $this->io->warn(sprintf('Please run "npm install %s --save-dev" followed by "ddev npm install"', implode(' ', $dependencies)));
-            } else {
-                $this->io->warn(sprintf('Please run "npm install %s --save-dev"', implode(' ', $dependencies)));
+
+        $dependencies = [
+            '@lullabot/nightwatch-drupal-commands' => '@lullabot/nightwatch-drupal-commands@https://github.com/Lullabot/nightwatch-drupal-commands.git#main',
+            'nightwatch' => 'nightwatch',
+            'nightwatch-accessibility' => 'nightwatch-accessibility',
+        ];
+        $needToInstall = [];
+
+        // Detect if the required dependencies are already present.
+        if (file_exists('package.json')) {
+            $packageJson = json_decode(file_get_contents('./package.json'));
+            foreach(array_keys($dependencies) as $dependency) {
+                if (!isset($packageJson['devDependencies'][$dependency]) || empty($packageJson['devDependencies'][$dependency])) {
+                    $needToInstall[] = $dependency;
+                }
             }
         } else {
-            $this->io->warning(
-                sprintf('Yarn or NPM lockfile not found, please manually install Nightwatch dependencies %s',
-                    implode(', ', $dependencies)
-                )
-            );
+            throw new \Exception('package.json does not exist and was unable to be auto-created. Please create one.');
         }
+
+        if (!empty($needToInstall)) {
+            if (file_exists('yarn.lock')) {
+                if ($this->environment === 'ddev') {
+                    $this->io->warning(sprintf('Please run "yarn add %s" followed by "ddev yarn"', implode(' ', array_values($dependencies))));
+                } else {
+                    $this->io->warning(sprintf('Please run "yarn add %s"', implode(' ', array_values($dependencies))));
+                }
+            } else if (file_exists('package-lock.json')) {
+                if ($this->environment === 'ddev') {
+                    $this->io->warning(sprintf('Please run "npm install %s --save-dev" followed by "ddev npm install"', implode(' ', array_values($dependencies))));
+                } else {
+                    $this->io->warning(sprintf('Please run "npm install %s --save-dev"', implode(' ', $dependencies)));
+                }
+            } else {
+                $this->io->warning(
+                    sprintf('Yarn or NPM lockfile not found, please manually install Nightwatch dependencies %s',
+                        implode(', ', $needToInstall)
+                    )
+                );
+            }
+        }
+
     }
 }
