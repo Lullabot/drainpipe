@@ -30,12 +30,22 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
     protected $config;
 
     /**
+     * The environment in which we're currently running e.g. ddev
+     *
+     * @var string|null
+     */
+    protected $environment = NULL;
+
+    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
     {
         $this->io = $io;
         $this->config = $composer->getConfig();
+        if (file_exists('./.ddev/config.yaml')) {
+            $this->environment = 'ddev';
+        }
     }
 
     /**
@@ -133,7 +143,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      */
     private function installDdevSeleniumConfig(): void
     {
-        if (file_exists('./.ddev/config.yaml')) {
+        if ($this->environment === 'ddev') {
             $destination = '.ddev/docker-compose.selenium.yaml';
             $this->installScaffoldFile('docker-compose.selenium.yaml', $destination);
             // Make sure Selenium can access the Drupal site.
@@ -193,7 +203,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
                 if (Process::ERR === $type) {
                     $this->io->write('ERR > '.$buffer);
                 } else {
-                    $this->io->write('OUT > '.$buffer);
+                    $this->io->write('YARN > '.$buffer);
                 }
             });
             $yarn = new Process(['yarn', 'init']);
@@ -201,31 +211,23 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
                 if (Process::ERR === $type) {
                     $this->io->write('ERR > '.$buffer);
                 } else {
-                    $this->io->write('OUT > '.$buffer);
+                    $this->io->write('YARN > '.$buffer);
                 }
             });
         }
         // Add dependencies.
         if (file_exists('yarn.lock')) {
-            $yarn = new Process(array_merge(['yarn', 'add'], $dependencies, ['--dev']));
-            $yarn->setTimeout(0);
-            $yarn->run(function($type, $buffer) {
-                if (Process::ERR === $type) {
-                    $this->io->write('ERR > '.$buffer);
-                } else {
-                    $this->io->write('OUT > '.$buffer);
-                }
-            });
+            if ($this->environment === 'ddev') {
+                $this->io->warn(sprintf('Please run "yarn add %s" followed by "ddev yarn"', implode(' ', $dependencies)));
+            } else {
+                $this->io->warn(sprintf('Please run "yarn add %s"', implode(' ', $dependencies)));
+            }
         } else if (file_exists('package-lock.json')) {
-            $npm = new Process(array_merge(['npm', 'install'], $dependencies, ['--save-dev']));
-            $npm->setTimeout(0);
-            $npm->run(function($type, $buffer) {
-                if (Process::ERR === $type) {
-                    $this->io->write('ERR > '.$buffer);
-                } else {
-                    $this->io->write('OUT > '.$buffer);
-                }
-            });
+            if ($this->environment === 'ddev') {
+                $this->io->warn(sprintf('Please run "npm install %s --save-dev" followed by "ddev npm install"', implode(' ', $dependencies)));
+            } else {
+                $this->io->warn(sprintf('Please run "npm install %s --save-dev"', implode(' ', $dependencies)));
+            }
         } else {
             $this->io->warning(
                 sprintf('Yarn or NPM lockfile not found, please manually install Nightwatch dependencies %s',
