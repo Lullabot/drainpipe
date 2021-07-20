@@ -34,7 +34,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      *
      * @var string|null
      */
-    protected $environment = NULL;
+    protected $environment = null;
 
     /**
      * {@inheritDoc}
@@ -222,7 +222,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
 
         // Detect if the required dependencies are already present.
         if (file_exists('package.json')) {
-            $packageJson = json_decode(file_get_contents('./package.json'));
+            $packageJson = json_decode(file_get_contents('./package.json'), true);
             foreach(array_keys($dependencies) as $dependency) {
                 if (!isset($packageJson['devDependencies'][$dependency]) || empty($packageJson['devDependencies'][$dependency])) {
                     $needToInstall[] = $dependency;
