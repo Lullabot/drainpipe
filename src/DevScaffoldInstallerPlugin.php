@@ -218,7 +218,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             });
         } else if (file_exists('package-lock.json')) {
             $npm = new Process(array_merge(['npm', 'install'], $dependencies, ['--save-dev']));
->           $npm->setTimeout(0);
+            $npm->setTimeout(0);
             $npm->run(function($type, $buffer) {
                 if (Process::ERR === $type) {
                     $this->io->write('ERR > '.$buffer);
