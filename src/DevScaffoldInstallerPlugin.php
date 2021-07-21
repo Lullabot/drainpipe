@@ -37,6 +37,13 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
     protected $environment = null;
 
     /**
+     * A list of commands we would like the user to run after install or update.
+     *
+     * @var array
+     */
+    protected $userCommands = [];
+
+    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
@@ -83,6 +90,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
         $this->installDevTaskfile();
         $this->installDdevSeleniumConfig();
         $this->installNightwatchConfig();
+        $this->printUserCommands();
     }
 
     /**
@@ -95,8 +103,15 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
         $this->installDevTaskfile();
         $this->installDdevSeleniumConfig();
         $this->installNightwatchConfig();
+        $this->printUserCommands();
     }
 
+    /**
+     * Helper to copy a file from the scaffold directory into the project.
+     *
+     * @param string $source
+     * @param string $destination
+     */
     private function installScaffoldFile(string $source, string $destination): void
     {
         $vendor = $this->config->get('vendor-dir');
@@ -110,6 +125,13 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
                 "./$destination"
             );
         }
+    }
+
+    /**
+     * Let's the user know they need to run some commands post update/install.
+     */
+    private function printUserCommands() {
+        $this->io->warning(sprintf('You must run the following commands:\n %s', implode("\n", $this->userCommands)));
     }
 
     /**
@@ -149,9 +171,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             // Make sure Selenium can access the Drupal site.
             $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
             if (!is_array($ddevConfig['web_environment']) || !in_array('NIGHTWATCH_DRUPAL_URL=http://web', $ddevConfig['web_environment'])) {
-                $this->io->warning(
-                    'You must run the following and then restart DDEV: ddev config --web-environment="NIGHTWATCH_DRUPAL_URL=http://web"'
-                );
+                $this->userCommands[] = 'ddev config --web-environment="NIGHTWATCH_DRUPAL_URL=http://web"';
             }
             else {
                 $this->io->warning('DDEV Configuration has been updated, please restart');
@@ -234,16 +254,14 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
 
         if (!empty($needToInstall)) {
             if (file_exists('yarn.lock')) {
+                $this->userCommands[] = sprintf('yarn add %s', implode(array_values($dependencies)));
                 if ($this->environment === 'ddev') {
-                    $this->io->warning(sprintf('Please run "yarn add %s" followed by "ddev yarn"', implode(' ', array_values($dependencies))));
-                } else {
-                    $this->io->warning(sprintf('Please run "yarn add %s"', implode(' ', array_values($dependencies))));
+                    $this->userCommands[] = 'ddev yarn';
                 }
             } else if (file_exists('package-lock.json')) {
+                $this->userCommands[] = sprintf('npm install %s --save-dev', implode(array_values($dependencies)));
                 if ($this->environment === 'ddev') {
-                    $this->io->warning(sprintf('Please run "npm install %s --save-dev" followed by "ddev npm install"', implode(' ', array_values($dependencies))));
-                } else {
-                    $this->io->warning(sprintf('Please run "npm install %s --save-dev"', implode(' ', $dependencies)));
+                    $this->userCommands[] = 'ddev npm install';
                 }
             } else {
                 $this->io->warning(
