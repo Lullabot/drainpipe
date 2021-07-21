@@ -2,7 +2,7 @@ includes:
     - ../../../mglaman/phpstan-drupal/extension.neon
 
 parameters:
-    excludes_analyse:
+    excludePaths:
         - *sites/simpletest/*
         - *default.settings.php
         - *sites/*/files/*

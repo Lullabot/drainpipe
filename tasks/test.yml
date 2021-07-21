@@ -6,6 +6,8 @@ vars:
   YAML_DIRS: 'web/**/*.yml'
   TWIG_DIRS: 'web/modules web/profiles web/themes'
   TEST_DIRS: 'web/modules/custom web/themes/custom web/sites'
+  NIGHTWATCH_ENV: 'firefox,chrome'
+  NIGHTWATCH_TEST_DIRS: 'test'
   FUNC_ENSURE_DIRS: |
     DIRS_ARR=({{.TEST_DIRS}})
     for DIR in "${DIRS_ARR[@]}"; do
@@ -18,7 +20,7 @@ tasks:
     deps: [security, lint, phpstan, phpunit, phpcs]
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
-    deps: [config]
+    deps: [config, nightwatch]
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
@@ -67,3 +69,7 @@ tasks:
         {{ .FUNC_ENSURE_DIRS }}
       - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
       - ./vendor/bin/phpcbf --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
+  nightwatch:
+    desc: Runs Nighwatch functional browser tests
+    cmds:
+      - yarn nightwatch --env {{.NIGHTWATCH_ENV}}

@@ -1,32 +1,83 @@
 # Drainpipe
 
-## Dependencies
-This project requires [Task](https://github.com/go-task/task), [version 3 or later](https://taskfile.dev/#/taskfile_versions) to be installed.
+See https://github.com/lullabot/drainpipe first.
 
-## Setup
-An initial `Taskfile.yml` will be created when installing this package. Be sure to commit it to version control. To simplify future updates, consider including additional Taskfiles instead of adding commands to the file directly.
+This is a composer package containing the testing helpers for Drainpipe i.e.
+should be included in `require-dev` and not installed in production
+environments.
 
 ## Usage
-Below are some examples based on task files included in this package for certain project types.
 
-### Drupal
-```
-task drupal:update
-```
+### `test:static`
 
-or for a remote site:
+Runs all static tests i.e. those which don't require a running Drupal
+environment.
 
-```
-task drupal:update -- @mysite.dev
-```
+The static tests consist of:
 
-## Validation
+#### `test:security`
 
-Your `Taskfile.yml` can be validated with JSON Schema:
-```
-curl -O https://json.schemastore.org/taskfile.json
-npx ajv-cli validate -s taskfile.json -d Taskfile.yml
-```
+Runs security checks for composer packages against the [FriendsOfPHP Security
+Advisory Database](https://github.com/FriendsOfPHP/security-advisories) and
+Drupal core and contributed modules against
+[Drupal's Security Advisories](https://www.drupal.org/security).
 
-See [.github/workflows/validate-taskfile.yml](`.github/workflows/validate-taskfile.yml`)
-for an example of this in use.
+#### `test:lint`
+
+- YAML lint on `.yml` files in the `web` directory
+- Twig lint on files in `web/modules`, `web/profiles`, and `web/themes`
+- `composer validate`
+
+These cannot currently be customised.
+See [#9](https://github.com/Lullabot/drainpipe-dev/issues/9).
+
+#### `test:phpstan`
+
+Runs [PHPStan](https://phpstan.org/) with
+[mglaman/phpstan-drupal](https://github.com/mglaman/phpstan-drupal) on
+`web/modules/custom`, `web/themes/custom`, and `web/sites`.
+
+#### `test:phpunit`
+
+Runs PHPUnit tests in `web/modules/custom`, `web/themes/custom`, and
+`web/sites`.
+
+#### `test:phpcs`
+
+Runs PHPCS with Drupal coding standards provided by
+[Coder module](https://www.drupal.org/project/coder).
+
+### `test:functional`
+
+Runs all functional tests i.e. those which require a running Drupal environment.
+
+#### `test:config`
+
+Verifies that exported configuration matches the current configuration in
+Drupal's database.
+
+#### `test:nightwatch`
+
+Runs functional browser tests with [Nightwatch](https://nightwatchjs.org/).
+
+If you are using DDEV, Drainpipe will have created a
+`.ddev/docker-compose.selenium.yaml` file that provides Firefox and Chrome as
+containers, as well as an example test in
+`test/nightwatch/example.nightwatch.js`.
+
+Nightwatch tests must have the suffix `.nightwatch.js` to be recognised by
+the test runner.
+
+Whilst tests are running, you can view them in realtime through your browser.
+
+http://localhost:7900 for Chrome
+http://localhost:7901 for Firefox
+
+The password for all environments is `secret`.
+
+### `test:autofix`
+
+Attempts to autofix any issues discovered by tests. Currently, this is just
+fixing PHPCS errors with PHPCBF.
+
+
