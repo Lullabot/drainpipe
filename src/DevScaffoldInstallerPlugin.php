@@ -228,7 +228,8 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
                     $this->io->write('YARN > '.$buffer);
                 }
             });
-            $yarn = new Process(['yarn', 'init']);
+            $this->installScaffoldFile('.yarnrc.yml', '.yarnrc.yml');
+            $yarn = new Process(['yarn', 'init', '-p']);
             $yarn->run(function($type, $buffer) {
                 if (Process::ERR === $type) {
                     $this->io->write('ERR > '.$buffer);
