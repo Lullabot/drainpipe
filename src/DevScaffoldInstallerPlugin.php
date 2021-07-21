@@ -131,7 +131,8 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      * Let's the user know they need to run some commands post update/install.
      */
     private function printUserCommands() {
-        $this->io->warning('You must run the following commands');
+        $this->io->warning('You must run the following commands:');
+        $this->io->warning('');
         foreach ($this->userCommands as $userCommand) {
             $this->io->warning($userCommand);
         }
