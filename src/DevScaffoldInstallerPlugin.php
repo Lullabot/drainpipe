@@ -131,10 +131,12 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      * Let's the user know they need to run some commands post update/install.
      */
     private function printUserCommands() {
-        $this->io->warning('You must run the following commands:');
-        $this->io->warning('');
-        foreach ($this->userCommands as $userCommand) {
-            $this->io->warning($userCommand);
+        if (!empty($this->userCommands)) {
+            $this->io->warning('You must run the following commands:');
+            $this->io->warning('');
+            foreach ($this->userCommands as $userCommand) {
+                $this->io->warning($userCommand);
+            }
         }
     }
 
@@ -177,9 +179,6 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             if (!is_array($ddevConfig['web_environment']) || !in_array('NIGHTWATCH_DRUPAL_URL=http://web', $ddevConfig['web_environment'])) {
                 $this->userCommands[] = 'ddev config --web-environment="NIGHTWATCH_DRUPAL_URL=http://web"';
                 $this->userCommands[] = 'ddev restart';
-            }
-            else {
-                $this->io->warning('DDEV Configuration has been updated, please restart');
             }
             // Check if the file has deviated from the scaffold.
             $vendor = $this->config->get('vendor-dir');
