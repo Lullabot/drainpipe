@@ -220,6 +220,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
 
         // Create a new yarn project if there is no existing node dependencies.
         if (!file_exists('./package.json')) {
+            $this->installScaffoldFile('.yarnrc.yml', '.yarnrc.yml');
             $yarn = new Process(['yarn', 'set', 'version', 'berry']);
             $yarn->run(function($type, $buffer) {
                 if (Process::ERR === $type) {
@@ -228,7 +229,6 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
                     $this->io->write('YARN > '.$buffer);
                 }
             });
-            $this->installScaffoldFile('.yarnrc.yml', '.yarnrc.yml');
             $yarn = new Process(['yarn', 'init', '-p']);
             $yarn->run(function($type, $buffer) {
                 if (Process::ERR === $type) {
