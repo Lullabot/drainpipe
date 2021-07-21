@@ -131,7 +131,10 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      * Let's the user know they need to run some commands post update/install.
      */
     private function printUserCommands() {
-        $this->io->warning(sprintf('You must run the following commands:\n %s', implode("\n", $this->userCommands)));
+        $this->io->warning('You must run the following commands');
+        foreach ($this->userCommands as $userCommand) {
+            $this->io->warning($userCommand);
+        }
     }
 
     /**
@@ -172,6 +175,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
             if (!is_array($ddevConfig['web_environment']) || !in_array('NIGHTWATCH_DRUPAL_URL=http://web', $ddevConfig['web_environment'])) {
                 $this->userCommands[] = 'ddev config --web-environment="NIGHTWATCH_DRUPAL_URL=http://web"';
+                $this->userCommands[] = 'ddev restart';
             }
             else {
                 $this->io->warning('DDEV Configuration has been updated, please restart');
@@ -234,7 +238,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
         }
 
         $dependencies = [
-            '@lullabot/nightwatch-drupal-commands' => '@lullabot/nightwatch-drupal-commands@https://github.com/Lullabot/nightwatch-drupal-commands.git#main',
+            '@lullabot/nightwatch-drupal-commands' => '@lullabot/nightwatch-drupal-commands@https://github.com/Lullabot/nightwatch-drupal-commands.git#main --dev',
             'nightwatch' => 'nightwatch',
             'nightwatch-accessibility' => 'nightwatch-accessibility',
         ];
@@ -254,12 +258,12 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
 
         if (!empty($needToInstall)) {
             if (file_exists('yarn.lock')) {
-                $this->userCommands[] = sprintf('yarn add %s', implode(array_values($dependencies)));
+                $this->userCommands[] = sprintf('yarn add %s', implode(' ', array_values($dependencies)));
                 if ($this->environment === 'ddev') {
-                    $this->userCommands[] = 'ddev yarn';
+                    $this->userCommands[] = 'ddev exec yarn';
                 }
             } else if (file_exists('package-lock.json')) {
-                $this->userCommands[] = sprintf('npm install %s --save-dev', implode(array_values($dependencies)));
+                $this->userCommands[] = sprintf('npm install %s --save-dev', implode(' ', array_values($dependencies)));
                 if ($this->environment === 'ddev') {
                     $this->userCommands[] = 'ddev npm install';
                 }
