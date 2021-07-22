@@ -40,13 +40,11 @@ module.exports = {
         "on_failure" : true,
         "on_error" : false,
         "path" : "test_result"
-      },
-      desiredCapabilities: {
-        resolution: "1240x4000",
-      },
+      }
     },
     firefox: {
       desiredCapabilities: {
+        resolution: "1240x4000",
         browserName: 'firefox',
         alwaysMatch: {
           acceptInsecureCerts: true,
@@ -57,7 +55,6 @@ module.exports = {
             ]
           }
         }
-
       },
       webdriver: {
         start_process: false,
@@ -71,6 +68,7 @@ module.exports = {
     },
     chrome: {
       desiredCapabilities: {
+        resolution: "1240x4000",
         browserName: 'chrome',
         'goog:chromeOptions': {
           // More info on Chromedriver: https://sites.google.com/a/chromium.org/chromedriver/
