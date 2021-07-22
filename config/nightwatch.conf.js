@@ -41,6 +41,9 @@ module.exports = {
         "on_error" : false,
         "path" : "test_result"
       },
+      desiredCapabilities: {
+        resolution: "1240x4000",
+      },
     },
     firefox: {
       desiredCapabilities: {
