@@ -6,7 +6,6 @@ vars:
   YAML_DIRS: 'web/**/*.yml'
   TWIG_DIRS: 'web/modules web/profiles web/themes'
   TEST_DIRS: 'web/modules/custom web/themes/custom web/sites'
-  NIGHTWATCH_ENV: 'firefox,chrome'
   NIGHTWATCH_TEST_DIRS: 'test'
   FUNC_ENSURE_DIRS: |
     DIRS_ARR=({{.TEST_DIRS}})
@@ -71,6 +70,8 @@ tasks:
       - ./vendor/bin/phpcbf --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
   nightwatch:
     desc: Runs Nighwatch functional browser tests
+    env:
+      NIGHTWATCH_ENV: 'firefox,chrome'
     cmds:
       - yarn
-      - yarn nightwatch --env {{.NIGHTWATCH_ENV}}
+      - yarn nightwatch --env $NIGHTWATCH_ENV
