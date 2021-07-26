@@ -46,8 +46,8 @@ module.exports = {
       desiredCapabilities: {
         resolution: "1240x4000",
         browserName: 'firefox',
+        acceptInsecureCerts: true,
         alwaysMatch: {
-          acceptInsecureCerts: true,
           'moz:firefoxOptions': {
             args: [
               //'-headless',
