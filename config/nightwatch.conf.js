@@ -64,7 +64,10 @@ module.exports = {
           // very verbose geckodriver logs
           // '-vv'
         ]
-      }
+      },
+      globals: {
+        drupalUrl: process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX && process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX.length ? process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX.replace(/\/$/, '') : process.env.NIGHTWATCH_DRUPAL_URL,
+      },
     },
     chrome: {
       desiredCapabilities: {
@@ -90,7 +93,10 @@ module.exports = {
         cli_args: [
           // --verbose
         ]
-      }
+      },
+      globals: {
+        drupalUrl: process.env.NIGHTWATCH_DRUPAL_URL_CHROME && process.env.NIGHTWATCH_DRUPAL_URL_CHROME.length ? process.env.NIGHTWATCH_DRUPAL_URL_CHROME.replace(/\/$/, '') : process.env.NIGHTWATCH_DRUPAL_URL,
+      },
     },
   }
 };
