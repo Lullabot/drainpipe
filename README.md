@@ -1,24 +1,88 @@
 # Drainpipe
 
-## Dependencies
-This project requires [Task](https://github.com/go-task/task), [version 3 or later](https://taskfile.dev/#/taskfile_versions) to be installed.
+Drainpipe is a composer package which provides a number of build tool helpers
+for a Drupal site, including:
 
-## Setup
-An initial `Taskfile.yml` will be created when installing this package. Be sure to commit it to version control. To simplify future updates, consider including additional Taskfiles instead of adding commands to the file directly.
+- Site and database updates
+- Artifact packaging for deployment to a hosting provider
+- Automated testing setup with support for PHPUnit and Nightwatch tests
+
+## Installation
+
+```
+composer require lullabot/drainpipe
+# Includes development dependencies, but only in the `require-dev` section. This step is required for Drainpipe to provide test helpers.
+composer require lullabot/drainpipe-dev --dev
+```
+
+Drainpipe integrates with [DDEV](https://ddev.readthedocs.io/en/stable/), but
+will only add the relevant files when DDEV is detected in the repository. Either
+set DDEV up first before requiring this project, or run `composer update` if
+DDEV is added later.
+
+```
+composer create-project drupal/recommended-project drupal
+cd drupal
+ddev config
+ddev start
+ddev composer require lullabot/drainpipe
+ddev composer require lullabot/drainpipe-dev --dev
+# Restart is required to enable the provided Selenium containers
+ddev restart
+```
 
 ## Usage
-Below are some examples based on task files included in this package for certain project types.
+
+Build tasks are provided as [Taskfiles](https://taskfile.dev/#/). A full list of
+available tasks can be shown by running `./vendor/bin/task --list` (or
+`ddev task --list` if you're using DDEV).
 
 ### Drupal
-```
-task drupal:update
-```
 
-or for a remote site:
+|`drupal:build:prod`|Build Drupal for production usage|
+|`drupal:update`|Run Drupal update tasks after deploying new code|
+|`drupal:maintenance:on`|Turn on Maintenance Mode|
+|`drupal:maintenance:off`|Turn off Maintenance Mode|
 
-```
-task drupal:update -- @mysite.dev
-```
+All the above commands can be run on a remote site by providing a [drush site
+alias](https://www.drush.org/latest/site-aliases/).
+e.g. `task site=@mysite.dev drupal:update`
+
+### Snapshot
+
+These commands will prepare a Drupal codebase for deployment.
+
+#### `snapshot:directory`
+
+Creates a snapshot of the current working directory
+
+.git, .gitignore, files listed in .drainpipeignore, and .drainpipeignore
+itself are not added. .drainpipeignore uses the same format as gitignore.
+
+usage: `task snapshot:directory o=/tmp/release`
+
+o=<file>   Write the archive to <file>
+
+#### `snapshot:archive`
+
+Creates a snapshot of the current working directory and exports as an archive.
+
+`.git`, `.gitignore`, files listed in `.drainpipeignore`, and `.drainpipeignore`
+itself are not added. `.drainpipeignore` uses the same format as
+[`gitignore`](https://git-scm.com/docs/gitignore).
+
+If your `.gitattributes` file contains `export-ignore` or `export-subst`, these
+will be respected when exporting the archive.
+
+usage: `task snapshot:archive o=~/archive.tar.bz2`
+
+`o=<file>`
+Write the archive to `<file>`. The compression format is inferred from the file
+extension. Format options are: tar, tar.bz2, tar.gz, tar.xz, zip
+
+### Tests
+
+See https://github.com/Lullabot/drainpipe-dev
 
 ## Validation
 
