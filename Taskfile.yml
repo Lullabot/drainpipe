@@ -4,6 +4,7 @@ dotenv: ['.env']
 
 includes:
   drupal: ./tasks/drupal.yml
+  setup: ./tasks/setup.yml
   snapshot: ./tasks/snapshot.yml
   test: ./tasks/test.yml
 

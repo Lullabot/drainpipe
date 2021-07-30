@@ -4,6 +4,7 @@ dotenv: ['.env']
 
 includes:
   drupal: ./vendor/lullabot/drainpipe/tasks/drupal.yml
+  setup: ./vendor/lullabot/drainpipe/tasks/setup.yml
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
 
 tasks:
