@@ -12,7 +12,7 @@ tasks:
                           the remote service(s) we want to access
         SSH_KNOWN_HOSTS   The result of running "ssh-keyscan <domain>" of the
                           remove service(s) we want to access
-    cmd:
+    cmds:
       - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
       - cat ~/.ssh/known_hosts
       - chmod 644 ~/.ssh/known_hosts
@@ -27,6 +27,6 @@ tasks:
 
       git_email=<git email>   E-mail address to use for the git commit
       git_name=<git email>    Name to use for the git commit
-    cmd:
+    cmds:
       - git config user.email {{.git_email}}
       - git config user.name {{.git_name}}
