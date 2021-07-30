@@ -24,13 +24,13 @@ tasks:
 
         usage: task snapshot:directory o=/tmp/release
 
-        o=<file>   Write the archive to <file>
+        directory=<file>   Write the archive to <file>
     cmds:
-      - if [ -d "{{.o}}" ] || [ "" == "{{.o}}" ]; then echo "Please provide a path to a directory that does not yet exist" && exit 1; fi
-      - cp -pR . {{.o}}
-      - if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch {{.o}}/.drainpipeignore; fi
+      - if [ -d "{{.directory}}" ] || [ "" == "{{.directory}}" ]; then echo "Please provide a path to a directory that does not yet exist" && exit 1; fi
+      - cp -pR . {{.directory}}
+      - if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch {{.directory}}/.drainpipeignore; fi
       - |
-        cd {{.o}}
+        cd {{.directory}}
         {{ .PREPARE_DIRECTORY }}
         rm -rf .git
   archive:
@@ -48,8 +48,8 @@ tasks:
         usage: task snapshot:archive o=~/archive.tar.bz2
 
         o=<file>   Write the archive to <file>. The compression format is
-                    inferred from the file extension. Format options are:
-                    tar, tar.bz2, tar.gz, tar.xz, zip
+                   inferred from the file extension. Format options are:
+                   tar, tar.bz2, tar.gz, tar.xz, zip
     cmds:
       - |
         TMP_DIR=$(mktemp -d)

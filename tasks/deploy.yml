@@ -1,0 +1,31 @@
+tasks:
+  git:
+    desc: "Pushes a directory to a git remote"
+    summary: |
+      Given a directory, pushes it to a git remote whilst maintaining a linear
+      history with the remote.
+
+      usage: task deploy:git d="/tmp/release" b=main r="git@github.com:Lullabot/drainpipe.git" m="Initial commit" ge="bot@example.com" gn="Drainpipe Bot"
+
+      directory=<directory>   A directory containing the files to be pushed
+      branch=<branch>         Name of the branch to push to e.g. "main"
+      remote=<remote>         Git remote to push to
+      message=<message>       Commit message
+    cmds:
+      - if [ ! -d "{{.directory}}" ] || [ "" == "{{.directory}}" ]; then echo "Please provide a path to a directory to deploy" && exit 1; fi
+      - if [ "" == "{{.branch}}" ]; then echo "Please provide a branch to deploy to" && exit 1; fi
+      - if [ "" == "{{.remote}}" ]; then echo "Please provide a remote git repository to push to" && exit 1; fi
+      - if [ "" == "{{.message}}" ]; then echo "Please provide a commit message" && exit 1; fii
+      - |
+        TMP_DIR=$(mktemp -d)
+        git clone --depth 1 {{.remote}} $TMP_DIR
+        cd $TMP_DIR
+        mv $TMP_DIR/.git {{.directory}}
+        cd {{.directory}}
+        git checkout -B {{.branch}}
+        git add -A
+        git commit -m "{{.message}}" --allow-empty
+        git push origin {{.branch}}
+
+
+
