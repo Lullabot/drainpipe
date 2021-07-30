@@ -17,7 +17,7 @@ tasks:
       - if [ ! -d "{{.directory}}" ] || [ "" == "{{.directory}}" ]; then echo "Please provide a path to a directory to deploy" && exit 1; fi
       - if [ "" == "{{.branch}}" ]; then echo "Please provide a branch to deploy to" && exit 1; fi
       - if [ "" == "{{.remote}}" ]; then echo "Please provide a remote git repository to push to" && exit 1; fi
-      - if [ "" == "{{.message}}" ]; then echo "Please provide a commit message" && exit 1; fii
+      - if [ "" == "{{.message}}" ]; then echo "Please provide a commit message" && exit 1; fi
       - |
         TMP_DIR=$(mktemp -d)
         git clone --depth 1 {{.remote}} $TMP_DIR
