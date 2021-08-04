@@ -3,6 +3,7 @@ version: '3'
 dotenv: ['.env']
 
 includes:
+  deploy: ./tasks/deploy.yml
   drupal: ./tasks/drupal.yml
   snapshot: ./tasks/snapshot.yml
   test: ./tasks/test.yml
