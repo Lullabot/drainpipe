@@ -11,6 +11,7 @@ services:
       - 7900:7900
     links:
       - web:web
+      - web:drupal_chrome
     external_links:
       - ddev-router:${DDEV_SITENAME}.${DDEV_TLD}
 
@@ -24,5 +25,6 @@ services:
       - 7901:7900
     links:
       - web:web
+      - web:drupal_firefox
     external_links:
       - ddev-router:${DDEV_SITENAME}.${DDEV_TLD}
