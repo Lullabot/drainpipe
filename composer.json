@@ -23,7 +23,8 @@
         "drush/drush": "^10.5",
         "symfony/yaml": "^4",
         "lullabot/drainpipe": "dev-main",
-        "drupal/coder": "^8.3"
+        "drupal/coder": "^8.3",
+        "friends-of-behat/mink-browserkit-driver": "^1.5"
     },
     "require-dev": {
         "composer/composer": "^2.0"
