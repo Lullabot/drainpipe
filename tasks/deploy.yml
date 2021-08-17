@@ -33,4 +33,3 @@ tasks:
         git commit -m "{{.message}}" --allow-empty
         git push origin {{.branch}}
 
-
