@@ -21,7 +21,7 @@ tasks:
       - |
         TMP_DIR=$(mktemp -d)
         git clone --depth 1 --branch {{.branch}} {{.remote}} $TMP_DIR || true
-        if [[ ! -d $TMP_DIR ]]; then
+        if [[ ! -d "$TMP_DIR/.git" ]]; then
           git clone --depth 1 {{.remote}} $TMP_DIR
           git checkout -b {{.branch}}
         fi
