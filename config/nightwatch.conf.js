@@ -19,7 +19,7 @@ module.exports = {
   output_folder: 'test_result',
 
   // See https://nightwatchjs.org/guide/working-with-page-objects/
-  page_objects_path: [`${drupalCommandsPath}/page_objects`],,
+  page_objects_path: [`${drupalCommandsPath}/page_objects`],
 
   // See https://nightwatchjs.org/guide/extending-nightwatch/#writing-custom-commands
   custom_commands_path:  [`${a11yPath}/commands`, `${drupalCommandsPath}/commands`],
