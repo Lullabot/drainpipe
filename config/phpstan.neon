@@ -1,5 +1,6 @@
 includes:
     - ../../../mglaman/phpstan-drupal/extension.neon
+    - ../../../phpstan/phpstan-deprecation-rules/rules.neon
 
 parameters:
     excludePaths:
@@ -9,3 +10,7 @@ parameters:
         - *settings.ddev.php
     # PHPStan Level 1
     level: 1
+
+services:
+	errorFormatter.junit:
+		class: PHPStan\Command\ErrorFormatter\JUnitErrorFormatter

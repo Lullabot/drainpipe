@@ -24,12 +24,18 @@
         "symfony/yaml": "^4",
         "lullabot/drainpipe": "dev-main",
         "drupal/coder": "^8.3",
-        "friends-of-behat/mink-browserkit-driver": "^1.5"
+        "friends-of-behat/mink-browserkit-driver": "^1.5",
+        "tijsverkoyen/convert-to-junit-xml": "^1.9",
+        "mglaman/phpstan-junit": "^0.12.0",
+        "phpstan/phpstan-deprecation-rules": "^0.12.6"
     },
     "require-dev": {
         "composer/composer": "^2.0"
     },
-    "bin": ["bin/drainpipe-twig-linter"],
+    "bin": [
+        "bin/drainpipe-twig-linter",
+        "bin/drainpipe-convert-to-junit-xml"
+    ],
     "extra": {
         "class": [
             "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin",
