@@ -3,7 +3,6 @@ version: '3'
 # @todo allow these to be overridden or document them as required folder
 # structures. See also config/phpcs.xml and config/phpstan.neon
 vars:
-  TEST_OUTPUT_FORMAT: 'console'
   YAML_DIRS: 'web/**/*.yml'
   TWIG_DIRS: 'web/modules web/profiles web/themes'
   TEST_DIRS: 'web/modules/custom web/themes/custom web/sites'
@@ -25,13 +24,13 @@ tasks:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
       - cmd: |
-          if [ "{{.TEST_OUTPUT_FORMAT}}" == "junit" ]; then
+          if [ "{{.format}}" == "junit" ]; then
             mkdir -p test_result
             ./vendor/bin/local-php-security-checker --format=json > test_result/local-php-security-checker.json
           fi
         ignore_error: true
       - |
-        if [ "{{.TEST_OUTPUT_FORMAT}}" == "junit" ]; then
+        if [ "{{.format}}" == "junit" ]; then
           RESULT=$(cat test_result/local-php-security-checker.json)
           ./vendor/bin/drainpipe-convert-to-junit-xml convert:sensiolabs-security-check "$RESULT" > test_result/local-php-security-checker.xml
           if [ "$RESULT" != "{}" ]; then
@@ -66,7 +65,7 @@ tasks:
     dec: Runs PHPStan with mglaman/phpstan-drupal
     cmds:
       - |
-        if [ "{{.TEST_OUTPUT_FORMAT}}" == "junit" ]; then
+        if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
           ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe-dev/config/phpstan.neon --error-format=junit {{.TEST_DIRS}} > test_result/phpstan.xml
         else
@@ -78,7 +77,7 @@ tasks:
       - |
         {{ .FUNC_ENSURE_DIRS }}
       - |
-        if [ "{{.TEST_OUTPUT_FORMAT}}" == "junit" ]; then
+        if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
           ./vendor/bin/phpunit --log-junit test_result/phpunit.xml {{.TEST_DIRS}}
         else
@@ -91,7 +90,7 @@ tasks:
         {{ .FUNC_ENSURE_DIRS }}
       - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
       - |
-        if [ "{{.TEST_OUTPUT_FORMAT}}" == "junit" ]; then
+        if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
           ./vendor/bin/phpcs --report=junit -q --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}} > test_result/phpcs.xml
         else
