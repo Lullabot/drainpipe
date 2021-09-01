@@ -3,6 +3,7 @@ version: '3'
 # @todo allow these to be overridden or document them as required folder
 # structures. See also config/phpcs.xml and config/phpstan.neon
 vars:
+  TEST_OUTPUT_FORMAT: 'console'
   YAML_DIRS: 'web/**/*.yml'
   TWIG_DIRS: 'web/modules web/profiles web/themes'
   TEST_DIRS: 'web/modules/custom web/themes/custom web/sites'
@@ -23,12 +24,28 @@ tasks:
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
-      - ./vendor/bin/local-php-security-checker
+      - cmd: |
+          if [ "{{.TEST_OUTPUT_FORMAT}}" == "junit" ]; then
+            mkdir -p test_result
+            ./vendor/bin/local-php-security-checker --format=json > test_result/local-php-security-checker.json
+          fi
+        ignore_error: true
+      - |
+        if [ "{{.TEST_OUTPUT_FORMAT}}" == "junit" ]; then
+          RESULT=$(cat test_result/local-php-security-checker.json)
+          ./vendor/bin/drainpipe-convert-to-junit-xml convert:sensiolabs-security-check "$RESULT" > test_result/local-php-security-checker.xml
+          if [ "$RESULT" != "{}" ]; then
+            exit 1
+          fi
+        else
+          ./vendor/bin/local-php-security-checker
+        fi
+      # JUnit output blocked on https://github.com/drush-ops/drush/issues/4817
       - ./vendor/bin/drush pm:security
   lint:
     desc: Runs lint on composer, YAML, and Twig files
+    # @todo JUnit output
     cmds:
-      - echo {{.YAML_DIRS}}
       - composer validate
       - |
         DIRS_ARR=({{.YAML_DIRS}})
@@ -42,25 +59,44 @@ tasks:
         done
   config:
     desc: Verifies that exported config matches the config in Drupal
+    # @todo JUnit output
     cmds:
       - if [ $(./vendor/bin/drush config:status --format=string | wc -w) -gt 0 ]; then echo "Config export does not match"; drush config:status; exit 1; fi
   phpstan:
     dec: Runs PHPStan with mglaman/phpstan-drupal
     cmds:
-      - ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe-dev/config/phpstan.neon {{.TEST_DIRS}}
+      - |
+        if [ "{{.TEST_OUTPUT_FORMAT}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe-dev/config/phpstan.neon --error-format=junit {{.TEST_DIRS}} > test_result/phpstan.xml
+        else
+          ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe-dev/config/phpstan.neon {{.TEST_DIRS}}
+        fi
   phpunit:
     desc: Runs PHPUnit
     cmds:
       - |
         {{ .FUNC_ENSURE_DIRS }}
-      - ./vendor/bin/phpunit {{.TEST_DIRS}}
+      - |
+        if [ "{{.TEST_OUTPUT_FORMAT}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpunit --log-junit test_result/phpunit.xml {{.TEST_DIRS}}
+        else
+          ./vendor/bin/phpunit {{.TEST_DIRS}}
+        fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
     cmds:
       - |
         {{ .FUNC_ENSURE_DIRS }}
       - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
-      - ./vendor/bin/phpcs --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
+      - |
+        if [ "{{.TEST_OUTPUT_FORMAT}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpcs --report=junit -q --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}} > test_result/phpcs.xml
+        else
+          ./vendor/bin/phpcs --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
+        fi
   autofix:
     desc: Runs PHPCBF with Drupal Coding Standards to fix PHPCS violations
     cmds:
