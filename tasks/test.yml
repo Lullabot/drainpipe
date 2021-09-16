@@ -109,4 +109,4 @@ tasks:
       NIGHTWATCH_ENV: 'firefox,chrome'
     cmds:
       - yarn
-      - yarn nightwatch --env $NIGHTWATCH_ENV
+      - yarn nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
