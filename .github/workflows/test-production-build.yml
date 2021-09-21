@@ -39,7 +39,7 @@ jobs:
           cd drupal
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/composer.json .
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
-          composer install ${{ matrix.composer-flags }}
+          composer update ${{ matrix.composer-flags }}
       - name: Run static tests
         run: |
           cd ../drupal
