@@ -9,11 +9,18 @@ on:
 jobs:
   Test-Production-Build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: [7.3, 7.4, 8.0]
+        include:
+          - php-version: 7.3
+            composer-flags: --prefer-lowest --prefer-stable
+
     steps:
       - uses: actions/checkout@v2
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: ${{ matrix.php-version }}
           tools: composer:v2
           extensions: gd
       - name: Get composer cache directory
@@ -32,7 +39,7 @@ jobs:
           cd drupal
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/composer.json .
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
-          composer install
+          composer install ${{ matrix.composer-flags }}
       - name: Run static tests
         run: |
           cd ../drupal
