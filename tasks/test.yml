@@ -103,6 +103,14 @@ tasks:
         {{ .FUNC_ENSURE_DIRS }}
       - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
       - ./vendor/bin/phpcbf --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
+  install:firefox:
+    desc: "Runs the site installer for the Firefox container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
+  install:chrome:
+    desc: "Runs the site installer for the Chrome container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
   nightwatch:
     desc: Runs Nighwatch functional browser tests
     env:
