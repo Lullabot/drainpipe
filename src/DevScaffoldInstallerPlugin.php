@@ -176,9 +176,13 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             $this->installScaffoldFile('docker-compose.selenium.yaml', $destination);
             // Make sure Selenium can access the Drupal site.
             $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
-            if (!is_array($ddevConfig['web_environment']) || !in_array('NIGHTWATCH_DRUPAL_URL=http://web', $ddevConfig['web_environment'])) {
-                $this->userCommands[] = 'ddev config --web-environment="NIGHTWATCH_DRUPAL_URL=http://web"';
+            if (!is_array($ddevConfig['web_environment']) || !in_array('NIGHTWATCH_DRUPAL_URL_FIREFOX', $ddevConfig['web_environment']) || !in_array('NIGHTWATCH_DRUPAL_URL_CHROME', $ddevConfig['web_environment'])) {
+                $this->userCommands[] = 'ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox"';
+                $this->userCommands[] = 'ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"';
                 $this->userCommands[] = 'ddev restart';
+            }
+            if (!empty($ddevConfig['hooks']['post-start']) || !is_array($ddevConfig['hooks']['post-start']) || !in_array('exec: mysql -uroot -proot -hdb -e "CREATE DATABASE IF NOT EXISTS firefox; GRANT ALL ON firefox.* TO \'db\'@\'%\';"', $ddevConfig['hooks']['post-start']) || !in_array('exec: mysql -uroot -proot -hdb -e "CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO \'db\'@\'%\';"', $ddevConfig['hooks']['post-start'])) {
+                // Need to add database creation commands
             }
             // Check if the file has deviated from the scaffold.
             $vendor = $this->config->get('vendor-dir');
@@ -217,7 +221,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             $this->installScaffoldFile('example.nightwatch.js', 'test/nightwatch/example.nightwatch.js');
         }
 
-        // Create a new yarn project if there is no existing node dependencies.
+        // Create a new yarn project if package.json doesn't exist
         if (!file_exists('./package.json')) {
             $yarn = new Process(['yarn', 'set', 'version', 'berry']);
             $yarn->run(function($type, $buffer) {
@@ -265,7 +269,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
 
         if (!empty($needToInstall)) {
             if (file_exists('yarn.lock')) {
-                $this->userCommands[] = sprintf('yarn add %s', implode(' ', array_values($dependencies)));
+                $this->userCommands[] = sprintf('yarn add %s --dev', implode(' ', array_values($dependencies)));
                 if ($this->environment === 'ddev') {
                     $this->userCommands[] = 'ddev exec yarn';
                 }
