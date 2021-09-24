@@ -1,0 +1,28 @@
+version: '3'
+
+tasks:
+  compile:
+    desc: Compiles themes/custom/<theme name>/style.scss in custom themes to themes/custom/<theme name>/style.css
+    summary: |
+      Compiles themes/custom/<theme name>/style.scss in custom themes to themes/custom/<theme name>/style.css
+      Requires sass and esbuild to be installed.
+
+      usage: task sass:compile include_node_modules="modern-normalize another-node-modules-path" themes="my_custom_theme my_other_custom_theme"
+    cmds:
+      - if ["{{.themes}}" == ""]; echo "No theme names provided"; exit 1; fi
+      - yarn sass{{range split " " .include_node_modules}} -I $(yarn node -e "const path = require('path'); console.log(path.resolve(require.resolve('{{.}}'), '..', '..'));") {{end}}{{range split " " .themes }}web/themes/custom/{{.}}/style.scss:web/themes/custom/{{.}}/style.css {{end}}
+      - |
+        themes=({{.themes}})
+        for THEME in "${themes[@]}"; do
+          yarn esbuild web/themes/custom/$THEME/style.css --minify --sourcemap --allow-overwrite --outfile=web/themes/custom/$THEME/style.css
+        done
+  watch:
+    desc: Compiles themes/custom/<theme name>/style.scss in custom themes to themes/custom/<theme name>/style.css and watches for changes
+    summary: |
+      Compiles themes/custom/<theme name>/style.scss in custom themes to themes/custom/<theme name>/style.css
+      Requires sass and esbuild to be installed.
+
+      usage: task sass:watch include_node_modules="modern-normalize another-node-modules-path" themes="my_custom_theme my_other_custom_theme"
+    cmds:
+      - yarn sass --watch{{.CLI_ARGS}}{{range split " " .include_node_modules}} -I $(yarn node -e "const path = require('path'); console.log(path.resolve(require.resolve('{{.}}'), '..', '..'));"){{end}} {{range split " " .themes }}web/themes/custom/{{.}}/style.scss:web/themes/custom/{{.}}/style.css {{end}}
+
