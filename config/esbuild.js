@@ -3,22 +3,24 @@ const { hideBin } = require('yargs/helpers')
 const argv = yargs(hideBin(process.argv)).argv
 const { build } = require('esbuild');
 const chokidar = require('chokidar');
+const { pnpPlugin } = require('@yarnpkg/esbuild-plugin-pnp');
 const themes = argv.themes;
-const plugins = [];
+const modules = argv.modules;
 
-try {
-  const { pnpPlugin } = require('@yarnpkg/esbuild-plugin-pnp');
-  plugins.push(pnpPlugin());
-} catch(e) {
+if (!themes.length && !modules.length) {
+  console.log('No files to compile');
+  process.exit(0);
 }
 
+const scripts = themes.split(' ').filter(theme => theme !== '').map(theme => `web/themes/custom/${theme}`)
+  .concat(modules.split(' ').filter(module => module !== '').map(module => `web/modules/custom/${module}`));
 
 (async() => {
   try {
     let builder = await build({
-      plugins,
-      entryPoints: themes.split(' ').map(theme => `web/themes/custom/${theme}/script.js`),
-      outdir: 'web/themes/custom',
+      plugins: [pnpPlugin()],
+      entryPoints: scripts.map(script => `${script}/script.js`),
+      outdir: 'web',
       entryNames: '[dir]/[name].min',
       bundle: true,
       sourcemap: true,
@@ -29,8 +31,8 @@ try {
 
     if (!!argv.watch) {
       let ready = false;
-      chokidar.watch(themes.split(' ').map(theme => `web/themes/custom/${theme}/**/*.js`), {
-        ignored: themes.split(' ').map(theme => `web/themes/custom/${theme}/**/script.min.js`),
+      chokidar.watch(scripts.map(script => `${script}/**/*.js`), {
+        ignored: scripts.map(script => `${script}/**/script.min.js`),
       })
         .on('ready', () => {
           ready = true;
