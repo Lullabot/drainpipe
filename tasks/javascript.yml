@@ -2,24 +2,22 @@ version: '3'
 
 tasks:
   compile:
-    desc: |
-      Compiles themes/custom/<theme name>/script.js in custom themes to
-      themes/custom/<theme name>/script.min.js
+    desc: Compiles/bundles JavaScript for custom themes and modules
     summary: |
-      Requires: esbuild, chokidar, yargs
+      Compiles themes/custom/<theme name>/script.js in custom themes to
+      themes/custom/<theme name>/script.min.js and modules/custom/<module name>/script.js
+      to modules/custom/<module name>/script.js in custom modules.
+
+      Requires esbuild, chokidar, and yargs
       Additionally if using Yarn 2+: @yarnpkg/esbuild-plugin-pnp
 
-      usage: task javascript:compile themes="my_custom_theme my_other_theme"
+      usage: task javascript:compile themes="my_custom_theme my_other_theme" modules="my_module"
+    vars:
+      args: "--minify"
     cmds:
-      - yarn node ./vendor/lullabot/drainpipe/config/esbuild.js --themes="{{.themes}}" --minify
+      - yarn node ./vendor/lullabot/drainpipe/config/esbuild.js --themes="{{.themes}}" --modules="{{.modules}}" {{.args}}
   watch:
-    desc: |
-      Compiles themes/custom/<theme name>/script.js in custom themes to
-      themes/custom/<theme name>/script.min.js and watches for changes
-    summary: |
-      Requires: esbuild, chokidar, yargs
-      Additionally if using Yarn 2+: @yarnpkg/esbuild-plugin-pnp
-
-      usage: task javascript:watch themes="my_custom_theme my_other_theme"
+    desc: The same as compile, but continues running and watching for changes
     cmds:
-      -  yarn node ./vendor/lullabot/drainpipe/config/esbuild.js --themes="{{.themes}}" --watch
+      - task: compile
+        args: {args: "--watch"}
