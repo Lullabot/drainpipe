@@ -10,28 +10,28 @@ tasks:
       anyway to get task and drainpipe.
     cmds:
       - composer install --optimize-autoloader
-      sources:
-        - composer.json
-        - composer.lock
-      generates:
-        - ./vendor/composer/installed.json
-        - ./vendor/autoload.php
-      status:
-        - >
-          test -f ./vendor/composer/installed.json && grep -q '"dev": true' ./vendor/composer/installed.json
+    sources:
+      - composer.json
+      - composer.lock
+    generates:
+      - ./vendor/composer/installed.json
+      - ./vendor/autoload.php
+    status:
+      - >
+        test -f ./vendor/composer/installed.json && grep -q '"dev": true' ./vendor/composer/installed.json
   composer:production:
     desc: Install composer dependencies without devDependencies
     cmds:
       - composer install --no-dev --optimize-autoloader
-     sources:
-       - composer.json
-       - composer.lock
-     generates:
-       - ./vendor/composer/installed.json
-       - ./vendor/autoload.php
-     status:
-       - >
-         test -f ./vendor/composer/installed.json && grep -q '"dev": false' ./vendor/composer/installed.json
+   sources:
+     - composer.json
+     - composer.lock
+   generates:
+     - ./vendor/composer/installed.json
+     - ./vendor/autoload.php
+   status:
+     - >
+       test -f ./vendor/composer/installed.json && grep -q '"dev": false' ./vendor/composer/installed.json
   install:
     desc: "Runs the site installer"
     cmds:
