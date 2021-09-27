@@ -11,13 +11,17 @@ tasks:
       Requires esbuild, chokidar, and yargs
       Additionally if using Yarn 2+: @yarnpkg/esbuild-plugin-pnp
 
-      usage: task javascript:compile themes="my_custom_theme my_other_theme" modules="my_module"
-    vars:
-      args: "--minify"
+      usage: task javascript:compile DRAINPIPE_JAVASCRIPT_THEMES="my_custom_theme my_other_theme" DRAINPIPE_JAVASCRIPT_MODULES="my_module"
     cmds:
-      - yarn node ./vendor/lullabot/drainpipe/config/esbuild.js --themes="{{.themes}}" --modules="{{.modules}}" {{.args}}
+      - |
+        ARGS="--minify"
+        if [ "{{.args}}" != "" ]; then
+          ARGS="{{.args}}"
+        fi
+        yarn node ./vendor/lullabot/drainpipe/config/esbuild.js --themes="{{.DRAINPIPE_JAVASCRIPT_THEMES}}" --modules="{{.DRAINPIPE_JAVASCRIPT_MODULES}}" $ARGS
   watch:
-    desc: The same as compile, but continues running and watching for changes
-    cmds:
+    desc: As compile, but continues running and watching for changes
+    deps:
       - task: compile
-        args: {args: "--watch"}
+        vars:
+          args: "--watch"

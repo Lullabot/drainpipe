@@ -11,23 +11,42 @@ tasks:
       Requires sass and esbuild to be installed.
 
       usage: task sass:compile include_node_modules="modern-normalize another-node-modules-path" themes="my_custom_theme my_other_custom_theme" modules="my_module"
-    vars:
-      args: ""
     cmds:
-      - if ["{{.themes}}" == ""]; echo "No theme names provided"; exit 1; fi
-      - yarn sass {{.args}} {{.CLI_ARGS}}{{range split " " .include_node_modules}} -I $(yarn node -e "const path = require('path'); console.log(path.resolve(require.resolve('{{.}}'), '..', '..'));") {{end}}{{range split " " .themes }}web/themes/custom/{{.}}/style.scss:web/themes/custom/{{.}}/style.css {{end}}{{range split " " .modules }}web/modules/custom/{{.}}/style.scss:web/modules/custom/{{.}}/style.css {{end}}
+      - if [ "{{.DRAINPIPE_SASS_THEMES}}" == "" ] && [ "{{.DRAINPIPE_SASS_MODULES}}" == "" ]; then echo "No themes or modules provided to compile Sass for"; exit 1; fi
       - |
-        themes=({{.themes}})
-        for THEME in "${themes[@]}"; do
-          yarn esbuild web/themes/custom/$THEME/style.css --minify --sourcemap --allow-overwrite --outfile=web/themes/custom/$THEME/style.css
+        THEMES=({{.DRAINPIPE_SASS_THEMES}})
+        MODULES=({{.DRAINPIPE_SASS_MODULES}})
+        THEMES_COMPILE=""
+        MODULES_COMPILE=""
+        if [ "{{.DRAINPIPE_SASS_INCLUDE_NODE_MODULES}}" != "" ]; then
+          INCLUDES="{{range split " " .DRAINPIPE_SASS_INCLUDE_NODE_MODULES}} -I $(yarn node -e "const path = require('path'); console.log(path.resolve(require.resolve('{{.}}'), '..', '..'));") {{end}}"
+        fi
+        for THEME in "${THEMES[@]}"; do
+          if [ -f "web/themes/custom/$THEME/style.scss" ]; then
+            THEMES_COMPILE="$THEMES_COMPILE web/themes/custom/$THEME/style.scss:web/themes/custom/$THEME/style.css"
+          fi
         done
-      - |
-        modules=({{.modules}})
-        for MODULE in "${modules[@]}"; do
-          yarn esbuild web/modules/custom/$MODULE/style.css --minify --sourcemap --allow-overwrite --outfile=web/modules/custom/$MODULE/style.css
+        for MODULE in "${MODULES[@]}"; do
+          if [ -f "web/modules/custom/$MODULE/style.scss" ]; then
+            MODULES_COMPILE="$MODULES_COMPILE web/modules/custom/$MODULE/style.scss:web/modules/custom/$MODULE/style.css"
+          fi
+        done
+
+        yarn sass {{.args}} {{.CLI_ARGS}} $INCLUDES $THEMES_COMPILE $MODULES_COMPILE
+
+        for THEME in "${THEMES[@]}"; do
+          if [ -f "web/themes/custom/$THEME/style.css" ]; then
+            yarn esbuild web/themes/custom/$THEME/style.css --minify --sourcemap --allow-overwrite --outfile=web/themes/custom/$THEME/style.css
+          fi
+        done
+        for MODULE in "${MODULES[@]}"; do
+          if [ -f "web/modules/custom/$MODULE/style.css" ]; then
+            yarn esbuild web/modules/custom/$MODULE/style.css --minify --sourcemap --allow-overwrite --outfile=web/modules/custom/$MODULE/style.css
+          fi
         done
   watch:
-    desc: The same as compile, but continues running and watching for changes
-    cmds:
+    desc: As compile, but continues running and watching for changes
+    deps:
       - task: compile
-        vars: {args: "--watch"}
+        vars:
+          args: "--watch"
