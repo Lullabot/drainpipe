@@ -1,0 +1,37 @@
+version: '3'
+
+tasks:
+  compile:
+    desc: Compiles Sass for custom themes and modules
+    summary: |
+      Compiles themes/custom/<theme name>/style.scss in custom themes to
+      themes/custom/<theme name>/style.css and modules/custom/<module name>/style.scss
+      to modules/custom/<module name>/style.css in custom modules.
+
+      Requires sass and esbuild to be installed.
+
+      usage: task sass:compile include_node_modules="modern-normalize another-node-modules-path" themes="my_custom_theme my_other_custom_theme" modules="my_module"
+    cmds:
+      - if [ "{{.DRAINPIPE_SASS}}" == "" ]; then echo "Nothing provided for Sass to compile"; exit 1; fi
+      - |
+        if [ "{{.DRAINPIPE_SASS_INCLUDE_NODE_MODULES}}" != "" ]; then
+          INCLUDES="{{range split " " .DRAINPIPE_SASS_INCLUDE_NODE_MODULES}} -I $(yarn node -e "const path = require('path'); console.log(path.resolve(require.resolve('{{.}}'), '..', '..'));") {{end}}"
+        fi
+        FILES="{{.DRAINPIPE_SASS | catLines}}"
+
+        COMMAND="yarn sass {{.args -}} {{.CLI_ARGS -}} $INCLUDES $FILES"
+        echo "🪠 $COMMAND"
+        eval $COMMAND
+
+        {{range .DRAINPIPE_SASS | splitLines | compact}}
+          FILE="{{ . | splitList ":" | last }}"
+          COMMAND="yarn esbuild $FILE --minify --sourcemap --allow-overwrite --outfile=$FILE"
+          echo "🪠 $COMMAND"
+          eval $COMMAND
+        {{end}}
+  watch:
+    desc: As compile, but continues running and watching for changes
+    deps:
+      - task: compile
+        vars:
+          args: "--watch"

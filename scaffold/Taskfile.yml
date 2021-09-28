@@ -5,10 +5,21 @@ dotenv: ['.env']
 includes:
   deploy: ./vendor/lullabot/drainpipe/tasks/deploy.yml
   drupal: ./vendor/lullabot/drainpipe/tasks/drupal.yml
+  sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
+  javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
+
+vars:
+  DRAINPIPE_SASS_INCLUDE_NODE_MODULES: "modern-normalize"
+  DRAINPIPE_SASS: |
+    web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
+  DRAINPIPE_JAVASCRIPT: |
+    web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
 
 tasks:
-  default:
-    desc: "Example command"
-    cmds:
-      - echo "Hello, world!"
+  assets:
+    desc: "Builds assets such as CSS & JS"
+    deps: [sass:compile, javascript:compile]
+  assets:watch:
+    desc: "Builds assets such as CSS & JS, watches for changes. Does not minify or optimise."
+    deps: [sass:watch, javascript:watch]
