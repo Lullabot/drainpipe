@@ -4,24 +4,54 @@ const argv = yargs(hideBin(process.argv)).argv
 const { build } = require('esbuild');
 const chokidar = require('chokidar');
 const { pnpPlugin } = require('@yarnpkg/esbuild-plugin-pnp');
-const themes = argv.themes;
-const modules = argv.modules;
+const scripts = argv.files.split(' ');
 
-if (!themes.length && !modules.length) {
+
+if (!scripts.length) {
   console.log('No files to compile');
   process.exit(0);
 }
 
-const scripts = themes.split(' ').filter(theme => theme !== '').map(theme => `web/themes/custom/${theme}`)
-  .concat(modules.split(' ').filter(module => module !== '').map(module => `web/modules/custom/${module}`));
+const targets = [];
+const sources = [];
 
-(async() => {
+// Check that every source/target has the same basedir (probably "web") due to
+// being unable to provide separate entryNames.
+// See https://github.com/evanw/esbuild/issues/224
+const baseDirs = [];
+// Check that the output script name matches the same as the input script name,
+// due to the same limitation above. It can have a different file extension,
+// e.g. web/modules/custom/mymodule/script.js:web/modules/custom/mymodule/script.min.js
+const fileExtensions = [];
+scripts.forEach(script => {
+  const [source, target] = script.split(':');
+  sources.push(source);
+  targets.push(target);
+  baseDirs.push(source.split('/')[0]);
+  baseDirs.push(target.split('/')[0]);
+  const sourceFile = source.split('/').pop();
+  const targetFile = target.split('/').pop();
+  fileExtensions.push(targetFile.split('.', 2)[1]);
+});
+const uniqueBaseDir = [...new Set(baseDirs)];
+if (uniqueBaseDir.length !== 1) {
+  console.error('All source and target files must have a root directory in common');
+  process.exit(1);
+}
+const uniqueFileExtension = [ ...new Set(fileExtensions)];
+if (uniqueFileExtension.length !== 1) {
+  console.error('All target files must have the same file extension e.g. "min.js"');
+  process.exit(1);
+}
+
+
+  (async() => {
   try {
     let builder = await build({
       plugins: [pnpPlugin()],
-      entryPoints: scripts.map(script => `${script}/script.js`),
-      outdir: 'web',
-      entryNames: '[dir]/[name].min',
+      entryPoints: scripts.map(script => script.split(':')[0]),
+      outdir: uniqueBaseDir[0],
+      entryNames: `[dir]/[name].${uniqueFileExtension[0]}`,
       bundle: true,
       sourcemap: true,
       minify: !!argv.minify,
@@ -31,8 +61,8 @@ const scripts = themes.split(' ').filter(theme => theme !== '').map(theme => `we
 
     if (!!argv.watch) {
       let ready = false;
-      chokidar.watch(scripts.map(script => `${script}/**/*.js`), {
-        ignored: scripts.map(script => `${script}/**/script.min.js`),
+      chokidar.watch(`${uniqueBaseDir[0]}/**/*.js`, {
+        ignored: targets,
       })
         .on('ready', () => {
           ready = true;

@@ -12,38 +12,23 @@ tasks:
 
       usage: task sass:compile include_node_modules="modern-normalize another-node-modules-path" themes="my_custom_theme my_other_custom_theme" modules="my_module"
     cmds:
-      - if [ "{{.DRAINPIPE_SASS_THEMES}}" == "" ] && [ "{{.DRAINPIPE_SASS_MODULES}}" == "" ]; then echo "No themes or modules provided to compile Sass for"; exit 1; fi
+      - if [ "{{.DRAINPIPE_SASS}}" == "" ]; then echo "Nothing provided for Sass to compile"; exit 1; fi
       - |
-        THEMES=({{.DRAINPIPE_SASS_THEMES}})
-        MODULES=({{.DRAINPIPE_SASS_MODULES}})
-        THEMES_COMPILE=""
-        MODULES_COMPILE=""
         if [ "{{.DRAINPIPE_SASS_INCLUDE_NODE_MODULES}}" != "" ]; then
           INCLUDES="{{range split " " .DRAINPIPE_SASS_INCLUDE_NODE_MODULES}} -I $(yarn node -e "const path = require('path'); console.log(path.resolve(require.resolve('{{.}}'), '..', '..'));") {{end}}"
         fi
-        for THEME in "${THEMES[@]}"; do
-          if [ -f "web/themes/custom/$THEME/style.scss" ]; then
-            THEMES_COMPILE="$THEMES_COMPILE web/themes/custom/$THEME/style.scss:web/themes/custom/$THEME/style.css"
-          fi
-        done
-        for MODULE in "${MODULES[@]}"; do
-          if [ -f "web/modules/custom/$MODULE/style.scss" ]; then
-            MODULES_COMPILE="$MODULES_COMPILE web/modules/custom/$MODULE/style.scss:web/modules/custom/$MODULE/style.css"
-          fi
-        done
+        FILES="{{.DRAINPIPE_SASS | catLines}}"
 
-        yarn sass {{.args}} {{.CLI_ARGS}} $INCLUDES $THEMES_COMPILE $MODULES_COMPILE
+        COMMAND="yarn sass {{.args -}} {{.CLI_ARGS -}} $INCLUDES $FILES"
+        echo "🪠 $COMMAND"
+        eval $COMMAND
 
-        for THEME in "${THEMES[@]}"; do
-          if [ -f "web/themes/custom/$THEME/style.css" ]; then
-            yarn esbuild web/themes/custom/$THEME/style.css --minify --sourcemap --allow-overwrite --outfile=web/themes/custom/$THEME/style.css
-          fi
-        done
-        for MODULE in "${MODULES[@]}"; do
-          if [ -f "web/modules/custom/$MODULE/style.css" ]; then
-            yarn esbuild web/modules/custom/$MODULE/style.css --minify --sourcemap --allow-overwrite --outfile=web/modules/custom/$MODULE/style.css
-          fi
-        done
+        {{range .DRAINPIPE_SASS | splitLines | compact}}
+          FILE="{{ . | splitList ":" | last }}"
+          COMMAND="yarn esbuild $FILE --minify --sourcemap --allow-overwrite --outfile=$FILE"
+          echo "🪠 $COMMAND"
+          eval $COMMAND
+        {{end}}
   watch:
     desc: As compile, but continues running and watching for changes
     deps:
