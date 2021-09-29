@@ -171,6 +171,9 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
     {
         if ($this->environment === 'ddev') {
             $vendor = $this->config->get('vendor-dir');
+            $fs = new Filesystem();
+            $fs->ensureDirectoryExists('web/sites/firefox');
+            $fs->ensureDirectoryExists('web/sites/chrome');
             $scaffoldFiles = [
                 'docker-compose.selenium.yaml' => '.ddev/docker-compose.selenium.yaml',
                 'firefox.settings.php' => 'web/sites/firefox/settings.php',
