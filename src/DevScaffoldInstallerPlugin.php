@@ -173,8 +173,8 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             $vendor = $this->config->get('vendor-dir');
             $scaffoldFiles = [
                 'docker-compose.selenium.yaml' => '.ddev/docker-compose.selenium.yaml',
-                'chrome.settings.php' => 'web/sites/default/chrome.settings.php',
-                'firefox.settings.php' => 'web/sites/default/firefox.settings.php',
+                'firefox.settings.php' => 'web/sites/firefox/settings.php',
+                'chrome.settings.php' => 'web/sites/chrome/settings.php',
                 'sites.php' => 'web/sites/sites.php',
             ];
             foreach ($scaffoldFiles as $scaffoldFile => $destination) {
