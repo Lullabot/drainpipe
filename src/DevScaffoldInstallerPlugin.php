@@ -229,7 +229,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
                 $ddevRestartNeeded = true;
             }
             // Set additional hostnames so chrome and firefox sites can be accessed.
-            $additionalHostname = '*.' . getenv('DDEV_SITENAME') . '.' . getenv('DDEV_TLD');
+            $additionalHostname = '*.' . getenv('DDEV_SITENAME');
             if (!is_array($ddevConfig['additional_hostnames']) || !in_array($additionalHostname, $ddevConfig['additional_hostnames'])) {
                 $this->userCommands[] = "ddev config --additional-hostnames=\"$additionalHostname\"";
                 $ddevRestartNeeded = true;
