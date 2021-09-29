@@ -210,9 +210,11 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             $databaseFirefox = 'mysql -uroot -proot -hdb -e "CREATE DATABASE IF NOT EXISTS firefox; GRANT ALL ON firefox.* TO \'db\'@\'%\';"';
             $databaseChrome = 'mysql -uroot -proot -hdb -e "CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO \'db\'@\'%\';"';
             if (!in_array($databaseFirefox, $postStartExec) || !in_array($databaseChrome, $postStartExec)) {
-                $this->userCommands[] = 'Add the following to .ddev/config.yaml as post-start hooks:';
-                $this->userCommands[] = "exec: $databaseFirefox";
-                $this->userCommands[] = "exec: $databaseChrome";
+                $this->userCommands[] = 'Add the following to .ddev/config.yaml post-start hooks to .ddev/config.yaml:';
+                $this->userCommands[] = "hooks:";
+                $this->userCommands[] = "  post-start:";
+                $this->userCommands[] = "    - exec: $databaseFirefox";
+                $this->userCommands[] = "    - exec: $databaseChrome";
                 $ddevRestartNeeded = true;
             }
             // Make sure Selenium can access the Drupal site.
@@ -221,6 +223,12 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             if (!is_array($ddevConfig['web_environment']) || !in_array($webEnvironmentFirefox, $ddevConfig['web_environment']) || !in_array($webEnvironmentChrome, $ddevConfig['web_environment'])) {
                 $this->userCommands[] = 'Run:';
                 $this->userCommands[] = 'ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"';
+                $ddevRestartNeeded = true;
+            }
+            // Set additional hostnames so chrome and firefox sites can be accessed.
+            $additionalHostname = '*.' . getenv('DDEV_SITENAME');
+            if (!is_array($ddevConfig['additional_hostnames']) || !in_array($additionalHostname, $ddevConfig['additional_hostnames'])) {
+                $this->userCommands[] = "ddev config --additional-hostnames=\"$additionalHostname\"";
                 $ddevRestartNeeded = true;
             }
             if ($ddevRestartNeeded) {
