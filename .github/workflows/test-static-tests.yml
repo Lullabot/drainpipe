@@ -36,3 +36,6 @@ jobs:
         run: |
           cd ../drupal
           ./vendor/bin/task -t Taskfile.dev.yml test:static
+          # Test overriding phpcs.xml
+          cp -v ./vendor/bin/lullabot/drainpipe-dev/config/phpcs.xml .
+          ./vendor/bin/task -t Taskfile.dev.yml test:phpcs

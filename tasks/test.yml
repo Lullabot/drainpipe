@@ -85,14 +85,18 @@ tasks:
         fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
+    summary: |
+      Check your code against Drupal's coding standards. To override the default
+      ruleset, copy vendor/lullabot/drainpipe-dev/config/phpcs.xml to phpcs.xml
+      in the root of your project and edit as needed.
     cmds:
       - |
-        {{ .FUNC_ENSURE_DIRS }}
-      - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
-      - |
+        if [ ! -f phpcs.xml ]; then
+          STANDARD="--standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml"
+        fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpcs --report=junit -q --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}} > test_result/phpcs.xml
+          ./vendor/bin/phpcs --report=junit -q $STANDARD {{.TEST_DIRS}} > test_result/phpcs.xml
         else
           ./vendor/bin/phpcs --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
         fi
