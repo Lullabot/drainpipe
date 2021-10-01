@@ -132,8 +132,6 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      */
     private function printUserCommands() {
         if (!empty($this->userCommands)) {
-            $this->io->warning('You must run the following commands:');
-            $this->io->warning('');
             foreach ($this->userCommands as $userCommand) {
                 $this->io->warning($userCommand);
             }
@@ -172,31 +170,72 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
     private function installDdevSeleniumConfig(): void
     {
         if ($this->environment === 'ddev') {
-            $destination = '.ddev/docker-compose.selenium.yaml';
-            $this->installScaffoldFile('docker-compose.selenium.yaml', $destination);
-            // Make sure Selenium can access the Drupal site.
-            $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
-            if (!is_array($ddevConfig['web_environment']) || !in_array('NIGHTWATCH_DRUPAL_URL=http://web', $ddevConfig['web_environment'])) {
-                $this->userCommands[] = 'ddev config --web-environment="NIGHTWATCH_DRUPAL_URL=http://web"';
-                $this->userCommands[] = 'ddev restart';
-            }
-            // Check if the file has deviated from the scaffold.
             $vendor = $this->config->get('vendor-dir');
-            $filePath = "$vendor/lullabot/drainpipe-dev/scaffold/docker-compose.selenium.yaml";
-            if (sha1_file($filePath) !== sha1_file($destination)) {
-                $this->io->warning(
-                    sprintf('%s has either been customized or requires review.',
-                    $destination
-                    )
-                );
-                $this->io->warning(
-                    sprintf(
-                        'Compare %s with %s and update as needed.',
-                        $destination,
-                        $filePath
-                    )
-                );
-
+            $fs = new Filesystem();
+            $fs->ensureDirectoryExists('web/sites/firefox');
+            $fs->ensureDirectoryExists('web/sites/chrome');
+            $scaffoldFiles = [
+                'docker-compose.selenium.yaml' => '.ddev/docker-compose.selenium.yaml',
+                'firefox.settings.php' => 'web/sites/firefox/settings.php',
+                'chrome.settings.php' => 'web/sites/chrome/settings.php',
+                'sites.php' => 'web/sites/sites.php',
+            ];
+            foreach ($scaffoldFiles as $scaffoldFile => $destination) {
+                $source = "$vendor/lullabot/drainpipe-dev/scaffold/$scaffoldFile";
+                $this->installScaffoldFile($scaffoldFile, $destination);
+                if (sha1_file($source) !== sha1_file($destination)) {
+                    $this->io->warning(
+                        sprintf('%s has either been customized or requires review.',
+                            $destination
+                        )
+                    );
+                    $this->io->warning(
+                        sprintf(
+                            'Compare %s with %s and update as needed.',
+                            $destination,
+                            $source,
+                        )
+                    );
+                }
+            }
+            $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
+            $ddevRestartNeeded = false;
+            // Check Databases will be created for Firefox and Chrome
+            $postStartExec = [];
+            if (!empty($ddevConfig['hooks']['post-start'])) {
+                $postStartExec = array_filter($ddevConfig['hooks']['post-start'], function ($command) {
+                    return !empty($command['exec']);
+                });
+                $postStartExec = array_map(function ($command) {
+                    return $command['exec'];
+                }, $postStartExec);
+            }
+            $databaseFirefox = 'mysql -uroot -proot -hdb -e "CREATE DATABASE IF NOT EXISTS firefox; GRANT ALL ON firefox.* TO \'db\'@\'%\';"';
+            $databaseChrome = 'mysql -uroot -proot -hdb -e "CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO \'db\'@\'%\';"';
+            if (!in_array($databaseFirefox, $postStartExec) || !in_array($databaseChrome, $postStartExec)) {
+                $this->userCommands[] = 'Add the following to .ddev/config.yaml post-start hooks to .ddev/config.yaml:';
+                $this->userCommands[] = "hooks:";
+                $this->userCommands[] = "  post-start:";
+                $this->userCommands[] = "    - exec: $databaseFirefox";
+                $this->userCommands[] = "    - exec: $databaseChrome";
+                $ddevRestartNeeded = true;
+            }
+            // Make sure Selenium can access the Drupal site.
+            $webEnvironmentFirefox = 'NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox';
+            $webEnvironmentChrome = 'NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome';
+            if (!is_array($ddevConfig['web_environment']) || !in_array($webEnvironmentFirefox, $ddevConfig['web_environment']) || !in_array($webEnvironmentChrome, $ddevConfig['web_environment'])) {
+                $this->userCommands[] = 'Run:';
+                $this->userCommands[] = 'ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"';
+                $ddevRestartNeeded = true;
+            }
+            // Set additional hostnames so chrome and firefox sites can be accessed.
+            $additionalHostname = '*.' . getenv('DDEV_SITENAME');
+            if (!is_array($ddevConfig['additional_hostnames']) || !in_array($additionalHostname, $ddevConfig['additional_hostnames'])) {
+                $this->userCommands[] = "ddev config --additional-hostnames=\"$additionalHostname\"";
+                $ddevRestartNeeded = true;
+            }
+            if ($ddevRestartNeeded) {
+                $this->userCommands[] = 'ddev restart';
             }
         }
     }
@@ -217,7 +256,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             $this->installScaffoldFile('example.nightwatch.js', 'test/nightwatch/example.nightwatch.js');
         }
 
-        // Create a new yarn project if there is no existing node dependencies.
+        // Create a new yarn project if package.json doesn't exist
         if (!file_exists('./package.json')) {
             $yarn = new Process(['yarn', 'set', 'version', 'berry']);
             $yarn->run(function($type, $buffer) {
@@ -265,7 +304,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
 
         if (!empty($needToInstall)) {
             if (file_exists('yarn.lock')) {
-                $this->userCommands[] = sprintf('yarn add %s', implode(' ', array_values($dependencies)));
+                $this->userCommands[] = sprintf('yarn add %s --dev', implode(' ', array_values($dependencies)));
                 if ($this->environment === 'ddev') {
                     $this->userCommands[] = 'ddev exec yarn';
                 }

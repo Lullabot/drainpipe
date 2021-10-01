@@ -6,7 +6,11 @@ includes:
   test: ./vendor/lullabot/drainpipe-dev/tasks/test.yml
 
 tasks:
-  default:
-    desc: "Example command"
+  install:firefox:
+    desc: "Runs the site installer for the Firefox container"
     cmds:
-      - echo "Hello, world!"
+      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
+  install:chrome:
+    desc: "Runs the site installer for the Chrome container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
