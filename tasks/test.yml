@@ -1,7 +1,7 @@
 version: '3'
 
 # @todo allow these to be overridden or document them as required folder
-# structures. See also config/phpcs.xml and config/phpstan.neon
+# structures. See also config/phpstan.neon
 vars:
   YAML_DIRS: 'web/**/*.yml'
   TWIG_DIRS: 'web/modules web/profiles web/themes'
@@ -91,14 +91,11 @@ tasks:
       in the root of your project and edit as needed.
     cmds:
       - |
-        if [ ! -f phpcs.xml ]; then
-          STANDARD="--standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml"
-        fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpcs --report=junit -q $STANDARD {{.TEST_DIRS}} > test_result/phpcs.xml
+          ./vendor/bin/phpcs --report=junit -q {{.TEST_DIRS}} > test_result/phpcs.xml
         else
-          ./vendor/bin/phpcs --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
+          ./vendor/bin/phpcs {{.TEST_DIRS}}
         fi
   autofix:
     desc: Runs PHPCBF with Drupal Coding Standards to fix PHPCS violations
