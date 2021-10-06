@@ -14,9 +14,15 @@ tasks:
 
       usage: task sass:compile DRAINPIPE_SASS="web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css web/themes/custom/myothertheme/style.scss:web/themes/custom/myothertheme/style.css"
     cmds:
-      - if [ "{{.DRAINPIPE_SASS}}" == "" ]; then echo "Nothing provided for Sass to compile"; exit 0; fi
       - |
-        FILES="{{- .DRAINPIPE_SASS | catLines | trim -}}"
+        COMMAND="node"
+        if [ -f "yarn.lock" ]; then
+          COMMAND="yarn node"
+        fi
+        $COMMAND vendor/lullabot/drainpipe/config/check-deps-gulp.js
+      - |
+        if [ "{{.DRAINPIPE_SASS}}" == "" ]; then echo "🪠 Nothing provided for Sass to compile"; exit 0; fi
+        FILES="{{if .DRAINPIPE_SASS}}{{.DRAINPIPE_SASS | catLines | trim}}{{end}}"
         COMMAND="./node_modules/.bin/gulp"
         if [ -f "yarn.lock" ]; then
           COMMAND="yarn gulp"

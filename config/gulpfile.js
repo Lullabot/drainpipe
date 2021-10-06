@@ -9,6 +9,7 @@ const deps = [
   'gulp-postcss',
   'gulp-sourcemaps',
   'modern-normalize',
+  'postcss',
   'sass',
   'yargs',
 ].join(' ');
@@ -26,7 +27,7 @@ try {
   const autoprefixer = require('autoprefixer');
   const modernNormalizePath = path.join(path.dirname(require.resolve('modern-normalize')), '..');
 
-  const files = argv.files.split(' ');
+  const files = argv.files ? argv.files.split(' ') : '';
   if (!files.length) {
     console.log('No files to compile');
     process.exit(0);
@@ -82,15 +83,17 @@ catch (error) {
     throw error;
   }
   console.error('🪠 Missing node dependency! Please run:');
-  if (fs.exists(path.join(__dirname, `package-lock.json`))) {
+  if (fs.existsSync(path.join(process.cwd(), `package-lock.json`))) {
     console.error(`npm install ${deps} --save-dev`);
   }
-  else if (fs.exists(path.join(__dirname, 'yarn.lock'))) {
-    console.error(`yarn add ${deps} --dev`);
+  else if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) {
+    console.error(`yarn add ${deps} @yarnpkg/esbuild-plugin-pnp --dev`);
   }
   else {
     console.error('yarn init');
-    console.error(`yarn add ${deps} --dev`);
+    console.error(`yarn add ${deps} @yarnpkg/esbuild-plugin-pnp --dev`);
   }
   process.exit(1);
 }
+
+module.exports = deps;

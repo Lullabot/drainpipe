@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 let yarn2 = false;
 try {
   const { resolveToUnqualified } = require('pnpapi');
@@ -117,10 +118,10 @@ catch (error) {
     throw error;
   }
   console.error('🪠 Missing node dependency! Please run:');
-  if (fs.exists(path.join(__dirname, `package-lock.json`))) {
+  if (fs.existsSync(path.join(process.cwd(), `package-lock.json`))) {
     console.error(`npm install ${deps} --save-dev`);
   }
-  else if (fs.exists(path.join(__dirname, 'yarn.lock'))) {
+  else if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) {
     console.error(`yarn add ${deps} @yarnpkg/esbuild-plugin-pnp --dev`);
   }
   else {

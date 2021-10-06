@@ -9,6 +9,9 @@ includes:
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
 
+output: prefixed
+silent: true
+
 vars:
 #  DRAINPIPE_SASS: |
 #    web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
