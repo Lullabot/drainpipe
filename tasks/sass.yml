@@ -8,30 +8,23 @@ tasks:
       themes/custom/<theme name>/style.css and modules/custom/<module name>/style.scss
       to modules/custom/<module name>/style.css in custom modules.
 
-      Requires sass and esbuild to be installed.
+      Includes modern-normalize, autoprefixer, and cssnano. To customise browser
+      support for autoprefixer user "browserslist" in package.json (see
+      https://github.com/postcss/autoprefixer#browsers)
 
-      usage: task sass:compile include_node_modules="modern-normalize another-node-modules-path" themes="my_custom_theme my_other_custom_theme" modules="my_module"
+      usage: task sass:compile DRAINPIPE_SASS="web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css web/themes/custom/myothertheme/style.scss:web/themes/custom/myothertheme/style.css"
     cmds:
       - if [ "{{.DRAINPIPE_SASS}}" == "" ]; then echo "Nothing provided for Sass to compile"; exit 1; fi
       - |
-        if [ "{{.DRAINPIPE_SASS_INCLUDE_NODE_MODULES}}" != "" ]; then
-          INCLUDES="{{range split " " .DRAINPIPE_SASS_INCLUDE_NODE_MODULES}} -I $(yarn node -e "const path = require('path'); console.log(path.resolve(require.resolve('{{.}}'), '..', '..'));") {{end}}"
+        FILES="{{- .DRAINPIPE_SASS | catLines | trim -}}"
+        COMMAND="./node_modules/.bin/gulp"
+        if [ -f "yarn.lock" ]; then
+          COMMAND="yarn gulp"
         fi
-        FILES="{{.DRAINPIPE_SASS | catLines}}"
-
-        COMMAND="yarn sass {{.args -}} {{.CLI_ARGS -}} $INCLUDES $FILES"
-        echo "🪠 $COMMAND"
-        eval $COMMAND
-
-        {{range .DRAINPIPE_SASS | splitLines | compact}}
-          FILE="{{ . | splitList ":" | last }}"
-          COMMAND="yarn esbuild $FILE --minify --sourcemap --allow-overwrite --outfile=$FILE"
-          echo "🪠 $COMMAND"
-          eval $COMMAND
-        {{end}}
+        $COMMAND --gulpfile vendor/lullabot/drainpipe/config/gulpfile.js --cwd="./" sass{{- .args}} --files="$FILES"
   watch:
     desc: As compile, but continues running and watching for changes
     deps:
       - task: compile
         vars:
-          args: "--watch"
+          args: ":watch"

@@ -10,7 +10,6 @@ includes:
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
 
 vars:
-  DRAINPIPE_SASS_INCLUDE_NODE_MODULES: "modern-normalize"
   DRAINPIPE_SASS: |
     web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
   DRAINPIPE_JAVASCRIPT: |
@@ -19,7 +18,10 @@ vars:
 tasks:
   assets:
     desc: "Builds assets such as CSS & JS"
-    deps: [sass:compile, javascript:compile]
+    cmds:
+      - if [ -f "yarn.lock" ]; then yarn; else npm install; fi
+      - task: javascript:compile
+      - task: sass:compile
   assets:watch:
-    desc: "Builds assets such as CSS & JS, watches for changes. Does not minify or optimise."
+    desc: "Builds assets such as CSS & JS, and watches them for changes"
     deps: [sass:watch, javascript:watch]
