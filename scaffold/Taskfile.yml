@@ -10,10 +10,10 @@ includes:
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
 
 vars:
-  DRAINPIPE_SASS: |
-    web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
-  DRAINPIPE_JAVASCRIPT: |
-    web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
+#  DRAINPIPE_SASS: |
+#    web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
+#  DRAINPIPE_JAVASCRIPT: |
+#    web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
 
 tasks:
   assets:

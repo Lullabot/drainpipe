@@ -13,12 +13,13 @@ tasks:
 
       usage: task javascript:compile DRAINPIPE_JAVASCRIPT="web/themes/custom/script.js:web/themes/custom/script.min.js"
     cmds:
+      - if [ "{{- .DRAINPIPE_JAVASCRIPT -}}" == "" ]; then echo "Nothing provided for esbuild to compile"; exit 0; fi
       - |
         ARGS="--minify"
         if [ "{{- .args -}}" != "" ]; then
           ARGS="{{- .args -}}"
         fi
-        FILES="{{.DRAINPIPE_JAVASCRIPT | catLines | trim}}"
+        FILES="{{- .DRAINPIPE_JAVASCRIPT | catLines | trim -}}"
         COMMAND="yarn node ./vendor/lullabot/drainpipe/config/esbuild.js --files=\"$FILES\" $ARGS"
         echo "🪠 $COMMAND"
         eval $COMMAND

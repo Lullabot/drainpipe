@@ -1,3 +1,4 @@
+const fs = require('fs');
 let yarn2 = false;
 try {
   const { resolveToUnqualified } = require('pnpapi');
@@ -15,7 +16,6 @@ const deps = [
 ].join(' ');
 
 try {
-  const fs = require('fs');
   const yargs = require('yargs');
   const { hideBin } = require('yargs/helpers')
   const argv = yargs(hideBin(process.argv)).argv
