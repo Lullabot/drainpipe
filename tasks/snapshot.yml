@@ -22,7 +22,7 @@ tasks:
       .git, .gitignore, files listed in .drainpipeignore, and .drainpipeignore
       itself are not added. .drainpipeignore uses the same format as gitignore.
 
-        usage: task snapshot:directory o=/tmp/release
+        usage: task snapshot:directory directory=/tmp/release
 
         directory=<file>   Write the archive to <file>
     cmds:
