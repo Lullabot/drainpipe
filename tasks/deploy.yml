@@ -20,12 +20,12 @@ tasks:
       - if [ "" == "{{.message}}" ]; then echo "Please provide a commit message" && exit 1; fi
       - |
         TMP_DIR=$(mktemp -d)
-        git clone --depth 1 --branch {{.branch}} {{.remote}} $TMP_DIR || true
+        (git clone --depth 1 --branch {{.branch}} {{.remote}} $TMP_DIR && cd $TMP_DIR) || true
         if [[ ! -d "$TMP_DIR/.git" ]]; then
           git clone --depth 1 {{.remote}} $TMP_DIR
+          cd $TMP_DIR
           git checkout -b {{.branch}}
         fi
-        cd $TMP_DIR
         mv $TMP_DIR/.git {{.directory}}
         cd {{.directory}}
         git checkout -B {{.branch}}
