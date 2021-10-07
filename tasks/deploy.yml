@@ -13,6 +13,7 @@ tasks:
       branch=<branch>         Name of the branch to push to e.g. "main"
       remote=<remote>         Git remote to push to
       message=<message>       Commit message
+      push=true               (optional) Push to the remote repository
     cmds:
       - if [ ! -d "{{.directory}}" ] || [ "" == "{{.directory}}" ]; then echo "Please provide a path to a directory to deploy" && exit 1; fi
       - if [ "" == "{{.branch}}" ]; then echo "Please provide a branch to deploy to" && exit 1; fi
@@ -32,4 +33,6 @@ tasks:
         git add -A
         git commit -m "{{.message}}" --allow-empty
         git push origin {{.branch}}
-
+        if [ "" == "{{.push}}" -o "true" == "{{.push}}" ]; then
+          git push origin {{.branch}}
+        fi
