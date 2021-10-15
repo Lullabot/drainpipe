@@ -1,7 +1,7 @@
 {
   "name": "@lullabot/drainpipe-javascript",
   "packageManager": "yarn@3.0.2",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "dependencies": {
     "chokidar": "^3.5.2",
     "esbuild": "^0.13.6",
