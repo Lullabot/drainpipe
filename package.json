@@ -1,0 +1,10 @@
+{
+  "name": "@lullabot/drainpipe",
+  "packageManager": "yarn@3.0.2",
+  "workspaces": [
+    "metapackages/*"
+  ],
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}

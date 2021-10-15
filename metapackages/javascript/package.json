@@ -1,0 +1,17 @@
+{
+  "name": "@lullabot/drainpipe-javascript",
+  "packageManager": "yarn@3.0.2",
+  "dependencies": {
+    "chokidar": "^3.5.2",
+    "esbuild": "^0.13.6",
+    "yargs": "^17.2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/lullabot/drainpipe.git",
+    "directory": "metapackages/javascript"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  }
+}
