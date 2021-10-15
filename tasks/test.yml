@@ -60,7 +60,7 @@ tasks:
     desc: Verifies that exported config matches the config in Drupal
     # @todo JUnit output
     cmds:
-      - if [ $(./vendor/bin/drush config:status --format=string | wc -w) -gt 0 ]; then echo "Config export does not match"; drush config:status; exit 1; fi
+      - if [ $(./vendor/bin/drush config:status --format=string | wc -w) -gt 0 ]; then echo "Config export does not match"; ./vendor/bin/drush config:status; exit 1; fi
   phpstan:
     dec: Runs PHPStan with mglaman/phpstan-drupal
     cmds:
