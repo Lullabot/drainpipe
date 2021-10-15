@@ -1,18 +1,5 @@
 const path = require('path');
 const fs = require('fs');
-// So they can be easily printed to the user.
-const deps = [
-  'autoprefixer',
-  'cssnano',
-  'gulp',
-  'gulp-sass',
-  'gulp-postcss',
-  'gulp-sourcemaps',
-  'modern-normalize',
-  'postcss',
-  'sass',
-  'yargs',
-].join(' ');
 
 try {
   const yargs = require('yargs');
@@ -83,15 +70,17 @@ catch (error) {
     throw error;
   }
   console.error('🪠 Missing node dependency! Please run:');
-  if (fs.existsSync(path.join(process.cwd(), `package-lock.json`))) {
-    console.error(`npm install ${deps} --save-dev`);
+  console.error('echo \'@lullabot:registry=https://npm.pkg.github.com\' >> .npmrc');
+  if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) {
+    console.error(`yarn add @lullabot/drainpipe-sass --dev`);
   }
-  else if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) {
-    console.error(`yarn add ${deps} @yarnpkg/esbuild-plugin-pnp --dev`);
+  else if (fs.existsSync(path.join(process.cwd(), `package-lock.json`))) {
+    console.error(`npm install @lullabot/drainpipe-sass --save-dev`);
   }
   else {
+    console.error('yarn set version berry');
     console.error('yarn init');
-    console.error(`yarn add ${deps} @yarnpkg/esbuild-plugin-pnp --dev`);
+    console.error(`yarn add @lullabot/drainpipe-sass --dev`);
   }
   process.exit(1);
 }

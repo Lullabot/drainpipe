@@ -9,13 +9,6 @@ catch (error) {
   // Nothing
 }
 
-// So they can be easily printed to the user.
-const deps = [
-  'chokidar',
-  'esbuild',
-  'yargs',
-].join(' ');
-
 try {
   const yargs = require('yargs');
   const { hideBin } = require('yargs/helpers')
@@ -23,7 +16,6 @@ try {
   const { build } = require('esbuild');
   const chokidar = require('chokidar');
   const scripts = argv.files.split(' ');
-
 
   if (!scripts.length) {
     console.log('No files to compile');
@@ -118,15 +110,17 @@ catch (error) {
     throw error;
   }
   console.error('🪠 Missing node dependency! Please run:');
-  if (fs.existsSync(path.join(process.cwd(), `package-lock.json`))) {
-    console.error(`npm install ${deps} --save-dev`);
+  console.error('echo \'@lullabot:registry=https://npm.pkg.github.com\' >> .npmrc');
+  if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) {
+    console.error(`yarn add @lullabot/drainpipe-javascript --dev`);
   }
-  else if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) {
-    console.error(`yarn add ${deps} @yarnpkg/esbuild-plugin-pnp --dev`);
+  else if (fs.existsSync(path.join(process.cwd(), `package-lock.json`))) {
+    console.error(`npm install @lullabot/drainpipe-javascript --save-dev`);
   }
   else {
+    console.error('yarn set version berry');
     console.error('yarn init');
-    console.error(`yarn add ${deps} @yarnpkg/esbuild-plugin-pnp --dev`);
+    console.error(`yarn add @lullabot/drainpipe-javascript --dev`);
   }
   process.exit(1);
 }

@@ -19,7 +19,6 @@ tasks:
         if [ -f "yarn.lock" ]; then
           COMMAND="yarn node"
         fi
-        $COMMAND vendor/lullabot/drainpipe/config/check-deps-gulp.js
       - |
         if [ "{{.DRAINPIPE_SASS}}" == "" ]; then echo "🪠 Nothing provided for Sass to compile"; exit 0; fi
         FILES="{{if .DRAINPIPE_SASS}}{{.DRAINPIPE_SASS | catLines | trim}}{{end}}"

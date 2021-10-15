@@ -3,6 +3,7 @@
   "packageManager": "yarn@3.0.2",
   "version": "0.1.0",
   "dependencies": {
+    "@yarnpkg/esbuild-plugin-pnp": "^2.0.0-rc.2",
     "chokidar": "^3.5.2",
     "esbuild": "^0.13.6",
     "yargs": "^17.2.1"
