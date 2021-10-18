@@ -60,7 +60,7 @@ try {
       const plugins = [];
       if (yarn2) {
         const { pnpPlugin } = require('@yarnpkg/esbuild-plugin-pnp');
-        plugins.push(pnpPlugin);
+        plugins.push(pnpPlugin());
       }
       let builder = await build({
         plugins: [plugins],
