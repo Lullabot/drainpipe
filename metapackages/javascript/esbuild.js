@@ -57,13 +57,13 @@ try {
 
   (async () => {
     try {
-      const plugins = [];
+      let plugins = [];
       if (yarn2) {
         const { pnpPlugin } = require('@yarnpkg/esbuild-plugin-pnp');
-        plugins.push(pnpPlugin());
+        plugins = [pnpPlugin()]
       }
       let builder = await build({
-        plugins: [plugins],
+        plugins,
         entryPoints: scripts.map(script => script.split(':')[0]),
         outdir: uniqueBaseDir[0],
         entryNames: `[dir]/[name].${uniqueFileExtension[0]}`,
