@@ -3,9 +3,7 @@
   "packageManager": "yarn@3.0.2",
   "version": "0.5.0",
   "main": "esbuild.js",
-  "bin": {
-    "drainpipe-javascript": "./esbuild.js"
-  },
+  "bin": "./esbuild.js",
   "dependencies": {
     "@yarnpkg/esbuild-plugin-pnp": "^2.0.0-rc.2",
     "chokidar": "^3.5.2",
