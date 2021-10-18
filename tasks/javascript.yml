@@ -20,11 +20,11 @@ tasks:
           ARGS="{{- .args -}}"
         fi
         FILES="{{if .DRAINPIPE_JAVASCRIPT}}{{.DRAINPIPE_JAVASCRIPT | catLines | trim}}{{end}}"
-        COMMAND="node"
+        COMMAND="./node_modules/.bin/drainpipe-javascript"
         if [ -f "yarn.lock" ]; then
-          COMMAND="yarn node"
+          COMMAND="yarn drainpipe-javascript"
         fi
-        $COMMAND ./vendor/lullabot/drainpipe/config/esbuild.js --files="$FILES" $ARGS
+        $COMMAND drainpipe-javascript --files="$FILES" $ARGS
   watch:
     desc: As compile, but continues running and watching for changes
     deps:
