@@ -2,6 +2,7 @@
   "name": "@lullabot/drainpipe-sass",
   "packageManager": "yarn@3.0.2",
   "version": "0.1.0",
+  "main": "",
   "dependencies": {
     "autoprefixer": "^10.3.7",
     "cssnano": "^5.0.8",
