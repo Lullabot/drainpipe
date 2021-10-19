@@ -20,5 +20,8 @@
     "url": "ssh://git@github.com/lullabot/drainpipe.git",
     "directory": "metapackages/sass"
   },
-  "gitHead": "1cf00bf7085ae6f44eb3fbc80754171b5690d4bc"
+  "publishConfig":{
+    "access": "public"
+  },
+  "gitHead": "bdc84f00e99800fcdf3a380007bc06f50c48067d"
 }
