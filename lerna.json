@@ -9,7 +9,8 @@
     "publish": {
       "conventionalCommits": true,
       "message": "chore(release): publish",
-      "allowBranch": "justafish/sass-metapackage"
+      "allowBranch": "justafish/sass-metapackage",
+      "registry": "https://www.npmjs.com/"
     }
   }
 }
