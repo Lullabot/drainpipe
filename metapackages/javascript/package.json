@@ -1,11 +1,8 @@
 {
   "name": "@lullabot/drainpipe-javascript",
   "packageManager": "yarn@3.0.2",
-  "version": "0.5.0",
-  "main": "esbuild.js",
-  "bin": {
-    "drainpipe-javascript": "./esbuild.js"
-  },
+  "version": "0.0.1",
+  "bin": "./esbuild.js",
   "dependencies": {
     "@yarnpkg/esbuild-plugin-pnp": "^2.0.0-rc.2",
     "chokidar": "^3.5.2",
@@ -18,6 +15,7 @@
     "directory": "metapackages/javascript"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  }
+    "access": "public"
+  },
+  "gitHead": "bdc84f00e99800fcdf3a380007bc06f50c48067d"
 }

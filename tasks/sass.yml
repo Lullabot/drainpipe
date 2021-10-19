@@ -22,14 +22,14 @@ tasks:
       - |
         if [ "{{.DRAINPIPE_SASS}}" == "" ]; then echo "🪠 Nothing provided for Sass to compile"; exit 0; fi
         FILES="{{if .DRAINPIPE_SASS}}{{.DRAINPIPE_SASS | catLines | trim}}{{end}}"
-        COMMAND="./node_modules/.bin/gulp"
+        COMMAND="./node_modules/.bin/drainpipe-sass"
         if [ -f "yarn.lock" ]; then
-          COMMAND="yarn gulp"
+          COMMAND="yarn drainpipe-sass"
         fi
-        $COMMAND --gulpfile vendor/lullabot/drainpipe/metapackages/sass/gulpfile.js --cwd="./" sass{{- .args}} --files="$FILES"
+        $COMMAND --files="$FILES"{{.args}}
   watch:
     desc: As compile, but continues running and watching for changes
     deps:
       - task: compile
         vars:
-          args: ":watch"
+          args: " --watch"
