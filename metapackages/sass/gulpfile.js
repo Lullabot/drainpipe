@@ -26,6 +26,9 @@ const srcs = files
     return prev;
   }, {});
 
+console.log('🪠 Autoprefixer info:');
+console.log(autoprefixer.info());
+
 // Compile once with dart Sass directly to get a list of includes/partials.
 const includes = Object.keys(srcs)
   .map(file => {
@@ -38,8 +41,6 @@ const includes = Object.keys(srcs)
   .reduce((prev, curr) => prev.concat(curr), []);
 
 task('sass', function() {
-  console.log('🪠 Autoprefixer info:');
-  console.log(autoprefixer.info());
   return src(Object.keys(srcs))
     .pipe(sourcemaps.init())
     .pipe(sass.sync({
