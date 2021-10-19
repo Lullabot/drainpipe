@@ -1,8 +1,7 @@
 {
   "name": "@lullabot/drainpipe-javascript",
   "packageManager": "yarn@3.0.2",
-  "version": "0.6.0",
-  "main": "esbuild.js",
+  "version": "0.0.0",
   "bin": "./esbuild.js",
   "dependencies": {
     "@yarnpkg/esbuild-plugin-pnp": "^2.0.0-rc.2",
@@ -14,8 +13,5 @@
     "type": "git",
     "url": "ssh://git@github.com/lullabot/drainpipe.git",
     "directory": "metapackages/javascript"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
   }
 }

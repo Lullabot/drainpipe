@@ -1,7 +1,7 @@
 {
   "name": "@lullabot/drainpipe-sass",
   "packageManager": "yarn@3.0.2",
-  "version": "0.8.0",
+  "version": "0.0.0",
   "bin": "./gulp.js",
   "dependencies": {
     "autoprefixer": "^10.3.7",
@@ -19,9 +19,5 @@
     "type": "git",
     "url": "ssh://git@github.com/lullabot/drainpipe.git",
     "directory": "metapackages/sass"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
-  "gitHead": "13432c223f18bc0267accbfa88bbb00ba63d1710"
+  }
 }
