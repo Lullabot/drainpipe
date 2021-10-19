@@ -11,6 +11,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+## [0.0.1](https://github.com/lullabot/drainpipe/compare/@lullabot/drainpipe-javascript@0.0.2...@lullabot/drainpipe-javascript@0.0.1) (2021-10-19)
+
+**Note:** Version bump only for package @lullabot/drainpipe-javascript
+
+
+
+
+
 ## [0.0.2](https://github.com/lullabot/drainpipe/compare/@lullabot/drainpipe-javascript@0.0.1...@lullabot/drainpipe-javascript@0.0.2) (2021-10-19)
 
 **Note:** Version bump only for package @lullabot/drainpipe-javascript
