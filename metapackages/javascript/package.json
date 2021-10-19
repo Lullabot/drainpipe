@@ -13,5 +13,6 @@
     "type": "git",
     "url": "ssh://git@github.com/lullabot/drainpipe.git",
     "directory": "metapackages/javascript"
-  }
+  },
+  "gitHead": "eeebcc5e8d312208528331f92f3c99e5b0b3d855"
 }
