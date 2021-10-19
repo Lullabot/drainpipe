@@ -1005,7 +1005,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["autoprefixer", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.3.7"],
             ["cssnano", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:5.0.8"],
             ["gulp", "npm:4.0.2"],
-            ["gulp-cli", "npm:2.3.0"],
             ["gulp-postcss", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:9.0.1"],
             ["gulp-sass", "npm:5.0.0"],
             ["gulp-sourcemaps", "npm:3.0.0"],

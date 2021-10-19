@@ -1,88 +1,67 @@
 const path = require('path');
 const fs = require('fs');
+const yargs = require('yargs');
+const { hideBin } = require('yargs/helpers')
+const { src, dest, task, watch, series } = require('gulp');
+const sass = require('gulp-sass')(require('sass'));
+const dartSass = require('sass');
+const postcss = require('gulp-postcss');
+const sourcemaps = require('gulp-sourcemaps');
+const cssnano = require('cssnano');
+const autoprefixer = require('autoprefixer');
 
-try {
-  const yargs = require('yargs');
-  const { hideBin } = require('yargs/helpers')
-  const argv = yargs(hideBin(process.argv)).argv
-  const { src, dest, task, watch, series } = require('gulp');
-  const sass = require('gulp-sass')(require('sass'));
-  const dartSass = require('sass');
-  const postcss = require('gulp-postcss');
-  const sourcemaps = require('gulp-sourcemaps');
-  const cssnano = require('cssnano');
-  const autoprefixer = require('autoprefixer');
-  const modernNormalizePath = path.join(path.dirname(require.resolve('modern-normalize')), '..');
+const argv = yargs(hideBin(process.argv)).argv
+const modernNormalizePath = path.join(path.dirname(require.resolve('modern-normalize')), '..');
 
-  const files = argv.files ? argv.files.split(' ') : '';
-  if (!files.length) {
-    console.log('No files to compile');
-    process.exit(0);
-  }
+const files = argv.files ? argv.files.split(' ') : '';
+if (!files.length) {
+  console.log('No files to compile');
+  process.exit(0);
+}
 
-  const srcs = files
-    .map(file => file.split(':', 2).map(file => path.resolve(file)))
-    .reduce((prev, curr) => {
-      prev[curr.shift()] = curr.shift();
-      return prev;
-    }, {});
+const srcs = files
+  .map(file => file.split(':', 2).map(file => path.resolve(file)))
+  .reduce((prev, curr) => {
+    prev[curr.shift()] = curr.shift();
+    return prev;
+  }, {});
 
+// Compile once with dart Sass directly to get a list of includes/partials.
+const includes = Object.keys(srcs)
+  .map(file => {
+    const result = dartSass.renderSync({
+      file: file,
+      includePaths: [modernNormalizePath],
+    });
+    return result.stats.includedFiles.filter(file => typeof file === "string");
+  })
+  .reduce((prev, curr) => prev.concat(curr), []);
+
+task('sass', function() {
   console.log('🪠 Autoprefixer info:');
   console.log(autoprefixer.info());
+  return src(Object.keys(srcs))
+    .pipe(sourcemaps.init())
+    .pipe(sass.sync({
+      outputStyle: 'compressed',
+      includePaths: [modernNormalizePath],
+    }).on('error', sass.logError))
+    .pipe(postcss([
+      autoprefixer(),
+      cssnano(),
+    ]))
+    .pipe(sourcemaps.write('./'))
+    .pipe(dest((file) => {
+      const originalFile = file.history.shift();
+      const destFile = path.dirname(srcs[originalFile]);
+      console.log(`🪠 Writing ${path.relative(process.cwd(), file.path)}`);
+      return destFile;
+    }));
+});
 
-  // Compile once with dart Sass directly to get a list of includes/partials.
-  const includes = Object.keys(srcs)
-    .map(file => {
-      const result = dartSass.renderSync({
-        file: file,
-        includePaths: [modernNormalizePath],
-      });
-      return result.stats.includedFiles.filter(file => typeof file === "string");
-    })
-    .reduce((prev, curr) => prev.concat(curr), []);
+task('sass:watch', function() {
+  console.log('🪠 Watching for changes');
+  watch(includes, series('sass'));
+});
 
-  task('sass', function() {
-    return src(Object.keys(srcs))
-      .pipe(sourcemaps.init())
-      .pipe(sass.sync({
-        outputStyle: 'compressed',
-        includePaths: [modernNormalizePath],
-      }).on('error', sass.logError))
-      .pipe(postcss([
-        autoprefixer(),
-        cssnano(),
-      ]))
-      .pipe(sourcemaps.write('./'))
-      .pipe(dest((file) => {
-        const originalFile = file.history.shift();
-        const destFile = path.dirname(srcs[originalFile]);
-        console.log(`🪠 Writing ${path.relative(process.cwd(), file.path)}`);
-        return destFile;
-      }));
-  });
-
-  task('sass:watch', function() {
-    watch(includes, series('sass'));
-  });
-}
-catch (error) {
-  if (error.code !== 'MODULE_NOT_FOUND') {
-    throw error;
-  }
-  console.error('🪠 Missing node dependency! Please run:');
-  console.error('echo \'@lullabot:registry=https://npm.pkg.github.com\' >> .npmrc');
-  if (fs.existsSync(path.join(process.cwd(), 'yarn.lock'))) {
-    console.error(`yarn add @lullabot/drainpipe-sass --dev`);
-  }
-  else if (fs.existsSync(path.join(process.cwd(), `package-lock.json`))) {
-    console.error(`npm install @lullabot/drainpipe-sass --save-dev`);
-  }
-  else {
-    console.error('yarn set version berry');
-    console.error('yarn init');
-    console.error(`yarn add @lullabot/drainpipe-sass --dev`);
-  }
-  process.exit(1);
-}
-
-module.exports = deps;
+series(['sass']);

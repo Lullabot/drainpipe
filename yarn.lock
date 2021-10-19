@@ -878,7 +878,6 @@ __metadata:
     autoprefixer: ^10.3.7
     cssnano: ^5.0.8
     gulp: ^4.0.2
-    gulp-cli: ^2.3.0
     gulp-postcss: ^9.0.1
     gulp-sass: ^5.0.0
     gulp-sourcemaps: ^3.0.0
@@ -887,7 +886,7 @@ __metadata:
     sass: ^1.43.2
     yargs: ^17.2.1
   bin:
-    drainpipe-sass: ./bin/gulp.js
+    drainpipe-sass: ./gulp.js
   languageName: unknown
   linkType: soft
 
@@ -4041,7 +4040,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"gulp-cli@npm:^2.2.0, gulp-cli@npm:^2.3.0":
+"gulp-cli@npm:^2.2.0":
   version: 2.3.0
   resolution: "gulp-cli@npm:2.3.0"
   dependencies:

@@ -7,7 +7,6 @@
     "autoprefixer": "^10.3.7",
     "cssnano": "^5.0.8",
     "gulp": "^4.0.2",
-    "gulp-cli": "^2.3.0",
     "gulp-postcss": "^9.0.1",
     "gulp-sass": "^5.0.0",
     "gulp-sourcemaps": "^3.0.0",
@@ -23,5 +22,6 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
-  }
+  },
+  "gitHead": "13432c223f18bc0267accbfa88bbb00ba63d1710"
 }
