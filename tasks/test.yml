@@ -5,6 +5,9 @@ version: '3'
 vars:
   YAML_DIRS: 'web/**/*.yml'
   TWIG_DIRS: 'web/modules web/profiles web/themes'
+  # These directories are configured in phpcs.xml. However, phpcs will fail if
+  # those directories do not exist, so we create them with the assumption that
+  # every Drupal site will eventually have these directories.
   TEST_DIRS: 'web/modules/custom web/themes/custom web/sites'
   NIGHTWATCH_TEST_DIRS: 'test'
   FUNC_ENSURE_DIRS: |
@@ -91,6 +94,7 @@ tasks:
       in the root of your project and edit as needed.
     cmds:
       - |
+        {{ .FUNC_ENSURE_DIRS }}
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
           ./vendor/bin/phpcs --report=junit -q {{.TEST_DIRS}} > test_result/phpcs.xml
