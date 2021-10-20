@@ -104,6 +104,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
         $this->installDevTaskfile();
         $this->installDdevSeleniumConfig();
         $this->installNightwatchConfig();
+        $this->installPhpCsConfig();
         $this->printUserCommands();
     }
 
