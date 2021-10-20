@@ -97,9 +97,9 @@ tasks:
         {{ .FUNC_ENSURE_DIRS }}
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpcs --report=junit -q {{.TEST_DIRS}} > test_result/phpcs.xml
+          ./vendor/bin/phpcs --report=junit -q > test_result/phpcs.xml
         else
-          ./vendor/bin/phpcs {{.TEST_DIRS}}
+          ./vendor/bin/phpcs
         fi
   autofix:
     desc: Runs PHPCBF with Drupal Coding Standards to fix PHPCS violations
