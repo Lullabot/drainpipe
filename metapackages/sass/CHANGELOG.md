@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.1.0 (2021-10-25)
+
+
+### Features
+
+* When running watch mode for Sass, don't use compressed style nor cssnano ([#47](https://github.com/lullabot/drainpipe/issues/47)) ([bb054df](https://github.com/lullabot/drainpipe/commit/bb054dfd9dcc413838066350e4df475f8a2611da))
+
+
+
+
+
 ## 0.0.1 (2021-10-19)
 
 **Note:** Version bump only for package @lullabot/drainpipe-sass
