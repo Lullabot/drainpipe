@@ -60,9 +60,28 @@ task('sass', function() {
     }));
 });
 
+task('development', function() {
+  return src(Object.keys(srcs))
+    .pipe(sourcemaps.init())
+    .pipe(sass.sync({
+      outputStyle: 'expanded',
+      includePaths: [modernNormalizePath],
+    }).on('error', sass.logError))
+    .pipe(postcss([
+      autoprefixer(),
+    ]))
+    .pipe(sourcemaps.write('./'))
+    .pipe(dest((file) => {
+      const originalFile = file.history.shift();
+      const destFile = path.dirname(srcs[originalFile]);
+      console.log(`🪠 Writing ${path.relative(process.cwd(), file.path)}`);
+      return destFile;
+    }));
+});
+
 task('sass:watch', function() {
   console.log('🪠 Watching for changes');
-  watch(includes, series('sass'));
+  watch(includes, series('development'));
 });
 
 series(['sass']);
