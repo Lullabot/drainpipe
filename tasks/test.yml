@@ -1,10 +1,13 @@
 version: '3'
 
 # @todo allow these to be overridden or document them as required folder
-# structures. See also config/phpcs.xml and config/phpstan.neon
+# structures. See also config/phpstan.neon
 vars:
   YAML_DIRS: 'web/**/*.yml'
   TWIG_DIRS: 'web/modules web/profiles web/themes'
+  # These directories are configured in phpcs.xml. However, phpcs will fail if
+  # those directories do not exist, so we create them with the assumption that
+  # every Drupal site will eventually have these directories.
   TEST_DIRS: 'web/modules/custom web/themes/custom web/sites'
   NIGHTWATCH_TEST_DIRS: 'test'
   FUNC_ENSURE_DIRS: |
@@ -85,16 +88,18 @@ tasks:
         fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
+    summary: |
+      Check your code against Drupal's coding standards. To override the default
+      ruleset, copy vendor/lullabot/drainpipe-dev/config/phpcs.xml to phpcs.xml
+      in the root of your project and edit as needed.
     cmds:
       - |
         {{ .FUNC_ENSURE_DIRS }}
-      - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
-      - |
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpcs --report=junit -q --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}} > test_result/phpcs.xml
+          ./vendor/bin/phpcs --report=junit -q > test_result/phpcs.xml
         else
-          ./vendor/bin/phpcs --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
+          ./vendor/bin/phpcs
         fi
   autofix:
     desc: Runs PHPCBF with Drupal Coding Standards to fix PHPCS violations

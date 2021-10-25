@@ -8,13 +8,18 @@
     <arg value="p"/>
 
     <!-- Include common Drupal standards. -->
-    <rule ref="Drupal"/>
-    <rule ref="DrupalPractice"/>
+    <rule ref="./vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml"/>
+    <rule ref="./vendor/drupal/coder/coder_sniffer/DrupalPractice/ruleset.xml"/>
+
 
     <!-- Apply same exclusions for T function applied by core. -->
     <rule ref="Drupal.Semantics.FunctionT">
         <exclude name="Drupal.Semantics.FunctionT.NotLiteralString"/>
     </rule>
+
+    <file>web/modules/custom</file>
+    <file>web/themes/custom</file>
+    <file>web/sites</file>
 
     <!-- Exclude JS and CSS, this is covered by yarn scripts -->
     <exclude-pattern>**/*.js</exclude-pattern>

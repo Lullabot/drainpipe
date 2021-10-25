@@ -90,6 +90,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
         $this->installDevTaskfile();
         $this->installDdevSeleniumConfig();
         $this->installNightwatchConfig();
+        $this->installPhpCsConfig();
         $this->printUserCommands();
     }
 
@@ -103,6 +104,7 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
         $this->installDevTaskfile();
         $this->installDdevSeleniumConfig();
         $this->installNightwatchConfig();
+        $this->installPhpCsConfig();
         $this->printUserCommands();
     }
 
@@ -322,5 +324,12 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
             }
         }
 
+    }
+
+    private function installPhpCsConfig(): void
+    {
+        if (!file_exists('./phpcs.xml')) {
+            $this->installScaffoldFile('phpcs.xml', 'phpcs.xml');
+        }
     }
 }
