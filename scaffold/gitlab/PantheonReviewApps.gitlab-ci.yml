@@ -1,0 +1,66 @@
+.drainpipe_pantheon_drupal_review_app:
+  script:
+    - if [ "$CI_MERGE_REQUEST_EVENT_TYPE" == "merge_train" ]; then exit 0; fi
+    - !reference [.drainpipe_setup_ssh, script]
+    - !reference [.drainpipe_setup_git, script]
+    - !reference [.drainpipe_pantheon_setup_terminus, script]
+    - composer install
+    - terminus multidev:delete $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --delete-branch --yes || true
+    - |
+      if [ "$PANTHEON_MULTIDEV_RUN_INSTALLER" == "true" ]; then
+        terminus multidev:create $PANTHEON_SITE_NAME.dev mr-$CI_MERGE_REQUEST_IID --no-db --no-files --yes
+      else
+        terminus multidev:create $PANTHEON_SITE_NAME.dev mr-$CI_MERGE_REQUEST_IID --yes
+      fi
+    - ./vendor/bin/task build
+    - ./vendor/bin/task snapshot:directory
+    - ./vendor/bin/task deploy:git
+    # Wait for Pantheon to sync
+    - sleep 30
+    - terminus aliases --only $PANTHEON_SITE_NAME --yes
+    - |
+      if [ "$PANTHEON_MULTIDEV_RUN_INSTALLER" == "true" ]; then
+        ./vendor/bin/drush @$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --yes site:install --existing-config
+      else
+        ./vendor/bin/task site=@$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID drupal:update
+      fi
+    - echo $CI_ENVIRONMENT_URL > environment_url.txt
+drainpipe_pantheon_drupal_review_app:
+  needs: []
+  stage: deploy
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  interruptible: true
+  environment:
+    name: review/$CI_MERGE_REQUEST_IID/drupal
+    url: https://${REVIEW_APP_BASIC_AUTH}mr-$CI_MERGE_REQUEST_IID-$PANTHEON_SITE_NAME.pantheonsite.io
+    on_stop: drainpipe_pantheon_stop_drupal_review_app
+  variables:
+    directory: /tmp/release
+    branch: 'mr-${CI_MERGE_REQUEST_IID}'
+    remote: 'ssh://codeserver.dev.${PANTHEON_SITE_ID}@codeserver.dev.${PANTHEON_SITE_ID}.drush.in:2222/~/repository.git'
+    message: '${CI_COMMIT_MESSAGE}'
+    site: '${PANTHEON_SITE_NAME}.mr-${CI_MERGE_REQUEST_IID}'
+  script:
+    - !reference [.drainpipe_pantheon_drupal_review_app, script]
+  artifacts:
+    paths:
+      - environment_url.txt
+
+drainpipe_pantheon_stop_drupal_review_app:
+  stage: deploy
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+  allow_failure: true
+  environment:
+    name: review/$CI_MERGE_REQUEST_IID/drupal
+    action: stop
+  variables:
+    remote: '${PANTHEON_GIT_REMOTE}'
+  before_script:
+    - !reference [.drainpipe_setup_ssh, script]
+    - !reference [.drainpipe_setup_git, script]
+    - !reference [.drainpipe_pantheon_setup_terminus, script]
+  script:
+    - terminus multidev:delete $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --delete-branch --yes

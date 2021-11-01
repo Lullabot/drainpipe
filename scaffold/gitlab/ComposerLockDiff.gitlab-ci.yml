@@ -1,0 +1,32 @@
+# Updates a merge request description to include a table of composer lockfile
+# changes.
+drainpipe_lock_diff:
+  needs: []
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  variables:
+    GIT_STRATEGY: clone
+  interruptible: false
+  script:
+    - apk add jq
+    - composer global require davidrjonas/composer-lock-diff:^1.0
+    - git fetch
+    - git checkout $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    - git checkout $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+    - git checkout $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME -- composer.json composer.lock
+    - git reset .
+    - composer global exec -- "composer-lock-diff --md > composer_lock_diff.md"
+    - |
+      curl --fail -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID | jq '. | {id, iid, description}' > merge_request.json
+    - sed -i 's/<!--Composer Lock Diff-->.*<!--\/Composer Lock Diff-->//g' merge_request.json
+    - |
+      if [ "$(cat composer_lock_diff.md)" != "" ]; then
+        DIFF=$(cat composer_lock_diff.md | sed -z "s/\n/\\\n/g")
+        DESCRIPTION=$(cat merge_request.json | jq -r '.description' | sed -z 's/\n/\\n/g')
+        DESCRIPTION="$DESCRIPTION\\n<!--Composer Lock Diff-->\\n## Composer Lock Diff\\n$DIFF\\n<!--/Composer Lock Diff-->"
+        DESCRIPTION=$(echo $DESCRIPTION | sed 's/"/\\"/g')
+        ID=$(cat merge_request.json | jq -r '.id')
+        IID=$(cat merge_request.json | jq -r '.iid')
+        JSON="{\"id\": $ID, \"iid\": $IID, \"description\": \"$DESCRIPTION\"}"
+        curl --fail -X PUT -d "$JSON" -H "Content-Type: application/json" -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID
+      fi

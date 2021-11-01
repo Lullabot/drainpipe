@@ -14,7 +14,7 @@ use Composer\Script\ScriptEvents;
 use Composer\Util\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 
-class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterface
+class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterface
 {
     /**
      * @var IOInterface
@@ -29,12 +29,20 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     protected $config;
 
     /**
+     * Composer extra field configuration.
+     *
+     * @var array
+     */
+    protected $extra;
+
+    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
     {
         $this->io = $io;
         $this->config = $composer->getConfig();
+        $this->extra = $composer->getPackage()->getExtra();
     }
 
     /**
@@ -72,6 +80,7 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
+        $this->installCICommands();
     }
 
     /**
@@ -84,6 +93,7 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
+        $this->installCICommands();
     }
 
     /**
@@ -131,7 +141,12 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if (!file_exists('./.gitignore')) {
             $this->io->write('<info>Creating initial .gitignore...</info>');
             $fs = new Filesystem();
-            $fs->copy($gitignorePath, './.gitignore');
+            $fs->copy("$gitignorePath/common.gitignore", './.gitignore');
+            if (file_exists('./.ddev/config.yaml')) {
+                $fp = fopen('./.gitignore', 'a');
+                fwrite($fp, file_get_contents("$gitignorePath/ddev.gitignore"));
+                fclose($fp);
+            }
         } else {
             $contents = file_get_contents('./.gitignore');
             if (strpos($contents, '.task') === false) {
@@ -156,6 +171,60 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
             $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
+        }
+    }
+
+    /**
+     * Install CI Commands.
+     */
+    private function installCICommands(): void
+    {
+        $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
+        $fs = new Filesystem();
+        $fs->removeDirectory('./.drainpipe/gitlab');
+        if (!empty($this->extra['drainpipe']['gitlab'])) {
+            $fs->ensureDirectoryExists('./.drainpipe/gitlab');
+            $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
+            $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
+            foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
+                $file = "gitlab/$gitlab.gitlab-ci.yml";
+                if (file_exists("$scaffoldPath/$file")) {
+                    $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
+                    $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
+                }
+                else {
+                    $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
+                }
+
+                if ($gitlab === 'Pantheon') {
+                    // .drainpipeignore
+                    if (!file_exists('.drainpipeignore')) {
+                        $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
+                    }
+                    else {
+                        $contents = file_get_contents('./.drainpipeignore');
+                        if (strpos($contents, '/web/sites/default/files') === false) {
+                            $this->io->warning(
+                                sprintf(
+                                    '.gitignore does not contain drainpipe ignores. Compare .drainpipeignore in the root of your repository with %s and update as needed.',
+                                    "$scaffoldPath/pantheon/.drainpipeignore"
+                                )
+                            );
+                        }
+                    }
+                    // pantheon.yml
+                    if (!file_exists('./pantheon.yml')) {
+                        $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
+                    }
+                    // settings.pantheon.php
+                    if (!file_exists('./web/sites/default/settings.pantheon.php')) {
+                        $fs->copy("$scaffoldPath/pantheon/settings.pantheon.php", './web/sites/default/settings.pantheon.php');
+                    }
+                }
+            }
+            if (!file_exists('./.gitlab-ci.yml')) {
+                $fs->copy("$scaffoldPath/gitlab/gitlab-ci.example.yml", './.gitlab-ci.yml');
+            }
         }
     }
 }

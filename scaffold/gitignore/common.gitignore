@@ -1,0 +1,55 @@
+######################
+# Taskfile/Drainpipe #
+######################
+.task
+.env
+
+##########
+# Drupal #
+##########
+!web/
+web/*
+
+!web/libraries
+
+!web/modules
+web/modules/*
+!web/modules/custom
+
+!web/themes
+web/themes/*
+!web/themes/custom
+
+!web/sites
+web/sites/*
+!web/sites/sites.php
+
+!web/sites/default
+web/sites/default/*
+!web/sites/default/settings.php
+!web/sites/default/services.yml
+!web/sites/default/services.*.yml
+!web/sites/default/settings.*.php
+!web/sites/default/files
+
+vendor
+
+.editorconfig
+
+########
+# Yarn #
+########
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+yarn-error.log
+node_modules
+
+#########
+# Tests #
+#########
+test_result

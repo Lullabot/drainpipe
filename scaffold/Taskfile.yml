@@ -19,6 +19,10 @@ vars:
 #    web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
 
 tasks:
+  build:
+    desc: "Builds the project for production"
+    cmds:
+      - echo "Nothing to do"
   assets:
     desc: "Builds assets such as CSS & JS"
     cmds:

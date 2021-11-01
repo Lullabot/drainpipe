@@ -1,0 +1,8 @@
+.drainpipe_pantheon_setup_terminus:
+  script:
+    - echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >> ~/.ssh/config
+    - mkdir ~/terminus
+    - curl -L https://github.com/pantheon-systems/terminus/releases/latest/download/terminus.phar --output ~/terminus/terminus
+    - chmod +x ~/terminus/terminus
+    - ln -s ~/terminus/terminus /usr/local/bin/terminus
+    - terminus auth:login --machine-token="$PANTHEON_TERMINUS_TOKEN"
