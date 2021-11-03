@@ -21,14 +21,15 @@ silent: true
 tasks:
   build:
     desc: "Builds the project for production"
+    deps: [drupal:composer:production]
     cmds:
       - echo "Nothing to do"
-  assets:
-    desc: "Builds assets such as CSS & JS"
-    cmds:
-      - if [ -f "yarn.lock" ]; then yarn; else npm install; fi
-      - task: javascript:compile
-      - task: sass:compile
-  assets:watch:
-    desc: "Builds assets such as CSS & JS, and watches them for changes"
-    deps: [sass:watch, javascript:watch]
+# assets:
+#   desc: "Builds assets such as CSS & JS"
+#   cmds:
+#     - if [ -f "yarn.lock" ]; then yarn; else npm install; fi
+#     - task: javascript:compile
+#     - task: sass:compile
+# assets:watch:
+#   desc: "Builds assets such as CSS & JS, and watches them for changes"
+#   deps: [sass:watch, javascript:watch]
