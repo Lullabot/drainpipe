@@ -106,8 +106,7 @@ tasks:
     cmds:
       - |
         {{ .FUNC_ENSURE_DIRS }}
-      - ./vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
-      - ./vendor/bin/phpcbf --standard=vendor/lullabot/drainpipe-dev/config/phpcs.xml {{.TEST_DIRS}}
+      - ./vendor/bin/phpcbf
   nightwatch:
     desc: Runs Nighwatch functional browser tests
     env:
