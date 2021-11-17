@@ -11,6 +11,3 @@ parameters:
     # PHPStan Level 1
     level: 1
 
-services:
-	errorFormatter.junit:
-		class: PHPStan\Command\ErrorFormatter\JUnitErrorFormatter
