@@ -87,7 +87,6 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      */
     public function onPostInstallCmd(Event $event)
     {
-        $this->installDevTaskfile();
         $this->installDdevSeleniumConfig();
         $this->installNightwatchConfig();
         $this->installPhpCsConfig();
@@ -101,7 +100,6 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      */
     public function onPostUpdateCmd(Event $event)
     {
-        $this->installDevTaskfile();
         $this->installDdevSeleniumConfig();
         $this->installNightwatchConfig();
         $this->installPhpCsConfig();
