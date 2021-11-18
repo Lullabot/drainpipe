@@ -23,10 +23,10 @@
   ],
   "require": {
     "composer/installers": "^1.9",
-    "drupal/core": "^9.2",
-    "drupal/core-composer-scaffold": "^9.2",
-    "drupal/core-project-message": "^9.2",
-    "drupal/core-recommended": "^9.2",
+    "drupal/core": "^9",
+    "drupal/core-composer-scaffold": "^9",
+    "drupal/core-project-message": "^9",
+    "drupal/core-recommended": "^9",
     "lullabot/drainpipe": "*"
   },
   "require-dev": {

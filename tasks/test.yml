@@ -59,6 +59,18 @@ tasks:
         for DIR in "${DIRS_ARR[@]}"; do
           ./vendor/bin/drainpipe-twig-linter lint $DIR
         done
+      - |
+        if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn prettier --check .
+        elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run prettier --check .
+        fi
+      - |
+        if [ -f ".stylelintrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn stylelint "**/*.{css,scss,sass}"
+        elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run stylelint "**/*.{css,scss,sass}"
+        fi
   config:
     desc: Verifies that exported config matches the config in Drupal
     # @todo JUnit output
@@ -107,6 +119,18 @@ tasks:
       - |
         {{ .FUNC_ENSURE_DIRS }}
       - ./vendor/bin/phpcbf
+      - |
+        if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn prettier --write .
+        elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run prettier --write .
+        fi
+      - |
+        if [ -f ".stylelintrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn stylelint "**/*.{css,scss,sass}" --fix
+        elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run stylelint "**/*.{css,scss,sass}" --fix
+        fi
   nightwatch:
     desc: Runs Nighwatch functional browser tests
     env:
