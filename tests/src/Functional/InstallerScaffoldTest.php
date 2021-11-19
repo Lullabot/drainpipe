@@ -29,11 +29,6 @@ class InstallerScaffoldTest extends TestCase
         $clean->run();
     }
 
-    public function testDevTaskfile(): void
-    {
-        $this->assertEquals(sha1_file(self::PROJECT_PATH.'/vendor/lullabot/drainpipe-dev/scaffold/Taskfile.dev.yml'), sha1_file(self::PROJECT_PATH.'/Taskfile.dev.yml'));
-    }
-
     public function testBinaries(): void
     {
         $this->assertFileExists(self::PROJECT_PATH.'/vendor/bin/local-php-security-checker');

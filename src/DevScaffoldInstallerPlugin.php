@@ -87,7 +87,6 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      */
     public function onPostInstallCmd(Event $event)
     {
-        $this->installDevTaskfile();
         $this->installDdevSeleniumConfig();
         $this->installNightwatchConfig();
         $this->installPhpCsConfig();
@@ -101,7 +100,6 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
      */
     public function onPostUpdateCmd(Event $event)
     {
-        $this->installDevTaskfile();
         $this->installDdevSeleniumConfig();
         $this->installNightwatchConfig();
         $this->installPhpCsConfig();
@@ -136,32 +134,6 @@ class DevScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInte
         if (!empty($this->userCommands)) {
             foreach ($this->userCommands as $userCommand) {
                 $this->io->warning($userCommand);
-            }
-        }
-    }
-
-    /**
-     * Copies Taskfile.dev.yml from the scaffold directory if it doesn't yet exist.
-     */
-    private function installDevTaskfile(): void
-    {
-        $this->installScaffoldFile('Taskfile.dev.yml', 'Taskfile.dev.yml');
-        $vendor = $this->config->get('vendor-dir');
-        $taskfilePath = "$vendor/lullabot/drainpipe-dev/scaffold/Taskfile.dev.yml";
-        $scaffoldTaskfile = Yaml::parseFile($taskfilePath);
-        $projectTaskfile = Yaml::parseFile("./Taskfile.dev.yml");
-        foreach ($scaffoldTaskfile['includes'] as $key => $value) {
-            if (empty($projectTaskfile['includes'][$key]) || $projectTaskfile['includes'][$key] !== $value) {
-                $this->io->warning(
-                    'Taskfile.dev.yml has either been customized or requires review.'
-                );
-                $this->io->warning(
-                    sprintf(
-                        'Compare Taskfile.dev.yml includes in the root of your repository with %s and update as needed.',
-                        $taskfilePath
-                    )
-                );
-                break;
             }
         }
     }

@@ -31,17 +31,18 @@ jobs:
           mkdir drupal
           cd drupal
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-external-test-project/composer.json .
+          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-external-test-project/Taskfile.yml .
           composer install
       - name: Run static tests
         run: |
           cd ../drupal
-          ./vendor/bin/task -t Taskfile.dev.yml test:static
+          ./vendor/bin/task test:static
       - name: Run autofixer
         run: |
           cd ../drupal
-          ./vendor/bin/task -t Taskfile.dev.yml test:autofix
+          ./vendor/bin/task test:autofix
       - name: Run static tests when directories don't exist
         run: |
           cd ../drupal
           rmdir web/modules/custom web/themes/custom
-          ./vendor/bin/task -t Taskfile.dev.yml test:static
+          ./vendor/bin/task test:static
