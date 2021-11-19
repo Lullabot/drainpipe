@@ -71,6 +71,12 @@ tasks:
         elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
           npm run stylelint "**/*.{css,scss,sass}"
         fi
+      - |
+        if [ -f ".eslintrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn eslint .
+        elif [ -f ".eslintrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run eslint .
+        fi
   config:
     desc: Verifies that exported config matches the config in Drupal
     # @todo JUnit output
