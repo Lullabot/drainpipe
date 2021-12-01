@@ -16,4 +16,4 @@ jobs:
           node-version: '14'
       - run: |
           curl -O https://json.schemastore.org/taskfile.json
-          npx ajv-cli validate -s taskfile.json -d Taskfile.yml
+          npx ajv-cli validate -s taskfile.json -d scaffold/Taskfile.yml

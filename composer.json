@@ -21,7 +21,7 @@
     },
     "extra": {
         "class": [
-            "\\Lullabot\\Drainpipe\\TaskfileInstallerPlugin",
+            "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin",
             "\\Lullabot\\Drainpipe\\BinaryInstallerPlugin"
         ]
     }

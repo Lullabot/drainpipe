@@ -37,50 +37,7 @@ Build tasks are provided as [Taskfiles](https://taskfile.dev/#/). A full list of
 available tasks can be shown by running `./vendor/bin/task --list` (or
 `ddev task --list` if you're using DDEV).
 
-### Drupal
-
-|`drupal:build:prod`|Build Drupal for production usage|
-|`drupal:update`|Run Drupal update tasks after deploying new code|
-|`drupal:maintenance:on`|Turn on Maintenance Mode|
-|`drupal:maintenance:off`|Turn off Maintenance Mode|
-
-All the above commands can be run on a remote site by providing a [drush site
-alias](https://www.drush.org/latest/site-aliases/).
-e.g. `task site=@mysite.dev drupal:update`
-
-### Snapshot
-
-These commands will prepare a Drupal codebase for deployment.
-
-#### `snapshot:directory`
-
-Creates a snapshot of the current working directory
-
-.git, .gitignore, files listed in .drainpipeignore, and .drainpipeignore
-itself are not added. .drainpipeignore uses the same format as gitignore.
-
-usage: `task snapshot:directory o=/tmp/release`
-
-o=<file>   Write the archive to <file>
-
-#### `snapshot:archive`
-
-Creates a snapshot of the current working directory and exports as an archive.
-
-`.git`, `.gitignore`, files listed in `.drainpipeignore`, and `.drainpipeignore`
-itself are not added. `.drainpipeignore` uses the same format as
-[`gitignore`](https://git-scm.com/docs/gitignore).
-
-If your `.gitattributes` file contains `export-ignore` or `export-subst`, these
-will be respected when exporting the archive.
-
-usage: `task snapshot:archive o=~/archive.tar.bz2`
-
-`o=<file>`
-Write the archive to `<file>`. The compression format is inferred from the file
-extension. Format options are: tar, tar.bz2, tar.gz, tar.xz, zip
-
-### Tests
+### Running Tests
 
 See https://github.com/Lullabot/drainpipe-dev
 
@@ -94,3 +51,49 @@ npx ajv-cli validate -s taskfile.json -d Taskfile.yml
 
 See [.github/workflows/validate-taskfile.yml](`.github/workflows/validate-taskfile.yml`)
 for an example of this in use.
+
+## GitLab Integration
+
+Add the following to `composer.json` for GitLab helpers:
+```json
+"extra": {
+  "drainpipe": {
+    "gitlab": []
+  }
+}
+```
+
+This will import [`scaffold/gitlab/Common.gitlab-ci.yml`](scaffold/gitlab/Common.gitlab-ci.yml),
+which provides helpers that can be used in GitLab CI with [includes and
+references](https://docs.gitlab.com/ee/ci/yaml/yaml_specific_features.html#reference-tags).
+
+### Pantheon
+```json
+"extra": {
+    "drainpipe": {
+        "gitlab": ["Pantheon", "Pantheon Review Apps"]
+    }
+}
+```
+
+This will setup Merge Request deployment to Pantheon Multidev environments. See
+[scaffold/gitlab/gitlab-ci.example.yml] for an example. You can also just
+include which will give you helpers that you can include and reference for tasks
+such as setting up [Terminus](https://pantheon.io/docs/terminus). See
+[scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
+
+### Composer Lock Diff
+```json
+"extra": {
+    "drainpipe": {
+        "gitlab": ["ComposerLockDiff"]
+    }
+}
+```
+
+Updates Merge Request descriptions with a markdown table of any changes detected
+in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
+Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
+`api` scope.
+
+## Pantheon
