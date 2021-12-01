@@ -3,9 +3,12 @@
 drainpipe_composer_lock_diff:
   needs: []
   rules:
-    - if: '$CI_MERGE_REQUEST_IID'
     - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
       when: never
+    - if: '$CI_MERGE_REQUEST_IID'
+      changes:
+        - composer.json
+        - composer.lock
   variables:
     GIT_STRATEGY: clone
   interruptible: false
