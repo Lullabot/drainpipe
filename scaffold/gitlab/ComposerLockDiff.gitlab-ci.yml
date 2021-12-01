@@ -3,7 +3,9 @@
 drainpipe_composer_lock_diff:
   needs: []
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_MERGE_REQUEST_IID'
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+      when: never
   variables:
     GIT_STRATEGY: clone
   interruptible: false
@@ -15,9 +17,10 @@ drainpipe_composer_lock_diff:
     - git fetch
     - git checkout $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
     - git checkout $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
-    - git merge $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME --no-commit
+    - git merge $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME --no-commit --no-ff
     - git reset .
     - composer global exec -- "composer-lock-diff --md > composer_lock_diff.md"
+    - cat composer_lock_diff.md
     - |
       curl --fail -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID | jq '. | {id, iid, description}' > merge_request.json
     - sed -i 's/<!--Composer Lock Diff-->.*<!--\/Composer Lock Diff-->//g' merge_request.json
