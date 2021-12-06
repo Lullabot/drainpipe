@@ -1,8 +1,5 @@
 .drainpipe_pantheon_drupal_review_app:
   script:
-    - if [ "$CI_MERGE_REQUEST_EVENT_TYPE" == "merge_train" ]; then exit 0; fi
-    - !reference [.drainpipe_setup_ssh, script]
-    - !reference [.drainpipe_setup_git, script]
     - !reference [.drainpipe_pantheon_setup_terminus, script]
     - composer install
     - terminus multidev:delete $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --delete-branch --yes || true
@@ -29,7 +26,10 @@ drainpipe_pantheon_drupal_review_app:
   needs: []
   stage: deploy
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    # Don't run this on merge trains as it takes a long time
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+      when: never
+    - if: '$CI_MERGE_REQUEST_IID'
   interruptible: true
   environment:
     name: review/$CI_MERGE_REQUEST_IID/drupal
@@ -50,7 +50,7 @@ drainpipe_pantheon_drupal_review_app:
 drainpipe_pantheon_stop_drupal_review_app:
   stage: deploy
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_MERGE_REQUEST_IID'
       when: manual
   allow_failure: true
   environment:
@@ -58,9 +58,6 @@ drainpipe_pantheon_stop_drupal_review_app:
     action: stop
   variables:
     remote: '${PANTHEON_GIT_REMOTE}'
-  before_script:
-    - !reference [.drainpipe_setup_ssh, script]
-    - !reference [.drainpipe_setup_git, script]
-    - !reference [.drainpipe_pantheon_setup_terminus, script]
   script:
+    - !reference [.drainpipe_pantheon_setup_terminus, script]
     - terminus multidev:delete $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --delete-branch --yes
