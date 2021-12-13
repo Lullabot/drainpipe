@@ -27,6 +27,8 @@ tasks:
         directory=<file>   Write the archive to <file>
     cmds:
       - if [ -d "{{.directory}}" ] || [ "" == "{{.directory}}" ]; then echo "Please provide a path to a directory that does not yet exist" && exit 1; fi
+      # Make sure any subdirectories exist
+      - mkdir -p {{.directory}} && rm -rf {{.directory}}
       - cp -pR . {{.directory}}
       - if [ ! -f ".drainpipeignore" ]; then echo ".drainpipeignore does not exist" && touch {{.directory}}/.drainpipeignore; fi
       - |
