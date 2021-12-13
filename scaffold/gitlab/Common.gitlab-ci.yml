@@ -14,3 +14,8 @@
     - chmod 600 ~/.ssh/config
     - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
+
+.drainpipe_setup_node:
+  script:
+    - apk add --update nodejs npm
+    - npm install -g yarn
