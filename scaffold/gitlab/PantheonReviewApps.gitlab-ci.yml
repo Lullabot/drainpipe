@@ -61,3 +61,38 @@ drainpipe_pantheon_stop_drupal_review_app:
   script:
     - !reference [.drainpipe_pantheon_setup_terminus, script]
     - terminus multidev:delete $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --delete-branch --yes
+
+drainpipe_pantheon_multidev_cleanup:
+  needs: []
+  resource_group: drainpipe_pantheon_multidev_cleanup
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  script:
+    - !reference [.drainpipe_pantheon_setup_terminus, script]
+    - apk add jq
+    - |
+      for LINE in $(curl -s --fail -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/environments | jq -r '.[] | "\(.id),\(.name)"'); do
+        ID=$(echo $LINE | cut -f1 -d ',')
+        ENVIRONMENT=$(echo $LINE | cut -f2 -d ',')
+        MR=$(echo $ENVIRONMENT | cut -f2 -d '/')
+        echo "Found GitLab environment $ENVIRONMENT ($ID)"
+        # "-eq" used to check if $MR is a number or not.
+        if [[ $ENVIRONMENT == review\/* ]] && [ "$MR" -eq "$MR" ]; then
+          STATE=$(curl -s --fail -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$MR" | jq -r '.state')
+          if [ $STATE != "opened" ]; then
+            echo "Stopping GitLab environment $ENVIRONMENT ($ID)"
+            curl -s --fail -X POST -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/environments/$ID/stop"
+          fi
+        fi
+      done
+    - |
+      for MR in $(terminus multidev:list $PANTHEON_SITE_NAME --format json | jq -r .[].id | cut -d '-' -f2); do
+        # Check it's a number.
+        if [ "$MR" -eq "$MR" ]; then
+          STATE=$(curl -s --fail -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$MR" | jq -r '.state')
+          if [ $STATE != "opened" ]; then
+            echo "Deleting Pantheon Multidev for $MR"
+            terminus --yes multidev:delete $PANTHEON_SITE_NAME.mr-$MR
+          fi
+        fi
+      done
