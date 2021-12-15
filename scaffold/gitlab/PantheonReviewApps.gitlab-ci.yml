@@ -61,3 +61,32 @@ drainpipe_pantheon_stop_drupal_review_app:
   script:
     - !reference [.drainpipe_pantheon_setup_terminus, script]
     - terminus multidev:delete $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --delete-branch --yes
+
+drainpipe_pantheon_multidev_cleanup:
+  needs: []
+  resource_group: drainpipe_pantheon_multidev_cleanup
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  script:
+    - !reference [.drainpipe_pantheon_setup_terminus, script]
+    - apk add jq
+    - |
+      for LINE in $(curl -s --header "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/environments" | jq -r '.[] | "\(.id),\(.name)"'); do
+        ID=$(echo $LINE | cut -f1 -d',')
+        MR=$(echo $LINE | cut -f2 -d',' | cut -f2 -d'-')
+        STATE=`curl -s --header "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$MR" | jq -r '.state'`
+        if [ $STATE != "opened" ] && [ $MR != "development" ]; then
+          echo "Deleting GitLab environment $ID for MR $MR"
+          curl --request DELETE --header "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/environments/$ID"
+        else
+          echo "Ignoring GitLab environment $ID for MR $MR"
+        fi
+      done
+      - |
+        for MR in $(terminus multidev:list $PANTHEON_SITE_NAME --format json | jq -r .[].id | cut -d'-' -f2); do
+          STATE=`curl -s --header "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$MR" | jq -r '.state'`
+          if [ $STATE != "opened" ]; then
+            echo "Deleting Pantheon Multidev for $MR"
+            terminus --yes multidev:delete $PANTHEON_SITE_NAM.mr-$MR
+          fi
+        done
