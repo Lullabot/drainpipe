@@ -30,7 +30,7 @@ variables:
   # https://gitlab.com/username/project/-/settings/access_tokens
   # https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#project-access-tokens
   # Only supported by GitLab Premium or self-hosted GitLab
-  # Needs "api" scope. Used by Composer Lock Diff.
+  # Needs "api" scope. Used by Composer Lock Diff and Pantheon Multidev Cleanup.
   #GITLAB_ACCESS_TOKEN
 
 cache:
