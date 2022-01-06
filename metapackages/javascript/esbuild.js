@@ -24,13 +24,13 @@ if (!scripts.length) {
 const targets = [];
 const sources = [];
 
-// Check that every source/target has the same basedir (probably "web") due to
+// Check that every source/target has the same basedir (probably "docroot") due to
 // being unable to provide separate entryNames.
 // See https://github.com/evanw/esbuild/issues/224
 const baseDirs = [];
 // Check that the output script name matches the same as the input script name,
 // due to the same limitation above. It can have a different file extension,
-// e.g. web/modules/custom/mymodule/script.js:web/modules/custom/mymodule/script.min.js
+// e.g. docroot/modules/custom/mymodule/script.js:docroot/modules/custom/mymodule/script.min.js
 const fileExtensions = [];
 scripts.forEach(script => {
   const [source, target] = script.split(':');

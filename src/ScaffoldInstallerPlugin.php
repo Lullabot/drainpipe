@@ -203,7 +203,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     }
                     else {
                         $contents = file_get_contents('./.drainpipeignore');
-                        if (strpos($contents, '/web/sites/default/files') === false) {
+                        if (strpos($contents, '/docroot/sites/default/files') === false) {
                             $this->io->warning(
                                 sprintf(
                                     '.gitignore does not contain drainpipe ignores. Compare .drainpipeignore in the root of your repository with %s and update as needed.',
@@ -217,8 +217,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                         $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
                     }
                     // settings.pantheon.php
-                    if (!file_exists('./web/sites/default/settings.pantheon.php')) {
-                        $fs->copy("$scaffoldPath/pantheon/settings.pantheon.php", './web/sites/default/settings.pantheon.php');
+                    if (!file_exists('./docroot/sites/default/settings.pantheon.php')) {
+                        $fs->copy("$scaffoldPath/pantheon/settings.pantheon.php", './docroot/sites/default/settings.pantheon.php');
                     }
                 }
             }

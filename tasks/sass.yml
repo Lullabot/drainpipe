@@ -12,7 +12,7 @@ tasks:
       support for autoprefixer user "browserslist" in package.json (see
       https://github.com/postcss/autoprefixer#browsers)
 
-      usage: task sass:compile DRAINPIPE_SASS="web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css web/themes/custom/myothertheme/style.scss:web/themes/custom/myothertheme/style.css"
+      usage: task sass:compile DRAINPIPE_SASS="docroot/themes/custom/mytheme/style.scss:docroot/themes/custom/mytheme/style.css docroot/themes/custom/myothertheme/style.scss:docroot/themes/custom/myothertheme/style.css"
     cmds:
       - |
         COMMAND="node"
