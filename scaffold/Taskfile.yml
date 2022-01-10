@@ -8,6 +8,9 @@ includes:
   sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
+  test:
+    taskfile: ./vendor/lullabot/drainpipe-dev/tasks/test.yml
+    optional: true
 
 output: prefixed
 silent: true
