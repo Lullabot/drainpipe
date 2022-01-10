@@ -1,0 +1,7 @@
+parameters:
+    ignoreErrors:
+        -
+            message: '#Variable \$(app_root|site_path) might not be defined\.#'
+            paths:
+                - *sites/default/settings.php
+                - *sites/sites.php
