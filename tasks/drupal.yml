@@ -36,6 +36,18 @@ tasks:
     desc: "Runs the site installer"
     cmds:
       - ./vendor/bin/drush --yes site:install --existing-config
+  import-db:
+    desc: "Imports a database fetched with a *:fetch-db command"
+    cmds:
+      - echo "🚮 Dropping existing database"
+      - drush sql:drop --yes
+      - echo "📰 Importing database"
+      - drush sql:query --file=/var/www/html/files/private/db.sql.gz
+      - defer: rm -f /var/www/html/files/private/db.sql
+      - echo "🧹 Sanitising database"
+      - drush sql:sanitize --whitelist-fields=field_user_bio,user_picture --yes
+      - echo "➡ Exporting database"
+      - drush sql:dump --result-file=/var/www/html/files/private/db.sql.gz
   update:
     desc: Run Drupal update tasks after deploying new code
     cmds:

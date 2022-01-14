@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  fetch-db:
+    desc: "Fetches a database from Pantheon"
+    cmds:
+      - rm -f /var/www/html/files/private/db.sql.gz /var/www/html/files/private/db.sql
+      - if [ -z "$PANTHEON_TOKEN" ]; then echo "PANTHEON_TOKEN is empty, please add it to your .env file"; exit 1; fi
+      - echo "⚡ Authorising with Pantheon"
+      - terminus auth:login --machine-token="${PANTHEON_TOKEN}"
+      - echo "⚡ Fetching database from Pantheon"
+      - terminus backup:get {{.PANTHEON_SITE_ID}}.live --element=db --to=/var/www/html/files/private/db.sql.gz
