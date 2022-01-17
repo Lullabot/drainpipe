@@ -38,16 +38,21 @@ tasks:
       - ./vendor/bin/drush --yes site:install --existing-config
   import-db:
     desc: "Imports a database fetched with a *:fetch-db command"
+    env:
+      DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
     cmds:
       - echo "🚮 Dropping existing database"
       - drush sql:drop --yes
       - echo "📰 Importing database"
-      - drush sql:query --file=/var/www/html/files/private/db.sql.gz
-      - defer: rm -f /var/www/html/files/private/db.sql
-      - echo "🧹 Sanitising database"
-      - drush sql:sanitize --whitelist-fields=field_user_bio,user_picture --yes
+      - drush sql:query --file=$DB_DIR/private/db.sql.gz
+      - defer: rm -f $DB_DIR/db.sql
+  export-db:
+    desc: "Exports a database fetches with a *:fetch-db command"
+    env:
+      DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
+    cmds:
       - echo "➡ Exporting database"
-      - drush sql:dump --result-file=/var/www/html/files/private/db.sql.gz
+      - drush sql:dump --result-file=$DB_DIR/db.sql.gz
   update:
     desc: Run Drupal update tasks after deploying new code
     cmds:
