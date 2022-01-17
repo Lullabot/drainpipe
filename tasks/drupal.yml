@@ -44,7 +44,7 @@ tasks:
       - echo "🚮 Dropping existing database"
       - ./vendor/bin/drush sql:drop --yes
       - echo "📰 Importing database"
-      - ./vendor/bin/drush sql:query --file=$DB_DIR/private/db.sql.gz
+      - ./vendor/bin/drush sql:query --file=$DB_DIR/db.sql.gz
       - defer: rm -f $DB_DIR/db.sql
   export-db:
     desc: "Exports a database fetches with a *:fetch-db command"
