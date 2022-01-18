@@ -95,5 +95,3 @@ Updates Merge Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
 Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 `api` scope.
-
-## Pantheon
