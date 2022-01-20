@@ -35,7 +35,7 @@ tasks:
   install:
     desc: "Runs the site installer"
     cmds:
-      - ./vendor/bin/drush --yes site:install --existing-config
+      - ./vendor/bin/drush --yes site:install --existing-config {{.CLI_ARGS}}
   import-db:
     desc: "Imports a database fetched with a *:fetch-db command"
     env:
