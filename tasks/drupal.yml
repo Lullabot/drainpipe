@@ -73,3 +73,7 @@ tasks:
     desc: Turn off Maintenance Mode
     cmds:
       - ./vendor/bin/drush {{.site}} --yes state:set system.maintenance_mode 0 --input-format=integer
+  config:check:
+    desc: Tests whether active config matches staged (i.e., no changes/overrides)
+    cmds:
+      - "[ $(./vendor/bin/drush config:status --format=string | wc -w) -eq 0 ]"
