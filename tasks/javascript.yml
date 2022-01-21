@@ -6,7 +6,7 @@ tasks:
     summary: |
       Compiles themes/custom/<theme name>/script.js in custom themes to
       themes/custom/<theme name>/script.min.js and modules/custom/<module name>/script.js
-      to modules/custom/<module name>/script.js in custom modules.
+      to modules/custom/<module name>/script.min.js in custom modules.
 
       Requires esbuild, chokidar, and yargs
       Additionally if using Yarn 2+: @yarnpkg/esbuild-plugin-pnp
