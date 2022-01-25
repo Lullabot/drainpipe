@@ -236,6 +236,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             foreach ($this->extra['drainpipe']['github'] as $github) {
                 if ($github === 'PantheonReviewApps') {
                     $fs->ensureDirectoryExists('./github/actions/drainpipe/pantheon');
+                    $fs->ensureDirectoryExists('./github/workflows');
                     $fs->copy("$scaffoldPath/github/actions/pantheon", './github/actions/drainpipe/pantheon');
                     if (!file_exists('./github/workflows/PantheonReviewApps.yml')) {
                         if (file_exists('./.ddev/config.yaml')) {
