@@ -104,7 +104,7 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
   ```json
   "extra": {
       "drainpipe": {
-          "github": ["Pantheon Review Apps"]
+          "github": ["PantheonReviewApps"]
       }
   }
   ```
