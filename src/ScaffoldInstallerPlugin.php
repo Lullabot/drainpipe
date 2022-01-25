@@ -179,8 +179,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     private function installCICommands(): void
     {
-        $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
+        $scaffoldPath = "$this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold'";
         $fs = new Filesystem();
+        // GitLab
         $fs->removeDirectory('./.drainpipe/gitlab');
         if (!empty($this->extra['drainpipe']['gitlab'])) {
             $fs->ensureDirectoryExists('./.drainpipe/gitlab');
@@ -197,6 +198,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
 
                 if ($gitlab === 'Pantheon') {
+                    // @TODO this isn't really specific to GitLab
                     // .drainpipeignore
                     if (!file_exists('.drainpipeignore')) {
                         $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
@@ -224,6 +226,26 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             }
             if (!file_exists('./.gitlab-ci.yml')) {
                 $fs->copy("$scaffoldPath/gitlab/gitlab-ci.example.yml", './.gitlab-ci.yml');
+            }
+        }
+        // GitHub
+        $fs->removeDirectory('./.github/actions/drainpipe');
+        if (!empty($this->extra['drainpipe']['github'])) {
+            $fs->ensureDirectoryExists('./github/actions');
+            $fs->copy("$scaffoldPath/github/actions/common", './github/actions/drainpipe');
+            foreach ($this->extra['drainpipe']['github'] as $github) {
+                if ($github === 'PantheonReviewApps') {
+                    $fs->ensureDirectoryExists('./github/actions/drainpipe/pantheon');
+                    $fs->copy("$scaffoldPath/github/actions/pantheon", './github/actions/drainpipe/pantheon');
+                    if (!file_exists('./github/workflows/PantheonReviewApps.yml')) {
+                        if (file_exists('./.ddev/config.yaml')) {
+                            $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './github/workflows/PantheonReviewApps.yml');
+                        }
+                        else {
+                            $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './github/workflows/PantheonReviewApps.yml');
+                        }
+                    }
+                }
             }
         }
     }
