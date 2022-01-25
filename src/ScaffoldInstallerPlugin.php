@@ -179,7 +179,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     private function installCICommands(): void
     {
-        $scaffoldPath = "$this->config->get('vendor-dir')/lullabot/drainpipe/scaffold";
+        $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold'
         $fs = new Filesystem();
         // GitLab
         $fs->removeDirectory('./.drainpipe/gitlab');
