@@ -1,0 +1,46 @@
+name: 'Install and Start DDEV'
+description: 'Installs the latest version of DDEV and starts the project'
+inputs:
+  ssh-private-key:
+    description: "SSH Private Key"
+    required: false
+  ssh-known-hosts:
+    description: "SSH Known Hosts"
+    required: false
+  git-email:
+    description: "Git e-mail address"
+    required: false
+  git-name:
+    description: "Git name"
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Install and Start DDEV
+      run: |
+        sudo apt install libnss3-tools
+
+        mkdir -p .ddev/homeadditions/.ssh
+        # Copy private key
+        if [ "${{ inputs.ssh-private-key }}" != "" ]; then
+          echo "${{ inputs.ssh-private-key }}" > .ddev/homeadditions/.ssh/id_rsa
+          chmod 600 .ddev/homeadditions/.ssh/id_rsa
+        fi
+        # Copy known hosts
+        if [ "${{ inputs.ssh-known-hosts }}" != "" ]; then
+          echo "${{ inputs.ssh-known-hosts}}" > .ddev/homeadditions/.ssh/known_hosts
+          chmod 644 .ddev/homeadditions/.ssh/known_hosts
+        fi
+        chmod 700 .ddev/homeadditions/.ssh
+
+        curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh
+        ddev config global --instrumentation-opt-in=false --omit-containers=dba,ddev-ssh-agent
+        ddev start
+        ddev describe
+
+        # Copy git credentials
+        ddev exec "git config --global user.name \"${{ inputs.git-name }}\""
+        ddev exec "git config --global user.email \"${{ inputs.git-email }}\""
+
+        echo "DRAINPIPE_DDEV=true" >> $GITHUB_ENV
+      shell: bash

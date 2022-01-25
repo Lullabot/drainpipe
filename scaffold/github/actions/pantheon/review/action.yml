@@ -1,0 +1,81 @@
+name: 'Deploy Review epp to Pantheon'
+description: 'Deploys a review app to Pantheon Multidev'
+inputs:
+  github-token:
+    description: "GitHub token as generated automatically in inputs.github-token"
+    required: true
+  terminus-token:
+    description: "Pantheon Terminus Token"
+    required: true
+  site-name:
+    description: "Pantheon site machine name"
+    required: true
+  site-id:
+    description: "Pantheon site UUID"
+    required: true
+  run-installer:
+    description: "Whether or not to run the Drupal site installer. Defaults to false."
+    required: false
+  commit-message:
+    description: "The commit message to use when pushing to Pantheon"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Create GitHub Deployment
+      run: |
+        export GITHUB_DEPLOYMENT=$(curl -f -X POST \
+            https://api.github.com/repos/$GITHUB_REPOSITORY/deployments \
+            -H 'Accept: application/vnd.github.v3+json' \
+            -H "Authorization: token ${{ inputs.github-token }}" \
+            -d "{\"ref\": \"$DRAINPIPE_SHA\", \"auto_merge\": false, \"environment\": \"pantheon-pr-$DRAINPIPE_PR_NUMBER\", \"transient_environment\": true, \"required_contexts\": [], \"description\": \"Pantheon Multidev for Pull Request #$DRAINPIPE_PR_NUMBER\"}" \
+        )
+        export GITHUB_DEPLOYMENT_ID=$(echo $GITHUB_DEPLOYMENT | jq '.id')
+        echo "GITHUB_DEPLOYMENT_ID=$GITHUB_DEPLOYMENT_ID" >> $GITHUB_ENV
+        echo "Created GitHub Deployment ID $GITHUB_DEPLOYMENT_ID"
+        if [ -z "$GITHUB_DEPLOYMENT_ID" ] || [ "$GITHUB_DEPLOYMENT_ID" = "null" ]; then echo $GITHUB_DEPLOYMENT && exit 1; fi
+        curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d '{"state":"in_progress"}'
+      shell: bash
+
+    - name: Create Multidev or Wipe existing Multidev
+      run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "terminus auth:login --machine-token="${{ inputs.terminus-token }}""
+        JQ_COMMAND="'.[] | select(.id == \"pr-$DRAINPIPE_PR_NUMBER\") | .id'"
+        ENVIRONMENT_EXISTS=$(drainpipe_exec "terminus multidev:list --format json ${{ inputs.site-name }} | jq --raw-output $JQ_COMMAND")
+        if [ "$ENVIRONMENT_EXISTS" == "pr-$DRAINPIPE_PR_NUMBER" ]; then
+          drainpipe_exec "terminus env:wipe ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes"
+        else
+          drainpipe_exec "terminus multidev:create ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --no-db --no-files --yes"
+        fi
+        if [ "${{ inputs.run-installer }}" != "true" ]; then
+            drainpipe_exec "terminus env:clone-content ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --yes"
+        fi
+      shell: bash
+
+    - name: Push to Pantheon
+      run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "task deploy:git directory=/tmp/release branch=pr-$DRAINPIPE_PR_NUMBER remote=ssh://codeserver.dev.${{ inputs.site-id }}@codeserver.dev.${{ inputs.site-id }}.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\" site=${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+      shell: bash
+
+    - name: Deploy to Pantheon
+      run: |
+        # Wait for Pantheon to sync
+        sleep 30
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
+        if [ "${{ inputs.run-installer }}" == "true" ]; then
+          drainpipe_exec "drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
+        else
+          drainpipe_exec "task drupal:update site=@${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+        fi
+        curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"success\", \"environment_url\": \"https://pr-$DRAINPIPE_PR_NUMBER-${{ inputs.site-name }}.pantheonsite.io\"}"
+      shell: bash
+
+    - name: Set Deployment Failure Status
+      run: |
+        curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"failure\"}"
+      if: ${{ failure() }}
+      shell: bash
+
