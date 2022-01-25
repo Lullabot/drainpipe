@@ -95,3 +95,23 @@ Updates Merge Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
 Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 `api` scope.
+
+## GitHub Actions Integration
+
+## Pantheon
+
+- Add the following the composer.json to enable deployment of Pantheon Review Apps
+  ```json
+  "extra": {
+      "drainpipe": {
+          "github": ["Pantheon Review Apps"]
+      }
+  }
+  ```
+- Run `composer install`
+- Add your Pantheon `site-name` and `site-id` to the last job in the new
+  workflow file at `.github/workflows/PantheonReviewApps.yml`
+- Add the following secrets to your repository:
+  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
+  - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
+  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
