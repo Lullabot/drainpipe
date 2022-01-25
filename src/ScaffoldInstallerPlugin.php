@@ -231,19 +231,19 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         // GitHub
         $fs->removeDirectory('./.github/actions/drainpipe');
         if (!empty($this->extra['drainpipe']['github'])) {
-            $fs->ensureDirectoryExists('./github/actions');
-            $fs->copy("$scaffoldPath/github/actions/common", './github/actions/drainpipe');
+            $fs->ensureDirectoryExists('./.github/actions');
+            $fs->copy("$scaffoldPath/github/actions/common", './.github/actions/drainpipe');
             foreach ($this->extra['drainpipe']['github'] as $github) {
                 if ($github === 'PantheonReviewApps') {
-                    $fs->ensureDirectoryExists('./github/actions/drainpipe/pantheon');
-                    $fs->ensureDirectoryExists('./github/workflows');
-                    $fs->copy("$scaffoldPath/github/actions/pantheon", './github/actions/drainpipe/pantheon');
-                    if (!file_exists('./github/workflows/PantheonReviewApps.yml')) {
+                    $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
+                    $fs->ensureDirectoryExists('./.github/workflows');
+                    $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
+                    if (!file_exists('./.github/workflows/PantheonReviewApps.yml')) {
                         if (file_exists('./.ddev/config.yaml')) {
-                            $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './github/workflows/PantheonReviewApps.yml');
+                            $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
                         }
                         else {
-                            $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './github/workflows/PantheonReviewApps.yml');
+                            $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                         }
                     }
                 }
