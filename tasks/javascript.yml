@@ -8,8 +8,17 @@ tasks:
       themes/custom/<theme name>/script.min.js and modules/custom/<module name>/script.js
       to modules/custom/<module name>/script.min.js in custom modules.
 
-      Requires esbuild, chokidar, and yargs
+      Includes esbuild, chokidar, and yargs
       Additionally if using Yarn 2+: @yarnpkg/esbuild-plugin-pnp
+
+      Requires first installing the @lullabot/drainpipe-javascript node package.
+      ```
+      if [ -f yarn.lock ]; then
+        yarn add @lullabot/drainpipe-javascript
+      else
+        npm install @lullabot/drainpipe-javascript
+      fi
+      ```
 
       usage: task javascript:compile DRAINPIPE_JAVASCRIPT="web/themes/custom/script.js:web/themes/custom/script.min.js"
     cmds:

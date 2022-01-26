@@ -9,10 +9,20 @@ for a Drupal site, including:
 
 ## Installation
 
-```
+```sh
 composer require lullabot/drainpipe
 # Includes development dependencies, but only in the `require-dev` section. This step is required for Drainpipe to provide test helpers.
 composer require lullabot/drainpipe-dev --dev
+# To compile Sass and Javascript via their respective tasks, add these node packages.
+PACKAGES="
+@lullabot/drainpipe-sass
+@lullabot/drainpipe-javascript
+"
+if [ -f yarn.lock ]; then
+  yarn add $PACKAGES
+else
+  npm install $PACKAGES
+fi
 ```
 
 Drainpipe integrates with [DDEV](https://ddev.readthedocs.io/en/stable/), but
@@ -20,7 +30,7 @@ will only add the relevant files when DDEV is detected in the repository. Either
 set DDEV up first before requiring this project, or run `composer update` if
 DDEV is added later.
 
-```
+```sh
 composer create-project drupal/recommended-project drupal
 cd drupal
 ddev config
