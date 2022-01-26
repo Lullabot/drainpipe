@@ -12,6 +12,15 @@ tasks:
       support for autoprefixer user "browserslist" in package.json (see
       https://github.com/postcss/autoprefixer#browsers)
 
+      Requires first installing the @lullabot/drainpipe-sass node package.
+      ```
+      if [ -f yarn.lock ]; then
+        yarn add @lullabot/drainpipe-sass
+      else
+        npm install @lullabot/drainpipe-sass
+      fi
+      ```
+
       usage: task sass:compile DRAINPIPE_SASS="web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css web/themes/custom/myothertheme/style.scss:web/themes/custom/myothertheme/style.css"
     cmds:
       - |
