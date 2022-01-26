@@ -56,7 +56,7 @@ runs:
     - name: Push to Pantheon
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "task deploy:git directory=/tmp/release branch=pr-$DRAINPIPE_PR_NUMBER remote=ssh://codeserver.dev.${{ inputs.site-id }}@codeserver.dev.${{ inputs.site-id }}.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\" site=${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=pr-$DRAINPIPE_PR_NUMBER remote=ssh://codeserver.dev.${{ inputs.site-id }}@codeserver.dev.${{ inputs.site-id }}.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\" site=${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
       shell: bash
 
     - name: Deploy to Pantheon
@@ -66,9 +66,9 @@ runs:
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
-          drainpipe_exec "drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
+          drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
         else
-          drainpipe_exec "task drupal:update site=@${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+          drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
         fi
         curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"success\", \"environment_url\": \"https://pr-$DRAINPIPE_PR_NUMBER-${{ inputs.site-name }}.pantheonsite.io\"}"
       shell: bash
