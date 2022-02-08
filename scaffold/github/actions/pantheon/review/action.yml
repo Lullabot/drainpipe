@@ -22,6 +22,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Set Drainpipe environment
+      run: source .github/actions/drainpipe/set-env/bash_aliases
+      shell: bash
+
     - name: Create GitHub Deployment
       run: |
         export GITHUB_DEPLOYMENT=$(curl -f -X POST \
@@ -40,7 +44,6 @@ runs:
     - name: Clean Stale Environments
       run: |
         echo "Cleaning stale Multidev environments"
-        source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "terminus auth:login --machine-token=\"${{ inputs.terminus-token }}\""
         PULLS=$(curl -f \
             https://api.github.com/repos/$GITHUB_REPOSITORY/pulls?state=open \
@@ -64,7 +67,6 @@ runs:
 
     - name: Create Multidev or Wipe existing Multidev
       run: |
-        source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "terminus auth:login --machine-token=\"${{ inputs.terminus-token }}\""
         JQ_COMMAND="'.[] | select(.id == \"pr-$DRAINPIPE_PR_NUMBER\") | .id'"
         ENVIRONMENT_EXISTS=$(drainpipe_exec "terminus multidev:list --format json ${{ inputs.site-name }} | jq --raw-output $JQ_COMMAND")
@@ -80,7 +82,6 @@ runs:
 
     - name: Push to Pantheon
       run: |
-        source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "terminus connection:set  ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER git --yes"
         drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=pr-$DRAINPIPE_PR_NUMBER remote=ssh://codeserver.dev.${{ inputs.site-id }}@codeserver.dev.${{ inputs.site-id }}.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\" site=${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
       shell: bash
@@ -89,7 +90,6 @@ runs:
       run: |
         # Wait for Pantheon to sync
         sleep 30
-        source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
