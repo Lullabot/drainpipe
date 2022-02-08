@@ -4,7 +4,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-permissions: write-all
+permissions:
+  deployments: write
 
 jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
