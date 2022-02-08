@@ -49,8 +49,6 @@ runs:
         )
         PULL_NUMBERS=$(echo $PULLS | jq '.[] | "pr-" + (.number|tostring)')
         MULTIDEVS=$(drainpipe_exec "terminus multidev:list --format json ${{ inputs.site-name }} | jq --raw-output 'keys | .[]'")
-        echo "Open Pull Requests: $PULL_NUMBERS"
-        echo "Active Multidevs: $MULTIDEVS"
         for MULTIDEV in $MULTIDEVS; do
           if [[ "$PULL_NUMBERS[*]" =~ "$MULTIDEV" ]]; then
             echo "Found open PR for $MULTIDEV"
