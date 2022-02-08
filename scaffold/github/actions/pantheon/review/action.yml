@@ -52,9 +52,12 @@ runs:
         for MULTIDEV in $MULTIDEVS; do
           if [[ "$PULL_NUMBERS[*]" =~ "$MULTIDEV" ]]; then
             echo "Found open PR for $MULTIDEV"
-          else
+          # if $MULTIDEV starts with "pr-"
+          elif [[ $MULTIDEV == pr-* ]]; then
             echo "No PR for $MULTIDEV, shutting down..."
             drainpipe_exec "terminus multidev:delete ${{ inputs.site-name }}.$MULTIDEV --delete-branch --yes"
+          else
+            "Dangling Multidev environment $MULTIDEV found, no action taken.
           fi
         done
       shell: bash
