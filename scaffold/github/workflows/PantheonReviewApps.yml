@@ -4,6 +4,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions: write-all
+
 jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
     runs-on: ubuntu-latest
