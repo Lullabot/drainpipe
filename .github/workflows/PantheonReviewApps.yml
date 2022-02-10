@@ -9,18 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        path: drainpipe
 
-      - name: Get Composer Cache Directory
-        id: composer-cache
+      - name: Copy composer.json
         run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-      - uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+          cp $GITHUB_WORKSPACE/drainpipe/tests/fixtures/drainpipe-test-project/composer.json .
+          rm -rf $GITHUB_WORKSPACE/drainpipe
 
       - uses: ./.github/actions/drainpipe/set-env
 
@@ -29,16 +23,24 @@ jobs:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
 
+      # See https://pantheon.io/docs/ssh-keys/
+      # Input the public key for your bot user at https://dashboard.pantheon.io/users/[your-user-id]#account/ssh-keys
       - uses: ./.github/actions/drainpipe/setup-ssh
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          ssh-private-key: ${{ secrets.PANTHEON_SSH_KEY }}
+          ssh-known-hosts: ${{ secrets.PANTHEON_SSH_KNOWN_HOSTS }}
 
+      # Generate for your bot user at https://dashboard.pantheon.io/users/[your-user-id]#account/tokens/list
       - uses: ./github/actions/drainpipe/pantheon/setup-terminus
         with:
           pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
 
+      # Run composer install
       - uses: php-actions/composer@v6
+        with:
+          php_version: "7.4"
+          version: 2
+          dev: no
 
       - name: Build Project
         env:
@@ -55,6 +57,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
-          site-name: [site-name]
-          site-id: [site-id]
+          site-name: drainpipe-tester
+          site-id: 8f899ae5-bdf4-40e2-a984-dcf953417cbf
           commit-message: ${{ github.event.head_commit.message }}
