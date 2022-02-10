@@ -43,13 +43,6 @@ jobs:
         with:
           pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
 
-      # Run composer install
-      - uses: php-actions/composer@v6
-        with:
-          php_version: "7.4"
-          version: 2
-          dev: no
-
       - name: Build Project
         env:
           directory: /tmp/release
@@ -57,8 +50,9 @@ jobs:
           message:
           site:
         run: |
-          task build
-          task snapshot:directory directory=/tmp/release
+          composer install
+          ./vendor/bin/task build
+          ./vendor/bin/task snapshot:directory directory=/tmp/release
 
       - name: Deploy Pantheon Review App
         uses: ./.github/actions/drainpipe/pantheon/review
