@@ -15,7 +15,7 @@ jobs:
       - name: Copy composer.json
         run: |
           cp $GITHUB_WORKSPACE/drainpipe/tests/fixtures/drainpipe-test-project/composer.json .
-          cp -R $GITHUB_WORKSPACE/.github $GITHUB_WORKSPACE
+          cp -R $GITHUB_WORKSPACE/drainpipe/.github $GITHUB_WORKSPACE
           rm -rf $GITHUB_WORKSPACE/drainpipe
 
       - uses: ./.github/actions/drainpipe/set-env
