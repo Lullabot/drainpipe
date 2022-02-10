@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        path: drainpipe
+        with:
+          path: drainpipe
 
       - name: Copy composer.json
         run: |
