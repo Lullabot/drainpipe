@@ -33,7 +33,7 @@ jobs:
           ssh-known-hosts: ${{ secrets.PANTHEON_SSH_KNOWN_HOSTS }}
 
       # Generate for your bot user at https://dashboard.pantheon.io/users/[your-user-id]#account/tokens/list
-      - uses: ./github/actions/drainpipe/pantheon/setup-terminus
+      - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
         with:
           pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
 
