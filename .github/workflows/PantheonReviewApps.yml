@@ -8,6 +8,12 @@ jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
     runs-on: ubuntu-latest
     steps:
+      - name: Install OS dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq
+          sudo update-alternatives –set php /usr/bin/php7.4
+
       - uses: actions/checkout@v2
         with:
           path: drainpipe
