@@ -1,0 +1,64 @@
+name: "Pantheon Review Apps"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  Drainpipe-Deploy-Pantheon-Multidev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install OS dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq
+          sudo update-alternatives --set php /usr/bin/php7.4
+
+      - uses: actions/checkout@v2
+        with:
+          path: drainpipe
+
+      - name: Copy composer.json
+        run: |
+          cp $GITHUB_WORKSPACE/drainpipe/tests/fixtures/drainpipe-test-project/composer.json .
+          cp -R $GITHUB_WORKSPACE/drainpipe/.github $GITHUB_WORKSPACE
+          rm -rf $GITHUB_WORKSPACE/drainpipe
+
+      - uses: ./.github/actions/drainpipe/set-env
+
+      - uses: ./.github/actions/drainpipe/setup-git
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      # See https://pantheon.io/docs/ssh-keys/
+      # Input the public key for your bot user at https://dashboard.pantheon.io/users/[your-user-id]#account/ssh-keys
+      - uses: ./.github/actions/drainpipe/setup-ssh
+        with:
+          ssh-private-key: ${{ secrets.PANTHEON_SSH_KEY }}
+          ssh-known-hosts: ${{ secrets.PANTHEON_SSH_KNOWN_HOSTS }}
+
+      # Generate for your bot user at https://dashboard.pantheon.io/users/[your-user-id]#account/tokens/list
+      - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
+        with:
+          pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+
+      - name: Build Project
+        env:
+          directory: /tmp/release
+          remote:
+          message:
+          site:
+        run: |
+          composer install
+          ./vendor/bin/task build
+          ./vendor/bin/task snapshot:directory directory=/tmp/release
+
+      - name: Deploy Pantheon Review App
+        uses: ./.github/actions/drainpipe/pantheon/review
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          site-name: drainpipe-tester
+          site-id: 8f899ae5-bdf4-40e2-a984-dcf953417cbf
+          commit-message: ${{ github.event.head_commit.message }}
