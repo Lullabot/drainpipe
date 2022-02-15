@@ -1,0 +1,157 @@
+image: tugboatqa/php:8.0-apache
+
+pipelines:
+  pull-requests:
+    default:
+      # All steps in the following parallel group will be started at the
+      # same time. These are intended to be quick checks so that if any of them
+      # fails, there is no point in starting the more expensive checks below.
+      - parallel:
+          - step:
+              name: 'Static tests'
+              script:
+                # Prepare the environment.
+                - cp dist/.env.ci .env
+                - composer selfupdate --2
+                - echo "memory_limit = 512M" > $PHP_INI_DIR/conf.d/php-memory-limits.ini
+                # Install dependencies.
+                - composer install --no-ansi --no-interaction --optimize-autoloader --no-progress
+                # Run Drainpipe static tests.
+                - ./vendor/bin/task test:static
+          - step:
+              name: 'composer-lock-diff'
+              caches:
+                - composer
+              script:
+                - apt-get update && apt-get install jq
+                - composer global require davidrjonas/composer-lock-diff:^1.0
+                - COMPOSER_LOCK_DIFF=$(composer global exec -- "composer-lock-diff --from origin/$BITBUCKET_PR_DESTINATION_BRANCH")
+                # Are there any changes to composer.lock?
+                - |
+                  [ -z "$COMPOSER_LOCK_DIFF" ] && exit 0
+                - echo "$COMPOSER_LOCK_DIFF"
+                # Create the Bitbucket Pipelines "Report".
+                - REPORT_ID=webeco-composer-lock-diff-$BITBUCKET_PR_ID
+                - |
+                  curl \
+                    --proxy 'http://localhost:29418' \
+                    --request PUT \
+                    --url "http://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/commit/$BITBUCKET_COMMIT/reports/$REPORT_ID" \
+                    --header 'Accept: application/json' \
+                    --header 'Content-Type: application/json' \
+                    --data-raw '{
+                      "title": "composer-lock-diff",
+                      "details": "composer-lock-diff",
+                      "remote_link_enabled": true,
+                      "report_type": "COVERAGE",
+                      "result": "PASSED",
+                      "data": [
+                        {
+                            "title": "Results",
+                            "type": "TEXT",
+                            "value": "testing composer-lock-diff"
+                        }
+                      ]
+                    }'
+                # Create "Report Annotations" for each change in composer.lock.
+                - |
+                  while read ROW; do
+                    case "$ROW" in
+                      +* | ''                ) ;; # Skip lines without data.
+                      '| Production Changes'*) IS_DEV_DEPENDENCY=0 ;;
+                      '| Dev Changes'*       ) IS_DEV_DEPENDENCY=1 ;;
+                      *                      ) # Process rows with package info.
+                        # Remove spaces.
+                        printf -v ROW '%s' $ROW
+                        # Explode row into array of columns.
+                        IFS='|' read -ra COLS <<< "$ROW"
+                        if [ "${COLS[2]}" = 'NEW' ] ; then
+                          ANNOTATION="${COLS[1]} added @ v${COLS[3]}"
+                        else
+                          ANNOTATION="${COLS[1]} changed: v${COLS[2]} ⇾ v${COLS[3]}"
+                        fi
+                        if [ $IS_DEV_DEPENDENCY -eq 1 ] ; then
+                          ANNOTATION="$ANNOTATION (dev dependency)"
+                        fi
+                        ANNOTATION_ID="${REPORT_ID}-$(echo "${COLS[1]}" | sed 's/\///g')"
+                        curl \
+                          --proxy 'http://localhost:29418' \
+                          --request PUT \
+                          --url "http://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/commit/$BITBUCKET_COMMIT/reports/$REPORT_ID/annotations/$ANNOTATION_ID" \
+                          --header 'Accept: application/json' \
+                          --header 'Content-Type: application/json' \
+                          --data-raw "$( jq -n \
+                            --arg title "composer-lock-diff" \
+                            --arg annotation_type "CODE_SMELL" \
+                            --arg summary "$ANNOTATION" \
+                            --arg path "composer.lock" \
+                            '{
+                              title: $title,
+                              annotation_type: $annotation_type,
+                              summary: $summary,
+                              path: $path
+                            }' \
+                          )"
+                        ;;
+                    esac
+                  done <<< "$COMPOSER_LOCK_DIFF"
+      # The following parallel group will only start after all above steps
+      # have finished successfully.
+      - parallel:
+          - step:
+              name: 'Functional tests'
+              caches:
+                - composer
+              script:
+                - ./vendor/bin/task test:functional
+          - step:
+              name: 'Check Lighthouse reports'
+              script:
+                # Install the Tugboat CLI tool.
+                - wget https://dashboard.tugboat.qa/cli/linux/tugboat.tar.gz
+                - tar -zxf tugboat.tar.gz -C /usr/local/bin/
+                # Install jq.
+                - apt-get update && apt-get install jq
+                # Check the Lighthouse reports.
+                - |
+                  # Exit when any command fails (-e).
+                  set -e
+
+                  REPO='INSERT_TUGBOAT_REPO_ID_HERE';
+
+                  # Define here the accessibility thresholds for each URL being tested.
+                  declare -A thresholds
+                  thresholds["/"]=100
+                  thresholds["/user"]=100
+
+                  # @todo Implement a retry/timeout mechanism. Right now this always runs
+                  # after the preview is ready because this step is executed after others that
+                  # take some time, and our Tugboat builds relatively quickly. However, as we
+                  # move on, this might not always be the case.
+
+                  ref="pr${BITBUCKET_PR_ID}"
+                  filter='.[] | select(.ref == "'$ref'") | .id'
+                  PREVIEW_ID=$(tugboat --api-token $TUGBOAT_API_TOKEN --json list previews repo=${REPO} | jq -cr "${filter}")
+                  echo "Preview ID: ${PREVIEW_ID}"
+                  REPORTS=$(tugboat --api-token $TUGBOAT_API_TOKEN --json list lighthouse repo=${REPO} "${PREVIEW_ID}");
+                  # We could directly try to loop over it, but the collection could contain
+                  # elements with whitespaces or newlines, so we base64-encode each element first.
+                  for REPORT in $(echo "${REPORTS}" | jq -cr '.[] | @base64'); do
+                    URL=$(echo "${REPORT}" | base64 --decode | jq -cr '.url');
+                    CATEGORIES=$(echo "${REPORT}" | base64 --decode | jq -cr '.summary');
+                    for CATEGORY in $(echo "${CATEGORIES}" | jq -cr '.[] | @base64'); do
+                      ID=$(echo "${CATEGORY}" | base64 --decode | jq -cr '.id');
+                      if [ "$ID" = "accessibility" ]; then
+                        SCORE=$(echo "${CATEGORY}" | base64 --decode | jq -cr '.score');
+                        SCORE=$(( SCORE*100 ))
+                        if [ ${SCORE} -lt ${thresholds[$URL]} ]; then
+                          echo "[error] Failed accessibility check for URL: ${URL} . Score: ${SCORE} (Minimum: ${thresholds[$URL]})"
+                          exit 42;
+                        else
+                          echo "[success] URL ${URL} passed accessibility check with score ${SCORE} (Minimum: ${thresholds[$URL]})."
+                        fi
+                      fi
+                    done
+                  done
+
+                  echo "All Lighthouse checks are equal or above the expected thresholds."
