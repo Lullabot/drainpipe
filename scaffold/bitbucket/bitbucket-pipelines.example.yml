@@ -11,7 +11,6 @@ pipelines:
               name: 'Static tests'
               script:
                 # Prepare the environment.
-                - cp dist/.env.ci .env
                 - composer selfupdate --2
                 - echo "memory_limit = 512M" > $PHP_INI_DIR/conf.d/php-memory-limits.ini
                 # Install dependencies.
@@ -31,7 +30,7 @@ pipelines:
                   [ -z "$COMPOSER_LOCK_DIFF" ] && exit 0
                 - echo "$COMPOSER_LOCK_DIFF"
                 # Create the Bitbucket Pipelines "Report".
-                - REPORT_ID=webeco-composer-lock-diff-$BITBUCKET_PR_ID
+                - REPORT_ID="$BITBUCKET_REPO_SLUG-composer-lock-diff-$BITBUCKET_PR_ID"
                 - |
                   curl \
                     --proxy 'http://localhost:29418' \
