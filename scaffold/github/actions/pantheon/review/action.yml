@@ -104,7 +104,7 @@ runs:
         fi
         ENVIRONMENT_URL="https://pr-$DRAINPIPE_PR_NUMBER-${{ inputs.site-name }}.pantheonsite.io"
         # Lock Environment
-        if [ "${{ inputs.lock-username }}" != "" ] && [ "${{ inputs.lock-password" != "" ]; then
+        if [ "${{ inputs.lock-username }}" != "" ] && [ "${{ inputs.lock-password }}" != "" ]; then
           drainpipe_exec "terminus lock:enable ${{ inputs.site-name }.pr-$DRAINPIPE_PR_NUMBER ${{ inputs.lock-username }} ${{ inputs.lock-password }}"
           ENVIRONMENT_URL="https://${{ inputs.lock-username }}:${{ inputs.lock-password }}@pr-$DRAINPIPE_PR_NUMBER-${{ inputs.site-name }}.pantheonsite.io"
         fi
