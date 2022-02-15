@@ -19,6 +19,12 @@ inputs:
   commit-message:
     description: "The commit message to use when pushing to Pantheon"
     required: true
+  lock-username:
+    description: "The username if locking this environment with Basic Auth"
+    required: false
+  lock-password:
+    description: "The password if locking this environment with Basic Auth"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -96,7 +102,13 @@ runs:
         else
           drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
         fi
-        curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"success\", \"environment_url\": \"https://pr-$DRAINPIPE_PR_NUMBER-${{ inputs.site-name }}.pantheonsite.io\"}"
+        ENVIRONMENT_URL="https://pr-$DRAINPIPE_PR_NUMBER-${{ inputs.site-name }}.pantheonsite.io"
+        # Lock Environment
+        if [ "${{ inputs.lock-username }}" != "" ] && [ "${{ inputs.lock-password" != "" ]; then
+          drainpipe_exec "terminus lock:enable ${{ inputs.site-name }.pr-$DRAINPIPE_PR_NUMBER ${{ inputs.lock-username }} ${{ inputs.lock-password }}"
+          ENVIRONMENT_URL="https://${{ inputs.lock-username }}:${{ inputs.lock-password }}@pr-$DRAINPIPE_PR_NUMBER-${{ inputs.site-name }}.pantheonsite.io"
+        fi
+        curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"success\", \"environment_url\": \"$ENVIRONMENT_URL\"}"
       shell: bash
 
     - name: Set Deployment Failure Status
