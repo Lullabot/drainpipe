@@ -1,0 +1,28 @@
+name: "Update or Install Pantheon Site"
+description: "Runs the Drupal updater or the site installer in a Pantheon environment"
+inputs:
+  site-name:
+    description: "Pantheon site machine name"
+    required: true
+  run-installer:
+    description: "Whether or not to run the Drupal site installer. Defaults to false."
+    required: false
+  environment:
+    description: "The environment to run the updates or install in e.g. 'test'"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Update site on Pantheon
+      run: |
+        # Wait for Pantheon to sync
+        sleep 30
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
+        if [ "${{ inputs.run-installer }}" == "true" ]; then
+          drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.${{ inputs.environment }} --yes site:install --existing-config"
+        else
+          drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
+        fi
+      shell: bash
+
