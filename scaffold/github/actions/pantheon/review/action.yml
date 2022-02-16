@@ -29,6 +29,10 @@ runs:
   using: "composite"
   steps:
     - name: Set Drainpipe environment
+      uses: .github/actions/drainpipe/set-env
+      shell: bash
+
+    - name: Set Drainpipe environment
       run: source .github/actions/drainpipe/set-env/bash_aliases
       shell: bash
 
