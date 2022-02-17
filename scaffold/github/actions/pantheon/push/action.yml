@@ -1,0 +1,32 @@
+name: 'Push code to Pantheon'
+description: 'Pushes code to a Pantheon site'
+inputs:
+  terminus-token:
+    description: "Pantheon Terminus Token"
+    required: true
+  site-name:
+    description: "Pantheon site machine name"
+    required: true
+  site-id:
+    description: "Pantheon site UUID"
+    required: true
+  branch:
+    description: "Which branch to push to"
+    required: true
+  commit-message:
+    description: "The commit message to use when pushing to Pantheon"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Push to Pantheon
+      run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
+        ddev exec terminus auth:login --machine-token="${{ inputs.terminus-token }}"
+        if [ "${{ inputs.branch }}" == "master" ]; then
+          drainpipe_exec "terminus connection:set ${{ inputs.site-name }}.dev git --yes"
+        else
+          drainpipe_exec "terminus connection:set ${{ inputs.site-name }}.${{ inputs.branch }} git --yes"
+        fi
+        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=${{ inputs.branch }} remote=ssh://codeserver.dev.${{ inputs.site-id }}@codeserver.dev.${{ inputs.site-id }}.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\""
+      shell: bash
