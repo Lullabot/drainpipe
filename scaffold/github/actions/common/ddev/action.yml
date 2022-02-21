@@ -40,7 +40,7 @@ runs:
         ddev config global --instrumentation-opt-in=false --omit-containers=dba,ddev-ssh-agent
 
         if [ "${{ inputs.composer-cache-dir }}" != "false" ]; then
-          ddev config global --web-environment="COMPOSER_CACHE_DIR=/var/www/html/.ddev/.drainpipe-composer-cache"
+          ddev config --web-environment="COMPOSER_CACHE_DIR=/var/www/html/.ddev/.drainpipe-composer-cache"
         fi
 
         ddev start
