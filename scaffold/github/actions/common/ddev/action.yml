@@ -13,6 +13,9 @@ inputs:
   git-name:
     description: "Git name"
     required: false
+  composer-cache-dir:
+    description: "Composer cache directory, relative to the project workspace. Set to false to disable."
+    required: false
 runs:
   using: "composite"
   steps:
@@ -35,6 +38,11 @@ runs:
 
         curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh
         ddev config global --instrumentation-opt-in=false --omit-containers=dba,ddev-ssh-agent
+
+        if [ "${{ inputs.composer-cache-dir }}" != "false" ]; then
+          ddev config global --web-environment="COMPOSER_CACHE_DIR=/var/www/html/.ddev/.drainpipe-composer-cache"
+        fi
+
         ddev start
         ddev describe
 
