@@ -4,23 +4,22 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-      - uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+    - uses: actions/cache@v2
+      with:
+        path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
 
       - uses: ./.github/actions/drainpipe/set-env
 
