@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 # You will also need to add the secrets used below to Dependabot secrets
 # if you want this to successfully run in auto-created PRs.
 permissions:
