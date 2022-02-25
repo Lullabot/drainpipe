@@ -19,8 +19,8 @@ runs:
     - name: Push to Pantheon
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        SITE_ID=$(drainpipe_exec "terminus site:lookup ${{ inputs.site-name }}")
         ddev exec terminus auth:login --machine-token="${{ inputs.terminus-token }}"
+        SITE_ID=$(drainpipe_exec "terminus site:lookup ${{ inputs.site-name }}")
         if [ "${{ inputs.branch }}" == "master" ]; then
           drainpipe_exec "terminus connection:set ${{ inputs.site-name }}.dev git --yes"
         else
