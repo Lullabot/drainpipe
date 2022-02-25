@@ -68,5 +68,4 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
           site-name: [site-name]
-          site-id: [site-id]
           commit-message: ${{ github.event.head_commit.message }}
