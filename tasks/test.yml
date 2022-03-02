@@ -81,16 +81,19 @@ tasks:
     desc: Verifies that exported config matches the config in Drupal
     # @todo JUnit output
     cmds:
-      - if [ $(./vendor/bin/drush config:status --format=string | wc -w) -gt 0 ]; then echo "Config export does not match"; ./vendor/bin/drush config:status; exit 1; fi
+      - CONFIG_STATUS=$(./vendor/bin/drush config:status --format=string | wc -w)
+      - if [ "$CONFIG_STATUS" -gt 0 ]; then echo "Config export does not match"; ./vendor/bin/drush config:status; exit $CONFIG_STATUS; fi
   phpstan:
     dec: Runs PHPStan with mglaman/phpstan-drupal
     cmds:
       - |
+        {{ .FUNC_ENSURE_DIRS }}
+      - |
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe-dev/config/phpstan.neon --error-format=junit {{.TEST_DIRS}} > test_result/phpstan.xml
+          ./vendor/bin/phpstan analyse --error-format=junit {{.TEST_DIRS}} > test_result/phpstan.xml
         else
-          ./vendor/bin/phpstan analyse -c vendor/lullabot/drainpipe-dev/config/phpstan.neon {{.TEST_DIRS}}
+          ./vendor/bin/phpstan analyse {{.TEST_DIRS}}
         fi
   phpunit:
     desc: Runs PHPUnit

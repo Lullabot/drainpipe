@@ -2,7 +2,7 @@
     "name": "lullabot/drainpipe-dev",
     "description": "An automated build tool to allow projects to have a set standardized operations scripts.",
     "license": "GPL-2.0-or-later",
-    "type": "composer-plugin",
+    "type": "project",
     "autoload": {
         "psr-4": {"Lullabot\\DrainpipeDev\\": "src/"}
     },
@@ -22,7 +22,6 @@
         "mglaman/phpstan-drupal": "^1.0.3",
         "drush/drush": "^10.5",
         "symfony/yaml": "^4",
-        "lullabot/drainpipe": "^1.0",
         "drupal/coder": "^8.3",
         "friends-of-behat/mink-browserkit-driver": "^1.5",
         "tijsverkoyen/convert-to-junit-xml": "^1.9",
@@ -36,9 +35,18 @@
         "bin/drainpipe-convert-to-junit-xml"
     ],
     "extra": {
-        "class": [
-            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin",
-            "\\Lullabot\\DrainpipeDev\\DevScaffoldInstallerPlugin"
-        ]
+        "drupal-scaffold": {
+            "gitignore": true,
+            "file-mapping": {
+                "[project-root]/nightwatch.conf.js": "scaffold/nightwatch/nightwatch.conf.js",
+                "[web-root]/sites/chrome/settings.php": "scaffold/nightwatch/chrome.settings.php",
+                "[web-root]/sites/firefox/settings.php": "scaffold/nightwatch/firefox.settings.php",
+                "[web-root]/sites/default/sites.php": "scaffold/nightwatch/sites.php",
+                "[project-root]/.ddev/docker-compose.selenium.yaml": "scaffold/nightwatch/docker-compose.selenium.yaml",
+                "[project-root]/test/nightwatch/example.nightwatch.js": "scaffold/nightwatch/example.nightwatch.js",
+                "[project-root]/phpstan.neon": "scaffold/phpstan.neon",
+                "[project-root]/phpcs.xml": "scaffold/phpcs.xml"
+            }
+        }
     }
 }
