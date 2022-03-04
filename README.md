@@ -6,6 +6,22 @@ This is a composer package containing the testing helpers for Drainpipe i.e.
 should be included in `require-dev` and not installed in production
 environments.
 
+## Installation
+
+- Your Drupal project must be using `drupal/core-composer-scaffold`
+- Ensure your project's `composer.json` contains the following:
+  ```
+  "extra": {
+          "drupal-scaffold": {
+              "gitignore": true,
+              "allowed-packages": [
+                  "lullabot/drainpipe-dev"
+              ]
+          }
+  }
+  ```
+- Run `composer require lullabot/drainpipe-dev --dev`
+
 ## Usage
 
 ### `test:static`
