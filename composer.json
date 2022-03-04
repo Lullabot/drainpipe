@@ -19,6 +19,7 @@
         "mockery/mockery": "^1.4",
         "behat/mink": "^1.8",
         "symfony/phpunit-bridge": "^5.3",
+        "lullabot/drainpipe": "^1.0",
         "mglaman/phpstan-drupal": "^1.0.3",
         "drush/drush": "^10.5",
         "symfony/yaml": "^4",
@@ -50,6 +51,13 @@
                 "[project-root]/phpstan.neon": "scaffold/phpstan.neon",
                 "[project-root]/phpcs.xml": "scaffold/phpcs.xml"
             }
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "lullabot/drainpipe": true
         }
     }
 }
