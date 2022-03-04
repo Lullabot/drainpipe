@@ -102,8 +102,8 @@ the test runner.
 
 Whilst tests are running, you can view them in realtime through your browser.
 
-http://localhost:7900 for Chrome
-http://localhost:7901 for Firefox
+https://<ddev-site-name>:7900 for Chrome
+https://<ddev-site-name>:7901 for Firefox
 
 The password for all environments is `secret`.
 
