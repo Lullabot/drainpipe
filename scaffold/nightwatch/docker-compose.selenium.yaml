@@ -3,12 +3,16 @@ version: '3.6'
 services:
   chrome:
     container_name: ddev-${DDEV_SITENAME}-chrome
-    image: selenium/standalone-chrome:4.0.0-rc-1-prerelease-20210713
+    image: selenium/standalone-chrome:4.1.2-20220217
     labels:
       com.ddev.site-name: ${DDEV_SITENAME}
       com.ddev.approot: $DDEV_APPROOT
-    ports:
-      - 7900:7900
+    expose:
+      - 7900
+    environment:
+      - VIRTUAL_HOST=$DDEV_HOSTNAME
+      - HTTP_EXPOSE=7903:7900
+      - HTTPS_EXPOSE=7900:7900
     links:
       - web:web
       - web:drupal_chrome
@@ -17,12 +21,16 @@ services:
 
   firefox:
     container_name: ddev-${DDEV_SITENAME}-firefox
-    image: selenium/standalone-firefox:4.0.0-rc-1-prerelease-20210713
+    image: selenium/standalone-firefox:4.1.2-20220217
     labels:
       com.ddev.site-name: ${DDEV_SITENAME}
       com.ddev.approot: $DDEV_APPROOT
-    ports:
-      - 7901:7900
+    expose:
+      - 7900
+    environment:
+      - VIRTUAL_HOST=$DDEV_HOSTNAME
+      - HTTP_EXPOSE=7904:7900
+      - HTTPS_EXPOSE=7901:7900
     links:
       - web:web
       - web:drupal_firefox
