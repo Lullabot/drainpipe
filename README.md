@@ -72,7 +72,13 @@ Runs all functional tests i.e. those which require a running Drupal environment.
 Verifies that exported configuration matches the current configuration in
 Drupal's database.
 
+#### `test:nightwatch:setup`
+
+This will help you setup your project to run Nightwatch tests by installing
+the necessary node packages and DDEV configurations.
+
 #### `test:nightwatch`
+
 
 Runs functional browser tests with [Nightwatch](https://nightwatchjs.org/).
 
