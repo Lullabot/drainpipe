@@ -9,15 +9,25 @@ environments.
 ## Installation
 
 - Your Drupal project must be using `drupal/core-composer-scaffold`
-- Ensure your project's `composer.json` contains the following:
+- Run:
+  ```
+  composer config extra.drupal-scaffold.gitignore true
+  composer config --json --merge extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev"]'
+  ```
+  or if using DDEV:
+  ```
+  ddev composer config extra.drupal-scaffold.gitignore true
+  ddev composer "config --json extra.drupal-scaffold.allowed-packages '[\"lullabot/drainpipe-dev\"]'"
+  ```
+- Ensure your project's `composer.json` now contains the following:
   ```
   "extra": {
-          "drupal-scaffold": {
-              "gitignore": true,
-              "allowed-packages": [
-                  "lullabot/drainpipe-dev"
-              ]
-          }
+    "drupal-scaffold": {
+        "gitignore": true,
+        "allowed-packages": [
+            "lullabot/drainpipe-dev"
+        ]
+    }
   }
   ```
 - Run `composer require lullabot/drainpipe-dev --dev`
