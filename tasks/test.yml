@@ -219,7 +219,9 @@ tasks:
           echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS firefox; GRANT ALL ON firefox.* TO 'db'@'%';\"";
           echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO 'db'@'%';\"";
           echo ""
-          echo "Run:"
+          echo "------"
+          echo ""
+          echo "Then run:"
           echo ""
           echo "ddev config --web-environment=\"NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome\""
           echo "ddev config --additional-hostnames=\"*.$DDEV_SITENAME\""
