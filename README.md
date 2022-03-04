@@ -6,6 +6,32 @@ This is a composer package containing the testing helpers for Drainpipe i.e.
 should be included in `require-dev` and not installed in production
 environments.
 
+## Installation
+
+- Your Drupal project must be using `drupal/core-composer-scaffold`
+- Run:
+  ```
+  composer config extra.drupal-scaffold.gitignore true
+  composer config --json --merge extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev"]'
+  ```
+  or if using DDEV:
+  ```
+  ddev composer config extra.drupal-scaffold.gitignore true
+  ddev composer "config --json extra.drupal-scaffold.allowed-packages '[\"lullabot/drainpipe-dev\"]'"
+  ```
+- Ensure your project's `composer.json` now contains the following:
+  ```
+  "extra": {
+    "drupal-scaffold": {
+        "gitignore": true,
+        "allowed-packages": [
+            "lullabot/drainpipe-dev"
+        ]
+    }
+  }
+  ```
+- Run `composer require lullabot/drainpipe-dev --dev`
+
 ## Usage
 
 ### `test:static`
@@ -56,7 +82,13 @@ Runs all functional tests i.e. those which require a running Drupal environment.
 Verifies that exported configuration matches the current configuration in
 Drupal's database.
 
+#### `test:nightwatch:setup`
+
+This will help you setup your project to run Nightwatch tests by installing
+the necessary node packages and DDEV configurations.
+
 #### `test:nightwatch`
+
 
 Runs functional browser tests with [Nightwatch](https://nightwatchjs.org/).
 
@@ -70,8 +102,8 @@ the test runner.
 
 Whilst tests are running, you can view them in realtime through your browser.
 
-http://localhost:7900 for Chrome
-http://localhost:7901 for Firefox
+https://<ddev-site-name>:7900 for Chrome
+https://<ddev-site-name>:7901 for Firefox
 
 The password for all environments is `secret`.
 

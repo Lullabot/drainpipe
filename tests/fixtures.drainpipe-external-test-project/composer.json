@@ -41,6 +41,10 @@
   },
   "extra": {
     "drupal-scaffold": {
+      "gitignore": true,
+      "allowed-packages": [
+        "lullabot/drainpipe-dev"
+      ],
       "locations": {
         "web-root": "web/"
       }

@@ -19,10 +19,10 @@
         "mockery/mockery": "^1.4",
         "behat/mink": "^1.8",
         "symfony/phpunit-bridge": "^5.3",
+        "lullabot/drainpipe": "^1.0",
         "mglaman/phpstan-drupal": "^1.0.3",
         "drush/drush": "^10.5",
         "symfony/yaml": "^4",
-        "lullabot/drainpipe": "^1.0",
         "drupal/coder": "^8.3",
         "friends-of-behat/mink-browserkit-driver": "^1.5",
         "tijsverkoyen/convert-to-junit-xml": "^1.9",
@@ -37,8 +37,27 @@
     ],
     "extra": {
         "class": [
-            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin",
-            "\\Lullabot\\DrainpipeDev\\DevScaffoldInstallerPlugin"
-        ]
+            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin"
+        ],
+        "drupal-scaffold": {
+            "gitignore": true,
+            "file-mapping": {
+                "[project-root]/nightwatch.conf.js": "scaffold/nightwatch/nightwatch.conf.js",
+                "[web-root]/sites/chrome/settings.php": "scaffold/nightwatch/chrome.settings.php",
+                "[web-root]/sites/firefox/settings.php": "scaffold/nightwatch/firefox.settings.php",
+                "[web-root]/sites/default/sites.php": "scaffold/nightwatch/sites.php",
+                "[project-root]/.ddev/docker-compose.selenium.yaml": "scaffold/nightwatch/docker-compose.selenium.yaml",
+                "[project-root]/test/nightwatch/example.nightwatch.js": "scaffold/nightwatch/example.nightwatch.js",
+                "[project-root]/phpstan.neon": "scaffold/phpstan.neon",
+                "[project-root]/phpcs.xml": "scaffold/phpcs.xml"
+            }
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "lullabot/drainpipe": true
+        }
     }
 }
