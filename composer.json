@@ -2,7 +2,7 @@
     "name": "lullabot/drainpipe-dev",
     "description": "An automated build tool to allow projects to have a set standardized operations scripts.",
     "license": "GPL-2.0-or-later",
-    "type": "project",
+    "type": "composer-plugin",
     "autoload": {
         "psr-4": {"Lullabot\\DrainpipeDev\\": "src/"}
     },
@@ -35,6 +35,9 @@
         "bin/drainpipe-convert-to-junit-xml"
     ],
     "extra": {
+        "class": [
+            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin"
+        ],
         "drupal-scaffold": {
             "gitignore": true,
             "file-mapping": {
