@@ -28,3 +28,8 @@ $databases['default']['default'] = [
   'port' => $port,
   'prefix' => '',
 ];
+
+// Environment indicator settings.
+$config['environment_indicator.indicator']['name'] = 'Chrome';
+$config['environment_indicator.indicator']['bg_color'] = '#FFCD46';
+$config['environment_indicator.indicator']['fg_color'] = '#000000';

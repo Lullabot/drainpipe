@@ -28,3 +28,8 @@ $databases['default']['default'] = [
   'port' => $port,
   'prefix' => '',
 ];
+
+// Environment indicator settings.
+$config['environment_indicator.indicator']['name'] = 'Firefox';
+$config['environment_indicator.indicator']['bg_color'] = '#E66000';
+$config['environment_indicator.indicator']['fg_color'] = '#ffffff';
