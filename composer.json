@@ -45,7 +45,7 @@
                 "[project-root]/nightwatch.conf.js": "scaffold/nightwatch/nightwatch.conf.js",
                 "[web-root]/sites/chrome/settings.php": "scaffold/nightwatch/chrome.settings.php",
                 "[web-root]/sites/firefox/settings.php": "scaffold/nightwatch/firefox.settings.php",
-                "[web-root]/sites/default/sites.php": "scaffold/nightwatch/sites.php",
+                "[web-root]/sites/sites.php": "scaffold/nightwatch/sites.php",
                 "[project-root]/.ddev/docker-compose.selenium.yaml": "scaffold/nightwatch/docker-compose.selenium.yaml",
                 "[project-root]/test/nightwatch/example.nightwatch.js": "scaffold/nightwatch/example.nightwatch.js",
                 "[project-root]/phpstan.neon": "scaffold/phpstan.neon",

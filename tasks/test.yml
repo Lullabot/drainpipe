@@ -226,6 +226,21 @@ tasks:
           echo "ddev config --web-environment=\"NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome\""
           echo "ddev restart"
         fi
+  nightwatch:siteinstall:firefox:
+    desc: "Runs the site installer for the Firefox container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
+      - task: drupal:update
+        vars: { site: "--uri=https://drupal_firefox" }
+  nightwatch:siteinstall:chrome:
+    desc: "Runs the site installer for the Chrome container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
+      - task: drupal:update
+        vars: { site: "--uri=https://drupal_chrome" }
+  nightwatch:siteinstall:
+    desc: "Runs the site installer for the Firefox and Chrome containers"
+    deps: [nightwatch:siteinstall:firefox, nightwatch:siteinstall:chrome]
   nightwatch:
     desc: Runs Nighwatch functional browser tests
     deps: [nightwatch:check]

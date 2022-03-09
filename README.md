@@ -97,6 +97,23 @@ If you are using DDEV, Drainpipe will have created a
 containers, as well as an example test in
 `test/nightwatch/example.nightwatch.js`.
 
+To run the above test you will need to have a working Drupal installation in the
+Firefox and Chrome containers. You can run the `test:nightwatch:siteinstall`
+helper task to run the Drupal site installer for both sites with your existing
+configuration.
+
+After you've verified this test works, you can ignore it in your `composer.json`:
+```
+"extra": {
+        "drupal-scaffold": {
+            "file-mapping": {
+                "[project-root]/test/nightwatch/example.nightwatch.js": "scaffold/nightwatch/example.nightwatch.js": {
+			"mode": "skip"
+		}
+	}
+}
+```
+
 Nightwatch tests must have the suffix `.nightwatch.js` to be recognised by
 the test runner.
 
