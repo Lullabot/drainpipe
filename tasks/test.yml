@@ -161,8 +161,8 @@ tasks:
         fi
       - |
         if [ "$IS_DDEV_PROJECT" == "true" ]; then
-          HOST_FIREFOX="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox"
-          HOST_CHROME="NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"
+          HOST_FIREFOX="NIGHTWATCH_DRUPAL_URL_FIREFOX="
+          HOST_CHROME="NIGHTWATCH_DRUPAL_URL_CHROME="
           if ! grep -q "$HOST_FIREFOX" .ddev/config.yaml; then
             echo "No Firefox hostname found, please run test:nightwatch:setup"
             exit 1
@@ -231,14 +231,10 @@ tasks:
     desc: "Runs the site installer for the Firefox container"
     cmds:
       - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
-      - task: drupal:update
-        vars: { site: "--uri=https://drupal_firefox" }
   nightwatch:siteinstall:chrome:
     desc: "Runs the site installer for the Chrome container"
     cmds:
       - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
-      - task: drupal:update
-        vars: { site: "--uri=https://drupal_chrome" }
   nightwatch:siteinstall:
     desc: "Runs the site installer for the Firefox and Chrome containers"
     deps: [nightwatch:siteinstall:firefox, nightwatch:siteinstall:chrome]
