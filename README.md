@@ -51,6 +51,11 @@ available tasks can be shown by running `./vendor/bin/task --list` (or
 
 See https://github.com/Lullabot/drainpipe-dev
 
+### Defining Browser compatibility
+
+The best way to specify the browsers to target in the project is a `.browserslistrc` file in the project root. See https://github.com/postcss/autoprefixer
+for more info.
+
 ## Validation
 
 Your `Taskfile.yml` can be validated with JSON Schema:
