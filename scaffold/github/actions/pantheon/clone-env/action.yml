@@ -34,6 +34,6 @@ runs:
             rm db.env
             curl -o files.tar.gz $(drainpipe_exec "terminus backup:get ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=files")
             tar -xf files.tar.gz
-            drainpipe_exec "rsync -rLvz --delete --ipv4 --progress -e 'ssh -p 2222' ./files_${{ inputs.source-environment }}/. --temp-dir=~/tmp/ ${{ inputs.target-environment }}.$TARGET_SITE_ID@appserver.${{ inputs.target-environment }}.$TARGET_SITE_ID.drush.in:files"
+            drainpipe_exec "rsync -rLvz --delete --size-only --checksum --ipv4 --progress -e 'ssh -p 2222' ./files_${{ inputs.source-environment }}/. --temp-dir=~/tmp/ ${{ inputs.target-environment }}.$TARGET_SITE_ID@appserver.${{ inputs.target-environment }}.$TARGET_SITE_ID.drush.in:files"
           fi
         shell: bash
