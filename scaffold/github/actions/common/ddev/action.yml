@@ -36,7 +36,7 @@ runs:
         fi
         chmod 700 .ddev/homeadditions/.ssh
 
-        curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh
+        curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh v1.19.0-rc4
         ddev config global --instrumentation-opt-in=false --omit-containers=dba,ddev-ssh-agent
 
         if [ "${{ inputs.composer-cache-dir }}" != "false" ]; then

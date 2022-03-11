@@ -26,8 +26,9 @@ runs:
           if [ "${{ inputs.source-site-name }}" == "${{ inputs.target-site-name }}" ]; then
             drainpipe_exec "terminus env:clone-content ${{ inputs.source-site-name }}.${{ inputs.source-environment }} ${{ inputs.target-environment }}"
           else
+            drainpipe_exec "terminus backup:create ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=database"
+            drainpipe_exec "terminus backup:create ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=files"
             TARGET_SITE_ID=$(drainpipe_exec "terminus site:lookup ${{ inputs.target-site-name }}")
-            drainpipe_exec "terminus -y env:wipe ${{ inputs.target-site-name }}.${{ inputs.target-environment }}"
             DATABASE_URL=$(drainpipe_exec "terminus backup:get ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=database")
             # Can't pass the URL on the command line directly because it's got weird characters
             echo $DATABASE_URL > db.env
@@ -35,6 +36,6 @@ runs:
             rm db.env
             curl -o files.tar.gz $(drainpipe_exec "terminus backup:get ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=files")
             tar -xf files.tar.gz
-            drainpipe_exec "rsync -rLvz --size-only --checksum --ipv4 --progress -e 'ssh -p 2222' ./files_${{ inputs.source-environment }}/. --temp-dir=~/tmp/ ${{ inputs.target-environment }}.$TARGET_SITE_ID@appserver.${{ inputs.target-environment }}.$TARGET_SITE_ID.drush.in:files"
+            drainpipe_exec "rsync -rLvz --delete --size-only --checksum --ipv4 --progress -e 'ssh -p 2222' ./files_${{ inputs.source-environment }}/. --temp-dir=~/tmp/ ${{ inputs.target-environment }}.$TARGET_SITE_ID@appserver.${{ inputs.target-environment }}.$TARGET_SITE_ID.drush.in:files"
           fi
         shell: bash
