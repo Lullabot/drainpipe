@@ -16,6 +16,9 @@ inputs:
   composer-cache-dir:
     description: "Composer cache directory, relative to the project workspace. Set to false to disable."
     required: false
+  version:
+    description: "Override the DDEV version .e.g. '1.19.0'"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -36,7 +39,14 @@ runs:
         fi
         chmod 700 .ddev/homeadditions/.ssh
 
-        curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh v1.19.0-rc4
+        # Download and run the DDEV installer
+        curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh
+          bash install_ddev.sh v1.19.0
+        if [ "{{ inputs.version }}" != "" ]; then
+        else
+          bash install_ddev.sh v{{  inputs.version }}
+        fi
+        rm install_ddev.sh
         ddev config global --instrumentation-opt-in=false --omit-containers=dba,ddev-ssh-agent
 
         if [ "${{ inputs.composer-cache-dir }}" != "false" ]; then
@@ -45,7 +55,8 @@ runs:
           if [ "${{ inputs.composer-cache-dir }}" != "" ]; then
             CACHE_DIR="${{ inputs.composer-cache-dir }}"
           fi
-          ddev config --web-environment="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
+          # Composer cache disabled until https://github.com/drud/ddev/pull/3697 is released
+          #ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
         fi
 
         ddev start
