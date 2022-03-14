@@ -43,7 +43,7 @@ runs:
         if [ "${{ inputs.version }}" != "" ]; then
           curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh v${{ inputs.version }}
         else
-          curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh
+          curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh v1.19.0
         fi
         rm -f install_ddev.sh
 
