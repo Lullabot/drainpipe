@@ -41,7 +41,6 @@ runs:
 
         # Download and run the DDEV installer
         if [ "{{ inputs.version }}" != "" ]; then
-          bash install_ddev.sh v{{ inputs.version }}
           curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh v{{ inputs.version }}
         else
           curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh
