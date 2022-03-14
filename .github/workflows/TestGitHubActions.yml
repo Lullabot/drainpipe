@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Drainpipe-Deploy-Pantheon-Multidev:
+  Test-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
