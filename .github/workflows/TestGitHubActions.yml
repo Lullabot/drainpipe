@@ -28,4 +28,3 @@ jobs:
       - name: Build Project
         run: |
           ddev composer install
-          ddev task build
