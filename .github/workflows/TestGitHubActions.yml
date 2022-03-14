@@ -16,11 +16,9 @@ jobs:
 
       - name: Prepare Drupal
         run: |
-          cd ../
-          mkdir drupal
-          cd drupal
-          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/composer.json .
-          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
+          mv ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-github-actions/composer.json .
+          mv ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-github-actions/Taskfile.yml .
+          mv ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-github-actions/.ddev .
 
       - uses: ./scaffold/github/actions/common/set-env
 
