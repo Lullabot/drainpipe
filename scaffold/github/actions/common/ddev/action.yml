@@ -41,13 +41,13 @@ runs:
 
         # Download and run the DDEV installer
         curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh
-          bash install_ddev.sh v1.19.0
         if [ "{{ inputs.version }}" != "" ]; then
-          bash install_ddev.sh v{{  inputs.version }}
+          bash install_ddev.sh v{{ inputs.version }}
         else
           bash install_ddev.sh v1.19.0
         fi
         rm install_ddev.sh
+
         ddev config global --instrumentation-opt-in=false --omit-containers=dba,ddev-ssh-agent
 
         if [ "${{ inputs.composer-cache-dir }}" != "false" ]; then
