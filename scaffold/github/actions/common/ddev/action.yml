@@ -40,13 +40,13 @@ runs:
         chmod 700 .ddev/homeadditions/.ssh
 
         # Download and run the DDEV installer
-        curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh
         if [ "{{ inputs.version }}" != "" ]; then
           bash install_ddev.sh v{{ inputs.version }}
+          curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh v{{ inputs.version }}
         else
-          bash install_ddev.sh v1.19.0
+          curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh
         fi
-        rm install_ddev.sh
+        rm -f install_ddev.sh
 
         ddev config global --instrumentation-opt-in=false --omit-containers=dba,ddev-ssh-agent
 
@@ -57,7 +57,7 @@ runs:
             CACHE_DIR="${{ inputs.composer-cache-dir }}"
           fi
           # Composer cache disabled until https://github.com/drud/ddev/pull/3697 is released
-          #ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
+          # ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
         fi
 
         ddev start
