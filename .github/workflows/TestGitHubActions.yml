@@ -1,0 +1,33 @@
+name: "Test GitHub Actions"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Drainpipe-Deploy-Pantheon-Multidev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Prepare Drupal
+        run: |
+          cd ../
+          mkdir drupal
+          cd drupal
+          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/composer.json .
+          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
+
+      - uses: ./scaffold/github/actions/drainpipe/set-env
+
+      - name: Install and Start DDEV
+        uses: ./scaffold/github/actions/drainpipe/ddev
+
+      - name: Build Project
+        run: |
+          ddev composer install
+          ddev task build
