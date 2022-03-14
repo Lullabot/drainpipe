@@ -22,10 +22,10 @@ jobs:
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/composer.json .
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
 
-      - uses: ./scaffold/github/actions/drainpipe/set-env
+      - uses: ./scaffold/github/actions/common/set-env
 
       - name: Install and Start DDEV
-        uses: ./scaffold/github/actions/drainpipe/ddev
+        uses: ./scaffold/github/actions/common/ddev
 
       - name: Build Project
         run: |
