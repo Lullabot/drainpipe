@@ -76,7 +76,7 @@ assets:watch:
   deps: [sass:watch, javascript:watch]
 ```
 
-The following commands will be available on the root folder :
+You can then run the following tasks:
 - `ddev task assets` Default task to compile the CSS and JS once for production.
 - `ddev task assets:watch` Task to watch and build the changes while working on the theme.
 
