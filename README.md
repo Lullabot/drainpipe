@@ -58,8 +58,7 @@ for more info.
 
 ### CSS & JS asset automation
 
-Drainpipe provide default tasks to automate CSS & JavaScript generation with the
-submodules SASS and Javascript.
+Drainpipe provides tasks to automate Sass & JavaScript compilation.
 
 To enable them, first define the project variables `DRAINPIPE_SASS` and/or
 `DRAINPIPE_JAVASCRIPT` into the `Taskfile.yml` file.
