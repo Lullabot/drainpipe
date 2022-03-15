@@ -65,6 +65,7 @@ if (uniqueFileExtension.length !== 1) {
       plugins,
       entryPoints: scripts.map(script => script.split(':')[0]),
       outdir: uniqueBaseDir[0],
+      outbase: uniqueBaseDir[0],
       entryNames: `[dir]/[name].${uniqueFileExtension[0]}`,
       bundle: true,
       sourcemap: true,
