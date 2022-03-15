@@ -60,8 +60,8 @@ for more info.
 
 Drainpipe provides tasks to automate Sass & JavaScript compilation.
 
-To enable them, first define the project variables `DRAINPIPE_SASS` and/or
-`DRAINPIPE_JAVASCRIPT` into the `Taskfile.yml` file.
+To enable this, first define the project variables `DRAINPIPE_SASS` and/or
+`DRAINPIPE_JAVASCRIPT` in `Taskfile.yml`.
 
 Then define the task:
 ```
