@@ -56,6 +56,42 @@ See https://github.com/Lullabot/drainpipe-dev
 The best way to specify the browsers to target in the project is a `.browserslistrc` file in the project root. See https://github.com/postcss/autoprefixer
 for more info.
 
+### CSS & JS asset automation
+
+Drainpipe provide default tasks to automate CSS & JavaScript generation with the
+submodules SASS and Javascript.
+
+To enable them, first define the project variables `DRAINPIPE_SASS` and/or
+`DRAINPIPE_JAVASCRIPT` into the `Taskfile.yml` file.
+
+Then define the task:
+```
+assets:
+  desc: Builds assets such as CSS & JS
+  cmds:
+    - if [ -f "yarn.lock" ]; then yarn; else npm install; fi
+    - task: javascript:compile
+    - task: sass:compile
+assets:watch:
+  desc: Builds assets such as CSS & JS, and watches them for changes
+  deps: [sass:watch, javascript:watch]
+```
+
+The following commands will be available on the root folder :
+- `ddev task assets` Default task to compile the CSS and JS once for production.
+- `ddev task assets:watch` Task to watch and build the changes while working on the theme.
+
+#### CSS
+
+The task provided to compile CSS assets uses [Sass](https://sass-lang.com/).
+
+It includes SASS Glob to use glob imports to define a whole directory:
+
+```
+// Base
+@use "sass/base/**/*";
+```
+
 ## Validation
 
 Your `Taskfile.yml` can be validated with JSON Schema:
