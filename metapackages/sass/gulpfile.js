@@ -5,6 +5,7 @@ const { hideBin } = require('yargs/helpers')
 const { src, dest, task, watch, series } = require('gulp');
 const sass = require('gulp-sass')(require('sass'));
 const dartSass = require('sass');
+const sassGlob = require('gulp-sass-glob');
 const postcss = require('gulp-postcss');
 const sourcemaps = require('gulp-sourcemaps');
 const cssnano = require('cssnano');
@@ -43,6 +44,7 @@ const includes = Object.keys(srcs)
 task('sass', function() {
   return src(Object.keys(srcs))
     .pipe(sourcemaps.init())
+    .pipe(sassGlob())
     .pipe(sass.sync({
       outputStyle: 'compressed',
       includePaths: [modernNormalizePath],
@@ -63,6 +65,7 @@ task('sass', function() {
 task('development', function() {
   return src(Object.keys(srcs))
     .pipe(sourcemaps.init())
+    .pipe(sassGlob())
     .pipe(sass.sync({
       outputStyle: 'expanded',
       includePaths: [modernNormalizePath],
