@@ -79,7 +79,7 @@ drainpipe_pantheon_multidev_cleanup:
         # "-eq" used to check if $MR is a number or not.
         if [[ $ENVIRONMENT == review\/* ]] && [ "$MR" -eq "$MR" ]; then
           STATE=$(curl -s --fail -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$MR" | jq -r '.state')
-          if [ $STATE != "opened" ]; then
+          if [ "$STATE" != "opened" ]; then
             echo "Stopping GitLab environment $ENVIRONMENT ($ID)"
             curl -s --fail -X POST -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/environments/$ID/stop"
           fi
