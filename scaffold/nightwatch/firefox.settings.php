@@ -28,3 +28,18 @@ $databases['default']['default'] = [
   'port' => $port,
   'prefix' => '',
 ];
+
+/**
+ * Public file path.
+ */
+$settings['file_public_path'] = 'sites/firefox/files';
+
+/**
+ * Private files directory.
+ */
+$settings['file_private_path'] = 'sites/firefox/files/private';
+
+// Environment indicator settings.
+$config['environment_indicator.indicator']['name'] = 'Firefox';
+$config['environment_indicator.indicator']['bg_color'] = '#E66000';
+$config['environment_indicator.indicator']['fg_color'] = '#ffffff';

@@ -28,3 +28,18 @@ $databases['default']['default'] = [
   'port' => $port,
   'prefix' => '',
 ];
+
+/**
+ * Public file path.
+ */
+$settings['file_public_path'] = 'sites/chrome/files';
+
+/**
+ * Private files directory.
+ */
+$settings['file_private_path'] = 'sites/chrome/files/private';
+
+// Environment indicator settings.
+$config['environment_indicator.indicator']['name'] = 'Chrome';
+$config['environment_indicator.indicator']['bg_color'] = '#FFCD46';
+$config['environment_indicator.indicator']['fg_color'] = '#000000';
