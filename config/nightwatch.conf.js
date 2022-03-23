@@ -82,6 +82,7 @@ module.exports = {
             '--no-sandbox',
             '--ignore-certificate-errors',
             '--allow-insecure-localhost',
+            '--disable-dev-shm-usage',
             //'--headless'
           ]
         }
