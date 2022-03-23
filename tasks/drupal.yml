@@ -42,9 +42,9 @@ tasks:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
     cmds:
       - echo "🚮 Dropping existing database"
-      - ./vendor/bin/drush sql:drop --yes
+      - ./vendor/bin/drush {{ .site }} sql:drop --yes
       - echo "📰 Importing database"
-      - ./vendor/bin/drush sql:query --file=$DB_DIR/db.sql.gz
+      - ./vendor/bin/drush {{ .site }} sql:query --file=$DB_DIR/db.sql.gz
       - defer: rm -f $DB_DIR/db.sql
   export-db:
     desc: "Exports a database fetches with a *:fetch-db command"
@@ -52,7 +52,7 @@ tasks:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
     cmds:
       - echo "➡ Exporting database"
-      - ./vendor/bin/drush sql:dump --result-file=$DB_DIR/db.sql.gz
+      - ./vendor/bin/drush {{.site }} sql:dump --result-file=$DB_DIR/db.sql.gz
   update:
     desc: Run Drupal update tasks after deploying new code
     cmds:
