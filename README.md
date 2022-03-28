@@ -107,7 +107,7 @@ After you've verified this test works, you can ignore it in your `composer.json`
 "extra": {
         "drupal-scaffold": {
             "file-mapping": {
-                "[project-root]/test/nightwatch/example.nightwatch.js": "scaffold/nightwatch/example.nightwatch.js": {
+                "[project-root]/test/nightwatch/example.nightwatch.js": {
 			"mode": "skip"
 		}
 	}
