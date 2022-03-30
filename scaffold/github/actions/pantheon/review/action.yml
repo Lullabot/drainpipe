@@ -60,6 +60,12 @@ runs:
           # if $MULTIDEV starts with "pr-"
           elif [[ $MULTIDEV == pr-* ]]; then
             echo "No PR for $MULTIDEV, shutting down..."
+            DEPLOYMENTS=$(curl -s -f -H "Authorization: token ${{ inputs.github-token }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments?environment=pantheon-$MULTIDEV | jq '.[] | .id')
+            for DEPLOYMENT_ID in $DEPLOYMENTS; do
+              echo "Marking GitHub Deployment $DEPLOYMENT_ID as inactive"
+              curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses -d "{\"state\":\"inactive\"}"
+              curl -H "Authorization: token ${{ inputs.github-token }}" -X DELETE -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/environments/pantheon-$MULTIDEV
+            done
             drainpipe_exec "terminus multidev:delete ${{ inputs.site-name }}.$MULTIDEV --delete-branch --yes"
           else
             "Dangling Multidev environment $MULTIDEV found, no action taken."
