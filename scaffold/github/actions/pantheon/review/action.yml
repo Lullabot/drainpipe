@@ -64,6 +64,7 @@ runs:
             for DEPLOYMENT in $DEPLOYMENTS; do
               echo "Marking GitHub Deployment $DEPLOYMENT as inactive"
               curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses -d "{\"state\":\"inactive\"}"
+              curl -H "Authorization: token ${{ inputs.github-token }}" -X DELETE -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/environments/pantheon-$MULTIDEV"
             done
             drainpipe_exec "terminus multidev:delete ${{ inputs.site-name }}.$MULTIDEV --delete-branch --yes"
           else
