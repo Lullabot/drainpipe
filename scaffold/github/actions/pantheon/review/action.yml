@@ -61,8 +61,8 @@ runs:
           elif [[ $MULTIDEV == pr-* ]]; then
             echo "No PR for $MULTIDEV, shutting down..."
             DEPLOYMENTS=$(curl -s -f -H "Authorization: token ${{ inputs.github-token }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments?environment=pantheon-$MULTIDEV | jq '.[] | .id')
-            for DEPLOYMENT in $DEPLOYMENTS; do
-              echo "Marking GitHub Deployment $DEPLOYMENT as inactive"
+            for DEPLOYMENT_ID in $DEPLOYMENTS; do
+              echo "Marking GitHub Deployment $DEPLOYMENT_ID as inactive"
               curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses -d "{\"state\":\"inactive\"}"
               curl -H "Authorization: token ${{ inputs.github-token }}" -X DELETE -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/environments/pantheon-$MULTIDEV
             done
