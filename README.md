@@ -9,11 +9,20 @@ for a Drupal site, including:
 
 ## Installation
 
+### Initial scaffolding for all projects
+
 ```sh
 composer require lullabot/drainpipe
-# Includes development dependencies, but only in the `require-dev` section. This step is required for Drainpipe to provide test helpers.
-composer require lullabot/drainpipe-dev --dev
-# To compile Sass and Javascript via their respective tasks, add these node packages.
+```
+
+### Automated Testing Scaffolding
+Follow the directions at [lullabot/drainpipe-dev](https://github.com/Lullabot/drainpipe-dev#installation) to include development dependencies.
+
+### Front-end Scaffolding
+
+To compile Sass and Javascript via their respective tasks, add these node packages by copy-pasting into your shell in the root of your project:
+
+```console
 PACKAGES="
 @lullabot/drainpipe-sass
 @lullabot/drainpipe-javascript
@@ -24,6 +33,8 @@ else
   npm install $PACKAGES
 fi
 ```
+
+### DDEV Integration
 
 Drainpipe integrates with [DDEV](https://ddev.readthedocs.io/en/stable/), but
 will only add the relevant files when DDEV is detected in the repository. Either
