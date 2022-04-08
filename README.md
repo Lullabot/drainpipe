@@ -17,7 +17,7 @@ environments.
   or if using DDEV:
   ```
   ddev composer config extra.drupal-scaffold.gitignore true
-  ddev composer "config --json extra.drupal-scaffold.allowed-packages '[\"lullabot/drainpipe-dev\"]'"
+  ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe-dev\"]
   ```
 - Ensure your project's `composer.json` now contains the following:
   ```
