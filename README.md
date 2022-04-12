@@ -73,6 +73,7 @@ Drainpipe provides tasks to automate Sass & JavaScript compilation.
 
 To enable this, first define the project variables `DRAINPIPE_SASS` and/or
 `DRAINPIPE_JAVASCRIPT` in `Taskfile.yml`.
+You can define several entries, one per line.
 
 Then define the task:
 ```
@@ -101,6 +102,12 @@ It includes SASS Glob to use glob imports to define a whole directory:
 // Base
 @use "sass/base/**/*";
 ```
+
+#### JS
+
+Source and target need to have the same basedir (web or docroot) due to being
+unable to provide separate entryNames.
+See https://github.com/evanw/esbuild/issues/224
 
 ## Validation
 
