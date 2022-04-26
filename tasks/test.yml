@@ -19,10 +19,10 @@ vars:
 tasks:
   static:
     desc: Runs all static tests
-    deps: [security, lint, phpstan, phpunit, phpcs]
+    deps: [security, lint, phpstan, phpunit:static, phpcs]
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
-    deps: [config, nightwatch]
+    deps: [config, phpunit:functional, nightwatch]
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
@@ -113,6 +113,25 @@ tasks:
         else
           ./vendor/bin/phpunit {{.TEST_DIRS}}
         fi
+  phpunit:static:
+    desc: Runs PHPUnit unit tests
+    cmds:
+      - |
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpunit --testsuite=unit --log-junit test_result/phpunit.xml
+        else
+          ./vendor/bin/phpunit --testsuite=unit
+        fi
+    phpunit:functional:
+      desc: Runs PHPUnit functional tests
+      cmds:
+        - |
+          if [ "{{.format}}" == "junit" ]; then
+            mkdir -p test_result
+            ./vendor/bin/phpunit --exclude-testsuite=unit --log-junit test_result/phpunit.xml
+          else
+            ./vendor/bin/phpunit --exclude-testsuite=unit
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
     summary: |

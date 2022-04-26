@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.1/phpunit.xsd"
+         backupGlobals="false"
+         colors="true"
+         bootstrap="web/core/tests/bootstrap.php"
+         verbose="true"
+>
+  <testsuites>
+    <testsuite name="unit">
+      <directory>./web/modules/custom/*/tests/src/Unit</directory>
+      <directory>./test/phpunit/Unit</directory>
+    </testsuite>
+    <testsuite name="kernel">
+      <directory>./web/modules/custom/*/tests/src/Kernel</directory>
+      <directory>./test/phpunit/Kernel</directory>
+    </testsuite>
+    <testsuite name="functional">
+      <directory>./web/profiles/custom/*/tests/src/Functional</directory>
+      <directory>./test/phpunit/Functional</directory>
+    </testsuite>
+    <testsuite name="functional-javascript">
+      <directory>./web/profiles/custom/*/tests/src/FunctionalJavaScript</directory>
+      <directory>./test/phpunit/FunctionalJavaScript</directory>
+    </testsuite>
+    <testsuite name="build">
+      <directory>./web/profiles/custom/*/tests/src/Build</directory>
+      <directory>./test/phpunit/Build</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
