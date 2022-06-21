@@ -19,7 +19,12 @@ services:
     external_links:
       - ddev-router:${DDEV_SITENAME}.${DDEV_TLD}
     volumes:
-      - ".:/mnt/ddev_config"
+      - type: bind
+        source: ../
+        target: /var/www/html
+        consistency: cached
+      - ".:/mnt/ddev_config:ro"
+      - ddev-global-cache:/mnt/ddev-global-cache
 
   firefox:
     container_name: ddev-${DDEV_SITENAME}-firefox
@@ -40,4 +45,9 @@ services:
     external_links:
       - ddev-router:${DDEV_SITENAME}.${DDEV_TLD}
     volumes:
-      - ".:/mnt/ddev_config"
+      - type: bind
+        source: ../
+        target: /var/www/html
+        consistency: cached
+      - ".:/mnt/ddev_config:ro"
+      - ddev-global-cache:/mnt/ddev-global-cache
