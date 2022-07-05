@@ -11,5 +11,10 @@
   "prefer-stable": true,
   "require": {
     "lullabot/drainpipe": "*"
+  },
+  "config": {
+    "allow-plugins": {
+      "lullabot/drainpipe": true
+    }
   }
 }
