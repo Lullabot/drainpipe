@@ -27,7 +27,8 @@
     },
     "config": {
         "allow-plugins": {
-            "composer/installers": true
+            "composer/installers": true,
+            "drupal/core-composer-scaffold": true
         }
     }
 }
