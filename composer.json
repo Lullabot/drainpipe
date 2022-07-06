@@ -24,5 +24,13 @@
             "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin",
             "\\Lullabot\\Drainpipe\\BinaryInstallerPlugin"
         ]
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "drupal/core-composer-scaffold": true,
+            "drupal/core-project-message": true,
+            "lullabot/drainpipe": true
+        }
     }
 }
