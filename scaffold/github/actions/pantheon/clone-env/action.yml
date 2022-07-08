@@ -24,7 +24,7 @@ runs:
           source .github/actions/drainpipe/set-env/bash_aliases
           drainpipe_exec "terminus auth:login --machine-token=\"${{ inputs.terminus-token }}\""
           if [ "${{ inputs.source-site-name }}" == "${{ inputs.target-site-name }}" ]; then
-            drainpipe_exec "terminus env:clone-content ${{ inputs.source-site-name }}.${{ inputs.source-environment }} ${{ inputs.target-environment }}"
+            drainpipe_exec "terminus -y env:clone-content ${{ inputs.source-site-name }}.${{ inputs.source-environment }} ${{ inputs.target-environment }}"
           else
             drainpipe_exec "terminus backup:create ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=database"
             drainpipe_exec "terminus backup:create ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=files"
