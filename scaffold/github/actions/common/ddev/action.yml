@@ -24,6 +24,7 @@ runs:
   steps:
     - name: Install and Start DDEV
       run: |
+        sudo apt update
         sudo apt install libnss3-tools
 
         mkdir -p .ddev/homeadditions/.ssh
