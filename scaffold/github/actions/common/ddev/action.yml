@@ -25,7 +25,7 @@ runs:
     - name: Install and Start DDEV
       run: |
         sudo apt update
-        sudo apt install libnss3-tools
+        sudo apt install libnss3-tools -y
 
         mkdir -p .ddev/homeadditions/.ssh
         # Copy private key
