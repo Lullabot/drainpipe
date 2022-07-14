@@ -4,37 +4,39 @@
          xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.1/phpunit.xsd"
          backupGlobals="false"
          colors="true"
-         bootstrap="vendor/weitzman/drupal-test-traits/src/bootstrap-fast.php"
+         bootstrap="../../../weitzman/drupal-test-traits/src/bootstrap.php"
          verbose="true"
-        >
+>
   <testsuites>
     <testsuite name="unit">
-      <directory>./web/modules/custom/*/tests/src/Unit</directory>
+      <directory>./web/modules/custom/**/tests/src/Unit</directory>
       <directory>./test/phpunit/*/Unit</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>./web/modules/custom/*/tests/src/Kernel</directory>
-      <directory>./test/phpunit/*/Kernel</directory>
+      <directory>./web/modules/custom/**/tests/src/Kernel</directory>
+      <directory>./test/phpunit/**/Kernel</directory>
     </testsuite>
     <testsuite name="functional">
-      <directory>./web/profiles/custom/*/tests/src/Functional</directory>
-      <directory>./test/phpunit/*/Functional</directory>
+      <directory>./web/profiles/custom/**/tests/src/Functional</directory>
+      <directory>./test/phpunit/**/Functional</directory>
     </testsuite>
     <testsuite name="functional-javascript">
-      <directory>./web/profiles/custom/*/tests/src/FunctionalJavaScript</directory>
-      <directory>./test/phpunit/*/FunctionalJavaScript</directory>
+      <directory>./web/profiles/custom/**/tests/src/FunctionalJavaScript</directory>
+      <directory>./test/phpunit/**/FunctionalJavaScript</directory>
     </testsuite>
     <testsuite name="build">
-      <directory>./web/profiles/custom/*/tests/src/Build</directory>
-      <directory>./test/phpunit/*/Build</directory>
+      <directory>./web/profiles/custom/**/tests/src/Build</directory>
+      <directory>./test/phpunit/**/Build</directory>
     </testsuite>
     <testsuite name="existing-site">
       <!-- Assumes tests are namespaced as \Drupal\Tests\custom_foo\ExistingSite. -->
-      <directory>./web/modules/custom/*/tests/src/ExistingSite</directory>
+      <directory>./web/modules/custom/**/tests/src/ExistingSite</directory>
+      <directory>./test/phpunit/**/ExistingSite</directory>
     </testsuite>
     <testsuite name="existing-site-javascript">
       <!-- Assumes tests are namespaced as \Drupal\Tests\custom_foo\ExistingSiteJavascript. -->
-      <directory>./web/modules/custom/*/tests/src/ExistingSiteJavascript</directory>
+      <directory>./web/modules/custom/**/tests/src/ExistingSiteJavascript</directory>
+      <directory>./test/phpunit/**/ExistingSiteJavascript</directory>
     </testsuite>
   </testsuites>
 </phpunit>
