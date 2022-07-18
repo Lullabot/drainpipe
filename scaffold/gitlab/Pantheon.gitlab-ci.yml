@@ -7,4 +7,5 @@
     - curl -L https://github.com/pantheon-systems/terminus/releases/download/3.0.7/terminus.phar --output ~/terminus/terminus
     - chmod +x ~/terminus/terminus
     - ln -s ~/terminus/terminus /usr/local/bin/terminus
+    - terminus self:plugin:install pantheon-systems/terminus-secrets-plugin
     - terminus auth:login --machine-token="$PANTHEON_TERMINUS_TOKEN"
