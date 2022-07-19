@@ -139,7 +139,7 @@ tasks:
           mkdir -p test_result
           ./vendor/bin/phpunit --exclude-testsuite=unit -c vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml --log-junit test_result/phpunit.xml
         else
-          ./vendor/bin/phpunit -c vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml --exclude-testsuite=unit
+          ./vendor/bin/phpunit -c vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml --exclude-group=unit
         fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
