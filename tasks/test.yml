@@ -127,20 +127,20 @@ tasks:
         else
           ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
         fi
-    phpunit:functional:
-      desc: Runs PHPUnit functional tests
-      cmds:
-        - |
-          CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml"
-          if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-            CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit-testtraits.xml"
-          fi
-          if [ "{{.format}}" == "junit" ]; then
-            mkdir -p test_result
-            ./vendor/bin/phpunit --exclude-testsuite=unit -c vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml --log-junit test_result/phpunit.xml
-          else
-            ./vendor/bin/phpunit -c vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml --exclude-testsuite=unit
-          fi
+  phpunit:functional:
+    desc: Runs PHPUnit functional tests
+    cmds:
+      - |
+        CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml"
+        if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
+          CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit-testtraits.xml"
+        fi
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpunit --exclude-testsuite=unit -c vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml --log-junit test_result/phpunit.xml
+        else
+          ./vendor/bin/phpunit -c vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml --exclude-testsuite=unit
+        fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
     summary: |
