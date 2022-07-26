@@ -4,6 +4,9 @@ inputs:
   pantheon-token:
     description: "Pantheon Terminus Token"
     required: true
+  terminus-plugins:
+    description: "Terminus plugins"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -13,5 +16,6 @@ runs:
         curl -L https://github.com/pantheon-systems/terminus/releases/download/3.0.7/terminus.phar --output ~/terminus/terminus
         chmod +x ~/terminus/terminus
         ln -s ~/terminus/terminus /usr/local/bin/terminus
+        echo "${{ inputs.terminus-plugins }}" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
         terminus auth:login --machine-token="${{ inputs.pantheon-token }}"
       shell: bash

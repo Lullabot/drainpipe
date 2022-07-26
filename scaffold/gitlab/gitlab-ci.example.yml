@@ -32,6 +32,9 @@ variables:
   # Only supported by GitLab Premium or self-hosted GitLab
   # Needs "api" scope. Used by Composer Lock Diff and Pantheon Multidev Cleanup.
   #GITLAB_ACCESS_TOKEN
+  #
+  # A comma-separated list of Terminus plugins to install
+  #TERMINUS_PLUGINS
 
 cache:
   key:
