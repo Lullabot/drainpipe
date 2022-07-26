@@ -183,3 +183,4 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
   - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
   - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
+  - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
