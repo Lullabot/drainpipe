@@ -12,13 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/cache@v2
-        with:
-          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
       - name: Fetch Actions
         run: git clone https://github.com/Lullabot/drainpipe.git
 
@@ -32,6 +25,7 @@ jobs:
 
       - name: Build Project
         run: |
+          cd ../
           composer create-project drupal/recommended-project drupal
           cd drupal
           ddev config --auto
