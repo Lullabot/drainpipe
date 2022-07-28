@@ -1,0 +1,61 @@
+name: Test PHPUnit Integration
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  Test-PHPUnit-Integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Fetch Actions
+        run: git clone https://github.com/Lullabot/drainpipe.git
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install and Start DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Build Project
+        run: |
+          composer create-project drupal/recommended-project drupal
+          cd drupal
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe-dev\"]
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev composer require lullabot/drainpipe
+          ddev composer require lullabot/drainpipe-dev weitzman/drupal-test-traits drupal/drupal-extension friends-of-behat/mink-extension --dev
+          # Restart is required to enable the provided Selenium containers
+          mkdir web/modules/custom
+          cp -R ../tests/fixtures/test-traits/testmodule web/modules/custom/
+          cp ../tests/fixtures/test-traits/Taskfile.yml .
+          ddev drush site:install -y
+          ddev drush user:password admin password
+
+      - name: Run PHPUnit Functional Tests
+        run: |
+          ddev task test:phpunit:functional
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_result
+          path: test_result
