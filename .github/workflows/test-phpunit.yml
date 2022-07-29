@@ -51,9 +51,12 @@ jobs:
           cd ../drupal
           ddev task test:phpunit:functional
 
+      - name: Move Test Results Into The Workspace
+        run: mv ../drupal/test_results .
+
       - name: Upload test artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: test_result
-          path: ../drupal/test_result
+          path: test_result
