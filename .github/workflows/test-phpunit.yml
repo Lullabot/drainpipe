@@ -31,7 +31,9 @@ jobs:
           ddev config --auto
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe-dev\"]
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe-dev\",\"lullabot/drainpipe\"]
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
           ddev composer require lullabot/drainpipe
