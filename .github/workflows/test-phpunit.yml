@@ -39,6 +39,7 @@ jobs:
           ddev composer require lullabot/drainpipe
           ddev composer require lullabot/drainpipe-dev weitzman/drupal-test-traits drupal/drupal-extension friends-of-behat/mink-extension --dev
           # Restart is required to enable the provided Selenium containers
+          ddev restart
           mkdir web/modules/custom
           cp -R ../drainpipe-dev/tests/fixtures/test-traits/testmodule web/modules/custom/
           cp ../drainpipe-dev/tests/fixtures/test-traits/Taskfile.yml .
