@@ -48,6 +48,7 @@ jobs:
 
       - name: Run PHPUnit Functional Tests
         run: |
+          cd ../drupal
           ddev task test:phpunit:functional
 
       - name: Upload test artifacts
@@ -55,4 +56,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: test_result
-          path: test_result
+          path: ../drupal/test_result
