@@ -7,7 +7,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  Test-PHPUnit-Integration:
+  Test-PHPUnit-Functional:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -61,7 +61,8 @@ jobs:
         with:
           name: test_result
           path: test_result
-  Test-PHPUnit-Integration-DTT:
+
+  Test-PHPUnit-Functional-DTT:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -111,6 +112,61 @@ jobs:
       - name: Move Test Results Into The Workspace
         run: |
           mv ../drupal/test_result .
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_result
+          path: test_result
+
+  Test-PHPUnit-Static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Fetch Actions
+        run: git clone https://github.com/Lullabot/drainpipe.git
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install and Start DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Build Project
+        run: |
+          cd ../
+          composer create-project drupal/recommended-project drupal
+          cd drupal
+          cp -R $GITHUB_WORKSPACE .
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe-dev\",\"lullabot/drainpipe\"]
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev composer config repositories.drainpipe-dev --json "{\"type\": \"path\", \"url\": \"drainpipe-dev\", \"options\": {\"symlink\": false}}"
+          ddev composer config minimum-stability dev
+          ddev composer require lullabot/drainpipe
+          ddev composer require lullabot/drainpipe-dev --dev
+          # Restart is required to enable the provided Selenium containers
+          ddev restart
+          mkdir web/modules/custom
+          cp -R ../drainpipe-dev/tests/fixtures/phpunit/testmodule web/modules/custom/
+          cp ../drainpipe-dev/tests/fixtures/phpunit/Taskfile.yml .
+
+      - name: Run PHPUnit Tests
+        run: |
+          cd ../drupal
+          ddev task test:phpunit:static format=junit
+
+      - name: Move Test Results Into The Workspace
+        run: mv ../drupal/test_result .
 
       - name: Upload test artifacts
         if: ${{ always() }}

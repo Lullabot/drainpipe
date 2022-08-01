@@ -103,16 +103,7 @@ tasks:
         fi
   phpunit:
     desc: Runs PHPUnit
-    cmds:
-      - |
-        {{ .FUNC_ENSURE_DIRS }}
-      - |
-        if [ "{{.format}}" == "junit" ]; then
-          mkdir -p test_result
-          ./vendor/bin/phpunit --log-junit test_result/phpunit.xml {{.TEST_DIRS}}
-        else
-          ./vendor/bin/phpunit {{.TEST_DIRS}}
-        fi
+    deps: [phpunit:static, phpunit:functional]
   phpunit:static:
     desc: Runs PHPUnit unit tests
     cmds:
