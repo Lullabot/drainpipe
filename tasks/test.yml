@@ -137,7 +137,7 @@ tasks:
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpunit --exclude-testsuite=unit -c $CONFIG --log-junit test_result/phpunit.xml
+          ./vendor/bin/phpunit --exclude-group=unit -c $CONFIG --log-junit test_result/phpunit.xml
         else
           ./vendor/bin/phpunit -c $CONFIG --exclude-group=unit
         fi
