@@ -50,8 +50,6 @@ jobs:
       - name: Run PHPUnit Functional Tests
         run: |
           cd ../drupal
-          ddev drush site:install -y
-          ddev drush user:password admin password
           ddev task test:phpunit:functional
 
       - name: Move Test Results Into The Workspace
