@@ -92,6 +92,9 @@ This will additionally look for tests in:
 - `web/modules/custom/**/tests/src/ExistingSiteJavascript`
 - `test/phpunit/**/ExistingSiteJavascript`
 
+You will need to ensure a running Drupal site is available for running DTT tests,
+e.g. by running the site installer.
+
 #### `test:phpcs`
 
 Runs PHPCS with Drupal coding standards provided by
