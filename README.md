@@ -65,8 +65,32 @@ Runs [PHPStan](https://phpstan.org/) with
 
 #### `test:phpunit`
 
-Runs PHPUnit tests in `web/modules/custom`, `web/themes/custom`, and
-`web/sites`.
+Runs PHPUnit tests in:
+- `web/modules/custom/**/tests/src/Unit`
+- `test/phpunit/**/Unit`
+- `web/modules/custom/**/tests/src/Kernel`
+- `test/phpunit/**/Kernel`
+- `web/modules/custom/**/tests/src/Functional`
+- `test/phpunit/**/Functional`
+- `web/modules/custom/**/tests/src/FunctionalJavaScript`
+- `test/phpunit/**/FunctionalJavaScript`
+
+When running the main `test` task, this is split into `test:phpunit:functional`
+and `test:phpunit:static`.
+
+Support for [DTT](https://gitlab.com/weitzman/drupal-test-traits) is included,
+just set this in your `Taskfile.yml`:
+
+```
+vars:
+  DRUPAL_TEST_TRAITS: true
+```
+
+This will additionally look for tests in:
+- `web/modules/custom/**/tests/src/ExistingSite`
+- `test/phpunit/**/ExistingSite`
+- `web/modules/custom/**/tests/src/ExistingSiteJavascript`
+- `test/phpunit/**/ExistingSiteJavascript`
 
 #### `test:phpcs`
 
