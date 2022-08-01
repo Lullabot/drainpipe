@@ -50,7 +50,7 @@ jobs:
       - name: Run PHPUnit Functional Tests
         run: |
           cd ../drupal
-          ddev task test:phpunit:functional
+          ddev task test:phpunit:functional format=junit
 
       - name: Move Test Results Into The Workspace
         run: mv ../drupal/test_result .
@@ -106,13 +106,10 @@ jobs:
           cd ../drupal
           ddev drush site:install -y
           ddev drush user:password admin password
-          ddev task test:phpunit:functional
+          ddev task test:phpunit:functional format=junit
 
       - name: Move Test Results Into The Workspace
         run: |
-          pwd
-          ls ../
-          ls ../drupal
           mv ../drupal/test_result .
 
       - name: Upload test artifacts
