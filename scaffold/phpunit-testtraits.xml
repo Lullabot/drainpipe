@@ -41,16 +41,12 @@
       <directory>../../../../test/phpunit/**/Kernel</directory>
     </testsuite>
     <testsuite name="functional">
-      <directory>../../../../web/profiles/custom/**/tests/src/Functional</directory>
+      <directory>../../../../web/modules/custom/**/tests/src/Functional</directory>
       <directory>../../../../test/phpunit/**/Functional</directory>
     </testsuite>
     <testsuite name="functional-javascript">
-      <directory>../../../../web/profiles/custom/**/tests/src/FunctionalJavaScript</directory>
+      <directory>../../../../web/modules/custom/**/tests/src/FunctionalJavaScript</directory>
       <directory>../../../../test/phpunit/**/FunctionalJavaScript</directory>
-    </testsuite>
-    <testsuite name="build">
-      <directory>../../../../web/profiles/custom/**/tests/src/Build</directory>
-      <directory>../../../../test/phpunit/**/Build</directory>
     </testsuite>
     <testsuite name="existing-site">
       <!-- Assumes tests are namespaced as \Drupal\Tests\custom_foo\ExistingSite. -->

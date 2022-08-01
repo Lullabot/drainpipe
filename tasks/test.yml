@@ -131,9 +131,9 @@ tasks:
     desc: Runs PHPUnit functional tests
     cmds:
       - |
-        CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml"
+        CONFIG="$(pwd)/vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml"
         if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit-testtraits.xml"
+          CONFIG="$(pwd)/vendor/lullabot/drainpipe-dev/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
