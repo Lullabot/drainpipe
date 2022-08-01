@@ -10,6 +10,8 @@
   <php>
     <!-- Set error reporting to E_ALL. -->
     <ini name="error_reporting" value="32767"/>
+    <!-- Don't fail on deprecation notices -->
+    <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[total]=999999&amp;verbose=1" />
     <!-- Do not limit the amount of memory tests take to run. -->
     <ini name="memory_limit" value="-1"/>
     <!-- Example SIMPLETEST_BASE_URL value: http://localhost -->
