@@ -6,6 +6,9 @@
     <arg name="colors"/>
     <!-- Show progress. -->
     <arg value="p"/>
+    
+    <!-- Add Drupal specific PHP file extensions -->
+    <arg name="extensions" value="php,inc,module,theme,install"/>
 
     <!-- Include common Drupal standards. -->
     <rule ref="./vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml"/>
