@@ -21,7 +21,6 @@
         "symfony/phpunit-bridge": "^5.3",
         "lullabot/drainpipe": "^1.0",
         "mglaman/phpstan-drupal": "^1.0.3",
-        "drush/drush": "^10.5",
         "symfony/yaml": "^4",
         "drupal/coder": "^8.3",
         "friends-of-behat/mink-browserkit-driver": "^1.5",
