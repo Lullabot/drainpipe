@@ -1,0 +1,12 @@
+version: '3'
+
+includes:
+  test:
+    taskfile: ./vendor/lullabot/drainpipe-dev/tasks/test.yml
+    optional: true
+
+output: prefixed
+silent: true
+
+vars:
+  DRUPAL_TEST_TRAITS: true
