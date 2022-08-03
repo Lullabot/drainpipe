@@ -136,7 +136,7 @@ tasks:
     desc: Runs PHPCS with Drupal Coding Standards
     summary: |
       Check your code against Drupal's coding standards. To override the default
-      ruleset, copy vendor/lullabot/drainpipe-dev/config/phpcs.xml to phpcs.xml
+      ruleset, copy vendor/lullabot/drainpipe-dev/scaffold/phpcs.xml to phpcs.xml
       in the root of your project and edit as needed.
     cmds:
       - |
