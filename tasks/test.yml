@@ -19,10 +19,10 @@ vars:
 tasks:
   static:
     desc: Runs all static tests
-    deps: [security, lint, phpstan, phpunit, phpcs]
+    deps: [security, lint, phpstan, phpunit:static, phpcs]
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
-    deps: [config, nightwatch]
+    deps: [config, phpunit:functional, nightwatch]
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
@@ -103,21 +103,40 @@ tasks:
         fi
   phpunit:
     desc: Runs PHPUnit
+    deps: [phpunit:static, phpunit:functional]
+  phpunit:static:
+    desc: Runs PHPUnit unit tests
     cmds:
       - |
-        {{ .FUNC_ENSURE_DIRS }}
-      - |
+        CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml"
+        if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
+          CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit-testtraits.xml"
+        fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpunit --log-junit test_result/phpunit.xml {{.TEST_DIRS}}
+          ./vendor/bin/phpunit --testsuite=unit -c $CONFIG --log-junit test_result/phpunit.xml
         else
-          ./vendor/bin/phpunit {{.TEST_DIRS}}
+          ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
+        fi
+  phpunit:functional:
+    desc: Runs PHPUnit functional tests
+    cmds:
+      - |
+        CONFIG="$(pwd)/vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml"
+        if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
+          CONFIG="$(pwd)/vendor/lullabot/drainpipe-dev/scaffold/phpunit-testtraits.xml"
+        fi
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpunit --exclude-group=unit -c $CONFIG --log-junit test_result/phpunit.xml
+        else
+          ./vendor/bin/phpunit -c $CONFIG --exclude-group=unit
         fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
     summary: |
       Check your code against Drupal's coding standards. To override the default
-      ruleset, copy vendor/lullabot/drainpipe-dev/config/phpcs.xml to phpcs.xml
+      ruleset, copy vendor/lullabot/drainpipe-dev/scaffold/phpcs.xml to phpcs.xml
       in the root of your project and edit as needed.
     cmds:
       - |
