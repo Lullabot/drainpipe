@@ -188,7 +188,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      *  @see https://www.php.net/manual/en/function.hash-file.php
      */
-    protected function installBinary($binary, $version, $url, $sha, $hashalgo = 'sha256')
+    protected function installBinary($binary, $version, $url, $sha, $hashalgo = 'sha256'): void
     {
         $bin = $this->config->get('bin-dir');
         $fs = new Filesystem();
