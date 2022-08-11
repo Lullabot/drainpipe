@@ -251,6 +251,6 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      * @return bool True if the file needs to be downloaded again, false otherwise.
      */
     private function needsDownload(string $cacheDestination, $hashalgo, $hash): bool {
-        return !$this->cache->isEnabled() || !file_exists($cacheDestination) || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $hash);
+        return !$this->cache->isEnabled() || !file_exists($cacheDestination) || hash_file($hashalgo, $cacheDestination) !== $hash;
     }
 }
