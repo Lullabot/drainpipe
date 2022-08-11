@@ -18,7 +18,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
     /**
      * The binaries to manage and download.
      *
-     * @var string[]
+     * @var array[]
      */
     protected $binaries = [];
 
