@@ -143,7 +143,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $platform = $this->platform;
             $processor = $this->processor;
 
-            // Allow platform and processor to be overriden for this binary by
+            // Allow platform and processor to be overridden for this binary by
             // the user.
             if (!empty(getenv('DRAINPIPE_PLATFORM_'.$binary))) {
                 $platform = getenv('DRAINPIPE_PLATFORM_'.$binary);
