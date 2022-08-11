@@ -212,21 +212,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
             if ($gitlab === 'Pantheon') {
                 // @TODO this isn't really specific to GitLab
-                // .drainpipeignore
-                if (!file_exists('.drainpipeignore')) {
-                    $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
-                }
-                else {
-                    $contents = file_get_contents('./.drainpipeignore');
-                    if (strpos($contents, '/web/sites/default/files') === false) {
-                        $this->io->warning(
-                            sprintf(
-                                '.gitignore does not contain drainpipe ignores. Compare .drainpipeignore in the root of your repository with %s and update as needed.',
-                                "$scaffoldPath/pantheon/.drainpipeignore"
-                            )
-                        );
-                    }
-                }
+                $this->pantheonDrainpipeIgnore($scaffoldPath);
                 // pantheon.yml
                 if (!file_exists('./pantheon.yml')) {
                     $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
@@ -270,6 +256,29 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                         $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Copy a .drainpipeignore file suitable for Pantheon deployments.
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
+     */
+    private function pantheonDrainpipeIgnore(string $scaffoldPath): void {
+        $fs = new Filesystem();
+        if (!file_exists('.drainpipeignore')) {
+            $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
+        }
+        else {
+            $contents = file_get_contents('./.drainpipeignore');
+            if (strpos($contents, '/web/sites/default/files') === false) {
+                $this->io->warning(
+                    sprintf(
+                        '.gitignore does not contain drainpipe ignores. Compare .drainpipeignore in the root of your repository with %s and update as needed.',
+                        "$scaffoldPath/pantheon/.drainpipeignore"
+                    )
+                );
             }
         }
     }
