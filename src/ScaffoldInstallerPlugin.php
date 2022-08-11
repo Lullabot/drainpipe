@@ -180,8 +180,17 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     private function installCICommands(): void
     {
         $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
+        $this->installGitlabCI($scaffoldPath);
+        $this->installGitHubActions($scaffoldPath);
+    }
+
+    /**
+     * Install GitLab CI configuration if defined in composer.json
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy in.
+     */
+    private function installGitlabCI(string $scaffoldPath): void {
         $fs = new Filesystem();
-        // GitLab
         $fs->removeDirectory('./.drainpipe/gitlab');
         if (isset($this->extra['drainpipe']['gitlab']) && is_array($this->extra['drainpipe']['gitlab'])) {
             $fs->ensureDirectoryExists('./.drainpipe/gitlab');
@@ -228,7 +237,15 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $fs->copy("$scaffoldPath/gitlab/gitlab-ci.example.yml", './.gitlab-ci.yml');
             }
         }
-        // GitHub
+    }
+
+    /**
+     * Install GitLab CI configuration if defined in composer.json
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy in.
+     */
+    private function installGitHubActions(string $scaffoldPath): void {
+        $fs = new Filesystem();
         $fs->removeDirectory('./.github/actions/drainpipe');
         if (isset($this->extra['drainpipe']['github']) && is_array($this->extra['drainpipe']['github'])) {
             $fs->ensureDirectoryExists('./.github/actions');
