@@ -177,13 +177,13 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
     /**
      * Install an individual binary.
      *
-     * @param string
+     * @param string $binary
      *  The final filename of the binary
-     * @param string
+     * @param string $version
      *  The version number of the binary
-     * @param string
+     * @param string $url
      *  The URL to download the binary
-     * @param string
+     * @param string $sha
      *  The hashing algorithm to use
      *
      *  @see https://www.php.net/manual/en/function.hash-file.php
