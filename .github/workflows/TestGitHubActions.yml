@@ -26,5 +26,10 @@ jobs:
         uses: ./scaffold/github/actions/common/ddev
 
       - name: Build Project
-        run: |
-          ddev composer install
+        run: ddev composer install
+
+      - name: Install Drupal
+        run: ddev drush site:install -y
+
+      - name: Run Database Updates
+        run: ddev task drupal:update
