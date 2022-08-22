@@ -10,6 +10,13 @@
   },
   "repositories": [
     {
+      "type": "path",
+      "url": "../drainpipe",
+      "options": {
+        "symlink": false
+      }
+    },
+    {
       "type": "composer",
       "url": "https://packages.drupal.org/8"
     }
@@ -18,7 +25,8 @@
     "composer/installers": "^1.9",
     "drupal/core-composer-scaffold": "^9.3",
     "drupal/core-project-message": "^9.3",
-    "drupal/core-recommended": "^9.3"
+    "drupal/core-recommended": "^9.3",
+    "lullabot/drainpipe": "*"
   },
   "conflict": {
     "drupal/drupal": "*"
