@@ -18,7 +18,7 @@ runs:
   steps:
     - name: Update site on Pantheon
       run: |
-        # Wait for Pantheon to sync
+        # Wait for Pantheon to sync.
         if [ "${{ inputs.sleep }}" != "" ]; then
           sleep ${{ inputs.sleep }}
         else
@@ -32,4 +32,3 @@ runs:
           drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
         fi
       shell: bash
-

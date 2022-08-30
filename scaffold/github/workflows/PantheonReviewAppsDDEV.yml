@@ -14,13 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-    - uses: actions/cache@v2
-      with:
-        path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
-        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-composer-
-
+      - uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
       - uses: ./.github/actions/drainpipe/set-env
 
       - name: Install and Start DDEV
@@ -41,7 +40,6 @@ jobs:
           ddev composer install
           ddev task build
           ddev task snapshot:directory directory=/tmp/release
-
       - name: Deploy Pantheon Review App
         uses: ./.github/actions/drainpipe/pantheon/review
         with:
