@@ -47,6 +47,8 @@ cd drupal
 ddev config
 ddev start
 ddev composer require lullabot/drainpipe
+ddev composer config extra.drupal-scaffold.gitignore true
+ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe-dev\"]
 ddev composer require lullabot/drainpipe-dev --dev
 # Restart is required to enable the provided Selenium containers
 ddev restart
