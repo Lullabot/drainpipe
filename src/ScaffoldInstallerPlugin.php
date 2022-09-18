@@ -249,5 +249,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
             }
         }
+
+        // Tugboat
+        if (isset($this->extra['drainpipe']['tugboat']) && is_array($this->extra['drainpipe']['tugboat'])) {
+            if (!file_exists('./.tugboat/config.yml')) {
+                $fs->ensureDirectoryExists('./.tugboat');
+                $fs->copy("$scaffoldPath/tugboat/config.example.yml", './.tugboat/config.yml');
+            }
+        }
     }
 }
