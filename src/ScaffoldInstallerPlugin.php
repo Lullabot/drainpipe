@@ -171,6 +171,10 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
             $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
+            
+            # Enable .env file support via docker-composer web environment.
+            $ddevEnableEnvPath = $vendor.'/lullabot/drainpipe/scaffold/ddev/docker-compose-.env-file.yaml';
+            $fs->copy($ddevEnableEnvPath, './.ddev');
         }
     }
 
