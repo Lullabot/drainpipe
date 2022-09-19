@@ -59,6 +59,11 @@ runs:
           ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
         fi
 
+        # Create .env file when it does not exist.
+        if [ ! -f ".env" ]; then
+          touch .env
+        fi
+
         ddev start
         ddev describe
 
