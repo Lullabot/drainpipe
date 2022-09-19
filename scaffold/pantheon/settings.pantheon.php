@@ -12,27 +12,27 @@
  */
 
 if (isset($_SERVER['PRESSFLOW_SETTINGS'])) {
-    $pressflow_settings = json_decode($_SERVER['PRESSFLOW_SETTINGS'], TRUE);
-    foreach ($pressflow_settings as $key => $value) {
-        // One level of depth should be enough for $conf and $database.
-        if ($key == 'conf') {
-            foreach ($value as $conf_key => $conf_value) {
-                $conf[$conf_key] = $conf_value;
-            }
-        }
-        elseif ($key == 'databases') {
-            // Protect default configuration but allow the specification of
-            // additional databases. Also, allows fun things with 'prefix' if they
-            // want to try multisite.
-            if (!isset($databases) || !is_array($databases)) {
-                $databases = [];
-            }
-            $databases = array_replace_recursive($databases, $value);
-        }
-        else {
-            $$key = $value;
-        }
+  $pressflow_settings = json_decode($_SERVER['PRESSFLOW_SETTINGS'], TRUE);
+  foreach ($pressflow_settings as $key => $value) {
+    // One level of depth should be enough for $conf and $database.
+    if ($key == 'conf') {
+      foreach ($value as $conf_key => $conf_value) {
+        $conf[$conf_key] = $conf_value;
+      }
     }
+    elseif ($key == 'databases') {
+      // Protect default configuration but allow the specification of
+      // additional databases. Also, allows fun things with 'prefix' if they
+      // want to try multisite.
+      if (!isset($databases) || !is_array($databases)) {
+        $databases = [];
+      }
+      $databases = array_replace_recursive($databases, $value);
+    }
+    else {
+      $$key = $value;
+    }
+  }
 }
 
 /**
@@ -60,14 +60,14 @@ $settings["file_temp_path"] = $_SERVER['HOME'] . '/tmp';
  * to see updated results after a code deploy.
  */
 if (getenv('PANTHEON_ROLLING_TMP') !== NULL && getenv('PANTHEON_DEPLOYMENT_IDENTIFIER') !== NULL) {
-    // Relocate the compiled twig files to <binding-dir>/tmp/ROLLING/twig.
-    // The location of ROLLING will change with every deploy.
-    $settings['php_storage']['twig']['directory'] = getenv('PANTHEON_ROLLING_TMP');
-    // Ensure that the compiled twig templates will be rebuilt whenever the
-    // deployment identifier changes.  Note that a cache rebuild is also
-    // necessary.
-    $settings['deployment_identifier'] = getenv('PANTHEON_DEPLOYMENT_IDENTIFIER');
-    $settings['php_storage']['twig']['secret'] = getenv('DRUPAL_HASH_SALT') . $settings['deployment_identifier'];
+  // Relocate the compiled twig files to <binding-dir>/tmp/ROLLING/twig.
+  // The location of ROLLING will change with every deploy.
+  $settings['php_storage']['twig']['directory'] = getenv('PANTHEON_ROLLING_TMP');
+  // Ensure that the compiled twig templates will be rebuilt whenever the
+  // deployment identifier changes.  Note that a cache rebuild is also
+  // necessary.
+  $settings['deployment_identifier'] = getenv('PANTHEON_DEPLOYMENT_IDENTIFIER');
+  $settings['php_storage']['twig']['secret'] = getenv('DRUPAL_HASH_SALT') . $settings['deployment_identifier'];
 }
 
 /**
@@ -92,22 +92,22 @@ $settings['trusted_host_patterns'][] = '.*';
  * Environment indicator.
  */
 if (getenv('PANTHEON_ENVIRONMENT') === 'dev') {
-    $config['environment_indicator.indicator']['name'] = 'Development';
-    $config['environment_indicator.indicator']['bg_color'] = '#efd01b';
-    $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
+  $config['environment_indicator.indicator']['name'] = 'Development';
+  $config['environment_indicator.indicator']['bg_color'] = '#efd01b';
+  $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
 }
 elseif (getenv('PANTHEON_ENVIRONMENT') === 'test') {
-    $config['environment_indicator.indicator']['name'] = 'Test';
-    $config['environment_indicator.indicator']['bg_color'] = '#d25e0f';
-    $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
+  $config['environment_indicator.indicator']['name'] = 'Test';
+  $config['environment_indicator.indicator']['bg_color'] = '#d25e0f';
+  $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
 }
 elseif (getenv('PANTHEON_ENVIRONMENT') === 'live') {
-    $config['environment_indicator.indicator']['name'] = 'Live';
-    $config['environment_indicator.indicator']['bg_color'] = '#efd01b';
-    $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
+  $config['environment_indicator.indicator']['name'] = 'Live';
+  $config['environment_indicator.indicator']['bg_color'] = '#efd01b';
+  $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
 }
 else {
-    $config['environment_indicator.indicator']['name'] = 'Multidev (' . getenv('PANTHEON_ENVIRONMENT') . ')';
-    $config['environment_indicator.indicator']['bg_color'] = '#efd01b';
-    $config['environment_indicator.indicator']['fg_color'] = '#000000';
+  $config['environment_indicator.indicator']['name'] = 'Multidev (' . getenv('PANTHEON_ENVIRONMENT') . ')';
+  $config['environment_indicator.indicator']['bg_color'] = '#efd01b';
+  $config['environment_indicator.indicator']['fg_color'] = '#000000';
 }
