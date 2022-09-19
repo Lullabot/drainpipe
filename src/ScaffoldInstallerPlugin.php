@@ -161,7 +161,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
-     *
+     * Install DDEV Commands.
      */
     private function installDdevCommand(): void
     {
