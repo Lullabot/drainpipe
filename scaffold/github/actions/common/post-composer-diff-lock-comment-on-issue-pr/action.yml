@@ -1,0 +1,21 @@
+name: 'Post comment on a GitHub Issue/PR'
+description: 'Posts a comment on a GitHub Issue/PR'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Installing packages
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+
+    - name: Installing packages
+      shell: bash
+      run: composer install
+
+    - name: GitHub Script
+      uses: actions/github-script@v6.1.1
+      with:
+        script: |
+          const script = require('.github/actions/drainpipe/post-composer-diff-lock-comment-on-issue-pr/script.js');
+          await script({github, context});
