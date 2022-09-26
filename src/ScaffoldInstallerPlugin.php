@@ -255,6 +255,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (!file_exists('./.tugboat/config.yml')) {
                 $fs->ensureDirectoryExists('./.tugboat');
                 $fs->copy("$scaffoldPath/tugboat/config.example.yml", './.tugboat/config.yml');
+                $this->io->write("🪠 [Drainpipe] .tugboat/config.yml installed. Please commit this file.");
                 if (!file_exists('./web/sites/default/settings.tugboat.php')) {
                     $fs->copy("$scaffoldPath/tugboat/settings.tugboat.php", './web/sites/default/settings.tugboat.php');
                     $this->io->write("🪠 [Drainpipe] sites/default/settings.tugboat.php installed. Please commit this file.");
