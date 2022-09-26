@@ -76,8 +76,6 @@ module.exports = {
         'goog:chromeOptions': {
           // More info on Chromedriver: https://sites.google.com/a/chromium.org/chromedriver/
           //
-          // This tells Chromedriver to run using the legacy JSONWire protocol (not required in Chrome 78)
-          w3c: false,
           args: [
             '--no-sandbox',
             '--ignore-certificate-errors',
