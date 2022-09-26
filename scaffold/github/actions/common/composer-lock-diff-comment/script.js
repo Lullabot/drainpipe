@@ -20,11 +20,9 @@ module.exports = async ({github, context}) => {
   console.log(context.repo.owner);
   console.log('================================');
   console.log('============== context.repo =============');
-  console.log(context.repo.owner);
+  console.log(context.repo);
   console.log('================================');
   console.log('================================');
-
-  return;
 
   const issues = await github.rest.pulls.list({
     owner: context.repo.owner,
@@ -57,7 +55,7 @@ module.exports = async ({github, context}) => {
   const execSync = require('child_process').execSync;
 
   execSync('composer global require davidrjonas/composer-lock-diff:^1.0');
-  execSync(`git fetch origin ${context.repo.default_branch}`);
+  execSync(`git fetch origin ${context.payload.repository.default_branch}`);
 
   const output = execSync('~/.composer/vendor/bin/composer-lock-diff --from=origin/main --md', { encoding: 'utf-8' });
 
