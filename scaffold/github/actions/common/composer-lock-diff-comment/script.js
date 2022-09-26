@@ -27,13 +27,13 @@ module.exports = async ({github, context}) => {
     })
   })
 
-  const default_branch = context.payload.repository.default_branch
+  const default_branch = context.payload.repository.default_branch;
   // https://stackoverflow.com/a/52575123/1038565
   const execSync = require('child_process').execSync;
   execSync('composer global require davidrjonas/composer-lock-diff:^1.0');
   execSync(`git fetch origin ${default_branch}`);
 
-  const output = execSync(`~/.composer/vendor/bin/composer-lock-diff --from=origin/${default_branch}} --md`, { encoding: 'utf-8' });
+  const output = execSync(`~/.composer/vendor/bin/composer-lock-diff --from=origin/${default_branch} --md`);
 
   if (!output) {
     return
