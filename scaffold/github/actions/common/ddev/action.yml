@@ -1,5 +1,5 @@
 name: 'Install and Start DDEV'
-description: 'Installs the latest version of DDEV and starts the project'
+description: 'Installs the specified version of DDEV and starts the project'
 inputs:
   ssh-private-key:
     description: "SSH Private Key"
