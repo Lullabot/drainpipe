@@ -13,7 +13,7 @@
         "php": "^7.3||^8.0",
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
-        "phpunit/phpunit": "^7|^8|^9",
+        "phpunit/phpunit": "^8|^9",
         "j13k/yaml-lint": "^1.1",
         "sserbin/twig-linter": "^3.0",
         "mockery/mockery": "^1.4",
@@ -21,12 +21,12 @@
         "symfony/phpunit-bridge": "^5.3",
         "lullabot/drainpipe": "^1.0",
         "mglaman/phpstan-drupal": "^1.0.3",
-        "drush/drush": "^10.5",
         "symfony/yaml": "^4",
         "drupal/coder": "^8.3",
         "friends-of-behat/mink-browserkit-driver": "^1.5",
         "tijsverkoyen/convert-to-junit-xml": "^1.9",
-        "phpstan/phpstan-deprecation-rules": "^1.0.0"
+        "phpstan/phpstan-deprecation-rules": "^1.0.0",
+        "phpspec/prophecy-phpunit": "^2"
     },
     "require-dev": {
         "composer/composer": "^2.0"
