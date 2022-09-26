@@ -258,16 +258,19 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $this->io->write("🪠 [Drainpipe] .tugboat/config.yml installed. Please commit this file.");
                 if (!file_exists('./web/sites/default/settings.tugboat.php')) {
                     $fs->copy("$scaffoldPath/tugboat/settings.tugboat.php", './web/sites/default/settings.tugboat.php');
-                    $this->io->write("🪠 [Drainpipe] sites/default/settings.tugboat.php installed. Please commit this file.");
+                    $this->io->write("🪠 [Drainpipe] web/sites/default/settings.tugboat.php installed. Please commit this file.");
                     if (file_exists('./web/sites/default/settings.php')) {
                         $include=<<<EOD
 
 include __DIR__ . "/settings.tugboat.php";
 EOD;
 
-                        file_put_contents('./sites/default/settings.php', $include, FILE_APPEND);
+                        file_put_contents('./web/sites/default/settings.php', $include, FILE_APPEND);
+                        $this->io->write("🪠 [Drainpipe] web/sites/default/settings.php modified to include settings.tugboat.php. Please commit this file.");
                     }
-                    $this->io->write("🪠 [Drainpipe] sites/default/settings.php modified to include settings.tugboat.php. Please commit this file.");
+                    else {
+                        $this->io->write("🪠 [Drainpipe] web/sites/default/settings.php does not exist. Please include tugboat.settings.php from your settings.php files.");
+                    }
                 }
             }
         }
