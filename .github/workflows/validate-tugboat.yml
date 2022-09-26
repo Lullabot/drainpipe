@@ -9,11 +9,11 @@ on:
 jobs:
   Validate-Example-Tugboat-Configuration:
     runs-on: ubuntu-22.04
+    env:
+      TUGBOAT_API_TOKEN: ${{ secrets.TUGBOAT_API_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
-        env:
-          TUGBOAT_API_TOKEN: ${{ secrets.TUGBOAT_API_TOKEN }}
         with:
           node-version: '18'
       - run: |
