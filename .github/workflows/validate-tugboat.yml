@@ -17,4 +17,5 @@ jobs:
       - run: |
           curl -O https://dashboard.tugboatqa.com/cli/linux/tugboat.tar.gz
           tar xzvf tugboat.tar.gz
+          echo "Validating tugboat configuration..."
           ./tugboat validate scaffold/tugboat/config.example.yml
