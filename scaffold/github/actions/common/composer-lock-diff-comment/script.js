@@ -35,8 +35,6 @@ module.exports = async ({github, context}) => {
   execSync('composer global require davidrjonas/composer-lock-diff:^1.0');
   execSync(`git fetch origin ${context.repository.default_branch}`);
 
-  console.log(context.repository);
-
   const output = execSync('~/.composer/vendor/bin/composer-lock-diff --from=origin/main --md', { encoding: 'utf-8' });
 
   if (!output) {
