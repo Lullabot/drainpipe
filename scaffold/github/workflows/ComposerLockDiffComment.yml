@@ -1,0 +1,12 @@
+name: "Post Comment on a Github issue/PR with the composer-lock-diff contents"
+
+on:
+  push
+
+jobs:
+  Post-Comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Posting a single comment on this PR
+        uses: ./.github/actions/drainpipe/composer-lock-diff-comment

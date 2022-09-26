@@ -17,5 +17,5 @@ runs:
       uses: actions/github-script@v6.1.1
       with:
         script: |
-          const script = require('.github/actions/drainpipe/post-composer-diff-lock-comment-on-issue-pr/script.js');
+          const script = require('.github/actions/drainpipe/composer-lock-diff-comment/script.js');
           await script({github, context});
