@@ -1,11 +1,11 @@
 module.exports = async ({github, context}) => {
 
   console.log('================================');
-  console.log('================================');
+  console.log('============== github ===============');
   console.log('================================');
   console.log(github);
   console.log('================================');
-  console.log('================================');
+  console.log('============= context =============');
   console.log('================================');
   console.log(context);
   console.log('================================');
@@ -15,6 +15,16 @@ module.exports = async ({github, context}) => {
   console.log('================================');
   console.log('================================');
   console.log('================================');
+
+  console.log('============== owner =============');
+  console.log(context.repo.owner);
+  console.log('================================');
+  console.log('============== context.repo =============');
+  console.log(context.repo.owner);
+  console.log('================================');
+  console.log('================================');
+
+  return;
 
   const issues = await github.rest.pulls.list({
     owner: context.repo.owner,
