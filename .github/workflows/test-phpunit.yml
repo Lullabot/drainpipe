@@ -51,6 +51,7 @@ jobs:
         run: |
           cd ../drupal
           ddev task test:phpunit:functional format=junit
+          docker logs -s chrome | tee test_result/ddev-chrome.log
 
       - name: Move Test Results Into The Workspace
         run: mv ../drupal/test_result .
