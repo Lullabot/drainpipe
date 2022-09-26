@@ -166,9 +166,9 @@ in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/com
 Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 `api` scope.
 
-## GitHub Actions Integration
+## GitHub
 
-## Pantheon
+### Github Actions Integration / Pantheon
 
 - Add the following the composer.json to enable deployment of Pantheon Review Apps
   ```json
@@ -186,3 +186,17 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
   - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
   - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
+
+### composer-lock-diff comment on PR updates
+
+- Add the following the composer.json to enable composer-lock-diff comments on your PR/repository.
+  ```json
+  "extra": {
+      "drainpipe": {
+          "github": ["ComposerLockDiffComment"]
+      }
+  }
+  ```
+- Run `composer install`
+- Check for changes in your `.github` folder and update your branch accordingly.
+- Push your changes and you will see the `composer-lock-diff` comment on your PR, if there are package updates.
