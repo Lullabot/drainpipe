@@ -30,6 +30,8 @@ module.exports = async ({github, context}) => {
   // https://stackoverflow.com/a/52575123/1038565
   const execSync = require('child_process').execSync;
 
+  console.log(context.repository);
+
   execSync('composer global require davidrjonas/composer-lock-diff:^1.0');
   execSync(`git fetch origin ${context.repository.default_branch}`);
 
