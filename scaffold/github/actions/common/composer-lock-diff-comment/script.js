@@ -9,6 +9,10 @@ module.exports = async ({github, context}) => {
   console.log('================================');
   console.log(context);
   console.log('================================');
+  console.log('============= payload ================');
+  console.log('================================');
+  console.log(context.payload);
+  console.log('================================');
   console.log('================================');
   console.log('================================');
 
