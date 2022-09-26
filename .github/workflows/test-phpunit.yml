@@ -39,7 +39,7 @@ jobs:
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
           ddev composer config repositories.drainpipe-dev --json "{\"type\": \"path\", \"url\": \"drainpipe-dev\", \"options\": {\"symlink\": false}}"
           ddev composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe
+          ddev composer require lullabot/drainpipe --with-all-dependencies
           ddev composer require lullabot/drainpipe-dev drupal/drupal-extension friends-of-behat/mink-extension mikey179/vfsstream --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
           ddev restart
@@ -94,7 +94,7 @@ jobs:
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
           ddev composer config repositories.drainpipe-dev --json "{\"type\": \"path\", \"url\": \"drainpipe-dev\", \"options\": {\"symlink\": false}}"
           ddev composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe
+          ddev composer require lullabot/drainpipe --with-all-dependencies
           ddev composer require lullabot/drainpipe-dev weitzman/drupal-test-traits drupal/drupal-extension friends-of-behat/mink-extension mikey179/vfsstream --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
           ddev restart
@@ -152,8 +152,8 @@ jobs:
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
           ddev composer config repositories.drainpipe-dev --json "{\"type\": \"path\", \"url\": \"drainpipe-dev\", \"options\": {\"symlink\": false}}"
           ddev composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe
-          ddev composer require lullabot/drainpipe-dev --dev
+          ddev composer require lullabot/drainpipe --with-all-dependencies
+          ddev composer require lullabot/drainpipe-dev --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
           ddev restart
           mkdir web/modules/custom
