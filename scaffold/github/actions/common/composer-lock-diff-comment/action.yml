@@ -1,5 +1,5 @@
-name: 'Post comment on a GitHub Issue/PR'
-description: 'Posts a comment on a GitHub Issue/PR'
+name: "Post comment with composer's package differences on the current GitHub PR"
+description: 'Posts a comment with the composer-lock-diff output on the current GitHub PR'
 
 runs:
   using: "composite"
