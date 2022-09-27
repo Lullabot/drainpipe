@@ -189,7 +189,7 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 
 ### composer-lock-diff comment on PR updates
 
-- Add the following the composer.json to enable composer-lock-diff comments on your PR/repository.
+- Add the following to your repository's composer.json to enable composer-lock-diff comments on your PRs.
   ```json
   "extra": {
       "drainpipe": {
