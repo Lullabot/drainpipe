@@ -4,15 +4,6 @@ description: 'Posts a comment with the composer-lock-diff output on the current 
 runs:
   using: "composite"
   steps:
-    - name: Installing packages
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.4'
-
-    - name: Installing packages
-      shell: bash
-      run: composer install
-
     - name: GitHub Script
       uses: actions/github-script@v6.1.1
       with:
