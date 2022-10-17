@@ -7,6 +7,7 @@ services:
     labels:
       com.ddev.site-name: ${DDEV_SITENAME}
       com.ddev.approot: $DDEV_APPROOT
+    shm_size: 2gb
     expose:
       - 7900
     environment:
@@ -32,6 +33,7 @@ services:
     labels:
       com.ddev.site-name: ${DDEV_SITENAME}
       com.ddev.approot: $DDEV_APPROOT
+    shm_size: 2gb
     expose:
       - 7901
     environment:
