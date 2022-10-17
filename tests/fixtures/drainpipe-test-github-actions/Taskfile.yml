@@ -11,6 +11,5 @@ tasks:
     desc: "Production composer install of the project"
     deps: [drupal:composer:production]
     cmds:
-      - if [ ! -f ".env" ]; then exit 1; fi
       - if [ ! -f "web/index.php" ]; then exit 1; fi
       - if [ -f "vendor/lullabot/drainpipe-dev/composer.json" ]; then exit 1; fi
