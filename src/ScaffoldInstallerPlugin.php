@@ -281,6 +281,13 @@ EOD;
                         $this->io->write("🪠 [Drainpipe] .tugboat/tugboat.acquia-example.yml installed. Please commit this file.");
                     }
                 }
+                if ($tugboat === 'pantheon') {
+                    if (!file_exists('./.tugboat/tugboat.pantheon-example.yml')) {
+                        $fs->ensureDirectoryExists('./.tugboat');
+                        $fs->copy("$scaffoldPath/tugboat/tugboat.pantheon-example.yml", './.tugboat/tugboat.pantheon-example.yml');
+                        $this->io->write("🪠 [Drainpipe] .tugboat/tugboat.pantheon-example.yml installed. Please commit this file.");
+                    }
+                }
             }
         }
     }
