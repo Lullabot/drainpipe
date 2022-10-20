@@ -59,11 +59,12 @@ jobs:
           docker logs -s chrome | tee test_result/ddev-chrome.log
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@v2
-        with:
-          command_line: xmllint --xpath 'string(//testsuites/testsuite/@errors)' ../drupal/test_result/phpunit.xml
-          contains: 18
-          expected_result: PASSED
+        run: xmllint --xpath 'string(//testsuites/testsuite/@errors)' ../drupal/test_result/phpunit.xml |tee xmllist.log
+#        uses: GuillaumeFalourd/assert-command-line-output@v2
+#        with:
+#          command_line: xmllint --xpath 'string(//testsuites/testsuite/@errors)' ../drupal/test_result/phpunit.xml
+#          contains: 18
+#          expected_result: PASSED
 
       - name: Move Test Results Into The Workspace
         run: mv ../drupal/test_result .
