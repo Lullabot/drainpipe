@@ -186,3 +186,39 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
   - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
   - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
+
+## Tugboat Integration
+
+Add the following to `composer.json` for Tugboat helpers:
+```json
+"extra": {
+  "drainpipe": {
+    "tugboat": []
+  }
+}
+```
+
+This will import [`./.tugboat/config.example.yml`](./.tugboat/config.example.yml),
+and import [`./web/sites/default/settings.php`](./web/sites/default/settings.php).
+
+### Acquia
+```json
+"extra": {
+    "drainpipe": {
+        "gitlab": ["acquia"]
+    }
+}
+```
+This will import [`./.tugboat/tugboat.acquia-example.yml`](./.tugboat/tugboat.acquia-example.yml),
+this file includes memcached.
+
+### Pantheon
+```json
+"extra": {
+    "drainpipe": {
+        "gitlab": ["pantheon"]
+    }
+}
+```
+This will import [`./.tugboat/tugboat.pantheon-example.yml`](./.tugboat/tugboat.pantheon-example.yml),
+this file includes redis.
