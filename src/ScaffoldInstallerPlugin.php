@@ -273,8 +273,8 @@ EOD;
                     }
                 }
             }
-            foreach ($this->extra['drainpipe']['tugboat'] as $tugboat) {
-                if ($tugboat === 'acquia') {
+            foreach ($this->extra['drainpipe']['tugboat'] as $provider) {
+                if ($provider === 'acquia') {
                     if (!file_exists('./.tugboat/tugboat.acquia-example.yml')) {
                         $fs->ensureDirectoryExists('./.tugboat');
                         $fs->copy("$scaffoldPath/tugboat/tugboat.acquia-example.yml", './.tugboat/tugboat.acquia-example.yml');
