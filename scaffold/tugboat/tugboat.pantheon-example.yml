@@ -94,11 +94,11 @@ services:
 
     image: tugboatqa/redis:7
 
-    commands:
-
-      update: |
-
-        if [[ "tugboatqa/redis:7" == "NULL" ]]; then
-          echo -e "FATAL ERROR: Not installed"
-          exit 1
-        fi
+#    commands:
+#
+#      update: |
+#
+#        if [[ "tugboatqa/redis:7" == "NULL" ]]; then
+#          echo -e "FATAL ERROR: Not installed"
+#          exit 1
+#        fi

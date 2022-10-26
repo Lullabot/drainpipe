@@ -105,11 +105,11 @@ services:
 
     image: tugboatqa/memcached:1
 
-    commands:
-
-      update: |
-
-        if [[ "tugboatqa/memcached:1" == "NULL" ]]; then
-          echo -e "FATAL ERROR: Not installed"
-          exit 1
-        fi
+#    commands:
+#
+#      update: |
+#
+#        if [[ "tugboatqa/memcached:1" == "NULL" ]]; then
+#          echo -e "FATAL ERROR: Not installed"
+#          exit 1
+#        fi
