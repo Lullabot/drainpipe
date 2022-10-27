@@ -47,18 +47,18 @@ services:
         docker-php-ext-install opcache
         a2enmod headers rewrite
 
-#        # WebP
-#        apt-get install -y libwebp-dev libwebp6 webp libmagickwand-dev
-#        docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
-#        docker-php-ext-install gd
-#
-#        # Configure GD
-#        apt-get update && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev
-#        docker-php-ext-configure gd --with-jpeg --with-freetype && docker-php-ext-install gd
-#
-#        # Install drush-launcher, if desired.
-#        wget -O /usr/local/bin/drush https://github.com/drush-ops/drush-launcher/releases/download/0.6.0/drush.phar
-#        chmod +x /usr/local/bin/drush
+        # WebP
+        apt-get install -y libwebp-dev libwebp6 webp libmagickwand-dev
+        docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
+        docker-php-ext-install gd
+
+        # Configure GD
+        apt-get update && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev
+        docker-php-ext-configure gd --with-jpeg --with-freetype && docker-php-ext-install gd
+
+        # Install drush-launcher, if desired.
+        wget -O /usr/local/bin/drush https://github.com/drush-ops/drush-launcher/releases/download/0.6.0/drush.phar
+        chmod +x /usr/local/bin/drush
 
       # Commands that import files, databases,  or other assets. When an
       # existing preview is refreshed, the build workflow starts here,
@@ -73,9 +73,9 @@ services:
         # https://architecture.lullabot.com/adr/20210729-stage-file-proxy/
 
         # Set up permissions for the files directories.
-        chgrp -R www-data "${DOCROOT}/sites/default/files"
-        chmod -R g+w "${DOCROOT}/sites/default/files"
-        chmod 2775 "${DOCROOT}/sites/default/files"
+        chgrp -R www-data "${TUGBOAT_ROOT}/web/sites/default/files"
+        chmod -R g+w "${TUGBOAT_ROOT}/web/sites/default/files"
+        chmod 2775 "${TUGBOAT_ROOT}/web/sites/default/files"
 
         composer install
 
@@ -88,12 +88,8 @@ services:
         # vendor/bin/task drupal:import-db
 
         # Install
-        echo "I am running site install"
-#        drush site:install
-#        if [[ "drush site:install --standard-profile" == "NULL" ]]; then
-#          echo -e "FATAL ERROR: Not installed"
-#          exit 1
-#        fi
+        echo "Install drush"
+        drush site:install
 
       # Commands that build the site. This is where you would add things
       # like feature reverts or any other drush commands required to
