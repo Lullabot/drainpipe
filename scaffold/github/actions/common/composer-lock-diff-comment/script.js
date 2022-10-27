@@ -1,5 +1,16 @@
 module.exports = async ({github, context}) => {
 
+  console.log(github);
+
+  console.log('===========================');
+  console.log('===========================');
+  console.log('===========================');
+  console.log('===========================');
+
+  console.log(context);
+
+  return;
+
   // Getting this PR's id.
   // https://github.com/actions/github-script/issues/203#issuecomment-1027833024
   const issues = await github.rest.pulls.list({
