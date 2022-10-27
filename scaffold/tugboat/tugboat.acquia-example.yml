@@ -1,0 +1,115 @@
+# This serves as a Tugboat configuration file for Drupal websites. It sets up:
+#
+# 1. PHP 8.1 with Apache as the web server.
+# 2. MariaDB 10 for the database.
+# 3. drush-launcher
+# 4. Enables the PHP opcache and required Apache extensions.
+services:
+
+  # What to call the service hosting the site.
+  php:
+    # Only allow access via https.
+    http: false
+
+    # Use PHP 8.1 with Apache
+    image: tugboatqa/php:8.1-apache-bullseye
+
+    # Set this as the default service. This does a few things
+    #   1. Clones the git repository into the service container
+    #   2. Exposes port 80 to the Tugboat HTTP proxy
+    #   3. Routes requests to the preview URL to this service
+    default: true
+
+    # Wait until the mariadb service is done building
+    depends:
+      - mariadb
+
+    # A set of commands to run while building this service
+    commands:
+
+      # Commands that set up the basic preview infrastructure
+      init: |
+        set -eux
+        echo "Initializing..."
+        # Install prerequisite packages
+        apt-get update
+        apt-get install -y mariadb-client libldap2-dev
+
+        # Install drush-launcher
+        wget -O /usr/local/bin/drush https://github.com/drush-ops/drush-launcher/releases/download/0.10.1/drush.phar
+        chmod +x /usr/local/bin/drush
+
+        # Link the document root to the expected path. Tugboat uses /docroot
+        # by default. So, if Drupal is located at any other path in your git
+        # repository, change that here. This example links /web to the docroot
+        [ -d "${DOCROOT}" ] || ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
+
+        docker-php-ext-install opcache
+        a2enmod headers rewrite
+
+      # Commands that import files, databases,  or other assets. When an
+      # existing preview is refreshed, the build workflow starts here,
+      # skipping the init step, because the results of that step will
+      # already be present.
+      update: |
+        set -eux
+        echo "Updating..."
+
+        # We intentionally do not set up syncing of static assets, as we have
+        # decided to always use Stage File Proxy:
+        # https://architecture.lullabot.com/adr/20210729-stage-file-proxy/
+
+        # Set up permissions for the files directories.
+        chgrp -R www-data "${DOCROOT}/sites/default/files"
+        chmod -R g+w "${DOCROOT}/sites/default/files"
+        chmod 2775 "${DOCROOT}/sites/default/files"
+
+        composer install
+
+        # Install Drupal using the standard profile.
+        vendor/bin/task drupal:install
+
+        # To use an existing site, add the appropriate environment variables
+        # as document at <LINK> and instead run:
+        # vendor/bin/task <provider>:fetch-db
+        # vendor/bin/task drupal:import-db
+
+      # Commands that build the site. This is where you would add things
+      # like feature reverts or any other drush commands required to
+      # set up or configure the site. When a preview is built from a
+      # base preview, the build workflow starts here, skipping the init
+      # and update steps, because the results of those are inherited
+      # from the base preview.
+      build: |
+        set -eux
+        vendor/bin/task drupal:update
+        vendor/bin/drush user:login
+
+  # What to call the service hosting MySQL. This name also acts as the
+  # hostname to access the service by from the php service.
+  mariadb:
+
+    image: tugboatqa/mariadb:10
+
+    # A set of commands to run while building this service
+    commands:
+
+      # Commands that import files, databases,  or other assets. When an
+      # existing preview is refreshed, the build workflow starts here,
+      # skipping the init step, because the results of that step will
+      # already be present.
+      update:
+        - echo "Nothing to do as we import databases from the Drupal service."
+
+  memcached:
+
+    image: tugboatqa/memcached:1
+
+#    commands:
+#
+#      update: |
+#
+#        if [[ "tugboatqa/memcached:1" == "NULL" ]]; then
+#          echo -e "FATAL ERROR: Not installed"
+#          exit 1
+#        fi

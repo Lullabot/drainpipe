@@ -152,7 +152,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (strpos($contents, '.task') === false) {
                 $this->io->warning(
                     sprintf(
-                    '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
+                        '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
                         $gitignorePath
                     )
                 );
@@ -161,7 +161,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
-     * Install DDEV Commands.
+     *
      */
     private function installDdevCommand(): void
     {
@@ -171,12 +171,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
             $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
-
-            # Enable .env file support via docker-composer web environment.
-            $fs->copy($vendor.'/lullabot/drainpipe/scaffold/ddev/docker-compose-.env-file.yaml', './.ddev');
-            if (!is_file('./.env')) {
-                $fs->copy($vendor.'/lullabot/drainpipe/scaffold/ddev/env', './.env');
-            }
         }
     }
 
@@ -251,6 +245,47 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                         else {
                             $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                         }
+                    }
+                }
+            }
+        }
+
+        // Tugboat
+        if (isset($this->extra['drainpipe']['tugboat']) && is_array($this->extra['drainpipe']['tugboat'])) {
+            if (!file_exists('./.tugboat/config.yml')) {
+                $fs->ensureDirectoryExists('./.tugboat');
+                $fs->copy("$scaffoldPath/tugboat/config.example.yml", './.tugboat/config.yml');
+                $this->io->write("🪠 [Drainpipe] .tugboat/config.yml installed. Please commit this file.");
+                if (!file_exists('./web/sites/default/settings.tugboat.php')) {
+                    $fs->copy("$scaffoldPath/tugboat/settings.tugboat.php", './web/sites/default/settings.tugboat.php');
+                    $this->io->write("🪠 [Drainpipe] web/sites/default/settings.tugboat.php installed. Please commit this file.");
+                    if (file_exists('./web/sites/default/settings.php')) {
+                        $include=<<<EOD
+
+include __DIR__ . "/settings.tugboat.php";
+EOD;
+
+                        file_put_contents('./web/sites/default/settings.php', $include, FILE_APPEND);
+                        $this->io->write("🪠 [Drainpipe] web/sites/default/settings.php modified to include settings.tugboat.php. Please commit this file.");
+                    }
+                    else {
+                        $this->io->write("🪠 [Drainpipe] web/sites/default/settings.php does not exist. Please include tugboat.settings.php from your settings.php files.");
+                    }
+                }
+            }
+            foreach ($this->extra['drainpipe']['tugboat'] as $provider) {
+                if ($provider === 'acquia') {
+                    if (!file_exists('./.tugboat/tugboat.acquia-example.yml')) {
+                        $fs->ensureDirectoryExists('./.tugboat');
+                        $fs->copy("$scaffoldPath/tugboat/tugboat.acquia-example.yml", './.tugboat/tugboat.acquia-example.yml');
+                        $this->io->write("🪠 [Drainpipe] .tugboat/tugboat.acquia-example.yml installed. Please commit this file.");
+                    }
+                }
+                if ($provider === 'pantheon') {
+                    if (!file_exists('./.tugboat/tugboat.pantheon-example.yml')) {
+                        $fs->ensureDirectoryExists('./.tugboat');
+                        $fs->copy("$scaffoldPath/tugboat/tugboat.pantheon-example.yml", './.tugboat/tugboat.pantheon-example.yml');
+                        $this->io->write("🪠 [Drainpipe] .tugboat/tugboat.pantheon-example.yml installed. Please commit this file.");
                     }
                 }
             }
