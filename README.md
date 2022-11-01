@@ -156,15 +156,24 @@ such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 ```json
 "extra": {
     "drainpipe": {
+        "github": ["ComposerLockDiff"]
+    }
+}
+```
+
+```json
+"extra": {
+    "drainpipe": {
         "gitlab": ["ComposerLockDiff"]
     }
 }
 ```
 
-Updates Merge Request descriptions with a markdown table of any changes detected
+Updates Pull/Merge Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
-Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
-`api` scope.
+
+For GitLab, requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access
+token with `api` scope.
 
 ## GitHub Actions Integration
 
