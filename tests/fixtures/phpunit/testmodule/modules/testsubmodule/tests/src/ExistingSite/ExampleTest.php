@@ -12,7 +12,7 @@ use weitzman\DrupalTestTraits\ExistingSiteBase;
 class ExampleTest extends ExistingSiteBase
 {
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -29,17 +29,31 @@ class ExampleTest extends ExistingSiteBase
      */
     public function testLlama()
     {
+        // Creates a user. Will be automatically cleaned up at the end of the test.
+        $author = $this->createUser([], null, true);
+
+        // Create a taxonomy term. Will be automatically cleaned up at the end of the test.
+        $vocab = Vocabulary::load('tags');
+        $term = $this->createTerm($vocab);
+
         // Create a "Llama" article. Will be automatically cleaned up at end of test.
         $node = $this->createNode([
             'title' => 'Llama',
-            'type' => 'page',
-            'uid' => 1,
+            'type' => 'article',
+            'field_tags' => [
+                'target_id' => $term->id(),
+            ],
+            'uid' => $author->id(),
         ]);
         $node->setPublished()->save();
-        $this->assertEquals(1, $node->getOwnerId());
+        $this->assertEquals($author->id(), $node->getOwnerId());
 
         // We can browse pages.
         $this->drupalGet($node->toUrl());
         $this->assertSession()->statusCodeEquals(200);
+
+        // We can login and browse admin pages.
+        $this->drupalLogin($author);
+        $this->drupalGet($node->toUrl('edit-form'));
     }
 }
