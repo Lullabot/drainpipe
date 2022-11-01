@@ -14,6 +14,9 @@ jobs:
   Test-PHPUnit-Functional:
     runs-on: ubuntu-latest
     steps:
+      - name: Install xmllint
+        run: sudo apt update && sudo apt-get install -y libxml2-util
+
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
@@ -72,9 +75,6 @@ jobs:
           name: test_result
           path: test_result
 
-      - name: Install xmllint
-        run: sudo apt-get install -y libxml2-util
-
       - name: Confirm All PHPUnit Functional Tests were run
         uses: GuillaumeFalourd/assert-command-line-output@v2
         with:
@@ -85,6 +85,9 @@ jobs:
   Test-PHPUnit-Functional-DTT:
     runs-on: ubuntu-latest
     steps:
+      - name: Install xmllint
+        run: sudo apt update && sudo apt-get install -y libxml2-util
+
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
@@ -144,9 +147,6 @@ jobs:
           name: test_result
           path: test_result
 
-      - name: Install xmllint
-        run: sudo apt-get install -y libxml2-util
-
       - name: Confirm All PHPUnit Functional Tests were run
         uses: GuillaumeFalourd/assert-command-line-output@v2
         with:
@@ -157,6 +157,9 @@ jobs:
   Test-PHPUnit-Static:
     runs-on: ubuntu-latest
     steps:
+      - name: Install xmllint
+        run: sudo apt update && sudo apt-get install -y libxml2-util
+
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
@@ -209,9 +212,6 @@ jobs:
         with:
           name: test_result
           path: test_result
-
-      - name: Install xmllint
-        run: sudo apt-get install -y libxml2-util
 
       - name: Confirm All PHPUnit Functional Tests were run
         uses: GuillaumeFalourd/assert-command-line-output@v2
