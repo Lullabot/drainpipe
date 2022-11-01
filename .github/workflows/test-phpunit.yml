@@ -173,9 +173,12 @@ jobs:
           ddev composer require lullabot/drainpipe-dev --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
           ddev restart
+
+      - name: Add Custom Testing Module
+        run: |
           mkdir web/modules/custom
-          cp -R ../drainpipe-dev/tests/fixtures/phpunit/testmodule web/modules/custom/
-          cp ../drainpipe-dev/tests/fixtures/phpunit/Taskfile.yml .
+          cp -R drainpipe-dev/tests/fixtures/phpunit/testmodule web/modules/custom/
+          cp drainpipe-dev/tests/fixtures/phpunit/Taskfile.yml .
 
       - name: Run PHPUnit Tests
         run: ddev task test:phpunit:static format=junit
