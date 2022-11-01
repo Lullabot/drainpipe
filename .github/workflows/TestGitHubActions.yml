@@ -42,7 +42,9 @@ jobs:
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
       - name: Install Drupal
-        run: ddev drush site:install -y
+        run: |
+          ddev drush site:install -y
+          ddev drush config:export -y
 
       - name: Run Database Updates
         run: ddev task drupal:update
