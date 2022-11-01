@@ -1,4 +1,3 @@
-# Drainpipe
 
 Drainpipe is a composer package which provides a number of build tool helpers
 for a Drupal site, including:
