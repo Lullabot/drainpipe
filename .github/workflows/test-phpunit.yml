@@ -14,6 +14,9 @@ jobs:
   Test-PHPUnit-Functional:
     runs-on: ubuntu-latest
     steps:
+      - name: Install xmllint
+        run: sudo apt-get install -y libxml2-utils
+
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
@@ -72,9 +75,19 @@ jobs:
           name: test_result
           path: test_result
 
+      - name: Confirm All PHPUnit Functional Tests were run
+        uses: GuillaumeFalourd/assert-command-line-output@v2
+        with:
+          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
+          contains: 18
+          expected_result: PASSED
+
   Test-PHPUnit-Functional-DTT:
     runs-on: ubuntu-latest
     steps:
+      - name: Install xmllint
+        run: sudo apt-get install -y libxml2-utils
+
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
@@ -134,9 +147,19 @@ jobs:
           name: test_result
           path: test_result
 
+      - name: Confirm All PHPUnit Functional Tests were run
+        uses: GuillaumeFalourd/assert-command-line-output@v2
+        with:
+          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
+          contains: 21
+          expected_result: PASSED
+
   Test-PHPUnit-Static:
     runs-on: ubuntu-latest
     steps:
+      - name: Install xmllint
+        run: sudo apt-get install -y libxml2-utils
+
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
@@ -189,3 +212,10 @@ jobs:
         with:
           name: test_result
           path: test_result
+
+      - name: Confirm All PHPUnit Functional Tests were run
+        uses: GuillaumeFalourd/assert-command-line-output@v2
+        with:
+          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
+          contains: 12
+          expected_result: PASSED
