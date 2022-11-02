@@ -19,7 +19,7 @@ jobs:
       - uses: ./scaffold/github/actions/common/set-env
 
       - name: Add a composer dependency
-        run: composer require symfony/translation
+        run: composer require monolog/monolog
 
       - name: Get diff
         run: |
