@@ -15,8 +15,6 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
 
       - uses: ./scaffold/github/actions/common/set-env
 
@@ -25,15 +23,11 @@ jobs:
           sudo apt-get install jq
           composer global require davidrjonas/composer-lock-diff:^1.0
 
-      - name: Prepare repository
-        run: |
-          git reset --soft HEAD^1
-          git reset .
-
       - name: Run composer lock diff
         run: |
-          cd tests/fixtures/composer-lock-diff
-          composer require monolog/monolog -W
+          cd tests/fixtures/composer-lock-diff/before
+          cp tests/fixtures/composer-lock-diff/after/composer.* .
+          cd tests/fixtures/composer-lock-diff/after
           composer global exec -- "composer-lock-diff --md > composer_lock_diff.md"
           cat composer_lock_diff.md
 
