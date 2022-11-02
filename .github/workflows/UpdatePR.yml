@@ -14,12 +14,14 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - uses: ./scaffold/github/actions/common/set-env
+
       - name: Curl
         run: |
           curl \
             -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/pulls/PULL_NUMBER \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER \
             -d '{"title":"new title","body":"updated body"}'
             --fail
