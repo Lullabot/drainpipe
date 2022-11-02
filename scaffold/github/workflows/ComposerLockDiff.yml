@@ -1,4 +1,4 @@
-name: "Test Updating a PR"
+name: "Composer Lock Diff"
 
 on:
   pull_request:
@@ -9,21 +9,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Test-Update-PR:
+  Composer-Lock-Diff:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
+      - name: Add Composer Lock Diff
+        run: |
+          sudo apt-get install jq
+          composer global require davidrjonas/composer-lock-diff:^1.0
+
       - uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
       - uses: ./scaffold/github/actions/common/set-env
-
-      - name: Add Composer Lock Diff
-        run: |
-          sudo apt-get install jq
-          composer global require davidrjonas/composer-lock-diff:^1.0
 
       - name: Prepare repository
         run: |
@@ -32,13 +32,10 @@ jobs:
 
       - name: Run composer lock diff
         run: |
-          cd tests/fixtures/composer-lock-diff
-          composer require monolog/monolog:^2 -W
-          cd ../../../
-          composer global exec -- "composer-lock-diff --path ./tests/fixtures/composer-lock-diff --md > composer_lock_diff.md"
+          composer global exec -- "composer-lock-diff --md > composer_lock_diff.md"
           cat composer_lock_diff.md
 
-      - name: Curl
+      - name: Update Pull Request
         run: |
           curl -f \
             -H "Accept: application/vnd.github+json" \

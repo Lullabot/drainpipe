@@ -1,7 +1,0 @@
-{
-    "name": "lullabot/drainpipe-composer-lock-diff",
-    "type": "project",
-    "require": {
-        "psr/log": "^1.1"
-    }
-}

@@ -253,6 +253,12 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                         }
                     }
                 }
+                else if ($github === 'ComposerLockDiff') {
+                    $fs->ensureDirectoryExists('./.github/workflows');
+                    if (!file_exists('./.github/workflows/ComposerLockDiff.yml')) {
+                        $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
+                    }
+                }
             }
         }
     }
