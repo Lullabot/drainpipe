@@ -33,7 +33,7 @@ jobs:
       - name: Run composer lock diff
         run: |
           cd tests/fixtures/composer-lock-diff
-          composer self-update --2
+          sudo composer self-update --2
           composer require monolog/monolog -W
           composer global exec -- "composer-lock-diff --md > composer_lock_diff.md"
           cat composer_lock_diff.md
