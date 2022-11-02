@@ -16,19 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          path: head
           fetch-depth: 2
 
-      - uses: ./head/scaffold/github/actions/common/set-env
+      - uses: ./scaffold/github/actions/common/set-env
 
       - name: Add Composer Lock Diff
         run: |
           sudo apt-get install jq
           composer global require davidrjonas/composer-lock-diff:^1.0
 
-      - name: Fetch base
+      - name: Prepare repository
         run: |
-          cd head
           git reset --soft HEAD^1
           git reset .
 
