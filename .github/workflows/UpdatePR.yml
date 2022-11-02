@@ -18,7 +18,6 @@ jobs:
         with:
           path: head
           fetch-depth: 2
-          ref: ${{ github.ref_name }}
 
       - uses: ./head/scaffold/github/actions/common/set-env
 
