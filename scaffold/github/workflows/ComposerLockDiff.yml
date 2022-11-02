@@ -24,7 +24,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - uses: ./scaffold/github/actions/common/set-env
+      - uses: ./.github/actions/drainpipe/set-env
 
       - name: Prepare repository
         run: |
