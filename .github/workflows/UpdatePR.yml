@@ -15,11 +15,8 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v3
-        path: head
-
-      - uses: actions/checkout@v3
-        path: base
-        ref: ${{github.base_ref}}
+        with:
+          path: head
 
       - uses: ./head/scaffold/github/actions/common/set-env
 
