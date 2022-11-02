@@ -15,18 +15,31 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v3
+        path: head
 
-      - uses: ./scaffold/github/actions/common/set-env
+      - uses: actions/checkout@v3
+        path: base
+        ref: ${{github.base_ref}}
 
-      - name: Add a composer dependency
-        run: composer require monolog/monolog
+      - uses: ./head/scaffold/github/actions/common/set-env
 
-      - name: Get diff
+      - name: Add Composer Lock Diff
         run: |
-          curl \
-          -H "Accept: application/vnd.github+json" \
-          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          https://api.github.com/repos/${{ github.repository }}/dependency-graph/compare/${{github.base_ref}}...${{github.head_ref}}
+          sudo apt-get install jq
+          composer global require davidrjonas/composer-lock-diff:^1.0
+
+      - name: Fetch base
+        run: |
+          cd head
+          git fetch origin ${{github.base_ref}}
+          git checkout ${{github.base_ref}}
+          git merge ${{github.head_ref}} --no-commit --no-ff
+          git reset .
+
+      - name: Run composer lock diff
+        run: |
+          composer global exec -- "composer-lock-diff --md > composer_lock_diff.md"
+          cat composer_lock_diff.md
 
       - name: Curl
         run: |
