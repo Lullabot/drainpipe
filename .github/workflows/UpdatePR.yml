@@ -41,8 +41,20 @@ jobs:
       - name: Curl
         run: |
           curl -f \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer  ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER | jq '. | {body}' > pull_request.json
+          sed -i 's/<!--Composer Lock Diff-->.*<!--\/Composer Lock Diff-->//g' pull_request.json
+          DESCRIPTION=$(cat pull_request.json | jq -r '.body' | sed -z 's/\n/\\n/g')
+          if [ "$(cat composer_lock_diff.md)" != "" ]; then
+            DIFF=$(cat composer_lock_diff.md | sed -z "s/\n/\\\n/g")
+            DESCRIPTION="$DESCRIPTION\\n<!--Composer Lock Diff-->\\n## Composer Lock Diff\\n$DIFF\\n<!--/Composer Lock Diff-->"
+          fi
+          DESCRIPTION=$(echo $DESCRIPTION | sed 's/"/\\"/g')
+
+          curl -f \
             -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER \
-            -d '{"title":"new title","body":"updated body"}'
+            -d '{"body":"$DESCRIPTION"}'
