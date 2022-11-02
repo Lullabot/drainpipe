@@ -1,4 +1,4 @@
-name: "Test GitHub Actions"
+name: "Test Updating a PR"
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Test-GitHub-Actions:
+  Test-Update-PR:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
