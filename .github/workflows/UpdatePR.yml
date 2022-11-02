@@ -34,7 +34,8 @@ jobs:
         run: |
           cd tests/fixtures/composer-lock-diff
           composer require monolog/monolog:^2 -W
-          composer global exec -- "composer-lock-diff --md > composer_lock_diff.md"
+          cd ../../../
+          composer global exec -- "composer-lock-diff --path ./tests/fixtures/composer-lock-diff --md > composer_lock_diff.md"
           cat composer_lock_diff.md
 
       - name: Curl
