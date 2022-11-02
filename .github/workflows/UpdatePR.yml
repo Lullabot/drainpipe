@@ -30,6 +30,7 @@ jobs:
           cd head
           git fetch origin ${{github.base_ref}}
           git checkout ${{github.base_ref}}
+          git pull
           git merge ${{github.head_ref}} --no-commit --no-ff
           git reset .
 
