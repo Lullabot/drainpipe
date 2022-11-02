@@ -17,7 +17,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           path: head
-          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+          ref: ${{ github.ref_name }}
 
       - uses: ./head/scaffold/github/actions/common/set-env
 
@@ -29,10 +30,7 @@ jobs:
       - name: Fetch base
         run: |
           cd head
-          git fetch origin ${{github.base_ref}}
-          git checkout ${{github.base_ref}}
-          git pull origin ${{github.base_ref}}
-          git merge ${{ github.event.pull_request.head.sha }} --no-commit --no-ff
+          git reset --soft HEAD^1
           git reset .
 
       - name: Run composer lock diff
