@@ -51,10 +51,10 @@ jobs:
             DESCRIPTION="$DESCRIPTION\\n<!--Composer Lock Diff-->\\n## Composer Lock Diff\\n$DIFF\\n<!--/Composer Lock Diff-->"
           fi
           DESCRIPTION=$(echo $DESCRIPTION | sed 's/"/\\"/g')
-
+          JSON="{\"body\": \"$DESCRIPTION\"}"
           curl -f \
             -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER \
-            -d '{"body":"$DESCRIPTION"}'
+            -d "$JSON"
