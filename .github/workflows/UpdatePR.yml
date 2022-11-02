@@ -18,12 +18,21 @@ jobs:
 
       - uses: ./scaffold/github/actions/common/set-env
 
-      - name: Curl
+      - name: Add a composer dependency
+        run: composer require symfony/translation
+
+      - name: Get diff
         run: |
           curl \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer <YOUR-TOKEN>" \
+          https://api.github.com/repos/${{ github.repository }}/dependency-graph/compare/${{github.base_ref}}...${{github.head_ref}}
+
+      - name: Curl
+        run: |
+          curl -f \
             -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER \
             -d '{"title":"new title","body":"updated body"}'
-            --fail
