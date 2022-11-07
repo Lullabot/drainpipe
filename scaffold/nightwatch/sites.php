@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:ignoreFile
+
 /**
  * @file
  * Multi-site configuration.
