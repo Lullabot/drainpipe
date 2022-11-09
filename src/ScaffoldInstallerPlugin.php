@@ -152,7 +152,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (strpos($contents, '.task') === false) {
                 $this->io->warning(
                     sprintf(
-                    '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
+                        '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
                         $gitignorePath
                     )
                 );
@@ -161,7 +161,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
-     * Install DDEV Commands.
+     *
      */
     private function installDdevCommand(): void
     {
@@ -275,6 +275,22 @@ EOD;
                     }
                     else {
                         $this->io->write("🪠 [Drainpipe] web/sites/default/settings.php does not exist. Please include tugboat.settings.php from your settings.php files.");
+                    }
+                }
+            }
+            foreach ($this->extra['drainpipe']['tugboat'] as $provider) {
+                if ($provider === 'acquia') {
+                    if (!file_exists('./.tugboat/tugboat.acquia-example.yml')) {
+                        $fs->ensureDirectoryExists('./.tugboat');
+                        $fs->copy("$scaffoldPath/tugboat/tugboat.acquia-example.yml", './.tugboat/tugboat.acquia-example.yml');
+                        $this->io->write("🪠 [Drainpipe] .tugboat/tugboat.acquia-example.yml installed. Please commit this file.");
+                    }
+                }
+                if ($provider === 'pantheon') {
+                    if (!file_exists('./.tugboat/tugboat.pantheon-example.yml')) {
+                        $fs->ensureDirectoryExists('./.tugboat');
+                        $fs->copy("$scaffoldPath/tugboat/tugboat.pantheon-example.yml", './.tugboat/tugboat.pantheon-example.yml');
+                        $this->io->write("🪠 [Drainpipe] .tugboat/tugboat.pantheon-example.yml installed. Please commit this file.");
                     }
                 }
             }
