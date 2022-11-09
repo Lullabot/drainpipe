@@ -1,5 +1,5 @@
 name: 'Install and Start DDEV'
-description: 'Installs the latest version of DDEV and starts the project'
+description: 'Installs the latest or specified version of DDEV and starts the project'
 inputs:
   ssh-private-key:
     description: "SSH Private Key"
@@ -24,6 +24,8 @@ runs:
   steps:
     - name: Install and Start DDEV
       run: |
+        curl https://apt.fury.io/drud/gpg.key | sudo apt-key add -
+        echo "deb https://apt.fury.io/drud/ * *" | sudo tee -a /etc/apt/sources.list.d/ddev.list
         sudo apt update
         sudo apt install libnss3-tools -y
 
@@ -42,11 +44,10 @@ runs:
 
         # Download and run the DDEV installer
         if [ "${{ inputs.version }}" != "" ]; then
-          curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh v${{ inputs.version }}
+          sudo apt install -y ddev=${{inputs.version}}
         else
-          curl -LO https://raw.githubusercontent.com/drud/ddev/master/scripts/install_ddev.sh && bash install_ddev.sh v1.19.3
+          sudo apt install -y ddev
         fi
-        rm -f install_ddev.sh
 
         ddev config global --instrumentation-opt-in=false --omit-containers=dba,ddev-ssh-agent
 
