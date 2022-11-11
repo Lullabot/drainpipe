@@ -295,10 +295,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                         $include=<<<EOD
 
 include __DIR__ . "/settings.tugboat.php";
-
 EOD;
 
-                        file_put_contents('./web/sites/default/settings.php', $include, FILE_APPEND);
+                        file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
                         $this->io->write("🪠 [Drainpipe] web/sites/default/settings.php modified to include settings.tugboat.php. Please commit this file.");
                     }
                     else {
