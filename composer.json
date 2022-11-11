@@ -14,7 +14,7 @@
         "composer-plugin-api": "^2.0",
         "drush/drush": "^10|^11",
         "symfony/yaml": "^3|^4",
-        "twig/twig": "^3.4"
+        "twig/twig": "^2.0"
     },
     "require-dev": {
         "composer/composer": "^2.0",
