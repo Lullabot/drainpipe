@@ -12,8 +12,8 @@ if (getenv('TUGBOAT_REPO') !== FALSE) {
     'driver' => 'mysql',
   ];
 }
-
 {% if memory_cache_type == "redis" %}
+
 $redis_config = 'modules/contrib/redis/example.services.yml';
 if (file_exists($redis_config) && is_readable($redis_config)) {
   $settings['container_yamls'][] = $redis_config;
@@ -25,8 +25,8 @@ else {
   error_log("This project is configured to use Redis for caching. Please download and install the Drupal Redis module. See https://architecture.lullabot.com/adr/20220906-identical-cache-backends/.");
 }
 {% endif %}
-
 {% if memory_cache_type == "memcached" %}
+
 if (file_exists('modules/contrib/memcache/memcache.info.yml') {
   $settings['memcache']['servers'] = ['memcached:11211' => 'default'];
   $settings['cache']['default'] = 'cache.backend.memcache';
