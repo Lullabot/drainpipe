@@ -281,7 +281,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     $downsync
                 );
                 $fs->ensureDirectoryExists('./.tugboat/steps');
-                $fs->copy("$scaffoldPath/tugboat/steps/init.sh", './.tugboat/steps/init.sh');
+                $tugboatConfig->writeFile('steps/init.sh.twig', './.tugboat/steps/', $host,
+                    $downsync
+                );
                 chmod('./.tugboat/steps/init.sh', 0755);
                 $fs->copy("$scaffoldPath/tugboat/steps/build.sh", './.tugboat/steps/build.sh');
                 chmod('./.tugboat/steps/build.sh', 0755);

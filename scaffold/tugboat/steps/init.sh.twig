@@ -28,7 +28,9 @@ apt-get install -y libwebp-dev libwebp6 webp libmagickwand-dev
 docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 docker-php-ext-install gd
 
+{% if memory_cache_type == "memcached" %}
 docker-php-ext-install memcache
+{% endif %}
 
 # Install drush-launcher, if desired.
 wget -O /usr/local/bin/drush https://github.com/drush-ops/drush-launcher/releases/download/0.6.0/drush.phar
