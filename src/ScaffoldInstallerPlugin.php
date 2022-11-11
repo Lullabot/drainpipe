@@ -36,11 +36,17 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     protected $extra;
 
     /**
+     * @var \Composer\Package\Link[]
+     */
+    private $platformRequirements;
+
+    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
     {
         $this->io = $io;
+        $this->platformRequirements = $composer->getLocker()->getPlatformRequirements();
         $this->config = $composer->getConfig();
         $this->extra = $composer->getPackage()->getExtra();
     }
@@ -77,6 +83,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostInstallCmd(Event $event)
     {
+        $this->platformRequirements = $event->getComposer()->getLocker()->getPlatformRequirements();
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
@@ -90,6 +97,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostUpdateCmd(Event $event)
     {
+        $this->platformRequirements = $event->getComposer()->getLocker()->getPlatformRequirements();
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
@@ -257,6 +265,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat']) && is_array($this->extra['drainpipe']['tugboat'])) {
+            $php = '8.1';
+            foreach ($this->platformRequirements as $link) {
+                if ($link->getTarget() === "php") {
+                    $lower = $link->getConstraint()->getLowerBound()->getVersion();
+                    $php = substr($lower, 0, 3);
+                }
+            }
             if (!file_exists('./.tugboat/config.yml')) {
                 $fs->ensureDirectoryExists('./.tugboat');
                 if (!empty($this->extra['drainpipe']['tugboat'])) {
@@ -266,7 +281,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     $provider = TugboatConfig::PROVIDER_UNKNOWN;
                 }
 
-                $tugboatConfig = new TugboatConfig();
+                $tugboatConfig = new TugboatConfig($php);
                 $tugboatConfig->writeFile('config.yml.twig', './.tugboat/', $provider);
 
                 $this->io->write("🪠 [Drainpipe] .tugboat/config.yml installed. Please commit this file.");

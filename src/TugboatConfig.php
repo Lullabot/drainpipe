@@ -15,10 +15,16 @@ final class TugboatConfig implements ProviderInterface
      */
     private $twig;
 
-    public function __construct()
+    /**
+     * @var string
+     */
+    private $phpVersion;
+
+    public function __construct(string $phpVersion)
     {
-        $loader = new FilesystemLoader(__DIR__.'../scaffold/tugboat');
+        $loader = new FilesystemLoader(__DIR__.'/../scaffold/tugboat');
         $this->twig = new Environment($loader);
+        $this->phpVersion = $phpVersion;
     }
 
     public function render(
@@ -40,12 +46,14 @@ final class TugboatConfig implements ProviderInterface
         string $path,
         string $provider = self::PROVIDER_UNKNOWN
     ): void {
-        file_put_contents($path, $this->render($name, $provider));
+        $basename = basename($name, '.twig');
+        file_put_contents($path . "/$basename", $this->render($name, $provider));
     }
 
     private function renderAcquia(string $name): string
     {
         return $this->twig->render($name, [
+            'php_version' => $this->phpVersion,
             'database_type' => 'mysql',
             'database_version' => '5.7',
             'memory_cache_type' => 'memcached',
@@ -56,6 +64,7 @@ final class TugboatConfig implements ProviderInterface
     private function renderPantheon(string $name): string
     {
         return $this->twig->render($name, [
+            'php_version' => $this->phpVersion,
             'database_type' => 'mariadb',
             'database_version' => '10.6',
             'memory_cache_type' => 'redis',
@@ -66,8 +75,9 @@ final class TugboatConfig implements ProviderInterface
     private function renderUnknown(string $name): string
     {
         return $this->twig->render($name, [
+            'php_version' => $this->phpVersion,
             'database_type' => 'mariadb',
-            'database_version' => '10.6',
+            'database_version' => '10.4',
         ]);
     }
 
