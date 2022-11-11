@@ -259,10 +259,21 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if (isset($this->extra['drainpipe']['tugboat']) && is_array($this->extra['drainpipe']['tugboat'])) {
             if (!file_exists('./.tugboat/config.yml')) {
                 $fs->ensureDirectoryExists('./.tugboat');
-                $fs->copy("$scaffoldPath/tugboat/config.example.yml", './.tugboat/config.yml');
+                if (!empty($this->extra['drainpipe']['tugboat'])) {
+                    $provider = $this->extra['drainpipe']['tugboat'][0];
+                }
+                else {
+                    $provider = TugboatConfig::PROVIDER_UNKNOWN;
+                }
+
+                $tugboatConfig = new TugboatConfig();
+                $tugboatConfig->writeFile('config.yml.twig', './.tugboat/', $provider);
+
                 $this->io->write("🪠 [Drainpipe] .tugboat/config.yml installed. Please commit this file.");
                 if (!file_exists('./web/sites/default/settings.tugboat.php')) {
-                    $fs->copy("$scaffoldPath/tugboat/settings.tugboat.php", './web/sites/default/settings.tugboat.php');
+                    $tugboatConfig = new TugboatConfig();
+                    $tugboatConfig->writeFile('settings.tugboat.php.twig', './web/sites/default/', $provider);
+
                     $this->io->write("🪠 [Drainpipe] web/sites/default/settings.tugboat.php installed. Please commit this file.");
                     if (file_exists('./web/sites/default/settings.php')) {
                         $include=<<<EOD
@@ -275,22 +286,6 @@ EOD;
                     }
                     else {
                         $this->io->write("🪠 [Drainpipe] web/sites/default/settings.php does not exist. Please include tugboat.settings.php from your settings.php files.");
-                    }
-                }
-            }
-            foreach ($this->extra['drainpipe']['tugboat'] as $provider) {
-                if ($provider === 'acquia') {
-                    if (!file_exists('./.tugboat/tugboat.acquia-example.yml')) {
-                        $fs->ensureDirectoryExists('./.tugboat');
-                        $fs->copy("$scaffoldPath/tugboat/tugboat.acquia-example.yml", './.tugboat/tugboat.acquia-example.yml');
-                        $this->io->write("🪠 [Drainpipe] .tugboat/tugboat.acquia-example.yml installed. Please commit this file.");
-                    }
-                }
-                if ($provider === 'pantheon') {
-                    if (!file_exists('./.tugboat/tugboat.pantheon-example.yml')) {
-                        $fs->ensureDirectoryExists('./.tugboat');
-                        $fs->copy("$scaffoldPath/tugboat/tugboat.pantheon-example.yml", './.tugboat/tugboat.pantheon-example.yml');
-                        $this->io->write("🪠 [Drainpipe] .tugboat/tugboat.pantheon-example.yml installed. Please commit this file.");
                     }
                 }
             }

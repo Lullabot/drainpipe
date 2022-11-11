@@ -1,0 +1,27 @@
+services:
+  php:
+    http: false
+    image: tugboatqa/php:{{ php_version }}-apache-bullseye
+    default: true
+
+    depends:
+      - {{ database_type }}
+    {% if memory_cache_type %}
+      - {{ memory_cache_type }}
+    {% endif %}
+
+    commands:
+      init: ./.tugboat/scripts/init.sh
+      update: ./.tugboat/scripts/update.sh
+      build: ./.tugboat/scripts/build.sh
+
+  mariadb:
+    image: tugboatqa/{{ database_type }}:{{ database_version }}
+    commands:
+      update:
+        - echo "Nothing to do as we import databases from the Drupal service."
+
+{% if memory_cache_type %}
+  {{ memory_cache_type }}:
+    image: tugboatqa/{{ memory_cache_type }}:{{ memory_cache_version }}
+{% endif %}

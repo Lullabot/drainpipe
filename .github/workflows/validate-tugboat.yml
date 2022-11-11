@@ -19,4 +19,6 @@ jobs:
       - run: |
           curl -O https://dashboard.tugboatqa.com/cli/linux/tugboat.tar.gz
           tar xzvf tugboat.tar.gz
-          ./tugboat validate scaffold/tugboat/config.example.yml
+          ./tugboat validate scaffold/tugboat/config.generic.yml
+          ./tugboat validate scaffold/tugboat/config.acquia.yml
+          ./tugboat validate scaffold/tugboat/config.pantheon.yml
