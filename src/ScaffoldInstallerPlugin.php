@@ -265,7 +265,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat']) && is_array($this->extra['drainpipe']['tugboat'])) {
-            $php = $this->getPhpVersion();
             if (!file_exists('./.tugboat/config.yml')) {
                 $fs->ensureDirectoryExists('./.tugboat');
                 $provider = $this->extra['drainpipe']['tugboat']['provider'];
@@ -276,17 +275,20 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     $host = ProviderInterface::HOST_UNKNOWN;
                 }
 
-                $tugboatConfig = new TugboatConfig($php);
+                $tugboatConfig = new TugboatConfig($this->getPhpVersion());
                 $downsync = $this->extra['drainpipe']['tugboat']['provider']['downsync'] ?? false;
                 $tugboatConfig->writeFile('config.yml.twig', './.tugboat/', $host,
                     $downsync
                 );
                 $fs->ensureDirectoryExists('./.tugboat/steps');
                 $fs->copy("$scaffoldPath/tugboat/steps/init.sh", './.tugboat/steps/init.sh');
+                chmod('./.tugboat/steps/init.sh', 0755);
                 $fs->copy("$scaffoldPath/tugboat/steps/build.sh", './.tugboat/steps/build.sh');
+                chmod('./.tugboat/steps/build.sh', 0755);
                 $tugboatConfig->writeFile('steps/update.sh.twig', './.tugboat/steps/', $host,
                     $downsync
                 );
+                chmod('./.tugboat/steps/update.sh', 0755);
 
                 $this->io->write("🪠 [Drainpipe] .tugboat/ directory installed. Please commit this directory.");
                 if (!file_exists('./web/sites/default/settings.tugboat.php')) {
