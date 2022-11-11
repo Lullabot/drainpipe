@@ -189,36 +189,51 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 
 ## Tugboat Integration
 
-Add the following to `composer.json` for Tugboat helpers:
+Add the following to `composer.json` to add Tugboat configuration:
+
 ```json
-"extra": {
-  "drainpipe": {
-    "tugboat": []
-  }
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {}
+        }
+    }
 }
 ```
 
-This will import [`./.tugboat/config.example.yml`](./.tugboat/config.example.yml),
-and import [`./web/sites/default/settings.php`](./web/sites/default/settings.php).
+The PHP version is autodetected based on the composer requirements.
+
+A `provider` object allows the upstream host to be determined and to determine
+if Tugboat downsyncs from the provider or does a fresh Drupal site install.
 
 ### Acquia
 ```json
-"extra": {
-    "drainpipe": {
-        "gitlab": ["acquia"]
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {
+                "provider": {
+                    "host": "acquia",
+                    "downsync": true
+                }
+            }
+        }
     }
 }
 ```
-This will import [`./.tugboat/tugboat.acquia-example.yml`](./.tugboat/tugboat.acquia-example.yml),
-this file includes memcached.
 
 ### Pantheon
 ```json
-"extra": {
-    "drainpipe": {
-        "gitlab": ["pantheon"]
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {
+                "provider": {
+                    "host": "pantheon",
+                    "downsync": true
+                }
+            }
+        }
     }
 }
 ```
-This will import [`./.tugboat/tugboat.pantheon-example.yml`](./.tugboat/tugboat.pantheon-example.yml),
-this file includes redis.
