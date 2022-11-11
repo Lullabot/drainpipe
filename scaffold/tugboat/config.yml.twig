@@ -15,7 +15,7 @@ services:
       update: ./.tugboat/scripts/update.sh
       build: ./.tugboat/scripts/build.sh
 
-  mariadb:
+  {{ database_type }}:
     image: tugboatqa/{{ database_type }}:{{ database_version }}
     commands:
       update:
