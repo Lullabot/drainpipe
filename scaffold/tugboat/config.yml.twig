@@ -11,9 +11,9 @@ services:
 {% endif %}
 
     commands:
-      init: ./.tugboat/scripts/init.sh
-      update: ./.tugboat/scripts/update.sh
-      build: ./.tugboat/scripts/build.sh
+      init: ./.tugboat/steps/init.sh
+      update: ./.tugboat/steps/update.sh
+      build: ./.tugboat/steps/build.sh
 
   {{ database_type }}:
     image: tugboatqa/{{ database_type }}:{{ database_version }}
