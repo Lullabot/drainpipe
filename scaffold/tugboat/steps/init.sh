@@ -18,16 +18,17 @@ chmod +x /usr/local/bin/drush
 docker-php-ext-install opcache
 a2enmod headers rewrite
 
-docker-php-ext-install memcache
+# GD dependencies
+apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev
 
-# WebP
+# WebP dependencies
 apt-get install -y libwebp-dev libwebp6 webp libmagickwand-dev
+
+# Build and install gd
 docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 docker-php-ext-install gd
 
-# Configure GD
-apt-get update && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev
-docker-php-ext-configure gd --with-jpeg --with-freetype && docker-php-ext-install gd
+docker-php-ext-install memcache
 
 # Install drush-launcher, if desired.
 wget -O /usr/local/bin/drush https://github.com/drush-ops/drush-launcher/releases/download/0.6.0/drush.phar
