@@ -267,8 +267,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if (isset($this->extra['drainpipe']['tugboat']) && is_array($this->extra['drainpipe']['tugboat'])) {
             if (!file_exists('./.tugboat/config.yml')) {
                 $fs->ensureDirectoryExists('./.tugboat');
-                $provider = $this->extra['drainpipe']['tugboat']['provider'];
-                if (!empty($provider)) {
+                if (!empty($this->extra['drainpipe']['tugboat']['provider'])) {
                     $host = $this->extra['drainpipe']['tugboat']['provider']['host'];
                 }
                 else {
