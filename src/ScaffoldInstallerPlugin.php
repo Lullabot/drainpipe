@@ -265,29 +265,32 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat']) && is_array($this->extra['drainpipe']['tugboat'])) {
-            $php = '8.1';
-            foreach ($this->platformRequirements as $link) {
-                if ($link->getTarget() === "php") {
-                    $lower = $link->getConstraint()->getLowerBound()->getVersion();
-                    $php = substr($lower, 0, 3);
-                }
-            }
+            $php = $this->getPhpVersion();
             if (!file_exists('./.tugboat/config.yml')) {
                 $fs->ensureDirectoryExists('./.tugboat');
-                if (!empty($this->extra['drainpipe']['tugboat'])) {
-                    $provider = $this->extra['drainpipe']['tugboat'][0];
+                $provider = $this->extra['drainpipe']['tugboat']['provider'];
+                if (!empty($provider)) {
+                    $host = $this->extra['drainpipe']['tugboat']['provider']['host'];
                 }
                 else {
-                    $provider = TugboatConfig::PROVIDER_UNKNOWN;
+                    $host = ProviderInterface::HOST_UNKNOWN;
                 }
 
                 $tugboatConfig = new TugboatConfig($php);
-                $tugboatConfig->writeFile('config.yml.twig', './.tugboat/', $provider);
+                $downsync = $this->extra['drainpipe']['tugboat']['provider']['downsync'] ?? false;
+                $tugboatConfig->writeFile('config.yml.twig', './.tugboat/', $host,
+                    $downsync
+                );
+                $fs->ensureDirectoryExists('./.tugboat/steps');
+                $fs->copy("$scaffoldPath/tugboat/steps/init.sh", './.tugboat/steps/init.sh');
+                $fs->copy("$scaffoldPath/tugboat/steps/build.sh", './.tugboat/steps/build.sh');
+                $tugboatConfig->writeFile('steps/update.sh.twig', './.tugboat/steps/', $host,
+                    $downsync
+                );
 
-                $this->io->write("🪠 [Drainpipe] .tugboat/config.yml installed. Please commit this file.");
+                $this->io->write("🪠 [Drainpipe] .tugboat/ directory installed. Please commit this directory.");
                 if (!file_exists('./web/sites/default/settings.tugboat.php')) {
-                    $tugboatConfig = new TugboatConfig();
-                    $tugboatConfig->writeFile('settings.tugboat.php.twig', './web/sites/default/', $provider);
+                    $tugboatConfig->writeFile('settings.tugboat.php.twig', './web/sites/default/', $host);
 
                     $this->io->write("🪠 [Drainpipe] web/sites/default/settings.tugboat.php installed. Please commit this file.");
                     if (file_exists('./web/sites/default/settings.php')) {
@@ -306,4 +309,21 @@ EOD;
             }
         }
     }
+
+    /**
+     * @return string
+     */
+    private function getPhpVersion(): string
+    {
+        $php = '8.1';
+        foreach ($this->platformRequirements as $link) {
+            if ($link->getTarget() === "php") {
+                $lower = $link->getConstraint()->getLowerBound()->getVersion();
+                $php = substr($lower, 0, 3);
+            }
+        }
+
+        return $php;
+    }
+
 }

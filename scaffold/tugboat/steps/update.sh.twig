@@ -14,14 +14,10 @@ chmod 2775 "${TUGBOAT_ROOT}/web/sites/default/files"
 
 composer install
 
+{% if downsync %}
+vendor/bin/task {{ host }}:fetch-db
+vendor/bin/task drupal:import-db
+{% else %}
 # Install Drupal using the standard profile.
 vendor/bin/task drupal:install
-
-# To use an existing site, add the appropriate environment variables
-# as document at <LINK> and instead run:
-# vendor/bin/task <provider>:fetch-db
-# vendor/bin/task drupal:import-db
-
-# Install
-echo "Install drush"
-drush site:install
+{% endif %}

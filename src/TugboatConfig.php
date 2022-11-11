@@ -29,28 +29,30 @@ final class TugboatConfig implements ProviderInterface
 
     public function render(
         string $name,
-        string $provider = self::PROVIDER_UNKNOWN
+        string $host = self::HOST_UNKNOWN,
+        bool $downsync = false
     ): string {
-        switch ($provider) {
-            case self::PROVIDER_ACQUIA:
-                return $this->renderAcquia($name);
-            case self::PROVIDER_PANTHEON:
-                return $this->renderPantheon($name);
+        switch ($host) {
+            case self::HOST_ACQUIA:
+                return $this->renderAcquia($name, $downsync);
+            case self::HOST_PANTHEON:
+                return $this->renderPantheon($name, $downsync);
             default:
-                return $this->renderUnknown($name);
+                return $this->renderUnknown($name, $host, $downsync);
         }
     }
 
     public function writeFile(
         string $name,
         string $path,
-        string $provider = self::PROVIDER_UNKNOWN
+        string $host = self::HOST_UNKNOWN,
+        bool $downsync = false
     ): void {
         $basename = basename($name, '.twig');
-        file_put_contents($path . "/$basename", $this->render($name, $provider));
+        file_put_contents($path . "/$basename", $this->render($name, $host, $downsync));
     }
 
-    private function renderAcquia(string $name): string
+    private function renderAcquia(string $name, bool $downsync): string
     {
         return $this->twig->render($name, [
             'php_version' => $this->phpVersion,
@@ -58,10 +60,12 @@ final class TugboatConfig implements ProviderInterface
             'database_version' => '5.7',
             'memory_cache_type' => 'memcached',
             'memory_cache_version' => 1,
+            'host' => 'acquia',
+            'downsync' => $downsync,
         ]);
     }
 
-    private function renderPantheon(string $name): string
+    private function renderPantheon(string $name, bool $downsync): string
     {
         return $this->twig->render($name, [
             'php_version' => $this->phpVersion,
@@ -69,15 +73,19 @@ final class TugboatConfig implements ProviderInterface
             'database_version' => '10.6',
             'memory_cache_type' => 'redis',
             'memory_cache_version' => 7,
+            'host' => 'pantheon',
+            'downsync' => $downsync,
         ]);
     }
 
-    private function renderUnknown(string $name): string
+    private function renderUnknown(string $name, string $host, bool $downsync): string
     {
         return $this->twig->render($name, [
             'php_version' => $this->phpVersion,
             'database_type' => 'mariadb',
             'database_version' => '10.4',
+            'host' => $host,
+            'downsync' => $downsync,
         ]);
     }
 

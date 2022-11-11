@@ -5,10 +5,10 @@ namespace Lullabot\Drainpipe;
 interface ProviderInterface
 {
 
-    public const PROVIDER_PANTHEON = 'pantheon';
+    public const HOST_PANTHEON = 'pantheon';
 
-    public const PROVIDER_ACQUIA = 'acquia';
+    public const HOST_ACQUIA = 'acquia';
 
-    public const PROVIDER_UNKNOWN = 'unknown';
+    public const HOST_UNKNOWN = 'unknown';
 
 }
