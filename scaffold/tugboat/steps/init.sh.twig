@@ -13,7 +13,7 @@ chmod +x /usr/local/bin/drush
 # Link the document root to the expected path. Tugboat uses /docroot
 # by default. So, if Drupal is located at any other path in your git
 # repository, change that here. This example links /web to the docroot
-[ -d "${DOCROOT}" ] || ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
+ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
 
 docker-php-ext-install opcache
 a2enmod headers rewrite
