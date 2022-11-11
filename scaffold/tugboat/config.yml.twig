@@ -6,9 +6,9 @@ services:
 
     depends:
       - {{ database_type }}
-    {% if memory_cache_type %}
+{% if memory_cache_type %}
       - {{ memory_cache_type }}
-    {% endif %}
+{% endif %}
 
     commands:
       init: ./.tugboat/scripts/init.sh
