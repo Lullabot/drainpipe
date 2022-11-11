@@ -267,12 +267,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if (isset($this->extra['drainpipe']['tugboat']) && is_array($this->extra['drainpipe']['tugboat'])) {
             if (!file_exists('./.tugboat/config.yml')) {
                 $fs->ensureDirectoryExists('./.tugboat');
-                if (!empty($this->extra['drainpipe']['tugboat']['provider'])) {
-                    $host = $this->extra['drainpipe']['tugboat']['provider']['host'];
-                }
-                else {
-                    $host = ProviderInterface::HOST_UNKNOWN;
-                }
+                $host = $this->extra['drainpipe']['tugboat']['provider']['host'] ?? ProviderInterface::HOST_UNKNOWN;
 
                 $tugboatConfig = new TugboatConfig($this->getPhpVersion());
                 $downsync = $this->extra['drainpipe']['tugboat']['provider']['downsync'] ?? false;
