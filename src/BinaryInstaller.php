@@ -217,7 +217,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         }
 
         if ('.tar.gz' === substr($fileName, -7)) {
-            $archive = new \PharData(substr($cacheDestination, 0, -2));
+            $archive = new \PharData($cacheDestination);
 
             $this->io->write("=== CacheDestination: $cacheDestination");
             $this->io->write("=== Files in: $cacheFolder");
