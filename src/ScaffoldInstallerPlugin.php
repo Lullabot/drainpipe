@@ -173,8 +173,15 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
 
             # Enable .env file support via docker-composer web environment.
-            if (is_file('./.env')) {
-                $fs->copy($vendor.'/lullabot/drainpipe/scaffold/ddev/docker-compose.env-file.yaml', './.ddev/docker-compose.env-file.yaml');
+            $fs->copy($vendor . '/lullabot/drainpipe/scaffold/ddev/docker-compose.env-file.yaml', './.ddev/docker-compose.env-file.yaml');
+            if (!is_file('./.env')) {
+                $fs->copy($vendor . '/lullabot/drainpipe/scaffold/ddev/env', './.env');
+            }
+            if (strpos(file_get_contents("./.gitignore"), '/.ddev/docker-compose.env-file.yaml') !== false) {
+                file_put_contents('./.gitignore', "\n/.ddev/docker-compose.env-file.yaml\n", FILE_APPEND);
+            }
+            if (strpos(file_get_contents("./.gitignore"), '/.env') !== false) {
+                file_put_contents('./.gitignore', "\n/.env\n", FILE_APPEND);
             }
         }
     }
