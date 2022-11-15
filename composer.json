@@ -7,7 +7,10 @@
         "psr-4": {"Lullabot\\Drainpipe\\": "src/"}
     },
     "autoload-dev": {
-        "psr-4": {"Lullabot\\Drainpipe\\Tests\\Functional\\": "tests/src/functional/"}
+        "psr-4": {"Lullabot\\Drainpipe\\Tests\\Functional\\": "tests/src/functional/"},
+        "files": [
+            "vendor/lullabot/drainpipe/scaffold/env/load.environment.php"
+        ]
     },
     "require": {
         "php": "^7.3||^8.0",
