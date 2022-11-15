@@ -68,7 +68,7 @@ runs:
             done
             drainpipe_exec "terminus multidev:delete ${{ inputs.site-name }}.$MULTIDEV --delete-branch --yes"
           else
-            "Dangling Multidev environment $MULTIDEV found, no action taken."
+            echo "Dangling Multidev environment $MULTIDEV found, no action taken."
           fi
         done
       shell: bash

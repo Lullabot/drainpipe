@@ -10,10 +10,12 @@ jobs:
   Validate-Example-Taskfile:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '18'
+
       - run: |
-          curl -O https://json.schemastore.org/taskfile.json
-          npx ajv-cli validate -s taskfile.json -d scaffold/Taskfile.yml
+          curl -O https://taskfile.dev/schema.json
+          npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml

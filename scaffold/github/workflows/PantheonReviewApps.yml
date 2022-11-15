@@ -45,7 +45,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 
-      - uses: ./github/actions/drainpipe/pantheon/setup-terminus
+      - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
         with:
           pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
           terminus-plugins: ${{ secrets.TERMINUS_PLUGINS }}
