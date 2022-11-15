@@ -12,19 +12,39 @@ jobs:
   Test-GitHub-Actions:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - name: Prepare Drupal
+      - uses: actions/checkout@v3
+        with:
+          repository: lullabot/drainpipe
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup Project
         run: |
-          mv ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-github-actions/composer.json .
-          mv ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-github-actions/Taskfile.yml .
-          mv ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-github-actions/.ddev .
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config repositories.drainpipe --json "{\"type\": \"path\", \"url\": \"drainpipe\", \"options\": {\"symlink\": false}}"
+          ddev composer config minimum-stability dev
+          ddev composer require lullabot/drainpipe --with-all-dependencies
 
-      - uses: ./scaffold/github/actions/common/set-env
-
-      - name: Install and Start DDEV
-        uses: ./scaffold/github/actions/common/ddev
-
-      - name: Build Project
+      - name: Install Drupal
         run: |
-          ddev composer install
+          ddev drush site:install -y
+          ddev drush config:export -y
+
+      - name: Run Database Updates
+        run: ddev task drupal:update
