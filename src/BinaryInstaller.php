@@ -216,9 +216,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $this->io->write("=== Files in: $cacheFolder");
             $this->io->write(scandir($cacheFolder));
             $this->io->write("=======================");
-
-            $archive->decompress('.tar');
-
+            $archive->decompress();
             $archive = new \PharData(substr($cacheDestination, 0, -3));
             $archive->extractTo($cacheFolder, $binary, true);
             // Remove .tar
