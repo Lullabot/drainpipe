@@ -1,0 +1,65 @@
+name: "Test Environment Variables"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-Env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v3
+        with:
+          repository: lullabot/drainpipe
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config repositories.drainpipe --json "{\"type\": \"path\", \"url\": \"drainpipe\", \"options\": {\"symlink\": false}}"
+          ddev composer config minimum-stability dev
+          ddev composer require lullabot/drainpipe --with-all-dependencies
+
+      - name: Install Drupal
+        run: |
+          ddev drush site:install -y
+
+      - name: Check files are created
+        run: |
+          test -f .env
+          test -f .env.defaults
+
+      - name: Check gitignore contains .env
+        run: grep -q '.env' .gitignore
+
+      - name: Add a value to the .env file
+        run: |
+          echo "FOO=bar" >> .env
+          echo "  echo:" >> .env
+          echo "    cmds:" >> .env
+          echo "      - if [ "$FOO" != "bar" ]; then exit 1; fi >> .env
+          ddev restart
+
+      - name: Test if the environment variable is available to the DDEV web container
+        run: ddev task echo
