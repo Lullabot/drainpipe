@@ -7,6 +7,8 @@
  * Allows separate installs for Chrome and Firefox Nightwatch testing.
  */
 
+declare(strict_types=1);
+
 if (getenv('IS_DDEV_PROJECT') == 'true') {
   $sites['drupal_chrome'] = 'chrome';
   $sites['drupal_firefox'] = 'firefox';
