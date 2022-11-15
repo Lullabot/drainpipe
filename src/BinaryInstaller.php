@@ -208,7 +208,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $this->io->write('==============================');
         $this->io->write('==============================');
 
-        if (!$this->cache->isEnabled() || !file_exists($cacheDestination) || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $sha)) {
+        if (!$this->cache->isEnabled() || !file_exists($binDestination) || (file_exists($binDestination) && hash_file($hashalgo, $$binDestination) !== $sha)) {
             // Fetch a new copy of the binary.
             $httpDownloader->copy($url, $cacheDestination);
         } else {
