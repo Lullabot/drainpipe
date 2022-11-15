@@ -24,13 +24,13 @@
         "class": [
             "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin",
             "\\Lullabot\\Drainpipe\\BinaryInstallerPlugin"
-        ]
-    },
-    "drupal-scaffold": {
-        "gitignore": true,
-        "file-mapping": {
-            "[project-root]/.ddev/docker-compose.env-file.yaml": "scaffold/ddev/docker-compose.env-file.yaml",
-            "[project-root]/.env": "scaffold/env/env"
+        ],
+        "drupal-scaffold": {
+            "gitignore": true,
+            "file-mapping": {
+                "[project-root]/.ddev/docker-compose.env-file.yaml": "scaffold/ddev/docker-compose.env-file.yaml",
+                "[project-root]/.env": "scaffold/env/env"
+            }
         }
     },
     "config": {
