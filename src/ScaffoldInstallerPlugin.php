@@ -81,6 +81,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installGitignore();
         $this->installDdevCommand();
         $this->installCICommands();
+        $this->installEnvSupport();
     }
 
     /**
@@ -94,6 +95,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installGitignore();
         $this->installDdevCommand();
         $this->installCICommands();
+        $this->installEnvSupport();
     }
 
     /**
@@ -161,6 +163,25 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
+     * Install .env support.
+     */
+    private function installEnvSupport(): void
+    {
+        $fs = new Filesystem();
+        $vendor = $this->config->get('vendor-dir');
+        // Copy this over as the other files in composer drupal-scaffold
+        // are added to the gitignore, and this should be checked in.
+        if (!is_file('./.env.defaults')) {
+            $fs->copy($vendor . '/lullabot/drainpipe/scaffold/env/env.defaults', './.env.defaults');
+        }
+        $autoloadDev = $this->config->get('autoload-dev');
+        if (empty($autoloadDev['files']) || !in_array($autoloadDev['files'], "$vendor/lullabot/drainpipe/scaffold/env/load.environment.php")) {
+            $this->io->warning("🪠 [Drainpipe] $vendor . '/lullabot/drainpipe/scaffold/env/load.environment.php' missing from autoload-dev files");
+        }
+
+    }
+
+    /**
      * Install DDEV Commands.
      */
     private function installDdevCommand(): void
@@ -171,16 +192,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
             $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
-
-            # Copy this over as the other files in composer drupal-scaffold
-            # are added to the gitignore, and this should be checked in.
-            if (!is_file('./.env.defaults')) {
-                $fs->copy($vendor . '/lullabot/drainpipe/scaffold/env/env.defaults', './.env.defaults');
-            }
-            $autoloadDev = $this->config->get('autoload-dev');
-            if (empty($autoloadDev['files']) || !in_array($autoloadDev['files'], 'vendor/lullabot/drainpipe/scaffold/env/load.environment.php')) {
-                $this->io->warning("🪠 [Drainpipe] 'vendor/lullabot/drainpipe/scaffold/env/load.environment.php' missing from autoload-dev files");
-            }
         }
     }
 
