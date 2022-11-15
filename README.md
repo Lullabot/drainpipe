@@ -111,6 +111,21 @@ Source and target need to have the same basedir (web or docroot) due to being
 unable to provide separate entryNames.
 See https://github.com/evanw/esbuild/issues/224
 
+## .env support
+Drainpipe will add `.env` file support for managing environment variables locally.
+This consists of:
+- Creation of a `.env` and `.env.defaults` file
+- DDEV integration to bring the environment variables into the DDEV web container
+- Drupal integration via [`vlucas/phpdotenv`](https://packagist.org/packages/vlucas/phpdotenv)
+  To enable this, add the following to your `composer.json`:
+  ```
+  "autoload-dev": {
+    "files": [
+      "vendor/lullabot/drainpipe/scaffold/env/load.environment.php"
+    ]
+  },
+  ```
+
 ## Validation
 
 Your `Taskfile.yml` can be validated with JSON Schema:

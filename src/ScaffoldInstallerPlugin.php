@@ -175,7 +175,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             # Copy this over as the other files in composer drupal-scaffold
             # are added to the gitignore, and this should be checked in.
             if (!is_file('./.env.defaults')) {
-                $fs->copy($vendor . '/lullabot/drainpipe/scaffold/env/env.defaults', './env.defaults');
+                $fs->copy($vendor . '/lullabot/drainpipe/scaffold/env/env.defaults', './.env.defaults');
             }
             $autoloadDev = $this->config->get('autoload-dev');
             if (empty($autoloadDev['files']) || !in_array($autoloadDev['files'], 'vendor/lullabot/drainpipe/scaffold/env/load.environment.php')) {
