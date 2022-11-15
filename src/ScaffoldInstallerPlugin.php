@@ -174,11 +174,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if (!is_file('./.env.defaults')) {
             $fs->copy($vendor . '/lullabot/drainpipe/scaffold/env/env.defaults', './.env.defaults');
         }
-        $autoloadDev = $this->config->get('autoload-dev');
-        if (empty($autoloadDev['files']) || !in_array($autoloadDev['files'], "$vendor/lullabot/drainpipe/scaffold/env/load.environment.php")) {
-            $this->io->warning("🪠 [Drainpipe] $vendor . '/lullabot/drainpipe/scaffold/env/load.environment.php' missing from autoload-dev files");
+        // There has to be a better way of doing this?
+        $vendorRelative = str_replace(getcwd() . DIRECTORY_SEPARATOR, '', $vendor);
+        $composerJson = file_get_contents('composer.json');
+        $composerFullConfig = json_decode($composerJson, true);
+        if (empty($composerFullConfig['autoload-dev']['files']) || !in_array("$vendorRelative/lullabot/drainpipe/scaffold/env/load.environment.php", $composerFullConfig['autoload-dev']['files'])) {
+            $this->io->warning("🪠 [Drainpipe] $vendorRelative/lullabot/drainpipe/scaffold/env/load.environment.php' missing from autoload-dev files");
         }
-
     }
 
     /**

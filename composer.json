@@ -14,7 +14,8 @@
         "composer-plugin-api": "^2.0",
         "drush/drush": "^10|^11",
         "symfony/yaml": "^3|^4",
-        "vlucas/phpdotenv": "^3|^4|^5"
+        "vlucas/phpdotenv": "^3|^4|^5",
+        "ext-json": "*"
     },
     "require-dev": {
         "composer/composer": "^2.0",
