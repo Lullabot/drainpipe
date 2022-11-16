@@ -202,15 +202,17 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $this->io->write('==============================');
         $this->io->write('=== Binary: ' . $binary);
         $this->io->write("=== CacheEnabled: " . $this->cache->isEnabled());
-        $this->io->write("=== FileExists: " . file_exists($cacheDestination));
+        // $this->io->write("=== FileExists: " . file_exists($cacheDestination));
         $this->io->write('=== HashFile: ' . hash_file($hashalgo, $cacheDestination));
         $this->io->write('=== Sha: ' . $sha);
         $this->io->write('==============================');
         $this->io->write('==============================');
 
-        if (!$this->cache->isEnabled() || !file_exists($binDestination) || (file_exists($binDestination) && hash_file($hashalgo, $binDestination) !== $sha)) {
+        if (!$this->cache->isEnabled() || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $sha)) {
             // Fetch a new copy of the binary.
-            $httpDownloader->copy($url, $cacheDestination);
+            if (!file_exists($cacheDestination)) {
+                $httpDownloader->copy($url, $cacheDestination);
+            }
         } else {
             $this->io->write(sprintf('Using cached version of %s v%s (%s)', $binary, $version, $sha));
         }
@@ -222,7 +224,6 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
 
         if ('.tar.gz' === substr($fileName, -7)) {
             $archive = new \PharData($cacheDestination);
-
             $this->io->write("=== CacheDestination: $cacheDestination");
             $this->io->write("=== Files in: $cacheFolder");
             $this->io->write(scandir($cacheFolder));
