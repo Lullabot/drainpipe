@@ -49,6 +49,9 @@ jobs:
       - name: Check gitignore contains .env
         run: grep -q '.env' .gitignore
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Test if the environment variable is available via Task
         run: |
           echo "FOO=bar" >> .env.defaults
