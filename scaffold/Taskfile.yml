@@ -1,6 +1,6 @@
 version: '3'
 
-dotenv: ['.env']
+dotenv: ['.env.defaults,', '.env']
 
 includes:
   deploy: ./vendor/lullabot/drainpipe/tasks/deploy.yml

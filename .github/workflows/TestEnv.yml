@@ -49,13 +49,25 @@ jobs:
       - name: Check gitignore contains .env
         run: grep -q '.env' .gitignore
 
-      - name: Add a value to the .env file
+      - name: Test if the environment variable is available via Task
         run: |
-          echo "FOO=bar" >> .env
-          echo "  echo:" >> .env
-          echo "    cmds:" >> .env
-          echo '      - if [ "$FOO" != "bar" ]; then exit 1; fi' >> .env
-          ddev restart
+          echo "FOO=bar" >> .env.defaults
+          cp tests/fixtures/env/Taskfile-dotenv.yml Taskfile.yml
+          ddev task bar
 
       - name: Test if the environment variable is available to the DDEV web container
-        run: ddev task echo
+        run: |
+          ddev restart
+          cp tests/fixtures/env/Taskfile-no-dotenv.yml Taskfile.yml
+          ddev exec 'if [ "$FOO" != "bar" ]; then exit 1; fi'
+
+      - name: Test overriding with .env
+        run: |
+          echo "FOO=baz" >> .env
+          cp tests/fixtures/env/Taskfile-dotenv.yml Taskfile.yml
+          ddev task baz
+          ddev restart
+          cp tests/fixtures/env/Taskfile-no-dotenv.yml Taskfile.yml
+          ddev exec 'if [ "$FOO" != "baz" ]; then exit 1; fi'
+
+
