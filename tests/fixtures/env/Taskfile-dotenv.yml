@@ -1,6 +1,6 @@
 version: '3'
 
-dotenv: ['.env.defaults', '.env']
+dotenv: ['.env', '.env.defaults']
 
 tasks:
   bar:
