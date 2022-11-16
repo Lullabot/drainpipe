@@ -1,6 +1,6 @@
 version: '3'
 
-dotenv: ['.env.defaults,', '.env']
+dotenv: ['.env', '.env.defaults,']
 
 tasks:
   bar:
@@ -8,4 +8,4 @@ tasks:
       - if [ "$FOO" != "bar" ]; then exit 1; fi
   baz:
     cmds:
-      - if [ "$FOO" != "bar" ]; then exit 1; fi
+      - if [ "$FOO" != "baz" ]; then exit 1; fi
