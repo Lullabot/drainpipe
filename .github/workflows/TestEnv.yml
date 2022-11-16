@@ -49,17 +49,17 @@ jobs:
       - name: Check gitignore contains .env
         run: grep -q '.env' .gitignore
 
-      - name: Test if the environment variable is available via Task
+      - name: Test .env.defaults
         run: |
           echo "FOO=bar" >> .env.defaults
           cp drainpipe/tests/fixtures/env/Taskfile-dotenv.yml Taskfile.yml
           ddev task bar
-
-      - name: Test if the environment variable is available to the DDEV web container
-        run: |
           ddev restart
           cp drainpipe/tests/fixtures/env/Taskfile-no-dotenv.yml Taskfile.yml
           ddev exec 'if [ "$FOO" != "bar" ]; then exit 1; fi'
+          cat composer.json | jq '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/load.environment.php"]}' | tee composer.json > /dev/null
+          DRUPAL_FOO_DEFAULT=$(ddev drush php:eval "print getenv('FOO')")
+          if [ "$DRUPAL_FOO_DEFAULT" != "bar" ]; then exit 1; fi
 
       - name: Test overriding with .env
         run: |
@@ -69,5 +69,7 @@ jobs:
           ddev task baz
           cp drainpipe/tests/fixtures/env/Taskfile-no-dotenv.yml Taskfile.yml
           ddev exec 'if [ "$FOO" != "baz" ]; then exit 1; fi'
+          DRUPAL_FOO=$(ddev drush php:eval "print getenv('FOO')")
+          if [ "$DRUPAL_FOO" != "baz" ]; then exit 1; fi
 
 
