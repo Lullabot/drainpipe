@@ -1,0 +1,11 @@
+version: '3'
+
+dotenv: ['.env.defaults,', '.env']
+
+tasks:
+  bar:
+    cmds:
+      - if [ "$FOO" != "bar" ]; then exit 1; fi
+  baz:
+    cmds:
+      - if [ "$FOO" != "bar" ]; then exit 1; fi
