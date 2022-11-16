@@ -61,9 +61,6 @@ jobs:
           cp drainpipe/tests/fixtures/env/Taskfile-no-dotenv.yml Taskfile.yml
           ddev exec 'if [ "$FOO" != "bar" ]; then exit 1; fi'
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Test overriding with .env
         run: |
           ddev restart
