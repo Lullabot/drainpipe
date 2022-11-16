@@ -112,14 +112,17 @@ unable to provide separate entryNames.
 See https://github.com/evanw/esbuild/issues/224
 
 ## .env support
-Drainpipe will add `.env` file support for managing environment variables locally.
+Drainpipe will add `.env` file support for managing environment variables.
 This consists of:
 - Creation of a `.env` and `.env.defaults` file
 - DDEV integration to bring the environment variables into the DDEV web container
+- Default `Taskfile.yml` contains [dotenv support](https://taskfile.dev/usage/#env-files)
+  _note: real environment variables will override these i.e. ones set in DDEV_
 - Drupal integration via [`vlucas/phpdotenv`](https://packagist.org/packages/vlucas/phpdotenv)
   To enable this, add the following to your `composer.json`:
   ```
-  "autoload-dev": {
+  "autoload-dev":
+  {
     "files": [
       "vendor/lullabot/drainpipe/scaffold/env/load.environment.php"
     ]

@@ -63,8 +63,8 @@ jobs:
 
       - name: Test overriding with .env
         run: |
-          ddev restart
           echo "FOO=baz" >> .env
+          ddev restart
           cp drainpipe/tests/fixtures/env/Taskfile-dotenv.yml Taskfile.yml
           ddev task baz
           cp drainpipe/tests/fixtures/env/Taskfile-no-dotenv.yml Taskfile.yml
