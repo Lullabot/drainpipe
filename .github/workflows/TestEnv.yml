@@ -40,8 +40,8 @@ jobs:
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev composer config repositories.drainpipe --json "{\"type\": \"path\", \"url\": \"drainpipe\", \"options\": {\"symlink\": false}}"
           ddev composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe --with-all-dependencies
           cat composer.json | jq '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/dotenv.php"]}' | tee composer.json > /dev/null
+          ddev composer require lullabot/drainpipe --with-all-dependencies
           cp drainpipe/tests/fixtures/env/Taskfile.yml Taskfile.yml
 
       - name: Check files are created

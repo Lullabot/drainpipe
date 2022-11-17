@@ -11,7 +11,7 @@
 use Dotenv\Dotenv;
 
 $cwd = getcwd();
-$dotenv = Dotenv::createImmutable($cwd, '.env.defaults');
+$dotenv = Dotenv::createImmutable(__DIR__, '.env.defaults');
 $dotenv->load();
-$dotenv = Dotenv::createImmutable($cwd, '.env');
+$dotenv = Dotenv::createImmutable(__DIR__, '.env');
 $dotenv->load();
