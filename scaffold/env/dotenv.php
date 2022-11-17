@@ -9,9 +9,8 @@
  */
 
 use Dotenv\Dotenv;
-use Dotenv\Exception\InvalidPathException;
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__, '.env.defaults');
+$dotenv = Dotenv::createImmutable(__DIR__, '.env.defaults');
 $dotenv->load();
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__, '.env');
+$dotenv = Dotenv::createImmutable(__DIR__, '.env');
 $dotenv->load();

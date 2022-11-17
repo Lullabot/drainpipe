@@ -15,7 +15,7 @@ jobs:
       - name: Create a Drupal project
         run: |
           composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
-          cat composer.json | jq '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/load.environment.php"]}' | tee composer.json > /dev/null
+          cat composer.json | jq '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/dotenv.php"]}' | tee composer.json > /dev/null
 
       - uses: actions/checkout@v3
         with:
@@ -51,6 +51,9 @@ jobs:
 
       - name: Check gitignore contains .env
         run: grep -q '.env' .gitignore
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: Test .env.defaults
         run: |
