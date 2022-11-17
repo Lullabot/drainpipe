@@ -57,6 +57,7 @@ jobs:
           echo "FOO=bar" >> .env.defaults
           ddev task bar
           DRUPAL_FOO_DEFAULT=$(ddev drush php:eval "print getenv('FOO')")
+          echo "FOO=$DRUPAL_FOO_DEFAULT"
           if [ "$DRUPAL_FOO_DEFAULT" != "bar" ]; then exit 1; fi
 
       - name: Test overriding with .env
@@ -64,6 +65,7 @@ jobs:
           echo "FOO=baz" >> .env
           ddev task baz
           DRUPAL_FOO=$(ddev drush php:eval "print getenv('FOO')")
+          echo "FOO=$DRUPAL_FOO"
           if [ "$DRUPAL_FOO" != "baz" ]; then exit 1; fi
 
 
