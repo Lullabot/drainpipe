@@ -13,7 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: |
+          composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+          cat composer.json | jq '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/load.environment.php"]}' | tee composer.json > /dev/null
 
       - uses: actions/checkout@v3
         with:
@@ -41,10 +43,6 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
           cp drainpipe/tests/fixtures/env/Taskfile.yml Taskfile.yml
-          cat composer.json | jq '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/load.environment.php"]}' | tee composer.json > /dev/null
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
 
       - name: Check files are created
         run: |
