@@ -43,6 +43,9 @@ jobs:
           cp drainpipe/tests/fixtures/env/Taskfile.yml Taskfile.yml
           cat composer.json | jq '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/load.environment.php"]}' | tee composer.json > /dev/null
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Check files are created
         run: |
           test -f .env
