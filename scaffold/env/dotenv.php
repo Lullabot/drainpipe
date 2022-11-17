@@ -10,7 +10,8 @@
 
 use Dotenv\Dotenv;
 
-$dotenv = Dotenv::createImmutable(__DIR__, '.env.defaults');
+$cwd = getcwd();
+$dotenv = Dotenv::createImmutable($cwd, '.env.defaults');
 $dotenv->load();
-$dotenv = Dotenv::createImmutable(__DIR__, '.env');
+$dotenv = Dotenv::createImmutable($cwd, '.env');
 $dotenv->load();
