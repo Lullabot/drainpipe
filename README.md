@@ -115,7 +115,6 @@ See https://github.com/evanw/esbuild/issues/224
 Drainpipe will add `.env` file support for managing environment variables.
 This consists of:
 - Creation of a `.env` and `.env.defaults` file
-- DDEV integration to bring the environment variables into the DDEV web container
 - Default `Taskfile.yml` contains [dotenv support](https://taskfile.dev/usage/#env-files)
   _note: real environment variables will override these i.e. ones set in DDEV_
 - Drupal integration via [`vlucas/phpdotenv`](https://packagist.org/packages/vlucas/phpdotenv)
