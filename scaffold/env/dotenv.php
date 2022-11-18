@@ -13,5 +13,5 @@ use Dotenv\Dotenv;
 $cwd = getcwd();
 $dotenv = Dotenv::createUnsafeImmutable($cwd, '.env.defaults');
 $dotenv->load();
-$dotenv = Dotenv::createUnsafeImmutable(__DIR__, '.env');
+$dotenv = Dotenv::createUnsafeImmutable($cwd, '.env');
 $dotenv->load();
