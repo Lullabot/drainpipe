@@ -42,8 +42,10 @@ jobs:
           ddev composer config minimum-stability dev
           cat composer.json | jq '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/dotenv.php"]}' | tee composer.json > /dev/null
           ddev composer require lullabot/drainpipe --with-all-dependencies
-          composer install
           cp drainpipe/tests/fixtures/env/Taskfile.yml Taskfile.yml
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: Check files are created
         run: |
