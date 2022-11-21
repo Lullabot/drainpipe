@@ -17,6 +17,6 @@ $cwd = getcwd();
 // any variables, however loading with the mutable class means real environment
 // variables won't take precedence.
 $defaults = file_get_contents(join(DIRECTORY_SEPARATOR, [$cwd, '.env.defaults']));
-$overrides = file_get_contents(join(DIRECTORY_SEPARATOR, [$cwd. '.env']));
+$overrides = file_get_contents(join(DIRECTORY_SEPARATOR, [$cwd, '.env']));
 
 Dotenv::parse($defaults . "\n" . "$overrides");
