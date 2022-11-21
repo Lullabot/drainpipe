@@ -10,11 +10,13 @@
 
 use Dotenv\Dotenv;
 
+$cwd = getcwd();
+
 // Load both .env.defaults and .env so we can use the immutable class.
 // Otherwise when we load .env after .env.defaults it's not able to overwrite
 // any variables, however loading with the mutable class means real environment
 // variables won't take precedence.
-$defaults = file_get_contents('.env.defaults');
-$overrides = file_get_contents('/.env');
+$defaults = file_get_contents(join(DIRECTORY_SEPARATOR, '.env.defaults'));
+$overrides = file_get_contents(join(DIRECTORY_SEPARATOR, '.env'));
 
 Dotenv::parse($defaults . "\n" . "$overrides");
