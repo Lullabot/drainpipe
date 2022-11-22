@@ -58,6 +58,7 @@ jobs:
           tar xzvf tugboat.tar.gz
       - name: Validate Tugboat file generation
         run: |
+          set -x
           cd ../
           mkdir drupal-tugboat
           cd drupal-tugboat
