@@ -88,6 +88,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installGitignore();
         $this->installDdevCommand();
         $this->installCICommands();
+        $this->installEnvSupport();
     }
 
     /**
@@ -102,6 +103,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installGitignore();
         $this->installDdevCommand();
         $this->installCICommands();
+        $this->installEnvSupport();
     }
 
     /**
@@ -169,21 +171,37 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
+     * Install .env support.
+     */
+    private function installEnvSupport(): void
+    {
+        $fs = new Filesystem();
+        $vendor = $this->config->get('vendor-dir');
+        // Copy this over as the other files in composer drupal-scaffold
+        // are added to the gitignore, and this should be checked in.
+        if (!is_file('./.env.defaults')) {
+            $fs->copy($vendor . '/lullabot/drainpipe/scaffold/env/env.defaults', './.env.defaults');
+        }
+        // There has to be a better way of doing this?
+        $vendorRelative = str_replace(getcwd() . DIRECTORY_SEPARATOR, '', $vendor);
+        $composerJson = file_get_contents('composer.json');
+        $composerFullConfig = json_decode($composerJson, true);
+        if (empty($composerFullConfig['autoload-dev']['files']) || !in_array("$vendorRelative/lullabot/drainpipe/scaffold/env/load.environment.php", $composerFullConfig['autoload-dev']['files'])) {
+            $this->io->warning("🪠 [Drainpipe] $vendorRelative/lullabot/drainpipe/scaffold/env/load.environment.php' missing from autoload-dev files");
+        }
+    }
+
+    /**
      *
      */
     private function installDdevCommand(): void
     {
         if (file_exists('./.ddev/config.yaml')) {
             $vendor = $this->config->get('vendor-dir');
-            $ddevCommandPath = $vendor.'/lullabot/drainpipe/scaffold/ddev/task-command.sh';
+            $ddevCommandPath = $vendor . '/lullabot/drainpipe/scaffold/ddev/task-command.sh';
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
             $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
-
-            # Enable .env file support via docker-composer web environment.
-            if (is_file('./.env')) {
-                $fs->copy($vendor.'/lullabot/drainpipe/scaffold/ddev/docker-compose.env-file.yaml', './.ddev/docker-compose.env-file.yaml');
-            }
         }
     }
 

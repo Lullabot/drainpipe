@@ -1,4 +1,4 @@
-name: "Test GitHub Actions"
+name: "Test Environment Variables"
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Test-GitHub-Actions:
+  Test-Env:
     runs-on: ubuntu-latest
     steps:
       - name: Create a Drupal project
@@ -41,10 +41,35 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
-      - name: Install Drupal
+      - name: Check files are created
         run: |
-          ddev drush site:install -y
-          ddev drush config:export -y
+          test -f .env
+          test -f .env.defaults
 
-      - name: Run Database Updates
-        run: ddev task drupal:update
+      - name: Check gitignore contains .env
+        run: grep -q '.env' .gitignore
+
+      - name: Test .env.defaults
+        run: |
+          echo "FOO=bar" >> .env.defaults
+          cp drainpipe/tests/fixtures/env/Taskfile-dotenv.yml Taskfile.yml
+          ddev task bar
+          ddev restart
+          cp drainpipe/tests/fixtures/env/Taskfile-no-dotenv.yml Taskfile.yml
+          ddev exec 'if [ "$FOO" != "bar" ]; then exit 1; fi'
+          cat composer.json | jq '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/load.environment.php"]}' | tee composer.json > /dev/null
+          DRUPAL_FOO_DEFAULT=$(ddev drush php:eval "print getenv('FOO')")
+          if [ "$DRUPAL_FOO_DEFAULT" != "bar" ]; then exit 1; fi
+
+      - name: Test overriding with .env
+        run: |
+          echo "FOO=baz" >> .env
+          ddev restart
+          cp drainpipe/tests/fixtures/env/Taskfile-dotenv.yml Taskfile.yml
+          ddev task baz
+          cp drainpipe/tests/fixtures/env/Taskfile-no-dotenv.yml Taskfile.yml
+          ddev exec 'if [ "$FOO" != "baz" ]; then exit 1; fi'
+          DRUPAL_FOO=$(ddev drush php:eval "print getenv('FOO')")
+          if [ "$DRUPAL_FOO" != "baz" ]; then exit 1; fi
+
+

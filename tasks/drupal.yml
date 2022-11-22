@@ -65,6 +65,12 @@ tasks:
       - ./vendor/bin/drush {{.site}} --yes config:import
       - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
+      - |
+        if [[ $(./vendor/bin/drush config:status --format=json --state=Different) != '[]' ]]; then
+          echo "Config export does not match database."
+          ./vendor/bin/drush config:status
+          exit 1;
+        fi
   maintenance:on:
     desc: Turn on Maintenance Mode
     cmds:
