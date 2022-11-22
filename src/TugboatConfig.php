@@ -83,7 +83,7 @@ final class TugboatConfig implements ProviderInterface
         return $this->twig->render($name, [
             'php_version' => $this->phpVersion,
             'database_type' => 'mariadb',
-            'database_version' => '10.4',
+            'database_version' => '10.6',
             'host' => $host,
             'downsync' => $downsync,
         ]);
