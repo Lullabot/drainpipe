@@ -14,6 +14,7 @@ chmod -R g+w "${TUGBOAT_ROOT}/web/sites/default/files"
 chmod 2775 "${TUGBOAT_ROOT}/web/sites/default/files"
 
 composer install
+vendor/bin/task drupal:composer:development
 
 {% if downsync %}
 # Remember to set any required environment variables for the fetch-db task,
