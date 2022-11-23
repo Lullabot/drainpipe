@@ -66,7 +66,7 @@ jobs:
           composer update ${{ matrix.composer-flags }}
           tugboat validate .tugboat/config.yml
           grep -q 'image: tugboatqa/php:${{ matrix.php-version }}-apache-bullseye' .tugboat/config.yml
-          grep -q 'image: tugboatqa/mariadb:10.4' .tugboat/config.yml
+          grep -q 'image: tugboatqa/mariadb:10.6' .tugboat/config.yml
 
           rm -rf .tugboat web/sites/default/settings.tugboat.php
 
