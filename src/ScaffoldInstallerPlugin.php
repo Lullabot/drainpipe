@@ -304,7 +304,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 );
                 chmod('./.tugboat/steps/update.sh', 0755);
 
-                if ($host == 'acquia') {
+                if ($host === 'acquia') {
                     $fs->copy("$scaffoldPath/tugboat/steps/install-mysql-client.sh", './.tugboat/steps/install-mysql-client.sh');
                     chmod('./.tugboat/steps/install-mysql-content.sh', 0755);
                 }
