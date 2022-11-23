@@ -26,7 +26,7 @@ if (getenv('TUGBOAT_REPO') !== FALSE) {
 {% endif %}
 {% if memory_cache_type == "memcached" %}
 
-  if (file_exists('modules/contrib/memcache/memcache.info.yml') {
+  if (file_exists('modules/contrib/memcache/memcache.info.yml')) {
     $settings['memcache']['servers'] = ['memcached:11211' => 'default'];
     $settings['cache']['default'] = 'cache.backend.memcache';
   }
