@@ -68,4 +68,6 @@ rm temp-keyring.gpg
 echo 'deb [signed-by=/etc/apt/keyrings/mysql.gpg] http://repo.mysql.com/apt/debian/ buster mysql-5.7' > /etc/apt/sources.list.d/mysql.list
 apt-get update
 
+# Purge mariadb if installed
+apt-get -y --autoremove purge 'mariadb*'
 apt-get -y install mysql-client
