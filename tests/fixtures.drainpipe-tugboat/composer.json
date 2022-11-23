@@ -46,10 +46,6 @@
     "extra": {
         "drainpipe": {
             "tugboat": {
-                "provider": {
-                    "host": "acquia",
-                    "downsync": true
-                }
             }
         },
         "drupal-scaffold": {
