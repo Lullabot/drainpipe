@@ -43,7 +43,9 @@ apt-get install -y imagemagick
 {% if memory_cache_type == "memcached" %}
 # Install the PHP memcache extension. The Drupal Redis module recommends
 # phpredis so no PHP extension is required.
-docker-php-ext-install memcache
+apt-get install -y zlib1g-dev
+pecl install memcache
+echo 'extension=memcache.so' > /usr/local/etc/php/conf.d/memcache.ini
 {% endif %}
 
 # Install drush-launcher
