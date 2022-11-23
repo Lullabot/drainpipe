@@ -336,7 +336,7 @@ EOD;
      */
     private function getPhpVersion(): string
     {
-        $php = '8.1';
+        $php = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
         foreach ($this->platformRequirements as $link) {
             if ($link->getTarget() === "php") {
                 $lower = $link->getConstraint()->getLowerBound()->getVersion();
