@@ -27,10 +27,12 @@ web/sites/*
 !web/sites/default
 web/sites/default/*
 !web/sites/default/settings.php
+!web/sites/default/settings.*.php
 !web/sites/default/services.yml
 !web/sites/default/*.services.yml
-!web/sites/default/settings.*.php
 !web/sites/default/files
+# Reginore default services file provided with Drupal scaffolding.
+web/sites/default/default.services.yml
 
 vendor
 
