@@ -116,7 +116,7 @@ Drainpipe will add `.env` file support for managing environment variables.
 This consists of:
 - Creation of a `.env` and `.env.defaults` file
 - Default `Taskfile.yml` contains [dotenv support](https://taskfile.dev/usage/#env-files)
-  _note: real environment variables will override these i.e. ones set in DDEV_
+  _note: real environment variables will override these_
 - Drupal integration via [`vlucas/phpdotenv`](https://packagist.org/packages/vlucas/phpdotenv)
   To enable this, add the following to your `composer.json`:
   ```
@@ -127,7 +127,7 @@ This consists of:
     ]
   },
   ```
-
+  **You will need to restart DDEV if you make any changes to `.env` or `.env.defaults`**
 ## Validation
 
 Your `Taskfile.yml` can be validated with JSON Schema:
