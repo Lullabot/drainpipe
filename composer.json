@@ -14,7 +14,7 @@
         "composer-plugin-api": "^2.0",
         "drush/drush": "^10|^11",
         "symfony/yaml": "^3|^4",
-        "vlucas/phpdotenv": "^3|^4|^5",
+        "vlucas/phpdotenv": "^4|^5",
         "ext-json": "*"
     },
     "require-dev": {
@@ -29,7 +29,6 @@
         "drupal-scaffold": {
             "gitignore": true,
             "file-mapping": {
-                "[project-root]/.ddev/docker-compose.env-file.yaml": "scaffold/ddev/docker-compose.env-file.yaml",
                 "[project-root]/.env": "scaffold/env/env"
             }
         }
