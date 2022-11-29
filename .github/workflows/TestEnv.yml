@@ -61,6 +61,8 @@ jobs:
         run: |
           echo "FOO=bar" >> .env.defaults
           ddev task bar
+          # Not sure why Drupal needs restarting for this to work
+          ddev restart
           DRUPAL_FOO_DEFAULT=$(ddev drush php:eval "print getenv('FOO')")
           echo "FOO=$DRUPAL_FOO_DEFAULT"
           if [ "$DRUPAL_FOO_DEFAULT" != "bar" ]; then exit 1; fi
@@ -69,6 +71,8 @@ jobs:
         run: |
           echo "FOO=baz" >> .env
           ddev task baz
+          # Not sure why Drupal needs restarting for this to work
+          ddev restart
           DRUPAL_FOO=$(ddev drush php:eval "print getenv('FOO')")
           echo "FOO=$DRUPAL_FOO"
           if [ "$DRUPAL_FOO" != "baz" ]; then exit 1; fi

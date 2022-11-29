@@ -11,5 +11,12 @@
 use Dotenv\Dotenv;
 
 $cwd = getcwd();
-$dotenv = Dotenv::createUnsafeImmutable($cwd, ['.env', '.env.defaults`'], false);
+$env_files = [];
+if (file_exists(join(DIRECTORY_SEPARATOR, [$cwd, '.env']))) {
+    $env_files[] = '.env';
+}
+if (file_exists(join(DIRECTORY_SEPARATOR, [$cwd, '.env.defaults']))) {
+    $env_files[] = '.env.defaults';
+}
+$dotenv = Dotenv::createUnsafeImmutable($cwd, $env_files, false);
 $dotenv->load();
