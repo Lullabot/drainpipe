@@ -13,7 +13,9 @@
         "php": "^7.3||^8.0",
         "composer-plugin-api": "^2.0",
         "drush/drush": "^10|^11",
-        "symfony/yaml": "^3|^4"
+        "symfony/yaml": "^3|^4",
+        "vlucas/phpdotenv": "^4|^5",
+        "ext-json": "*"
     },
     "require-dev": {
         "composer/composer": "^2.0",
@@ -23,7 +25,13 @@
         "class": [
             "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin",
             "\\Lullabot\\Drainpipe\\BinaryInstallerPlugin"
-        ]
+        ],
+        "drupal-scaffold": {
+            "gitignore": true,
+            "file-mapping": {
+                "[project-root]/.env": "scaffold/env/env"
+            }
+        }
     },
     "config": {
         "allow-plugins": {

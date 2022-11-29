@@ -46,9 +46,9 @@ composer create-project drupal/recommended-project drupal
 cd drupal
 ddev config
 ddev start
-ddev composer require lullabot/drainpipe
 ddev composer config extra.drupal-scaffold.gitignore true
-ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe-dev\"]
+ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\", \"lullabot/drainpipe-dev\"]
+ddev composer require lullabot/drainpipe
 ddev composer require lullabot/drainpipe-dev --dev
 # Restart is required to enable the provided Selenium containers
 ddev restart
@@ -111,6 +111,23 @@ Source and target need to have the same basedir (web or docroot) due to being
 unable to provide separate entryNames.
 See https://github.com/evanw/esbuild/issues/224
 
+## .env support
+Drainpipe will add `.env` file support for managing environment variables.
+This consists of:
+- Creation of a `.env` and `.env.defaults` file
+- Default `Taskfile.yml` contains [dotenv support](https://taskfile.dev/usage/#env-files)
+  _note: real environment variables will override these_
+- Drupal integration via [`vlucas/phpdotenv`](https://packagist.org/packages/vlucas/phpdotenv)
+  To enable this, add the following to your `composer.json`:
+  ```
+  "autoload-dev":
+  {
+    "files": [
+      "vendor/lullabot/drainpipe/scaffold/env/load.environment.php"
+    ]
+  },
+  ```
+  **You will need to restart DDEV if you make any changes to `.env` or `.env.defaults`**
 ## Validation
 
 Your `Taskfile.yml` can be validated with JSON Schema:
@@ -188,10 +205,11 @@ token with `api` scope.
   }
   ```
 - Run `composer install`
-- Add your Pantheon `site-name` to the last job in the new
-  workflow file at `.github/workflows/PantheonReviewApps.yml`
 - Add the following secrets to your repository:
   - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
+  - `PANTHEON_SITE_NAME` The canonical site name
+  - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth local
+  - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
   - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
   - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
