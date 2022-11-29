@@ -5,7 +5,9 @@ dotenv: ['.env', '.env.defaults']
 tasks:
   bar:
     cmds:
+      - echo "FOO=$FOO"
       - if [ "$FOO" != "bar" ]; then exit 1; fi
   baz:
     cmds:
+      - echo "FOO=$FOO"
       - if [ "$FOO" != "baz" ]; then exit 1; fi

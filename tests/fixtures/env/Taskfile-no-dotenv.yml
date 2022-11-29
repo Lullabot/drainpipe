@@ -1,9 +1,0 @@
-version: '3'
-
-tasks:
-  bar:
-    cmds:
-      - if [ "$FOO" != "bar" ]; then exit 1; fi
-  baz:
-    cmds:
-      - if [ "$FOO" != "baz" ]; then exit 1; fi
