@@ -18,5 +18,7 @@ if (file_exists(join(DIRECTORY_SEPARATOR, [$cwd, '.env.defaults']))) {
 if (file_exists(join(DIRECTORY_SEPARATOR, [$cwd, '.env']))) {
     $env_files[] = '.env';
 }
-$dotenv = Dotenv::createUnsafeImmutable($cwd, $env_files, false);
-$dotenv->load();
+if (!empty($env_files)) {
+    $dotenv = Dotenv::createUnsafeImmutable($cwd, $env_files, false);
+    $dotenv->load();
+}
