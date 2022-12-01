@@ -128,6 +128,7 @@ This consists of:
   },
   ```
   **You will need to restart DDEV if you make any changes to `.env` or `.env.defaults`**
+
 ## Validation
 
 Your `Taskfile.yml` can be validated with JSON Schema:
