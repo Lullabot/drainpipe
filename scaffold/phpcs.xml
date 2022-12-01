@@ -32,4 +32,5 @@
     <exclude-pattern>*/sites/*/files/*</exclude-pattern>
     <exclude-pattern>*/settings.ddev.php</exclude-pattern>
     <exclude-pattern>*/sites/simpletest/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
 </ruleset>
