@@ -123,11 +123,12 @@ This consists of:
   "autoload-dev":
   {
     "files": [
-      "vendor/lullabot/drainpipe/scaffold/env/load.environment.php"
+      "vendor/lullabot/drainpipe/scaffold/env/dotenv.php"
     ]
   },
   ```
   **You will need to restart DDEV if you make any changes to `.env` or `.env.defaults`**
+
 ## Validation
 
 Your `Taskfile.yml` can be validated with JSON Schema:
