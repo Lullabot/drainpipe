@@ -123,7 +123,7 @@ This consists of:
   "autoload-dev":
   {
     "files": [
-      "vendor/lullabot/drainpipe/scaffold/env/load.environment.php"
+      "vendor/lullabot/drainpipe/scaffold/env/dotenv.php"
     ]
   },
   ```
