@@ -73,5 +73,3 @@ jobs:
           DRUPAL_FOO=$(ddev drush php:eval "print getenv('FOO')")
           echo "FOO=$DRUPAL_FOO"
           if [ "$DRUPAL_FOO" != "baz" ]; then exit 1; fi
-
-

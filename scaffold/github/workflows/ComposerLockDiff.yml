@@ -1,0 +1,58 @@
+name: "Composer Lock Diff"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Composer-Lock-Diff:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Add Composer Lock Diff
+        run: |
+          sudo apt-get install jq
+          composer global require davidrjonas/composer-lock-diff:^1.0
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - uses: ./.github/actions/drainpipe/set-env
+
+      - name: Prepare repository
+        run: |
+          git reset --soft HEAD^1
+          git reset .
+
+      - name: Run composer lock diff
+        run: |
+          composer global exec -- "composer-lock-diff --md > composer_lock_diff.md"
+          cat composer_lock_diff.md
+
+      - name: Update Pull Request
+        run: |
+          curl -f \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer  ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER | jq '. | {body}' > pull_request.json
+          sed -i 's/<!--Composer Lock Diff-->.*<!--\/Composer Lock Diff-->//g' pull_request.json
+          DESCRIPTION=$(cat pull_request.json | jq -r '.body' | sed -z 's/\n/\\n/g')
+          if [ "$(cat composer_lock_diff.md)" != "" ]; then
+            DIFF=$(cat composer_lock_diff.md | sed -z "s/\n/\\\n/g")
+            DESCRIPTION="$DESCRIPTION\\n<!--Composer Lock Diff-->\\n## Composer Lock Diff\\n$DIFF\\n<!--/Composer Lock Diff-->"
+          fi
+          DESCRIPTION=$(echo $DESCRIPTION | sed 's/"/\\"/g')
+          JSON="{\"body\": \"$DESCRIPTION\"}"
+          curl -f \
+            -X PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER \
+            -d "$JSON"
