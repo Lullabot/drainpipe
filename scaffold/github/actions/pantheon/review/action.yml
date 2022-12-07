@@ -2,7 +2,7 @@ name: 'Deploy Review epp to Pantheon'
 description: 'Deploys a review app to Pantheon Multidev'
 inputs:
   github-token:
-    description: "GitHub token as generated automatically in inputs.github-token"
+    description: "GitHub token as generated automatically in secrets.GITHUB_TOKEN"
     required: true
   terminus-token:
     description: "Pantheon Terminus Token"
