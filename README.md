@@ -12,9 +12,7 @@ for a Drupal site, including:
 * [Installation](#installation)
 * [.env support](#env-support)
 * [SASS Compilation](#sass-compilation)
-    + [Setup](#setup)
 * [JavaScript Compilation](#javascript-compilation)
-    + [Setup](#setup-1)
 * [Testing](#testing)
     + [Static Tests](#static-tests)
     + [Functional Tests](#functional-tests)
@@ -40,13 +38,8 @@ composer require lullabot/drainpipe
 composer require lullabot/drainpipe-dev --dev
 ```
 
-or if using DDEV:
+and if using DDEV, restart to enable the added features:
 ```sh
-ddev composer config extra.drupal-scaffold.gitignore true
-ddev composer config --json extra.drupal-scaffold.allowed-packages "[\"lullabot/drainpipe\", \"lullabot/drainpipe-dev\"]"
-ddev composer require lullabot/drainpipe
-ddev composer require lullabot/drainpipe-dev --dev
-# Needed to enable the newly provided Selenium containers
 ddev restart
 ```
 
