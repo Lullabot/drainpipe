@@ -47,7 +47,7 @@ tasks:
       - ./vendor/bin/drush {{ .site }} sql:query --file=$DB_DIR/db.sql.gz
       - defer: rm -f $DB_DIR/db.sql
   export-db:
-    desc: "Exports a database fetches with a *:fetch-db command"
+    desc: "Exports a database fetched with a *:fetch-db command"
     env:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
     cmds:

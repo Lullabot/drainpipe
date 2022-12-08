@@ -8,13 +8,11 @@ for a Drupal site, including:
 - Automated testing setup
 - Integration with DDEV
 - CI integration
-
+---
 * [Installation](#installation)
 * [.env support](#env-support)
 * [SASS Compilation](#sass-compilation)
-    + [Setup](#setup)
 * [JavaScript Compilation](#javascript-compilation)
-    + [Setup](#setup-1)
 * [Testing](#testing)
     + [Static Tests](#static-tests)
     + [Functional Tests](#functional-tests)
@@ -30,7 +28,7 @@ for a Drupal site, including:
 * [GitLab CI Integration](#gitlab-ci-integration)
     + [Composer Lock Diff](#composer-lock-diff-1)
     + [Pantheon](#pantheon-2)
-
+---
 ## Installation
 
 ```sh
@@ -40,13 +38,8 @@ composer require lullabot/drainpipe
 composer require lullabot/drainpipe-dev --dev
 ```
 
-or if using DDEV:
+and if using DDEV, restart to enable the added features:
 ```sh
-ddev composer config extra.drupal-scaffold.gitignore true
-ddev composer config --json extra.drupal-scaffold.allowed-packages "[\"lullabot/drainpipe\", \"lullabot/drainpipe-dev\"]"
-ddev composer require lullabot/drainpipe
-ddev composer require lullabot/drainpipe-dev --dev
-# Needed to enable the newly provided Selenium containers
 ddev restart
 ```
 
@@ -57,7 +50,9 @@ Task is just a single binary and has no other dependencies. It's also
 cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
 
 You can see what tasks are available after installation by running
-`./vendor/bin/task --list` or `ddev task --list` if you're running DDEV.
+`./vendor/bin/task --list` or `ddev task --list` if you're running DDEV. To get
+more information on a specific task e.g. what parameters it takes, you can run
+`task [task name] --summary`.
 
 Your `Taskfile.yml` can be validated with JSON Schema:
 ```
@@ -262,9 +257,10 @@ Generic helpers for deployments can be found in [`tasks/snapshot.yml`,](tasks/sn
 
 |                                    |                                                                               |
 |------------------------------------|-------------------------------------------------------------------------------|
+| `task deploy:git`                  | Pushes a directory to a git remote                                            |
 | `task drupal:composer:development` | Install composer dependencies                                                 |
 | `task drupal:composer:production`  | Install composer dependencies without devDependencies                         |
-| `task drupal:export-db`            | Exports a database fetches with a *:fetch-db command                          |
+| `task drupal:export-db`            | Exports a database fetched with a *:fetch-db command                          |
 | `task drupal:import-db`            | Imports a database fetched with a *:fetch-db command                          |
 | `task drupal:install`              | Runs the site installer                                                       |
 | `task drupal:maintenance:off`      | Turn off Maintenance Mode                                                     |
@@ -272,6 +268,37 @@ Generic helpers for deployments can be found in [`tasks/snapshot.yml`,](tasks/sn
 | `task drupal:update`               | Run Drupal update tasks after deploying new code                              |
 | `task snapshot:archive`            | Creates a snapshot of the current working directory and exports as an archive |
 | `task snapshot:directory`          | Creates a snapshot of the current working directory                           |
+
+#### Importing/Exporting Databases
+
+Databases are by default fetched to `/var/www/html/files/db/db.sql.gz`, this can
+be overridden with a [variable](https://taskfile.dev/usage/#variables) in Task:
+```
+`task drupal:import-db DB_DIR="/var/www/htdocs"`
+```
+
+#### Snapshots
+
+When creating a snapshot of the current working directly files can be excluded
+using a `.drainpipeignore` file in the root of the repository that uses the same
+format as `.gitignore`, e.g.
+```
+# Files that won't be deployed to Pantheon
+/.ddev
+/.github
+/.yarn
+/files/db
+/tests
+/.env
+/.env.defaults
+/README.md
+/Taskfile.yml
+*.sql
+*.sql.gz
+```
+
+This folder can then be deployed to a remote service either as an archive, or
+pushed to a git remote with `task deploy:git`.
 
 ### Pantheon
 Pantheon specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.yml).
