@@ -8,7 +8,7 @@ for a Drupal site, including:
 - Automated testing setup
 - Integration with DDEV
 - CI integration
-
+---
 * [Installation](#installation)
 * [.env support](#env-support)
 * [SASS Compilation](#sass-compilation)
@@ -30,7 +30,7 @@ for a Drupal site, including:
 * [GitLab CI Integration](#gitlab-ci-integration)
     + [Composer Lock Diff](#composer-lock-diff-1)
     + [Pantheon](#pantheon-2)
-
+---
 ## Installation
 
 ```sh
