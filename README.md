@@ -211,6 +211,7 @@ _beware: DTT tests will run against the main working Drupal site rather than
 installing a new instance in isolation_
 
 #### Nightwatch
+`task test:nightwatch`
 
 Runs functional browser tests with [Nightwatch](https://nightwatchjs.org/).
 
