@@ -1,4 +1,4 @@
-name: 'Deploy Review epp to Pantheon'
+name: 'Deploy Review app to Pantheon'
 description: 'Deploys a review app to Pantheon Multidev'
 inputs:
   github-token:
