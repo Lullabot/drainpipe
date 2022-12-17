@@ -65,7 +65,7 @@ tasks:
       - ./vendor/bin/drush {{.site}} --yes config:import
       - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
-      - task: :test:config
+      - task: test:config
   maintenance:on:
     desc: Turn on Maintenance Mode
     cmds:
