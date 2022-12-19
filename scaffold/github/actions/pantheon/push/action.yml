@@ -26,5 +26,9 @@ runs:
         else
           drainpipe_exec "terminus connection:set ${{ inputs.site-name }}.${{ inputs.branch }} git --yes"
         fi
-        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=${{ inputs.branch }} remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\""
+        COMMIT_MESSAGE=$(cat <<EOF
+          ${{ inputs.commit-message }}
+        EOF
+        )
+        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=${{ inputs.branch }} remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${COMMIT_MESSAGE}\""
       shell: bash

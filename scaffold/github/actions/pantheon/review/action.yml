@@ -93,8 +93,12 @@ runs:
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
         SITE_ID=$(drainpipe_exec "terminus site:lookup ${{ inputs.site-name }}")
+        COMMIT_MESSAGE=$(cat <<EOF
+          ${{ inputs.commit-message }}
+        EOF
+        )
         drainpipe_exec "terminus connection:set  ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER git --yes"
-        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=pr-$DRAINPIPE_PR_NUMBER remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\" site=${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=pr-$DRAINPIPE_PR_NUMBER remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${COMMIT_MESSAGE}\" site=${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
       shell: bash
 
     - name: Deploy to Pantheon
