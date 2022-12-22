@@ -66,9 +66,9 @@ tasks:
       - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - |
-        if [[ $(./vendor/bin/drush config:status --format=json --state=Different) != '[]' ]]; then
+        if [[ $(./vendor/bin/drush {{.site}} config:status --format=json --state=Different) != '[]' ]]; then
           echo "Config export does not match database."
-          ./vendor/bin/drush config:status
+          ./vendor/bin/drush {{.site}} config:status
           exit 1;
         fi
   maintenance:on:
