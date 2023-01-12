@@ -18,8 +18,6 @@ jobs:
           repository: lullabot/drainpipe
           path: drainpipe
 
-      - uses: ./drainpipe/scaffold/github/actions/common/set-env
-
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
