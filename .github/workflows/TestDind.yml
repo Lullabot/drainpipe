@@ -13,13 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     container: justafish/ubuntu-ddev:latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: lullabot/drainpipe
-          path: drainpipe
-
-      - name: Install DDEV
-        uses: ./drainpipe/scaffold/github/actions/common/ddev
-        with:
-          git-name: Drainpipe Bot
-          git-email: no-reply@example.com
+      - name: Start DDEV
+        run: |
+          sudo service docker start
+          find /var/lib/images/ -iname "*.tar" -o -iname "*.tar.xz" | xargs -r -P4 -i sudo docker load -i {}
+          ddev config global --instrumentation-opt-in=false --omit-containers=dba,ddev-ssh-agent
+          ddev start
