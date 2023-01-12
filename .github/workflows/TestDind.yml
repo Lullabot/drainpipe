@@ -11,7 +11,7 @@ concurrency:
 jobs:
   Test-Dind:
     runs-on: ubuntu-latest
-    container: ubuntu:latest
+    container: justafish/ubuntu-ddev:latest
     steps:
       - uses: actions/checkout@v3
         with:
