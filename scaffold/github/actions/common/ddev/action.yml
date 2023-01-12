@@ -24,6 +24,11 @@ runs:
   steps:
     - name: Install and Start DDEV
       run: |
+        apt-get update
+        apt-get install sudo -y
+        usermod -aG sudo node
+        echo -e "\nnode ALL=(ALL) NOPASSWD: ALL\n" | sudo tee -a /etc/sudoers
+        su node -
         curl https://apt.fury.io/drud/gpg.key | sudo apt-key add -
         echo "deb https://apt.fury.io/drud/ * *" | sudo tee -a /etc/apt/sources.list.d/ddev.list
         sudo apt update
