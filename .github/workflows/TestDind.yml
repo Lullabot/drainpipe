@@ -1,0 +1,27 @@
+name: "Test Docker in Docker in GitHub Actions"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-Dind:
+    runs-on: ubuntu-latest
+    container: node:16-bullseye
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: lullabot/drainpipe
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
