@@ -31,7 +31,7 @@ tasks:
         cd {{.directory}}
         git checkout -B {{.branch}}
         git add -A
-        git commit -m {{shellQuote .message}} --allow-empty
+        git commit --quiet --message {{shellQuote .message}} --allow-empty
         git push origin {{.branch}}
         # Not using a bash-style comparison here due to https://github.com/go-task/task/issues/609
         {{if eq .push "true"}}git push origin {{.branch}}{{end}}
