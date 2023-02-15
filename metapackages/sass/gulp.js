@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const gulp = require('gulp');
 const gulpfile = require('./gulpfile');
 const yargs = require('yargs');
