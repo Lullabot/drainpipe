@@ -16,7 +16,8 @@ jobs:
         with:
           node-version: '18'
 
-      - run: |
-          # Also update src/BinaryInstallPlugin.php if changing version
-          curl -O https://github.com/go-task/task/blob/v3.21.0/docs/static/schema.json
+      - name: Validate Taskfile.yml
+        # Also update src/BinaryInstallPlugin.php if changing version
+        run: |
+          curl -O https://raw.githubusercontent.com/go-task/task/v3.21.0/docs/static/schema.json
           npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
