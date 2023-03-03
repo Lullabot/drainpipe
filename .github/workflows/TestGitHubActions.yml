@@ -48,3 +48,23 @@ jobs:
 
       - name: Run Database Updates
         run: ddev task drupal:update
+
+      - name: Snapshot Project
+        env:
+          directory: /tmp/release
+          remote:
+          message:
+          site:
+        run: |
+          echo "/drainpipe" >> .drainpipeignore
+          ddev task snapshot:directory directory=/tmp/release
+
+      - name: Deploy Pantheon Review App
+        uses: ./.github/actions/drainpipe/pantheon/review
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          commit-message: ${{ github.event.head_commit.message }}
+          site-name: ${{ secrets.PANTHEON_SITE_NAME }}
+          lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
+          lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
