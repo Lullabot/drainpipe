@@ -60,7 +60,7 @@ jobs:
           ddev task snapshot:directory directory=/tmp/release
 
       - name: Deploy Pantheon Review App
-        uses: ./.github/actions/drainpipe/pantheon/review
+        uses: ./.github/actions/pantheon/review
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
