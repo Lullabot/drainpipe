@@ -75,9 +75,6 @@ jobs:
           mkdir -p .github/actions
           cp -R ./drainpipe/scaffold/github/actions/common .github/actions/drainpipe
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Deploy Pantheon Review App
         uses: ./drainpipe/scaffold/github/actions/pantheon/review
         with:
