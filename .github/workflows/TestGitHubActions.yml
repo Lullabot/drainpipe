@@ -70,6 +70,11 @@ jobs:
           echo "/drainpipe" >> .drainpipeignore
           ddev task snapshot:directory directory=/tmp/release
 
+      - name: Prepare Actions
+        run: |
+          mkdir -p .github/actions/drainpipe
+          cp -R ./drainpipe/scaffold/github/actions/common .github/actions/drainpipe
+
       - name: Deploy Pantheon Review App
         uses: ./drainpipe/scaffold/github/actions/pantheon/review
         with:
