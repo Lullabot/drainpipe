@@ -72,9 +72,8 @@ jobs:
 
       - name: Prepare Actions
         run: |
-          mkdir -p .github/actions/drainpipe
-          cp -R ./drainpipe/scaffold/github/actions/common .github/actions/
-          mv .github/actions/common .github/actions/drainpipe
+          mkdir -p .github/actions
+          cp -R ./drainpipe/scaffold/github/actions/common .github/actions/drainpipe
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
