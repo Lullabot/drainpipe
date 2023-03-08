@@ -27,6 +27,19 @@ tasks:
     deps: [drupal:composer:production]
     cmds:
       - echo "Nothing to do"
+  site-schema:
+    desc: Updates site-schema.yml with the latest schema in DB (update and post_update hooks).
+    cmds:
+      - ./vendor/bin/drush {{.site}} site-schema --format=yaml > site-schema.yml
+  drupal:export:
+    desc: The opposite of drupal:update, exports the site's configuration and schema to code.
+    cmds:
+      - composer update --lock
+      - ./vendor/bin/drush {{.site}} --yes cache:clear plugin
+      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
+      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
+      - ./vendor/bin/drush {{.site}} --yes config:export
+      - task: site-schema
 # assets:
 #   desc: "Builds assets such as CSS & JS"
 #   cmds:
