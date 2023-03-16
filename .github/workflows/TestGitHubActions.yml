@@ -62,6 +62,9 @@ jobs:
           echo "enforce_https: full+subdomains" >> pantheon.yml
           echo "build_step: false" >> pantheon.yml
 
+      - name: Include settings.pantheon.php
+        run: echo "include __DIR__ . \"/settings.pantheon.php\";" >> web/sites/default/settings.php
+
       - name: Create .drainpipeignore
         run: |
           echo "web/sites/default/files" >> .drainpipeignore
