@@ -31,6 +31,7 @@ runs:
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "echo -e \"Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa\" >> ~/.ssh/config"
+        drainpipe_exec "cat ~/.ssh/config"
       shell: bash
 
     - name: Create GitHub Deployment
