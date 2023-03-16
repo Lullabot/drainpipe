@@ -62,6 +62,10 @@ jobs:
           echo "enforce_https: full+subdomains" >> pantheon.yml
           echo "build_step: false" >> pantheon.yml
 
+      - name: Create .drainpipeignore
+        run: |
+          echo "web/sites/default/files" >> .drainpipeignore
+
       - name: Snapshot Project
         env:
           directory: /tmp/release
