@@ -43,6 +43,11 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
+      - name: settings.pantheon.php
+        run: |
+          echo "include __DIR__ . \"/settings.pantheon.php\";" >> web/sites/default/settings.php
+          echo "$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+
       - name: Install Drupal
         run: |
           ddev drush site:install -y
@@ -61,9 +66,6 @@ jobs:
           echo "  version: 10.4" >> pantheon.yml
           echo "enforce_https: full+subdomains" >> pantheon.yml
           echo "build_step: false" >> pantheon.yml
-
-      - name: Include settings.pantheon.php
-        run: echo "include __DIR__ . \"/settings.pantheon.php\";" >> web/sites/default/settings.php
 
       - name: Create .drainpipeignore
         run: |
