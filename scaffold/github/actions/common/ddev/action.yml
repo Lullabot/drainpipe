@@ -41,8 +41,8 @@ runs:
           chmod 644 .ddev/homeadditions/.ssh/known_hosts
         fi
         # SSH config file
-        touch ~/.ssh/config
-        chmod 600 ~/.ssh/config
+        touch .ddev/homeadditions/.ssh/config
+        chmod 600 .ddev/homeadditions/.ssh/config
 
         chmod 700 .ddev/homeadditions/.ssh
 
