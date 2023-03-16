@@ -28,7 +28,7 @@ runs:
     - uses: ./.github/actions/drainpipe/set-env
 
     - name: Trust all drush.in hosts
-      run: echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >> ~/.ssh/config
+      run: drainpipe_exec "echo -e \"Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa\" >> ~/.ssh/config"
       shell: bash
 
     - name: Create GitHub Deployment
