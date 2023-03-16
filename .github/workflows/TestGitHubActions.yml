@@ -46,7 +46,7 @@ jobs:
       - name: settings.pantheon.php
         run: |
           echo "include __DIR__ . \"/settings.pantheon.php\";" >> web/sites/default/settings.php
-          echo "$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
 
       - name: Install Drupal
         run: |
