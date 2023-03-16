@@ -40,6 +40,10 @@ runs:
           echo "${{ inputs.ssh-known-hosts}}" > .ddev/homeadditions/.ssh/known_hosts
           chmod 644 .ddev/homeadditions/.ssh/known_hosts
         fi
+        # SSH config file
+        touch ~/.ssh/config
+        chmod 600 ~/.ssh/config
+
         chmod 700 .ddev/homeadditions/.ssh
 
         # Download and run the DDEV installer
