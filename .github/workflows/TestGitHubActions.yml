@@ -53,7 +53,7 @@ jobs:
           ddev drush site:install -y
           ddev drush config:export -y
           pwd
-          ls -l ../config
+          ls -lh config
 
       - name: Run Database Updates
         run: ddev task drupal:update
