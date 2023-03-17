@@ -52,8 +52,6 @@ jobs:
         run: |
           ddev drush site:install -y
           ddev drush config:export -y
-          pwd
-          ls -lh config
 
       - name: Run Database Updates
         run: ddev task drupal:update
@@ -71,7 +69,9 @@ jobs:
 
       - name: Create .drainpipeignore
         run: |
-          echo "web/sites/default/files" >> .drainpipeignore
+          echo "/web/sites/default/files" >> .drainpipeignore
+          echo "/.ddev" >> .drainpipeignore
+          echo "/drainpipe" >> .drainpipeignore
 
       - name: Snapshot Project
         env:
@@ -82,6 +82,9 @@ jobs:
         run: |
           echo "/drainpipe" >> .drainpipeignore
           ddev task snapshot:directory directory=/tmp/release
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: Prepare Actions
         run: |
