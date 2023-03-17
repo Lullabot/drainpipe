@@ -52,6 +52,8 @@ jobs:
         run: |
           ddev drush site:install -y
           ddev drush config:export -y
+          pwd
+          ls -l ../config
 
       - name: Run Database Updates
         run: ddev task drupal:update
