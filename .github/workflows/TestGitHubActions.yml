@@ -71,6 +71,8 @@ jobs:
         run: |
           echo "/web/sites/default/files" >> .drainpipeignore
           echo "/.ddev" >> .drainpipeignore
+          echo "settings.ddev.php" >> .drainpipeignore
+          echo "settings.php" >> .drainpipeignore
           echo "/drainpipe" >> .drainpipeignore
 
       - name: Snapshot Project
