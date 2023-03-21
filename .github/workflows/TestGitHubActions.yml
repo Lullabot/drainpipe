@@ -43,11 +43,6 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
-      - name: settings.pantheon.php
-        run: |
-          echo "include __DIR__ . \"/settings.pantheon.php\";" >> web/sites/default/settings.php
-          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
-
       - name: Install Drupal
         run: |
           ddev drush site:install -y
@@ -72,8 +67,13 @@ jobs:
           echo "/web/sites/default/files" >> .drainpipeignore
           echo "/.ddev" >> .drainpipeignore
           echo "settings.ddev.php" >> .drainpipeignore
-          echo "settings.php" >> .drainpipeignore
           echo "/drainpipe" >> .drainpipeignore
+
+      - name: Create settings.php
+        run: |
+          echo "\$settings['container_yamls'][] = __DIR__ . '/services.yml';" > web/sites/default/settings.php
+          echo "include __DIR__ . \"/settings.pantheon.php\";" >> web/sites/default/settings.php
+          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
 
       - name: Snapshot Project
         env:
