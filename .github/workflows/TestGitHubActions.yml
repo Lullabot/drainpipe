@@ -75,6 +75,7 @@ jobs:
           echo "\$settings['container_yamls'][] = __DIR__ . '/services.yml';" >> web/sites/default/settings.php
           echo "include __DIR__ . \"/settings.pantheon.php\";" >> web/sites/default/settings.php
           echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+          curl -o web/sites/default/settings.pantheon.php https://raw.githubusercontent.com/pantheon-systems/drops-8/default/sites/default/settings.pantheon.php
 
       - name: Snapshot Project
         env:
@@ -100,4 +101,5 @@ jobs:
           site-name: ${{ secrets.PANTHEON_SITE_NAME }}
           lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+          # set to "true" if you want to run the installer
           run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}
