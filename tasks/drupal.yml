@@ -72,7 +72,7 @@ tasks:
           exit 1;
         fi
       # Run cron after updating to refresh items.
-      - ./vendor/bin/drush {{ .site }} cron
+      - ./vendor/bin/drush {{ .site }} cron --verbose
   maintenance:on:
     desc: Turn on Maintenance Mode
     cmds:
