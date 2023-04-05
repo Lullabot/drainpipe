@@ -46,6 +46,7 @@ jobs:
       - name: Install Drupal
         run: |
           ddev drush site:install -y
+          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
           ddev drush config:export -y
 
       - name: Run Database Updates
