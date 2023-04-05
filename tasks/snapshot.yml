@@ -61,7 +61,7 @@ tasks:
         {{ .PREPARE_DIRECTORY }}
         git config user.email 'no-reply@lullabot.com'
         git config user.name 'Lullabot Drainpipe'
-        git commit -m "Initial commit" --no-gpg-sign
+        git commit --quiet --message "Initial commit" --no-gpg-sign
         git config tar.tar.xz.command "xz -c"
         git config tar.tar.bz2.command "bzip2 -c"
         git archive -o {{.o}} HEAD
