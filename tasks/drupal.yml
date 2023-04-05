@@ -71,6 +71,8 @@ tasks:
           ./vendor/bin/drush {{.site}} config:status
           exit 1;
         fi
+      # Run cron after updating to refresh items.
+      - ./vendor/bin/drush {{ .site }} cron
   maintenance:on:
     desc: Turn on Maintenance Mode
     cmds:
