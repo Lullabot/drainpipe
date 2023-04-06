@@ -42,14 +42,14 @@ jobs:
           ddev config --auto
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe-dev\",\"lullabot/drainpipe\"]
+          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
           ddev composer config --no-plugins allow-plugins.composer/installers true
           ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
-          ddev composer config repositories.drainpipe-dev --json "{\"type\": \"path\", \"url\": \"drainpipe-dev\", \"options\": {\"symlink\": false}}"
+          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe --with-all-dependencies
+          ddev composer require lullabot/drainpipe:"dev-main as 1.0.0" --with-all-dependencies
           ddev composer require lullabot/drainpipe-dev --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
           ddev restart
@@ -113,15 +113,15 @@ jobs:
           ddev config --auto
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe-dev\",\"lullabot/drainpipe\",\"weitzman/drupal-test-traits\"]
+          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe", "weitzman/drupal-test-traits"]'
           ddev composer config --no-plugins allow-plugins.composer/installers true
           ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
           ddev composer config --no-plugins allow-plugins.weitzman/drupal-test-traits true
-          ddev composer config repositories.drainpipe-dev --json "{\"type\": \"path\", \"url\": \"drainpipe-dev\", \"options\": {\"symlink\": false}}"
+          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe --with-all-dependencies
+          ddev composer require lullabot/drainpipe:"dev-main as 1.0.0" --with-all-dependencies
           ddev composer require lullabot/drainpipe-dev weitzman/drupal-test-traits behat/mink-selenium2-driver --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
           ddev restart
@@ -185,14 +185,14 @@ jobs:
           ddev config --auto
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe-dev\",\"lullabot/drainpipe\"]
+          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
           ddev composer config --no-plugins allow-plugins.composer/installers true
           ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
-          ddev composer config repositories.drainpipe-dev --json "{\"type\": \"path\", \"url\": \"drainpipe-dev\", \"options\": {\"symlink\": false}}"
+          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe --with-all-dependencies
+          ddev composer require lullabot/drainpipe:"dev-main as 1.0.0" --with-all-dependencies
           ddev composer require lullabot/drainpipe-dev --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
           ddev restart
@@ -219,3 +219,4 @@ jobs:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
           contains: 12
           expected_result: PASSED
+
