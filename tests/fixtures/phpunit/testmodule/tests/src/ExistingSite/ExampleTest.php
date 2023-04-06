@@ -12,7 +12,7 @@ use weitzman\DrupalTestTraits\ExistingSiteBase;
 class ExampleTest extends ExistingSiteBase
 {
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
