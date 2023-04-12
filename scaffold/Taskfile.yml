@@ -5,6 +5,7 @@ dotenv: ['.env', '.env.defaults']
 includes:
   deploy: ./vendor/lullabot/drainpipe/tasks/deploy.yml
   drupal: ./vendor/lullabot/drainpipe/tasks/drupal.yml
+  github: ./vendor/lullabot/drainpipe/tasks/github.yml
   sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
