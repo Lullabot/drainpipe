@@ -12,5 +12,5 @@ tasks:
     cmds:
       - |
           directories=".github/workflows .github/actions"
-          if [ "{{shellQuote .directories }}" != "" ]; then directories="{{ .directories }}"; fi
+          if [ "{{ .directories }}" != "" ]; then directories="{{ .directories }}"; fi
           find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \)  | xargs -n1 npx @action-validator/cli

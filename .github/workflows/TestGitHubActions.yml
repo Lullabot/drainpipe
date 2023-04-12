@@ -49,11 +49,8 @@ jobs:
           echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
           ddev drush config:export -y
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Lint GitHub Actions and Workflows
-        run: ddev task github:actions:lint directories="./scaffold/github/actions ./scaffold/github/workflows"
+        run: ddev task "github:actions:lint directories='./drainpipe/scaffold/github/actions ./drainpipe/scaffold/github/workflows'"
 
       - name: Run Database Updates
         run: ddev task drupal:update
