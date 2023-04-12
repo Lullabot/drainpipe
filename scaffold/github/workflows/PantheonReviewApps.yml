@@ -55,9 +55,6 @@ jobs:
       - name: Build Project
         env:
           directory: /tmp/release
-          remote:
-          message:
-          site:
         run: |
           composer install
           task build
