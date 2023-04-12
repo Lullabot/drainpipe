@@ -33,9 +33,6 @@ jobs:
       - name: Build Project
         env:
           directory: /tmp/release
-          remote:
-          message:
-          site:
         run: |
           ddev composer install
           ddev task build
