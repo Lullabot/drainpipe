@@ -1,0 +1,16 @@
+version: '3'
+
+tasks:
+  actions:lint:
+    desc: Run lint on Github Actions and Workflows
+    summary: |
+      Runs @action-validator/cli on GitHub Actions and Workflows
+
+      usage: task github:actions:lint
+
+      directories=<directories>   A list of directories seperated by spaces. Defaults to ".github/workflows .github/actions"
+    cmds:
+      - |
+          directories=".github/workflows .github/actions"
+          if [ "{{ .directories }}" != "" ]; then directories="{{ .directories }}"; fi
+          find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \)  | xargs -n1 npx @action-validator/cli

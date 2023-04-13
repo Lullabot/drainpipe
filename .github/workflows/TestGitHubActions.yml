@@ -39,7 +39,7 @@ jobs:
           ddev composer config --no-plugins allow-plugins.composer/installers true
           ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev composer config repositories.drainpipe --json "{\"type\": \"path\", \"url\": \"drainpipe\", \"options\": {\"symlink\": false}}"
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
@@ -48,6 +48,9 @@ jobs:
           ddev drush site:install minimal -y
           echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
           ddev drush config:export -y
+
+      - name: Lint GitHub Actions and Workflows
+        run: ddev task "github:actions:lint directories='./drainpipe/scaffold/github/actions ./drainpipe/scaffold/github/workflows'"
 
       - name: Run Database Updates
         run: ddev task drupal:update
