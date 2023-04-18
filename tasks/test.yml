@@ -1,0 +1,281 @@
+version: '3'
+
+# @todo allow these to be overridden or document them as required folder
+# structures. See also config/phpstan.neon
+vars:
+  YAML_DIRS: 'web/**/*.yml'
+  TWIG_DIRS: 'web/modules web/profiles web/themes'
+  # These directories are configured in phpcs.xml. However, phpcs will fail if
+  # those directories do not exist, so we create them with the assumption that
+  # every Drupal site will eventually have these directories.
+  TEST_DIRS: 'web/modules/custom web/themes/custom web/sites'
+  NIGHTWATCH_TEST_DIRS: 'test'
+  FUNC_ENSURE_DIRS: |
+    DIRS_ARR=({{.TEST_DIRS}})
+    for DIR in "${DIRS_ARR[@]}"; do
+      mkdir -p $DIR
+    done
+
+tasks:
+  static:
+    desc: Runs all static tests
+    deps: [security, lint, phpstan, phpunit:static, phpcs]
+  functional:
+    desc: Runs all tests that require a bootstrapped Drupal site
+    deps: [config, phpunit:functional, nightwatch]
+  security:
+    desc: Runs security checks for composer packages and Drupal contrib
+    cmds:
+      - cmd: |
+          if [ "{{.format}}" == "junit" ]; then
+            mkdir -p test_result
+            ./vendor/bin/local-php-security-checker --format=json > test_result/local-php-security-checker.json
+          fi
+        ignore_error: true
+      - |
+        if [ "{{.format}}" == "junit" ]; then
+          RESULT=$(cat test_result/local-php-security-checker.json)
+          ./vendor/bin/drainpipe-convert-to-junit-xml convert:sensiolabs-security-check "$RESULT" > test_result/local-php-security-checker.xml
+          if [ "$RESULT" != "{}" ]; then
+            exit 1
+          fi
+        else
+          ./vendor/bin/local-php-security-checker
+        fi
+      # JUnit output blocked on https://github.com/drush-ops/drush/issues/4817
+      - ./vendor/bin/drush pm:security
+  lint:
+    desc: Runs lint on composer, YAML, and Twig files
+    # @todo JUnit output
+    cmds:
+      - composer validate
+      - |
+        DIRS_ARR=({{.YAML_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          ./vendor/bin/yaml-lint $DIR
+        done
+      - |
+        DIRS_ARR=({{.TWIG_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          ./vendor/bin/drainpipe-twig-linter lint $DIR
+        done
+      - |
+        if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn prettier --check .
+        elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run prettier --check .
+        fi
+      - |
+        if [ -f ".stylelintrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn stylelint "**/*.{css,scss,sass}"
+        elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run stylelint "**/*.{css,scss,sass}"
+        fi
+      - |
+        if [ -f ".eslintrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn eslint .
+        elif [ -f ".eslintrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run eslint .
+        fi
+  config:
+    desc: "Verifies that exported config matches the config in Drupal. Run with format=short to skip showing the full table of diffs."
+    # @todo JUnit output
+    cmds:
+      - |
+        if [ $(./vendor/bin/drush config:status --format=string | wc -w) -gt 0 ]; then
+          echo "Config export does not match"
+          if [ "{{.format}}" != "short" ]; then
+            ./vendor/bin/drush config:status
+          fi
+          exit 1
+        fi
+  phpstan:
+    dec: Runs PHPStan with mglaman/phpstan-drupal
+    cmds:
+      - |
+        {{ .FUNC_ENSURE_DIRS }}
+      - |
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpstan analyse --error-format=junit {{.TEST_DIRS}} > test_result/phpstan.xml
+        else
+          ./vendor/bin/phpstan analyse {{.TEST_DIRS}}
+        fi
+  phpunit:
+    desc: Runs PHPUnit
+    deps: [phpunit:static, phpunit:functional]
+  phpunit:static:
+    desc: Runs PHPUnit unit tests
+    cmds:
+      - |
+        CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml"
+        if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
+          CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit-testtraits.xml"
+        fi
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpunit --testsuite=unit -c $CONFIG --log-junit test_result/phpunit.xml
+        else
+          ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
+        fi
+  phpunit:functional:
+    desc: Runs PHPUnit functional tests
+    cmds:
+      - |
+        CONFIG="$(pwd)/vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml"
+        if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
+          CONFIG="$(pwd)/vendor/lullabot/drainpipe-dev/scaffold/phpunit-testtraits.xml"
+        fi
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpunit --exclude-group=unit -c $CONFIG --log-junit test_result/phpunit.xml
+        else
+          ./vendor/bin/phpunit -c $CONFIG --exclude-group=unit
+        fi
+  phpcs:
+    desc: Runs PHPCS with Drupal Coding Standards
+    summary: |
+      Check your code against Drupal's coding standards. To override the default
+      ruleset, copy vendor/lullabot/drainpipe-dev/scaffold/phpcs.xml to phpcs.xml
+      in the root of your project and edit as needed.
+    cmds:
+      - |
+        {{ .FUNC_ENSURE_DIRS }}
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpcs --report=junit -q > test_result/phpcs.xml
+        else
+          ./vendor/bin/phpcs
+        fi
+  autofix:
+    desc: Runs PHPCBF with Drupal Coding Standards to fix PHPCS violations
+    cmds:
+      - |
+        {{ .FUNC_ENSURE_DIRS }}
+      - ./vendor/bin/phpcbf
+      - |
+        if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn prettier --write .
+        elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run prettier --write .
+        fi
+      - |
+        if [ -f ".stylelintrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn stylelint "**/*.{css,scss,sass}" --fix
+        elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run stylelint "**/*.{css,scss,sass}" --fix
+        fi
+  nightwatch:check:
+    #desc: Verifies Nightwatch is setup correctly
+    cmds:
+      - |
+        if [ ! -f "package.json" ]; then
+          echo "No package.json exists, please run test:nightwatch:setup"
+        fi
+      - |
+        if [ "$IS_DDEV_PROJECT" == "true" ]; then
+          DATABASE_FIREFOX="CREATE DATABASE IF NOT EXISTS firefox";
+          DATABASE_CHROME="CREATE DATABASE IF NOT EXISTS chrome";
+          if ! grep -q "$DATABASE_FIREFOX" .ddev/config.yaml; then
+            echo "No Firefox container found, please run test:nightwatch:setup"
+            exit 1
+          fi
+          if ! grep -q "$DATABASE_CHROME" .ddev/config.yaml; then
+            echo "No Chrome container found, please run test:nightwatch:setup"
+            exit 1
+          fi
+        fi
+      - |
+        if [ "$IS_DDEV_PROJECT" == "true" ]; then
+          HOST_FIREFOX="NIGHTWATCH_DRUPAL_URL_FIREFOX="
+          HOST_CHROME="NIGHTWATCH_DRUPAL_URL_CHROME="
+          if ! grep -q "$HOST_FIREFOX" .ddev/config.yaml; then
+            echo "No Firefox hostname found, please run test:nightwatch:setup"
+            exit 1
+          fi
+          if ! grep -q "$HOST_CHROME" .ddev/config.yaml; then
+            echo "No Chrome hostname found, please run test:nightwatch:setup"
+            exit 1
+          fi
+        fi
+      - echo "Nightwatch appears to be setup correctly"
+  nightwatch:setup:
+    desc: Sets up Nightwatch
+    interactive: true
+    cmds:
+      - |
+        PACKAGES="nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands"
+        if [ ! -f "package.json" ]; then
+          echo -n "No package.json exists, would you like to use yarn1, npm, or yarn? "
+          read -r PACKAGE_MANAGER
+          if [ "$PACKAGE_MANAGER" == "npm" ]; then
+            if [ "$IS_DDEV_PROJECT" == "true" ]; then
+              sudo npm update -g
+            fi
+            npm init -y
+            npm install $PACKAGES --save-dev
+          elif [ "$PACKAGE_MANAGER" == "yarn1" ]; then
+            yarn set version classic
+            yarn init -y
+            yarn add $PACKAGES --dev
+          elif [ "$PACKAGE_MANAGER" == "yarn" ]; then
+            yarn set version berry
+            yarn init
+            yarn add $PACKAGES --dev
+          else
+            echo "Sorry I'm not aware of that package manager. Please first init package.json with it yourself manually."
+          fi
+        else
+          if [ -f "package-lock.json" ]; then
+            npm install $PACKAGES --save-dev
+          elif [ -f "yarn.lock" ]; then
+            yarn add $PACKAGES --dev
+          else
+            echo "package.json found but unable to figure out which package manager is in use"
+            echo "Please manually install $PACKAGES"
+            exit 1;
+          fi
+        fi
+
+        if [ "$IS_DDEV_PROJECT" == "true" ]; then
+          echo 'Add the following to post-start hooks to .ddev/config.yaml:';
+          echo ""
+          echo "hooks:";
+          echo "  post-start:";
+          echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS firefox; GRANT ALL ON firefox.* TO 'db'@'%';\"";
+          echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO 'db'@'%';\"";
+          echo ""
+          echo "------"
+          echo ""
+          echo "Then run:"
+          echo ""
+          echo "ddev config --web-environment=\"NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome\""
+          echo "ddev config --additional-hostnames=\"*.$DDEV_SITENAME\""
+          echo "ddev restart"
+        fi
+  nightwatch:siteinstall:firefox:
+    desc: "Runs the site installer for the Firefox container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
+  nightwatch:siteinstall:chrome:
+    desc: "Runs the site installer for the Chrome container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
+  nightwatch:siteinstall:
+    desc: "Runs the site installer for the Firefox and Chrome containers"
+    deps: [nightwatch:siteinstall:firefox, nightwatch:siteinstall:chrome]
+  nightwatch:
+    desc: Runs Nighwatch functional browser tests
+    deps: [nightwatch:check]
+    env:
+      NIGHTWATCH_ENV: 'firefox,chrome'
+    cmds:
+      - |
+        if [ -f "package-lock.json" ]; then
+          npm run nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
+        elif [ -f "yarn.lock" ]; then
+          yarn nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
+        else
+          echo "Unable to figure out which package manager is in use"
+          exit 1;
+        fi
