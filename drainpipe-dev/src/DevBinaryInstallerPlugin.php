@@ -1,8 +1,7 @@
 <?php
 
-namespace Lullabot\Drainpipe;
 
-use Lullabot\Drainpipe\BinaryInstaller;
+use Lullabot\DrainpipeDev\BinaryInstaller;
 
 class DevBinaryInstallerPlugin extends BinaryInstaller {
     /**

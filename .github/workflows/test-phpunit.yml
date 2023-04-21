@@ -25,9 +25,7 @@ jobs:
           path: drainpipe
 
       - name: Setup drainpipe-dev
-        run: |
-          mkdir drainpipe-dev
-          cp ./drainpipe/composer-dev.json drainpipe-dev/composer.json
+        run: mv drainpipe/drainpipe-dev .
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
@@ -97,11 +95,7 @@ jobs:
           path: drainpipe
 
       - name: Setup drainpipe-dev
-        run: |
-          mkdir drainpipe-dev
-          cp ./drainpipe/composer-dev.json drainpipe-dev/composer.json
-
-      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+        run: mv drainpipe/drainpipe-dev .
 
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
@@ -170,9 +164,7 @@ jobs:
           path: drainpipe
 
       - name: Setup drainpipe-dev
-        run: |
-          mkdir drainpipe-dev
-          cp ./drainpipe/composer-dev.json drainpipe-dev/composer.json
+        run: mv drainpipe/drainpipe-dev .
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
