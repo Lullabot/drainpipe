@@ -1,5 +1,6 @@
 <?php
 
+namespace Lullabot\DrainpipeDev;
 
 use Lullabot\Drainpipe\BinaryInstaller;
 
