@@ -40,5 +40,8 @@
             "drupal/core-project-message": true,
             "lullabot/drainpipe": true
         }
+    },
+    "archive": {
+        "exclude": ["/.github", "/.yarn", "/drainpipe-dev", "/metapackages"]
     }
 }
