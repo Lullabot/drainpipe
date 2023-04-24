@@ -8,7 +8,7 @@ includes:
   github: ./vendor/lullabot/drainpipe/tasks/github.yml
   sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
-  test: ./vendor/lullabot/drainpipe/tasks//test.yml
+  test: ./vendor/lullabot/drainpipe/tasks/test.yml
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
 
 output: prefixed
