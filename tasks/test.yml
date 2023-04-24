@@ -108,9 +108,9 @@ tasks:
     desc: Runs PHPUnit unit tests
     cmds:
       - |
-        CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml"
+        CONFIG="vendor/lullabot/drainpipe/scaffold/phpunit.xml"
         if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="vendor/lullabot/drainpipe-dev/scaffold/phpunit-testtraits.xml"
+          CONFIG="vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
@@ -122,9 +122,9 @@ tasks:
     desc: Runs PHPUnit functional tests
     cmds:
       - |
-        CONFIG="$(pwd)/vendor/lullabot/drainpipe-dev/scaffold/phpunit.xml"
+        CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
         if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="$(pwd)/vendor/lullabot/drainpipe-dev/scaffold/phpunit-testtraits.xml"
+          CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
@@ -136,7 +136,7 @@ tasks:
     desc: Runs PHPCS with Drupal Coding Standards
     summary: |
       Check your code against Drupal's coding standards. To override the default
-      ruleset, copy vendor/lullabot/drainpipe-dev/scaffold/phpcs.xml to phpcs.xml
+      ruleset, copy vendor/lullabot/drainpipe/scaffold/phpcs.xml to phpcs.xml
       in the root of your project and edit as needed.
     cmds:
       - |
