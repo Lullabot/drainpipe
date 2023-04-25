@@ -118,7 +118,7 @@ jobs:
           ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
-          ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+          ddev composer require "lullabot/drainpipe-dev @dev" weitzman/drupal-test-traits --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
           ddev restart
 
@@ -197,9 +197,6 @@ jobs:
           mkdir web/modules/custom
           cp -R drainpipe/tests/fixtures/phpunit/testmodule web/modules/custom/
           cp drainpipe/tests/fixtures/phpunit/Taskfile.yml .
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
 
       - name: Run PHPUnit Tests
         run: ddev task test:phpunit:static format=junit
