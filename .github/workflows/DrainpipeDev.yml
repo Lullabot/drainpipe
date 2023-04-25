@@ -49,4 +49,4 @@ jobs:
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
       - name: Push drainpipe-dev
-        run: ddev task deploy:git directory=/var/www/html/drainpipe/drainpipe-dev branch=${{ github.ref_name }} remote=git@github.com:Lullabot/drainpipe-dev.git message=\"${{ github.event.head_commit.message }}\"
+        run: ddev exec "./vendor/bin/task deploy:git directory=/var/www/html/drainpipe/drainpipe-dev branch=${{ github.ref_name }} remote=git@github.com:Lullabot/drainpipe-dev.git message=\"${{ github.event.head_commit.message }}\""
