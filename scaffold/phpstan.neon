@@ -1,0 +1,2 @@
+includes:
+	- vendor/lullabot/drainpipe-dev/config/phpstan.neon

@@ -1,0 +1,50 @@
+name: "Push Drainpipe Dev Package"
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  Drainpipe-Dev:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v3
+        with:
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer require lullabot/drainpipe --with-all-dependencies
+
+      - name: Push drainpipe-dev
+        run: ddev exec "./vendor/bin/task deploy:git directory=/var/www/html/drainpipe/drainpipe-dev branch=${{ github.ref_name }} remote=https://${{ secrets.DRAINPIPE_DEV_GITHUB_TOKEN_USERNAME }}:${{ secrets.DRAINPIPE_DEV_GITHUB_TOKEN }}@github.com/lullabot/drainpipe-dev.git message=\"${{ github.event.head_commit.message }}\""

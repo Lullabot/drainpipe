@@ -1,0 +1,14 @@
+includes:
+    - ../../../mglaman/phpstan-drupal/extension.neon
+    - ../../../phpstan/phpstan-deprecation-rules/rules.neon
+
+parameters:
+    excludePaths:
+        - *sites/simpletest/*
+        - *default.settings.php
+        - *sites/*/files/*
+        - *settings.ddev.php
+        - */node_modules/*
+    # PHPStan Level 1
+    level: 1
+
