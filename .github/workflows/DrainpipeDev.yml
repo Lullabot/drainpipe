@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - justafish/fix-drainpipe-src-tests
     tags:
       - 'v*'
 
