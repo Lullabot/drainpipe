@@ -48,5 +48,8 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Push drainpipe-dev
         run: ddev exec "./vendor/bin/task deploy:git directory=/var/www/html/drainpipe/drainpipe-dev branch=${{ github.ref_name }} remote=git@github.com:Lullabot/drainpipe-dev.git message=\"${{ github.event.head_commit.message }}\""
