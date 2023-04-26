@@ -10,8 +10,9 @@
 
 use Dotenv\Dotenv;
 
-$cwd = getcwd();
+$cwd = join(DIRECTORY_SEPARATOR, [DRUPAL_ROOT, '..']);
 $env_files = [];
+
 if (file_exists(join(DIRECTORY_SEPARATOR, [$cwd, '.env.defaults']))) {
     $env_files[] = '.env.defaults';
 }
