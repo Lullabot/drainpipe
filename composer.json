@@ -29,7 +29,11 @@
         "drupal-scaffold": {
             "gitignore": true,
             "file-mapping": {
-                "[project-root]/.env": "scaffold/env/env"
+                "[project-root]/.env": {
+                    "mode": "replace",
+                    "path": "scaffold/env/env",
+                    "overwrite": false
+                }
             }
         }
     },
