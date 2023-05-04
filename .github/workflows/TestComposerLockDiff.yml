@@ -62,3 +62,10 @@ jobs:
             echo "Expected description not produced"
             exit 1
           fi
+
+      - name: Upload description artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: description-renovate
+          path: description-renovate.md
