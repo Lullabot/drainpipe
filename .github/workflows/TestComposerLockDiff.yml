@@ -45,6 +45,8 @@ jobs:
       - name: Commit current state
         run: |
           echo "/drainpipe" >> .gitignore
+          git config --global user.email "no-reply@example.com"
+          git config --global user.name "Drainpipe Bot"
           git init
           git add .
           git commit -m "Initial commit"
