@@ -1,0 +1,51 @@
+name: "Test Composer Lock Diff"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-Composer-Lock-Diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v3
+        with:
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer require lullabot/drainpipe --with-all-dependencies
+
+      - name: Run Composer Lock Diff on a Renovate PR
+        run: |
+          ddev task "composer-lock-diff pull_request='tests/fixtures/composer-lock-diff/github/renovate.json' description='description-renovate.md'"
+          if [ "$(cat description-renovate.md" != "$(cat tests/fixtures/composer-lock-diff/github/renovate-after.md)" ]; then
+            echo "Expected description not produced"
+            exit 1;
+          fi
