@@ -34,7 +34,6 @@ tasks:
         LOCK_DIFF="$(composer global exec -- "composer-lock-diff --md")"
         sed -i 's/<!--Composer Lock Diff-->.*<!--\/Composer Lock Diff-->//g' /tmp/drainpipe-composer-lock-diff-pr
         DESCRIPTION=$(cat /tmp/drainpipe-composer-lock-diff-pr | jq -r '.body')
-        #| sed -z 's/\n/\\\n/g')
         if [ "$(cat /tmp/drainpipe-composer-lock-diff)" != "" ]; then
             DIFF=$(cat /tmp/drainpipe-composer-lock-diff)
             DESCRIPTION="$DESCRIPTION
@@ -42,6 +41,6 @@ tasks:
         ## Composer Lock Diff
         $DIFF
         <!--/Composer Lock Diff-->"
-          fi
+        fi
         DESCRIPTION=$(echo "$DESCRIPTION" | sed -z 's/\n/\\n/g')
         echo "$DESCRIPTION" > {{ .description_file }}
