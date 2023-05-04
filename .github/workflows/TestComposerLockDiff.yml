@@ -44,7 +44,7 @@ jobs:
 
       - name: Run Composer Lock Diff on a Renovate PR
         run: |
-          ddev task "github:composer-lock-diff pull_request='tests/fixtures/composer-lock-diff/github/renovate.json' description='description-renovate.md'"
+          ddev task "github:composer-lock-diff pull_request='tests/fixtures/composer-lock-diff/github/renovate.json' description_file='description-renovate.md'"
           if [ "$(cat description-renovate.md" != "$(cat tests/fixtures/composer-lock-diff/github/renovate-after.md)" ]; then
             echo "Expected description not produced"
             exit 1;
