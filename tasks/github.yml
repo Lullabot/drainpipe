@@ -20,7 +20,7 @@ tasks:
     summary: |
       Runs composer-lock-diff on a pull request description and produces a new description
 
-      usage: task composer-lock-diff pull_request="pull_request.json" description_file="description.md"
+      usage: task github:composer-lock-diff pull_request="pull_request.json" description_file="description.md"
 
       pull_request=<pull_request>   A file containing a json representation of a pull request from the GitHub API
       description_file              A file to write the new description to
