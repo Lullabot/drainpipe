@@ -44,6 +44,7 @@ jobs:
 
       - name: Run Composer Lock Diff on a Renovate PR
         run: |
+          ddev composer global require davidrjonas/composer-lock-diff:^1.0
           ddev task "github:composer-lock-diff pull_request='drainpipe/tests/fixtures/composer-lock-diff/github/renovate.json' description_file='description-renovate.md'"
           if [ "$(cat description-renovate.md" != "$(cat drainpipe/tests/fixtures/composer-lock-diff/github/renovate-after.md)" ]; then
             echo "Expected description not produced"
