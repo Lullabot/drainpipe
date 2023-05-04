@@ -15,16 +15,23 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Add Composer Lock Diff
-        run: |
-          sudo apt-get install jq
-          composer global require davidrjonas/composer-lock-diff:^1.0
-
+    steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
         with:
-          fetch-depth: 2
+          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
       - uses: ./.github/actions/drainpipe/set-env
+
+      - name: Install and Start DDEV
+        uses: ./.github/actions/drainpipe/ddev
+
+      - name: Build Project
+        run: ddev composer install
 
       - name: Prepare repository
         run: |
@@ -33,23 +40,12 @@ jobs:
 
       - name: Run composer lock diff
         run: |
-          composer global exec -- "composer-lock-diff --md > composer_lock_diff.md"
-          cat composer_lock_diff.md
-
-      - name: Update Pull Request
-        run: |
           curl -f \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer  ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER | jq '. | {body}' > pull_request.json
-          sed -i 's/<!--Composer Lock Diff-->.*<!--\/Composer Lock Diff-->//g' pull_request.json
-          DESCRIPTION=$(cat pull_request.json | jq -r '.body' | sed -z 's/\r\n/\\n/g')
-          if [ "$(cat composer_lock_diff.md)" != "" ]; then
-            DIFF=$(cat composer_lock_diff.md | sed -z "s/\n/\\\n/g")
-            DESCRIPTION="$DESCRIPTION\\n<!--Composer Lock Diff-->\\n## Composer Lock Diff\\n$DIFF\\n<!--/Composer Lock Diff-->"
-          fi
-          DESCRIPTION=$(echo $DESCRIPTION | sed 's/"/\\"/g')
-          JSON="{\"body\": \"$DESCRIPTION\"}"
+          ddev task "github:composer-lock-diff pull_request='pull_request.json' description_file='description.md'"
+          JSON="{\"body\": \"$(cat description.md)\"}"
           curl -f \
             -X PATCH \
             -H "Accept: application/vnd.github+json" \
