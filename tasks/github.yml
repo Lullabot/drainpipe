@@ -14,3 +14,33 @@ tasks:
           directories=".github/workflows .github/actions"
           if [ "{{ .directories }}" != "" ]; then directories="{{ .directories }}"; fi
           find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \)  | xargs -n1 npx @action-validator/cli
+
+  composer-lock-diff:
+    desc: Runs composer-lock-diff on a pull request description and produces a new description
+    summary: |
+      Runs composer-lock-diff on a pull request description and produces a new description
+
+      usage: task github:composer-lock-diff pull_request="pull_request.json" description_file="description.md"
+
+      pull_request=<pull_request>   A file containing a json representation of a pull request from the GitHub API
+      json_file              A file to write the new description to in a format which can be patched to GitHub directly
+    cmds:
+      - if [ "" == {{shellQuote .json_file}} ]; then echo "Please provide a file to write the description to" && exit 1; fi
+      - composer global exec -- "composer-lock-diff --md > /tmp/drainpipe-composer-lock-diff"
+      - defer: rm -f /tmp/drainpipe-composer-lock-diff
+      - cp {{ .pull_request }} /tmp/drainpipe-composer-lock-diff-pr
+      - defer: rm -f /tmp/drainpipe-composer-lock-diff-pr
+      - |
+        LOCK_DIFF="$(composer global exec -- "composer-lock-diff --md")"
+        sed -i 's/<!--Composer Lock Diff-->.*<!--\/Composer Lock Diff-->//g' /tmp/drainpipe-composer-lock-diff-pr
+        DESCRIPTION=$(cat /tmp/drainpipe-composer-lock-diff-pr | jq -r '.body')
+        if [ "$(cat /tmp/drainpipe-composer-lock-diff)" != "" ]; then
+            DIFF=$(cat /tmp/drainpipe-composer-lock-diff)
+            DESCRIPTION="$DESCRIPTION
+        <!--Composer Lock Diff-->
+        ## Composer Lock Diff
+        $DIFF
+        <!--/Composer Lock Diff-->"
+        fi
+        DESCRIPTION=$(echo "$DESCRIPTION" | sed -z 's/\n/\\n/g' | sed -z 's/"/\\"/g' | sed -z 's/\r//g')
+        echo "{\"body\": \"$(echo "$DESCRIPTION")\"}" > {{ .json_file }}
