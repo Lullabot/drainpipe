@@ -39,6 +39,9 @@ jobs:
       - name: Build Project
         run: ddev composer install
 
+      - name: Install composer lock diff
+        run: ddev composer global require davidrjonas/composer-lock-diff:^1.0
+
       - name: Prepare repository
         run: |
           git reset --soft HEAD^1
@@ -46,7 +49,6 @@ jobs:
 
       - name: Run composer lock diff
         run: |
-          ddev composer global require davidrjonas/composer-lock-diff:^1.0
           curl -f \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer  ${{ secrets.GITHUB_TOKEN }}" \

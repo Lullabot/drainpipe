@@ -65,12 +65,6 @@ jobs:
             exit 1
           fi
 
-      - name: Upload artifact
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: renovate
-
       - name: Run Composer Lock Diff on a PR Template
         run: |
           ddev task "github:composer-lock-diff pull_request='drainpipe/tests/fixtures/composer-lock-diff/github/pr-template.json' json_file='pr-template-processed.json'"
