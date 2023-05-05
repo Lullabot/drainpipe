@@ -51,21 +51,39 @@ jobs:
           git add .
           git commit -m "Initial commit"
 
+      - name: Install Composer Lock Diff
+        run : ddev composer global require davidrjonas/composer-lock-diff:^1.0
+
       - name: Add a new package
         run: ddev composer require sebastian/version:4.0.1
 
       - name: Run Composer Lock Diff on a Renovate PR
         run: |
-          ddev composer global require davidrjonas/composer-lock-diff:^1.0
-          ddev task "github:composer-lock-diff pull_request='drainpipe/tests/fixtures/composer-lock-diff/github/renovate.json' description_file='description-renovate.md'"
-          if [ "$(cat description-renovate.md)" != "$(cat drainpipe/tests/fixtures/composer-lock-diff/github/renovate-after.md)" ]; then
+          ddev task "github:composer-lock-diff pull_request='drainpipe/tests/fixtures/composer-lock-diff/github/renovate.json' json_file='renovate-processed.json'"
+          if [ "$(cat renovate-processed.json)" != "$(cat drainpipe/tests/fixtures/composer-lock-diff/github/renovate-after.json)" ]; then
             echo "Expected description not produced"
             exit 1
           fi
 
-      - name: Upload description artifact
+      - name: Upload artifact
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: description-renovate
-          path: description-renovate.md
+          name: renovate
+
+      - name: Run Composer Lock Diff on a PR Template
+        run: |
+          ddev task "github:composer-lock-diff pull_request='drainpipe/tests/fixtures/composer-lock-diff/github/pr-template.json' json_file='pr-template-processed.json'"
+          if [ "$(cat pr-template-processed.json)" != "$(cat drainpipe/tests/fixtures/composer-lock-diff/github/pr-template-after.json)" ]; then
+            echo "Expected description not produced"
+            exit 1
+          fi
+
+      - name: Upload artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: processed-descriptions
+          path: |
+            renovate-processed.json
+            pr-template-processed.json
