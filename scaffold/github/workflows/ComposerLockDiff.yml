@@ -16,6 +16,8 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - uses: actions/cache@v3
         with:
@@ -39,8 +41,6 @@ jobs:
 
       - name: Prepare repository
         run: |
-          git config --global user.email "no-reply@example.com"
-          git config --global user.name "Drainpipe Bot"
           git reset --soft HEAD^1
           git reset .
 
