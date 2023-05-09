@@ -42,6 +42,7 @@ class InstallerScaffoldTest extends TestCase
 
     public function testBinaries(): void
     {
+        $this->assertFileExists('/usr/local/bin/task');
         $this->assertFileExists(self::PROJECT_PATH.'/vendor/bin/task');
     }
 }
