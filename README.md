@@ -34,6 +34,8 @@ for a Drupal site, including:
 ```sh
 composer config extra.drupal-scaffold.gitignore true
 composer config --json extra.drupal-scaffold.allowed-packages "[\"lullabot/drainpipe\", \"lullabot/drainpipe-dev\"]"
+composer config --json extra.drainpipe.global-binaries.task "true"
+composer config --json extra.drainpipe.global-binaries.local-php-security-checker "true"
 composer require lullabot/drainpipe
 composer require lullabot/drainpipe-dev --dev
 ```

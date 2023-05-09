@@ -55,12 +55,18 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
     protected $processor;
 
     /**
+     * @var array
+     */
+    private $extra;
+
+    /**
      * {@inheritdoc}
      */
     public function activate(Composer $composer, IOInterface $io)
     {
         $this->io = $io;
         $this->config = $composer->getConfig();
+        $this->extra = $composer->getPackage()->getExtra();
         $this->platform = strtolower(\PHP_OS_FAMILY);
         $uname = strtolower(php_uname('v'));
         if (false !== strpos($uname, 'arm64')) {
@@ -140,6 +146,17 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
     public function installBinaries(Event $event)
     {
         foreach ($this->binaries as $binary => $info) {
+            if (isset($this->extra['drainpipe']['global-binaries'])) {
+                $global_binaries = $this->extra['drainpipe']['global-binaries'];
+                if (isset($global_binaries[$binary]) && $global_binaries[$binary]) {
+                    continue;
+                }
+                $this->io->warning('Downloading binaries to vendor/bin is deprecated and will be removed in Drainpipe 3.0.');
+                $this->io->warning('Run the following composer command and update any CI scripts to use the commands installed in /usr/local/bin to migrate.');
+                $this->io->warning('composer config --json extra.drainpipe.global-binaries.task "true"');
+                $this->io->warning('composer config --json extra.drainpipe.global-binaries.local-php-security-checker "true"');
+            }
+
             $platform = $this->platform;
             $processor = $this->processor;
 
