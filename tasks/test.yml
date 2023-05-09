@@ -29,7 +29,7 @@ tasks:
       - cmd: |
           if [ "{{.format}}" == "junit" ]; then
             mkdir -p test_result
-            ./vendor/bin/local-php-security-checker --format=json > test_result/local-php-security-checker.json
+            local-php-security-checker --format=json > test_result/local-php-security-checker.json
           fi
         ignore_error: true
       - |
@@ -40,7 +40,7 @@ tasks:
             exit 1
           fi
         else
-          ./vendor/bin/local-php-security-checker
+          local-php-security-checker
         fi
       # JUnit output blocked on https://github.com/drush-ops/drush/issues/4817
       - ./vendor/bin/drush pm:security

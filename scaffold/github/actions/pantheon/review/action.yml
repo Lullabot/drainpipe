@@ -101,7 +101,7 @@ runs:
         source .github/actions/drainpipe/set-env/bash_aliases
         SITE_ID=$(drainpipe_exec "terminus site:lookup ${{ inputs.site-name }}")
         drainpipe_exec "terminus connection:set  ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER git --yes"
-        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=pr-$DRAINPIPE_PR_NUMBER remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\" site=${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+        drainpipe_exec "task deploy:git directory=/tmp/release branch=pr-$DRAINPIPE_PR_NUMBER remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\" site=${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
       shell: bash
 
     - name: Deploy to Pantheon
@@ -113,7 +113,7 @@ runs:
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
         else
-          drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+          drainpipe_exec "task drupal:update site=@${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
         fi
         ENVIRONMENT_URL="https://pr-$DRAINPIPE_PR_NUMBER-${{ inputs.site-name }}.pantheonsite.io"
         # Lock Environment.

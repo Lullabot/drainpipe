@@ -9,9 +9,9 @@
       else
         terminus multidev:create $PANTHEON_SITE_NAME.dev mr-$CI_MERGE_REQUEST_IID --yes
       fi
-    - ./vendor/bin/task build
-    - ./vendor/bin/task snapshot:directory
-    - ./vendor/bin/task deploy:git
+    - task build
+    - task snapshot:directory
+    - task deploy:git
     # Wait for Pantheon to sync
     - sleep 30
     - terminus aliases --only $PANTHEON_SITE_NAME --yes
@@ -19,7 +19,7 @@
       if [ "$PANTHEON_MULTIDEV_RUN_INSTALLER" == "true" ]; then
         ./vendor/bin/drush @$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --yes site:install --existing-config
       else
-        ./vendor/bin/task site=@$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID drupal:update
+        task site=@$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID drupal:update
       fi
     - echo $CI_ENVIRONMENT_URL > environment_url.txt
 drainpipe_pantheon_drupal_review_app:

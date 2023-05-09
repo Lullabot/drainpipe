@@ -52,7 +52,7 @@ Task is just a single binary and has no other dependencies. It's also
 cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
 
 You can see what tasks are available after installation by running
-`./vendor/bin/task --list` or `ddev task --list` if you're running DDEV. To get
+`task --list` or `ddev task --list` if you're running DDEV. To get
 more information on a specific task e.g. what parameters it takes, you can run
 `task [task name] --summary`.
 

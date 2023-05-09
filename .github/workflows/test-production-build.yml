@@ -48,4 +48,4 @@ jobs:
       - name: Run static tests
         run: |
           cd ../drupal
-          ./vendor/bin/task build
+          task build
