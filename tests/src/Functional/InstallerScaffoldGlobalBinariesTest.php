@@ -7,9 +7,9 @@ namespace Lullabot\Drainpipe\Tests\Functional;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Process;
 
-class InstallerScaffoldTest extends TestCase
+class InstallerScaffoldGlobalBinariesTest extends TestCase
 {
-    public const PROJECT_PATH = __DIR__.'/../../fixtures/drainpipe-test-project';
+    public const PROJECT_PATH = __DIR__.'/../../fixtures/drainpipe-test-project-global-binaries';
 
     public static function setUpBeforeClass(): void
     {
@@ -44,7 +44,7 @@ class InstallerScaffoldTest extends TestCase
     {
         $this->assertFileExists('/usr/local/bin/task');
         $this->assertFileExists('/usr/local/bin/local-php-security-checker');
-        $this->assertFileExists(self::PROJECT_PATH.'/vendor/bin/task');
-        $this->assertFileExists(self::PROJECT_PATH.'/vendor/bin/local-php-security-checker');
+        $this->assertFileDoesNotExist(self::PROJECT_PATH.'/vendor/bin/task');
+        $this->assertFileDoesNotExist(self::PROJECT_PATH.'/vendor/bin/local-php-security-checker');
     }
 }
