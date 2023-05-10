@@ -151,7 +151,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
                 if (isset($global_binaries[$binary]) && $global_binaries[$binary]) {
                     continue;
                 }
-                $this->io->warning('Downloading binaries to vendor/bin is deprecated and will be removed in Drainpipe 3.0.');
+                $this->io->warning('Downloading binaries to vendor/bin is deprecated and will be removed in Drainpipe 4.0.');
                 $this->io->warning('Run the following composer command and update any CI scripts to use the commands installed in /usr/local/bin to migrate.');
                 $this->io->warning('composer config --json extra.drainpipe.global-binaries.task "true"');
                 $this->io->warning('composer config --json extra.drainpipe.global-binaries.local-php-security-checker "true"');
