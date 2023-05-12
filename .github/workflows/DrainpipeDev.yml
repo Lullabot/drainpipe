@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 208--drainpipe-dev-bin
     tags:
       - 'v*'
 
