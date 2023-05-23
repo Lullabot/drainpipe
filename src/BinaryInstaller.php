@@ -191,7 +191,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $parts = explode('/', $url);
         $fileName = array_pop($parts);
         $cacheFolder = $this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version;
-        $cacheDestination = $cacheFolder.\DIRECTORY_SEPARATOR.$fileName;
+        $cacheDestination = $cacheFolder.\DIRECTORY_SEPARATOR.bin2hex(random_bytes(5)).$fileName;
         $cacheExtractedBinary = $cacheFolder.\DIRECTORY_SEPARATOR.$binary;
         $binDestination = $bin.\DIRECTORY_SEPARATOR.$binary;
 
