@@ -47,7 +47,7 @@ tasks:
       - ./vendor/bin/drush {{ .site }} sql:query --file=$DB_DIR/db.sql.gz
       - defer: rm -f $DB_DIR/db.sql
   export-db:
-    desc: "Exports a database fetches with a *:fetch-db command"
+    desc: "Exports a database fetched with a *:fetch-db command"
     env:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
     cmds:
@@ -66,11 +66,13 @@ tasks:
       - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - |
-        if [[ $(./vendor/bin/drush config:status --format=json --state=Different) != '[]' ]]; then
+        if [[ $(./vendor/bin/drush {{.site}} config:status --format=json --state=Different) != '[]' ]]; then
           echo "Config export does not match database."
-          ./vendor/bin/drush config:status
+          ./vendor/bin/drush {{.site}} config:status
           exit 1;
         fi
+      # Run cron after updating to refresh items.
+      - ./vendor/bin/drush {{ .site }} core:cron --verbose
   maintenance:on:
     desc: Turn on Maintenance Mode
     cmds:

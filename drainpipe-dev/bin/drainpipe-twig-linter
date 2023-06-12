@@ -1,0 +1,46 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+if (PHP_SAPI !== 'cli') {
+  return;
+}
+
+if (is_file(__DIR__ . '/../../../autoload.php')) {
+    require_once __DIR__ . '/../../../autoload.php';
+}
+else {
+    echo "Composer autoload file not found.\n";
+    echo "You need to run 'composer install'.\n";
+    exit(1);
+}
+
+use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\File\FileUrlGenerator;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Routing\UrlGeneratorInterface;
+use Drupal\Core\Theme\ThemeManagerInterface;
+use Symfony\Component\Console\Application;
+use Twig\Loader\ArrayLoader;
+use PackageVersions\Versions;
+
+use Sserbin\TwigLinter\StubEnvironment;
+use Drupal\Core\Template\TwigExtension;
+use Sserbin\TwigLinter\Command\LintCommand;
+
+$twig = new StubEnvironment(new ArrayLoader, []);
+
+$renderer = Mockery::mock(RendererInterface::class);
+$urlGenerator = Mockery::mock(UrlGeneratorInterface::class);
+$themeManager = Mockery::mock(ThemeManagerInterface::class);
+$dateFormatter = Mockery::mock(DateFormatterInterface::class);
+$fileUrlGenerator = Mockery::mock(FileUrlGenerator::class);
+
+$twig->addExtension(new TwigExtension($renderer, $urlGenerator, $themeManager, $dateFormatter, $fileUrlGenerator));
+
+$lintCommand = new LintCommand($twig);
+
+$app = new Application('twig-linter', (string) Versions::getVersion('sserbin/twig-linter'));
+$app->add($lintCommand);
+$app->setDefaultCommand('lint');
+$app->run();

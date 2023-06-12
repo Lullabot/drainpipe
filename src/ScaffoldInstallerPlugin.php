@@ -180,8 +180,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $vendorRelative = str_replace(getcwd() . DIRECTORY_SEPARATOR, '', $vendor);
         $composerJson = file_get_contents('composer.json');
         $composerFullConfig = json_decode($composerJson, true);
-        if (empty($composerFullConfig['autoload-dev']['files']) || !in_array("$vendorRelative/lullabot/drainpipe/scaffold/env/load.environment.php", $composerFullConfig['autoload-dev']['files'])) {
-            $this->io->warning("🪠 [Drainpipe] $vendorRelative/lullabot/drainpipe/scaffold/env/load.environment.php' missing from autoload-dev files");
+        if (empty($composerFullConfig['autoload-dev']['files']) || !in_array("$vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php", $composerFullConfig['autoload-dev']['files'])) {
+            $this->io->warning("🪠 [Drainpipe] $vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php' missing from autoload-dev files");
         }
     }
 
@@ -263,14 +263,16 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
                     $fs->ensureDirectoryExists('./.github/workflows');
                     $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
-                    if (!file_exists('./.github/workflows/PantheonReviewApps.yml')) {
-                        if (file_exists('./.ddev/config.yaml')) {
-                            $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
-                        }
-                        else {
-                            $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
-                        }
+                    if (file_exists('./.ddev/config.yaml')) {
+                        $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
+                    else {
+                        $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
+                    }
+                }
+                else if ($github === 'ComposerLockDiff') {
+                    $fs->ensureDirectoryExists('./.github/workflows');
+                    $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
                 }
             }
         }

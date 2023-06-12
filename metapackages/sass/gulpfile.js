@@ -84,7 +84,9 @@ task('development', function() {
 
 task('sass:watch', function() {
   console.log('🪠 Watching for changes');
-  watch(includes, series('development'));
+  watch(includes, {
+      usePolling: true,
+  }, series('development'));
 });
 
 series(['sass']);

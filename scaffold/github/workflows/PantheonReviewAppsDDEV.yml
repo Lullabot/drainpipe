@@ -12,9 +12,9 @@ jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -33,17 +33,19 @@ jobs:
       - name: Build Project
         env:
           directory: /tmp/release
-          remote:
-          message:
-          site:
         run: |
           ddev composer install
           ddev task build
           ddev task snapshot:directory directory=/tmp/release
+
       - name: Deploy Pantheon Review App
         uses: ./.github/actions/drainpipe/pantheon/review
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
-          site-name: [site-name]
-          commit-message: ${{ github.event.head_commit.message }}
+          commit-message: ${{ github.sha }}
+          site-name: ${{ secrets.PANTHEON_SITE_NAME }}
+          lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
+          lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+          # set to "true" if you want to run the installer
+          run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}

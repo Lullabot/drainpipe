@@ -1,0 +1,7 @@
+version: '3'
+
+includes:
+  test: ./vendor/lullabot/drainpipe/tasks/test.yml
+
+output: prefixed
+silent: true

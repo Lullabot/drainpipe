@@ -13,11 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: |
+          composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
       - uses: actions/checkout@v3
         with:
-          repository: lullabot/drainpipe
           path: drainpipe
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
@@ -39,7 +39,11 @@ jobs:
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev composer config repositories.drainpipe --json "{\"type\": \"path\", \"url\": \"drainpipe\", \"options\": {\"symlink\": false}}"
           ddev composer config minimum-stability dev
+          cat composer.json | jq --indent 4 '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/dotenv.php"]}' | tee composer.json > /dev/null
+          ddev composer update --lock
+          ddev composer validate
           ddev composer require lullabot/drainpipe --with-all-dependencies
+          cp drainpipe/tests/fixtures/env/Taskfile.yml Taskfile.yml
 
       - name: Check files are created
         run: |
@@ -52,24 +56,19 @@ jobs:
       - name: Test .env.defaults
         run: |
           echo "FOO=bar" >> .env.defaults
-          cp drainpipe/tests/fixtures/env/Taskfile-dotenv.yml Taskfile.yml
           ddev task bar
+          # Not sure why Drupal needs restarting for this to work
           ddev restart
-          cp drainpipe/tests/fixtures/env/Taskfile-no-dotenv.yml Taskfile.yml
-          ddev exec 'if [ "$FOO" != "bar" ]; then exit 1; fi'
-          cat composer.json | jq '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/load.environment.php"]}' | tee composer.json > /dev/null
           DRUPAL_FOO_DEFAULT=$(ddev drush php:eval "print getenv('FOO')")
+          echo "FOO=$DRUPAL_FOO_DEFAULT"
           if [ "$DRUPAL_FOO_DEFAULT" != "bar" ]; then exit 1; fi
 
       - name: Test overriding with .env
         run: |
           echo "FOO=baz" >> .env
-          ddev restart
-          cp drainpipe/tests/fixtures/env/Taskfile-dotenv.yml Taskfile.yml
           ddev task baz
-          cp drainpipe/tests/fixtures/env/Taskfile-no-dotenv.yml Taskfile.yml
-          ddev exec 'if [ "$FOO" != "baz" ]; then exit 1; fi'
+          # Not sure why Drupal needs restarting for this to work
+          ddev restart
           DRUPAL_FOO=$(ddev drush php:eval "print getenv('FOO')")
+          echo "FOO=$DRUPAL_FOO"
           if [ "$DRUPAL_FOO" != "baz" ]; then exit 1; fi
-
-

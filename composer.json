@@ -14,10 +14,10 @@
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
         "drush/drush": "^10|^11",
-        "symfony/yaml": "^3|^4",
+        "symfony/yaml": "^3|^4|^5|^6",
         "twig/twig": "^2.0",
-        "symfony/yaml": "^3|^4",
-        "vlucas/phpdotenv": "^3|^4|^5"
+        "vlucas/phpdotenv": "^4|^5",
+        "ext-json": "*"
     },
     "require-dev": {
         "composer/composer": "^2.0",
@@ -31,8 +31,11 @@
         "drupal-scaffold": {
             "gitignore": true,
             "file-mapping": {
-                "[project-root]/.ddev/docker-compose.env-file.yaml": "scaffold/ddev/docker-compose.env-file.yaml",
-                "[project-root]/.env": "scaffold/env/env"
+                "[project-root]/.env": {
+                    "mode": "replace",
+                    "path": "scaffold/env/env",
+                    "overwrite": false
+                }
             }
         }
     },
@@ -43,5 +46,8 @@
             "drupal/core-project-message": true,
             "lullabot/drainpipe": true
         }
+    },
+    "archive": {
+        "exclude": ["/.github", "/.yarn", "/drainpipe-dev", "/metapackages"]
     }
 }

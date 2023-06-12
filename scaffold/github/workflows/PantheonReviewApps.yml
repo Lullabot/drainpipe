@@ -19,14 +19,14 @@ jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
           echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -55,9 +55,6 @@ jobs:
       - name: Build Project
         env:
           directory: /tmp/release
-          remote:
-          message:
-          site:
         run: |
           composer install
           task build
@@ -68,5 +65,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
-          site-name: [site-name]
-          commit-message: ${{ github.event.head_commit.message }}
+          commit-message: ${{ github.sha }}
+          site-name: ${{ secrets.PANTHEON_SITE_NAME }}
+          lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
+          lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}

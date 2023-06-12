@@ -1,0 +1,63 @@
+{
+    "name": "lullabot/drainpipe-dev",
+    "description": "An automated build tool to allow projects to have a set standardized operations scripts.",
+    "license": "GPL-2.0-or-later",
+    "type": "composer-plugin",
+    "autoload": {
+        "psr-4": {"Lullabot\\DrainpipeDev\\": "src/"}
+    },
+    "autoload-dev": {
+        "psr-4": {"Lullabot\\DrainpipeDev\\Tests\\Functional\\": "tests/src/functional/"}
+    },
+    "require": {
+        "php": "^7.3||^8.0",
+        "ext-json": "*",
+        "composer-plugin-api": "^2.0",
+        "phpunit/phpunit": "^8|^9",
+        "j13k/yaml-lint": "^1.1",
+        "sserbin/twig-linter": "^3.0",
+        "mikey179/vfsstream": "^1.6",
+        "mockery/mockery": "^1.4",
+        "behat/mink": "^1.8",
+        "symfony/phpunit-bridge": "^5.3",
+        "lullabot/drainpipe": "*",
+        "mglaman/phpstan-drupal": "^1.0.3",
+        "symfony/yaml": "^4|^5|^6",
+        "drupal/coder": "^8.3",
+        "friends-of-behat/mink-browserkit-driver": "^1.5",
+        "tijsverkoyen/convert-to-junit-xml": "^1.9",
+        "phpstan/phpstan-deprecation-rules": "^1.0.0",
+        "phpspec/prophecy-phpunit": "^2"
+    },
+    "require-dev": {
+        "composer/composer": "^2.0"
+    },
+    "bin": [
+        "bin/drainpipe-twig-linter",
+        "bin/drainpipe-convert-to-junit-xml"
+    ],
+    "extra": {
+        "class": [
+            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin"
+        ],
+        "drupal-scaffold": {
+            "gitignore": true,
+            "file-mapping": {
+                "[project-root]/nightwatch.conf.js": "scaffold/nightwatch/nightwatch.conf.js",
+                "[web-root]/sites/chrome/settings.php": "scaffold/nightwatch/chrome.settings.php",
+                "[web-root]/sites/firefox/settings.php": "scaffold/nightwatch/firefox.settings.php",
+                "[web-root]/sites/sites.php": "scaffold/nightwatch/sites.php",
+                "[project-root]/.ddev/docker-compose.selenium.yaml": "scaffold/nightwatch/docker-compose.selenium.yaml",
+                "[project-root]/test/nightwatch/example.nightwatch.js": "scaffold/nightwatch/example.nightwatch.js"
+            }
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "lullabot/drainpipe": true
+        }
+    }
+}
+
