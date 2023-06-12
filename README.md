@@ -63,6 +63,11 @@ npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
 See [.github/workflows/validate-taskfile.yml](`.github/workflows/validate-taskfile.yml`)
 for an example of this in use.
 
+```
+💡 If your docroot is not the standard `web/` path, you must create a symlink to it
+ln -s web/ docroot
+```
+
 ---
 
 ## .env support
