@@ -74,6 +74,7 @@ jobs:
           ddev config --auto
           ddev start
           ddev composer install
+          ddev restart
 
       - name: Install Drupal
         run: |
