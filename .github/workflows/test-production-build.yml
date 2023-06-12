@@ -71,7 +71,7 @@ jobs:
         run: |
           cp drainpipe/tests/fixtures/drainpipe-test-production-build/composer-ddev-global-binary.json composer.json
           cp drainpipe/tests/fixtures/drainpipe-test-production-build/Taskfile.yml .
-          ddev config --auto
+          ddev config --project-type=drupal9
           ddev start
           ddev composer install
           ddev restart
