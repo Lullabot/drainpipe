@@ -69,13 +69,10 @@ jobs:
 
       - name: Setup Project
         run: |
-          cp drainpipe/tests/fixtures/drainpipe-test-production-build/composer.json .
+          cp drainpipe/tests/fixtures/drainpipe-test-production-build/composer-ddev-global-binary.json composer.json
           cp drainpipe/tests/fixtures/drainpipe-test-production-build/Taskfile.yml .
           ddev config --auto
           ddev start
-          ddev composer config extra.drainpipe.global-binaries.task true
-          ddev composer config extra.drainpipe.global-binaries.local-php-security-checker true
-          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev composer install
 
       - name: Install Drupal
