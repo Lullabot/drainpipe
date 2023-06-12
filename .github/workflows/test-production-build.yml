@@ -75,6 +75,7 @@ jobs:
           ddev start
           ddev composer config extra.drainpipe.global-binaries.task true
           ddev composer config extra.drainpipe.global-binaries.local-php-security-checker true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev composer install
 
       - name: Install Drupal
