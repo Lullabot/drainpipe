@@ -13,6 +13,8 @@ use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
 use Composer\Util\Filesystem;
 use Symfony\Component\Yaml\Yaml;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterface
 {
@@ -36,17 +38,11 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     protected $extra;
 
     /**
-     * @var \Composer\Package\Link[]
-     */
-    private $platformRequirements;
-
-    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
     {
         $this->io = $io;
-        $this->platformRequirements = $composer->getLocker()->getPlatformRequirements();
         $this->config = $composer->getConfig();
         $this->extra = $composer->getPackage()->getExtra();
     }
@@ -83,7 +79,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostInstallCmd(Event $event)
     {
-        $this->platformRequirements = $event->getComposer()->getLocker()->getPlatformRequirements();
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
@@ -98,7 +93,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostUpdateCmd(Event $event)
     {
-        $this->platformRequirements = $event->getComposer()->getLocker()->getPlatformRequirements();
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
@@ -283,68 +277,44 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat']) && is_array($this->extra['drainpipe']['tugboat'])) {
-            if (!file_exists('./.tugboat/config.yml')) {
-                $fs->ensureDirectoryExists('./.tugboat');
-                $host = $this->extra['drainpipe']['tugboat']['provider']['host'] ?? ProviderInterface::HOST_UNKNOWN;
-
-                $tugboatConfig = new TugboatConfig($this->getPhpVersion());
-                $downsync = $this->extra['drainpipe']['tugboat']['provider']['downsync'] ?? false;
-                $tugboatConfig->writeFile('config.yml.twig', './.tugboat/', $host,
-                    $downsync
-                );
-                $fs->ensureDirectoryExists('./.tugboat/steps');
-                $tugboatConfig->writeFile('steps/init.sh.twig', './.tugboat/steps/', $host,
-                    $downsync
-                );
-                chmod('./.tugboat/steps/init.sh', 0755);
-                $fs->copy("$scaffoldPath/tugboat/steps/build.sh", './.tugboat/steps/build.sh');
-                chmod('./.tugboat/steps/build.sh', 0755);
-                $tugboatConfig->writeFile('steps/update.sh.twig', './.tugboat/steps/', $host,
-                    $downsync
-                );
-                chmod('./.tugboat/steps/update.sh', 0755);
-
-                if ($host === 'acquia') {
-                    $fs->copy("$scaffoldPath/tugboat/steps/install-mysql-client.sh", './.tugboat/steps/install-mysql-client.sh');
-                    chmod('./.tugboat/steps/install-mysql-client.sh', 0755);
+            $fs->ensureDirectoryExists('./.tugboat');
+            $fs->ensureDirectoryExists('./.tugboat/steps');
+            $hosting_providers = array_map(function ($provider) {
+                return $provider['provider'];
+            }, $this->extra['drainpipe']['tugboat']);
+            $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
+            $twig = new Environment($loader);
+            // Pantheon
+            if (in_array('pantheon', $hosting_providers)) {
+                $pantheonConfig = Yaml::parseFile('./pantheon.yml');
+                $composerJson = file_get_contents('composer.json');
+                $composerFullConfig = json_decode($composerJson, true);
+                $tugboatConfig = [
+                    'php_version' => $pantheonConfig['php_version'],
+                    'database_type' => 'mariadb',
+                    'database_version' => $pantheonConfig['database']['version'],
+                ];
+                if (!empty($composerFullConfig['require']) && in_array(array_keys($composerFullConfig['require']), 'drupal/redis')) {
+                    $tugboatConfig['memory_cache_type'] = 'redis';
+                    $tugboatConfig['memory_cache_version'] = 7;
                 }
-
-                $this->io->write("🪠 [Drainpipe] .tugboat/ directory installed. Please commit this directory.");
-                if (!file_exists('./web/sites/default/settings.tugboat.php')) {
-                    $tugboatConfig->writeFile('settings.tugboat.php.twig', './web/sites/default/', $host);
-
-                    $this->io->write("🪠 [Drainpipe] web/sites/default/settings.tugboat.php installed. Please commit this file.");
-                    if (file_exists('./web/sites/default/settings.php')) {
-                        $include=<<<EOD
+                file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/init.sh', $twig->render('steps/init.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/build.sh', $twig->render('steps/build.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/update.sh', $twig->render('steps/update.sh.twig', $tugboatConfig));
+                chmod('./.tugboat/steps/init.sh', 0755);
+                chmod('./.tugboat/steps/build.sh', 0755);
+                chmod('./.tugboat/steps/update.sh', 0755);
+                file_put_contents('./web/sites/default/settings.tugboat.php', $twig->render('settings.tugboat.php.twig', $tugboatConfig));
+                $settings = file_get_contents('./web/sites/default/settings.php');
+                if (!str_contains($settings, 'include __DIR__ . "/settings.tugboat.php";')) {
+                    $include = <<<EOD
 
 include __DIR__ . "/settings.tugboat.php";
 EOD;
-
-                        file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
-                        $this->io->write("🪠 [Drainpipe] web/sites/default/settings.php modified to include settings.tugboat.php. Please commit this file.");
-                    }
-                    else {
-                        $this->io->write("🪠 [Drainpipe] web/sites/default/settings.php does not exist. Please include tugboat.settings.php from your settings.php files.");
-                    }
+                    file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
                 }
             }
         }
     }
-
-    /**
-     * @return string
-     */
-    private function getPhpVersion(): string
-    {
-        $php = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
-        foreach ($this->platformRequirements as $link) {
-            if ($link->getTarget() === "php") {
-                $lower = $link->getConstraint()->getLowerBound()->getVersion();
-                $php = substr($lower, 0, 3);
-            }
-        }
-
-        return $php;
-    }
-
 }

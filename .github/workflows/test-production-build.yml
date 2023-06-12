@@ -8,33 +8,34 @@ on:
 
 jobs:
   Test-Production-Build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ["7.3", "7.4", "8.0"]
+        php-version: [7.3, 7.4, 8.0]
         include:
-          - php-version: "7.3"
+          - php-version: 7.3
             composer-flags: --prefer-lowest --prefer-stable
-
-    env:
-      TUGBOAT_API_TOKEN: ${{ secrets.TUGBOAT_API_TOKEN }}
 
     steps:
       - uses: actions/checkout@v2
+
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
           tools: composer:v2
           extensions: gd
+
       - name: Get composer cache directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
+
       - name: Install Drupal
         run: |
           cd ../
@@ -43,45 +44,8 @@ jobs:
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/composer.json .
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
           composer update ${{ matrix.composer-flags }}
-      - name: Build a production Drupal site
+
+      - name: Run static tests
         run: |
           cd ../drupal
           ./vendor/bin/task build
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '18'
-      - name: Install Tugboat CLI for validation
-        run: |
-          cd /usr/local/bin
-          curl -O https://dashboard.tugboatqa.com/cli/linux/tugboat.tar.gz
-          tar xzvf tugboat.tar.gz
-      - name: Validate Tugboat file generation
-        run: |
-          set -x
-          cd ../
-          mkdir drupal-tugboat
-          cd drupal-tugboat
-          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-tugboat/composer.json .
-          composer update ${{ matrix.composer-flags }}
-          tugboat validate .tugboat/config.yml
-          grep -q 'image: tugboatqa/php:${{ matrix.php-version }}-apache-bullseye' .tugboat/config.yml
-          grep -q 'image: tugboatqa/mariadb:10.6' .tugboat/config.yml
-
-          rm -rf .tugboat web/sites/default/settings.tugboat.php
-
-          composer config extra.drainpipe --json '{"tugboat": {"provider": { "host": "acquia" }}}'
-          composer update ${{ matrix.composer-flags }}
-          tugboat validate .tugboat/config.yml
-          grep -q 'image: tugboatqa/php:${{ matrix.php-version }}-apache-bullseye' .tugboat/config.yml
-          grep -q 'image: tugboatqa/mysql:5.7' .tugboat/config.yml
-          grep -q 'image: tugboatqa/memcached:1' .tugboat/config.yml
-
-          rm -rf .tugboat web/sites/default/settings.tugboat.php
-
-          composer config extra.drainpipe --json '{"tugboat": {"provider": { "host": "pantheon" }}}'
-          composer update ${{ matrix.composer-flags }}
-          tugboat validate .tugboat/config.yml
-          grep -q 'image: tugboatqa/php:${{ matrix.php-version }}-apache-bullseye' .tugboat/config.yml
-          grep -q 'image: tugboatqa/mariadb:10.6' .tugboat/config.yml
-          grep -q 'image: tugboatqa/redis:7' .tugboat/config.yml
