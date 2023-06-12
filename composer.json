@@ -12,7 +12,7 @@
     "require": {
         "php": "^7.3||^8.0",
         "composer-plugin-api": "^2.0",
-        "drush/drush": "^10|^11",
+        "drush/drush": "^10|^11|^12",
         "symfony/yaml": "^3|^4|^5|^6",
         "vlucas/phpdotenv": "^4|^5",
         "ext-json": "*"
