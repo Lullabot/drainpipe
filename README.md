@@ -36,6 +36,15 @@ composer config extra.drupal-scaffold.gitignore true
 composer config --json extra.drupal-scaffold.allowed-packages "[\"lullabot/drainpipe\", \"lullabot/drainpipe-dev\"]"
 composer config --json extra.drainpipe.global-binaries.task "true"
 composer config --json extra.drainpipe.global-binaries.local-php-security-checker "true"
+```
+
+If using DDEV (highly recommended!), additionally set `task` to be a global binary:
+```sh
+ddev composer config extra.drainpipe.global-binaries.task true
+```
+
+Finally, require `drainpipe` and `drainpipe-dev`
+```sh
 composer require lullabot/drainpipe
 composer require lullabot/drainpipe-dev --dev
 ```

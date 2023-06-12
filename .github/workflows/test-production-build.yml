@@ -17,7 +17,7 @@ jobs:
             composer-flags: --prefer-lowest --prefer-stable
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -41,11 +41,47 @@ jobs:
           cd ../
           mkdir drupal
           cd drupal
-          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/composer.json .
-          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
+          cp ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-production-build/composer.json .
+          cp ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-production-build/Taskfile.yml .
           composer update ${{ matrix.composer-flags }}
 
-      - name: Run static tests
+      - name: Run production build
         run: |
           cd ../drupal
           ./vendor/bin/task build
+
+  Test-Production-Build-DDEV-Global-Binary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Setup Project
+        run: |
+          cp drainpipe/tests/fixtures/drainpipe-test-production-build/composer.json .
+          cp drainpipe/tests/fixtures/drainpipe-test-production-build/Taskfile.yml .
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drainpipe.global-binaries.task true
+          ddev composer config extra.drainpipe.global-binaries.local-php-security-checker true
+          ddev composer install
+
+      - name: Install Drupal
+        run: |
+          ddev drush site:install minimal -y
+          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+          ddev drush config:export -y
+
+      - name: Run production build
+        run: ddev task build
