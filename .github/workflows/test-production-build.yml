@@ -76,6 +76,9 @@ jobs:
           ddev composer install
           ddev restart
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Install Drupal
         run: |
           ddev drush site:install minimal -y
