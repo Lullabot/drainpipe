@@ -214,4 +214,3 @@ jobs:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
           contains: 12
           expected_result: PASSED
-
