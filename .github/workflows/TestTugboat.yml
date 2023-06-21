@@ -1,0 +1,60 @@
+name: "Test GitHub Actions"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-Tugboat-Pantheon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v3
+        with:
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Create pantheon.yml
+        run: |
+          echo "api_version: 1" >> pantheon.yml
+          echo "php_version: 8.1" >> pantheon.yml
+          echo "database:" >> pantheon.yml
+          echo "  version: 10.6" >> pantheon.yml
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer config extra.drainpipe --json '{"tugboat": {"host": "pantheon"}}'
+          ddev composer require lullabot/drainpipe --with-all-dependencies
+
+      # Compare the generated files to the ones used to build this repository
+      # preview - they should be the same.
+      - name: Test Generated Files
+        run: |
+          cmp --silent -- "drainpipe/.tugboat/config.yml" ".tugboat/config.yml"
+          cmp --silent -- "drainpipe/.tugboat/steps/build.sh" ".tugboat/steps/build.sh"
+          cmp --silent -- "drainpipe/.tugboat/steps/init.sh" ".tugboat/steps/init.sh"
+          cmp --silent -- "drainpipe/.tugboat/steps/update.sh" ".tugboat/steps/update`.sh"
+

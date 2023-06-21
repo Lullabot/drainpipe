@@ -1,0 +1,20 @@
+services:
+  php:
+    http: false
+    image: tugboatqa/php:8.1-fpm
+    default: true
+
+    depends:
+      - mariadb
+
+    commands:
+      init: ./.tugboat/steps/init.sh
+      update: ./.tugboat/steps/update.sh
+      build: ./.tugboat/steps/build.sh
+
+  mariadb:
+    image: tugboatqa/mariadb:10.6
+    commands:
+      update:
+        - echo "Nothing to do as we import databases from the Drupal service."
+

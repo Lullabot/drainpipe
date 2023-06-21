@@ -278,16 +278,12 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         }
 
         // Tugboat
-        if (isset($this->extra['drainpipe']['tugboat']) && is_array($this->extra['drainpipe']['tugboat'])) {
-            $fs->ensureDirectoryExists('./.tugboat');
-            $fs->ensureDirectoryExists('./.tugboat/steps');
-            $hosting_providers = array_map(function ($provider) {
-                return $provider['provider'];
-            }, $this->extra['drainpipe']['tugboat']);
-            $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
-            $twig = new Environment($loader);
+        $fs->removeDirectory('./.tugboat');
+        if (!empty($this->extra['drainpipe']['tugboat']['host'])) {
+            $tugboatConfig = [];
+
             // Pantheon
-            if (in_array('pantheon', $hosting_providers)) {
+            if ($this->extra['drainpipe']['tugboat']['host'] === 'pantheon') {
                 $pantheonConfig = Yaml::parseFile('./pantheon.yml');
                 $composerJson = file_get_contents('composer.json');
                 $composerFullConfig = json_decode($composerJson, true);
@@ -296,10 +292,17 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     'database_type' => 'mariadb',
                     'database_version' => $pantheonConfig['database']['version'],
                 ];
-                if (!empty($composerFullConfig['require']) && in_array(array_keys($composerFullConfig['require']), 'drupal/redis')) {
+                if (is_array($composerFullConfig['require']) && in_array('drupal/redis', array_keys($composerFullConfig['require']))) {
                     $tugboatConfig['memory_cache_type'] = 'redis';
                     $tugboatConfig['memory_cache_version'] = 7;
                 }
+            }
+
+            if (count($tugboatConfig) > 0) {
+                $fs->ensureDirectoryExists('./.tugboat');
+                $fs->ensureDirectoryExists('./.tugboat/steps');
+                $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
+                $twig = new Environment($loader);
                 file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/init.sh', $twig->render('steps/init.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/build.sh', $twig->render('steps/build.sh.twig', $tugboatConfig));
@@ -307,6 +310,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 chmod('./.tugboat/steps/init.sh', 0755);
                 chmod('./.tugboat/steps/build.sh', 0755);
                 chmod('./.tugboat/steps/update.sh', 0755);
+
+                // settings.php
                 file_put_contents('./web/sites/default/settings.tugboat.php', $twig->render('settings.tugboat.php.twig', $tugboatConfig));
                 $settings = file_get_contents('./web/sites/default/settings.php');
                 if (!str_contains($settings, 'include __DIR__ . "/settings.tugboat.php";')) {

@@ -439,9 +439,9 @@ Add the following to `composer.json` to add Tugboat configuration:
 {
     "extra": {
         "drainpipe": {
-            "tugboat": [{
+            "tugboat": {
               "provider": "pantheon"
-            }]
+            }
         }
     }
 }
