@@ -49,7 +49,8 @@
                 "[web-root]/sites/sites.php": "scaffold/nightwatch/sites.php",
                 "[project-root]/.ddev/docker-compose.selenium.yaml": "scaffold/nightwatch/docker-compose.selenium.yaml",
                 "[project-root]/test/nightwatch/example.nightwatch.js": "scaffold/nightwatch/example.nightwatch.js"
-            }
+            },
+            "[project-root]/phpcs.xml": "scaffold/phpcs.xml"
         }
     },
     "config": {
