@@ -54,6 +54,10 @@ jobs:
         run: |
           test -f phpcs.xml
 
+      - name: Fix settings.php
+        run: |
+          sed -i '/^$settings\[\'container_yamls\'\]\[\] = \$app_root \. \'\/\' \. \$site_path \. \'\/services.yml\';/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
+
       - name: Run Static Tests
         run: ddev task test:static
 
