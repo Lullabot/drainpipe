@@ -3,6 +3,9 @@ includes:
     - ../../../phpstan/phpstan-deprecation-rules/rules.neon
 
 parameters:
+    ignoreErrors:
+        # new static() is a best practice in Drupal, so we cannot fix that.
+        - "#^Unsafe usage of new static#"
     excludePaths:
         - *sites/simpletest/*
         - *default.settings.php
