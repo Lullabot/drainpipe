@@ -76,7 +76,7 @@ jobs:
 
       - name: Restore Workspace
         run: |
-          cd ../
+          cd /
           mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
           unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
           cd ${{ github.workspace }}
