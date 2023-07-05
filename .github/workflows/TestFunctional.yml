@@ -69,9 +69,6 @@ jobs:
           ddev drush --uri=https://drupal_chrome --yes site:install
           ddev drush config:export --yes
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Run Functional Tests
         run: ddev task test:functional
 
