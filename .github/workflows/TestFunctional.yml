@@ -248,6 +248,7 @@ jobs:
           echo '  "nightwatch@*":' >> .yarnrc.yml
           echo '    dependencies:' >> .yarnrc.yml
           echo '      ws: "*"' >> .yarnrc.yml
+          yarn
 
       - name: Install Drupal
         run: |
