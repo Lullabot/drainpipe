@@ -26,7 +26,7 @@ tasks:
       - |
         if [ "{{.DRAINPIPE_SASS}}" == "" ]; then echo "🪠 Nothing provided for Sass to compile"; exit 0; fi
         FILES="{{if .DRAINPIPE_SASS}}{{.DRAINPIPE_SASS | catLines | trim}}{{end}}"
-        COMMAND="npx drainpipe-sass"
+        COMMAND="node ./node_modules/.bin/drainpipe-sass"
         if [ -f "yarn.lock" ]; then
           COMMAND="yarn drainpipe-sass"
         fi
