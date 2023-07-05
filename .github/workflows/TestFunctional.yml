@@ -70,14 +70,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: Build
     steps:
-      - uses: ./drainpipe/scaffold/github/actions/common/set-env
-
-      - name: Install DDEV
-        uses: ./drainpipe/scaffold/github/actions/common/ddev
-        with:
-          git-name: Drainpipe Bot
-          git-email: no-reply@example.com#
-
       - uses: actions/download-artifact@v3
         with:
           name: test-functional-build
@@ -86,6 +78,14 @@ jobs:
         run: |
           cd ../
           unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
 
       - name: Start DDEV
         run: ddev start
