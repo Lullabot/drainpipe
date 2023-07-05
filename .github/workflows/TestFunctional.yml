@@ -114,3 +114,53 @@ jobs:
         with:
           name: test_result
           path: test_result
+
+  Test-Yarn1:
+    runs-on: ubuntu-latest
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-functional-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Nightwatch
+        run: |
+          ddev yarn set version classic
+          ddev yarn init -y
+          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-command --dev
+          ddev restart
+
+      - name: Install Drupal
+        run: |
+          ddev drush --yes site:install
+          ddev drush --uri=https://drupal_firefox --yes site:install
+          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev drush config:export --yes
+
+      - name: Run Functional Tests
+        run: ddev task test:functional
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_result
+          path: test_result
