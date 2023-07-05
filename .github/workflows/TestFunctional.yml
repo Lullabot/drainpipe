@@ -57,11 +57,14 @@ jobs:
           ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"
           ddev config --additional-hostnames="*.drainpipe"
 
+      - name: Create Artifact
+        run: zip -r /tmp/drainpipe.zip ${{ github.workspace }}
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: test-functional-build
-          path: ${{ github.workspace }}
+          path: /tmp/drainpipe.zip
 
   Test-NPM:
     runs-on: ubuntu-latest
@@ -78,6 +81,11 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: test-functional-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
 
       - name: Start DDEV
         run: ddev start
