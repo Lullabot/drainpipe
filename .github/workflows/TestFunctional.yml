@@ -57,6 +57,7 @@ jobs:
           echo "hooks:" >> .ddev/config.yaml
           echo "  post-start:" >> .ddev/config.yaml
           echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS firefox; GRANT ALL ON firefox.* TO 'db'@'%';\"" >> .ddev/config.yaml
+          echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO 'db'@'%';\"" >> .ddev/config.yaml
           ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"
           ddev config --additional-hostnames="*.drainpipe"
           ddev restart
