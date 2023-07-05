@@ -130,36 +130,35 @@ jobs:
         run: ddev task assets
 
   Test-Yarn-Berry:
-    Test-Yarn-Classic:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/download-artifact@v3
-          with:
-          name: test-functional-build
+     runs-on: ubuntu-latest
+     steps:
+       - uses: actions/download-artifact@v3
+         with:
+         name: test-functional-build
 
-        - name: Restore Workspace
-          run: |
-            cd ../
-            mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
-            unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
-            cd ${{ github.workspace }}
+       - name: Restore Workspace
+         run: |
+           cd ../
+           mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+           unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+           cd ${{ github.workspace }}
 
-        - uses: ./drainpipe/scaffold/github/actions/common/set-env
+       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
-        - name: Install DDEV
-          uses: ./drainpipe/scaffold/github/actions/common/ddev
-          with:
-            git-name: Drainpipe Bot
-            git-email: no-reply@example.com#
+       - name: Install DDEV
+         uses: ./drainpipe/scaffold/github/actions/common/ddev
+         with:
+           git-name: Drainpipe Bot
+           git-email: no-reply@example.com#
 
-        - name: Start DDEV
-          run: ddev start
+       - name: Start DDEV
+         run: ddev start
 
-        - name: Setup Sass
-          run: |
-            ddev yarn set version berry
-            ddev yarn init -y
-            ddev yarn add @lullabot/drainpipe-sass --dev
+       - name: Setup Sass
+         run: |
+           ddev yarn set version berry
+           ddev yarn init -y
+           ddev yarn add @lullabot/drainpipe-sass --dev
 
-        - name: Compile Sass
-          run: ddev task assets
+       - name: Compile Sass
+         run: ddev task assets
