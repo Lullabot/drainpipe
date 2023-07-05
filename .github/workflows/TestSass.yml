@@ -35,7 +35,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          echo "nodejs_version: \"18\"" >> .ddev/config.yaml
+          ddev config --nodejs-version "18"
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
