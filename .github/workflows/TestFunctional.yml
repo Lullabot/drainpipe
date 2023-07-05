@@ -58,7 +58,7 @@ jobs:
           ddev config --additional-hostnames="*.drainpipe"
 
       - name: Create Artifact
-        run: zip -r /tmp/drainpipe.zip ${{ github.workspace }}
+        run: zip -r /tmp/drainpipe.zip ./
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -76,7 +76,7 @@ jobs:
 
       - name: Restore Workspace
         run: |
-          cd /
+          cd ../
           mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
           unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
           cd ${{ github.workspace }}
