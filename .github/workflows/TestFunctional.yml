@@ -243,7 +243,7 @@ jobs:
         run: |
           ddev yarn set version berry
           ddev yarn init -y
-          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands --dev
+          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands ws --dev
           echo "packageExtensions:" >> .yarnrc.yml
           echo '  "nightwatch@*":' >> .yarnrc.yml
           echo '    dependencies:' >> .yarnrc.yml
