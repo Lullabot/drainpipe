@@ -115,7 +115,7 @@ jobs:
           name: test_result
           path: test_result
 
-  Test-Yarn1:
+  Test-Yarn-Classic:
     runs-on: ubuntu-latest
     needs: Build
     steps:
@@ -145,7 +145,7 @@ jobs:
         run: |
           ddev yarn set version classic
           ddev yarn init -y
-          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-command --dev
+          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands --dev
           ddev restart
 
       - name: Install Drupal
