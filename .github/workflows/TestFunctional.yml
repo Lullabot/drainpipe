@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Test-Functional:
+  Build:
     runs-on: ubuntu-latest
     steps:
       - name: Create a Drupal project
@@ -47,19 +47,36 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
-          # Restart is required to enable the provided Selenium containers
-          ddev restart
 
       - name: Setup Nightwatch
         run: |
-          ddev npm init -y
-          ddev npm install nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands --save-dev
           echo "hooks:" >> .ddev/config.yaml
           echo "  post-start:" >> .ddev/config.yaml
           echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS firefox; GRANT ALL ON firefox.* TO 'db'@'%';\"" >> .ddev/config.yaml
           echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO 'db'@'%';\"" >> .ddev/config.yaml
           ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"
           ddev config --additional-hostnames="*.drainpipe"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-functional-build
+          path: ${{ github.workspace }}
+
+  Test-NPM:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-functional-build
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Nightwatch
+        run: |
+          ddev npm init -y
+          ddev npm install nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands --save-dev
           ddev restart
 
       - name: Install Drupal
