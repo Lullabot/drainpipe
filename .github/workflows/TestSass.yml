@@ -68,7 +68,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
         with:
-          name: test-functional-build
+          name: test-sass-build
 
       - name: Restore Workspace
         run: |
@@ -102,7 +102,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
         with:
-          name: test-functional-build
+          name: test-sass-build
 
       - name: Restore Workspace
         run: |
@@ -137,7 +137,7 @@ jobs:
      steps:
        - uses: actions/download-artifact@v3
          with:
-           name: test-functional-build
+           name: test-sass-build
 
        - name: Restore Workspace
          run: |
