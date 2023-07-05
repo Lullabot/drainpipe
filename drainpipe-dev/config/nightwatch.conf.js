@@ -6,7 +6,7 @@ try {
   drupalCommandsPath = resolveToUnqualified('@lullabot/nightwatch-drupal-commands', __filename).replace(/\/$/, '');
   yarn2 = true;
 } catch(e) {
-  a11yPath = './node_modules/nightwatch-accessibility';
+  a11yPath = './node_modules/nightwatch-accessibility/nightwatch';
   drupalCommandsPath = './node_modules/@lullabot/nightwatch-drupal-commands';
 }
 
@@ -35,8 +35,7 @@ module.exports = {
   webdriver: {},
 
   test_workers: {
-    enabled: true,
-    workers: 'auto'
+    enabled: false
   },
 
   test_settings: {
