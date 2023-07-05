@@ -67,6 +67,7 @@ jobs:
           ddev drush --yes site:install
           ddev drush --uri=https://drupal_firefox --yes site:install
           ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev drush config:export --yes
 
       - name: Run Functional Tests
         run: ddev task test:functional
