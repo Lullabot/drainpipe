@@ -2,7 +2,7 @@
 
 set -eux
 
+./vendor/bin/task sync
 # drainpipe-start
 ./vendor/bin/drush config:export --yes
 # drainpipe-end
-./vendor/bin/task sync
