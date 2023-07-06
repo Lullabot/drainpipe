@@ -47,3 +47,9 @@ apt-get install -y zlib1g-dev
 pecl install memcache
 echo 'extension=memcache.so' > /usr/local/etc/php/conf.d/memcache.ini
 {% endif %}
+
+# Install node
+curl -fsSL https://deb.nodesource.com/setup_{{ node_version }}.x | bash -
+apt-get install -y nodejs
+# This only works for node > 16, but that version is unsupported now anyway.
+corepack enable

@@ -17,4 +17,5 @@ composer require lullabot/drainpipe --with-all-dependencies
 # drainpipe-end
 composer install
 ./vendor/bin/task sync
+./vendor/bin/task build
 ./vendor/bin/task drupal:update

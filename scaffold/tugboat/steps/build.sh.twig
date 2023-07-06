@@ -1,5 +1,7 @@
 #!/bin/bash
 
 set -eux
-vendor/bin/task drupal:update
-vendor/bin/drush user:login
+composer install
+./vendor/bin/task sync
+./vendor/bin/task build
+./vendor/bin/task drupal:update
