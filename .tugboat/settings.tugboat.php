@@ -6,7 +6,7 @@ if (getenv('TUGBOAT_REPO') !== FALSE) {
         'username' => 'tugboat',
         'password' => 'tugboat',
         'prefix' => '',
-        'host' => '{{ database_type }}',
+        'host' => 'mariadb',
         'port' => '3306',
         'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
         'driver' => 'mysql',
