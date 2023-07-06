@@ -31,12 +31,9 @@ docker-php-ext-install gd
 apt-get install -y imagemagick
 # drainpipe-start
 # This is necessary for testing as this repository doesn't hold a Drupal site.
-CURRENT_DIR=$(pwd)
-mkdir ../drainpipe-tmp
-cd ../
-mv `ls -1 $CURRENT_DIR` drainpipe-tmp
-mv drainpipe-tmp $CURRENT_DIR/drainpipe
-cd $CURRENT_DIR
+shopt -s extglob
+mkdir drainpipe
+mv !(drainpipe) drainpipe
 composer create-project drupal/recommended-project .
 composer config extra.drupal-scaffold.gitignore true
 composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
