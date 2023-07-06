@@ -34,7 +34,9 @@ apt-get install -y imagemagick
 shopt -s extglob
 mkdir drainpipe
 mv !(drainpipe) drainpipe
+mv drainpipe ../drainpipe-tmp
 composer create-project drupal/recommended-project .
+mv ../drainpipe-tmp drainpipe
 composer config extra.drupal-scaffold.gitignore true
 composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
 composer config --no-plugins allow-plugins.composer/installers true
