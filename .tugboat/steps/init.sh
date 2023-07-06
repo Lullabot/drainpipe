@@ -45,4 +45,6 @@ composer config repositories.drainpipe --json '{"type": "path", "url": "drainpip
 composer config minimum-stability dev
 composer require lullabot/drainpipe --with-all-dependencies
 mv drainpipe/.tugboat .
+cp .tugboat/settings.tugboat.php web/sites/default/settings.tugboat.php
+echo "include __DIR__ . '/settings.tugboat.php';" >> web/sites/default/settings.php
 # drainpipe-end
