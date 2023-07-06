@@ -47,4 +47,6 @@ composer config repositories.drainpipe --json '{"type": "path", "url": "drainpip
 composer config minimum-stability dev
 composer require lullabot/drainpipe --with-all-dependencies
 # drainpipe-end
+ls -lha .tugboat
+ls -lha .tugboat/steps
 cat ./.tugboat/steps/update.sh
