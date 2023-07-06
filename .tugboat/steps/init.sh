@@ -35,7 +35,8 @@ shopt -s dotglob
 mkdir ../drainpipe-tmp
 mv * ../drainpipe-tmp/
 composer create-project drupal/recommended-project .
-mv ../drainpipe-tmp/* .
+mkdir drainpipe
+mv ../drainpipe-tmp/* ./drainpipe/
 composer config extra.drupal-scaffold.gitignore true
 composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
 composer config --no-plugins allow-plugins.composer/installers true
