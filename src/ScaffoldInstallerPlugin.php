@@ -324,10 +324,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 file_put_contents('./web/sites/default/settings.tugboat.php', $twig->render('settings.tugboat.php.twig', $tugboatConfig));
                 $settings = file_get_contents('./web/sites/default/settings.php');
                 if (!str_contains($settings, 'include __DIR__ . "/settings.tugboat.php";')) {
-                    $include = <<<EOD
-
-include __DIR__ . "/settings.tugboat.php";
-EOD;
+                    $include = 'include __DIR__ . "/settings.tugboat.php";';
                     file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
                 }
             }

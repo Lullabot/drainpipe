@@ -1,4 +1,4 @@
-name: "Test GitHub Actions"
+name: "Test Tugboat"
 
 on:
   pull_request:
