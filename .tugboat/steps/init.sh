@@ -38,6 +38,8 @@ composer create-project drupal/recommended-project .
 mkdir drainpipe
 mv ../drainpipe-tmp/* ./drainpipe/
 mv ./drainpipe/.tugboat .
+ls -lha
+ls -lha .tugboat
 composer config extra.drupal-scaffold.gitignore true
 composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
 composer config --no-plugins allow-plugins.composer/installers true
