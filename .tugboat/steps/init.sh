@@ -38,8 +38,6 @@ composer create-project drupal/recommended-project .
 mkdir drainpipe
 mv ../drainpipe-tmp/* ./drainpipe/
 mv ./drainpipe/.tugboat .
-ls -lha
-ls -lha .tugboat
 composer config extra.drupal-scaffold.gitignore true
 composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
 composer config --no-plugins allow-plugins.composer/installers true
@@ -49,3 +47,4 @@ composer config repositories.drainpipe --json '{"type": "path", "url": "drainpip
 composer config minimum-stability dev
 composer require lullabot/drainpipe --with-all-dependencies
 # drainpipe-end
+cat ./.tugboat/steps/update.sh
