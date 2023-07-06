@@ -1,0 +1,20 @@
+version: '3'
+
+dotenv: ['.env', '.env.defaults']
+
+includes:
+  sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
+
+output: prefixed
+silent: true
+
+vars:
+  DRAINPIPE_SASS: |
+    style.scss:style.css
+
+tasks:
+  assets:
+    desc: "Builds assets such as CSS & JS"
+    cmds:
+      - if [ -f "yarn.lock" ]; then yarn; else npm install; fi
+      - task: sass:compile
