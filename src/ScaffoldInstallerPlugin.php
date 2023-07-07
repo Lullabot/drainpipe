@@ -328,6 +328,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     //                file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
     //            }
     //        }
-    //    }
+        }
     }
 }
