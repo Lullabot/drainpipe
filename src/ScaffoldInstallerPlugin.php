@@ -278,8 +278,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         }
 
         // Tugboat
-        $fs->removeDirectory('./.tugboat');
         if (!empty($this->extra['drainpipe']['tugboat']['host'])) {
+            $fs->removeDirectory('./.tugboat');
             $tugboatConfig = [];
 
             // Pantheon
