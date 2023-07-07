@@ -13,6 +13,8 @@ use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
 use Composer\Util\Filesystem;
 use Symfony\Component\Yaml\Yaml;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterface
 {
@@ -154,7 +156,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (strpos($contents, '.task') === false) {
                 $this->io->warning(
                     sprintf(
-                    '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
+                        '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
                         $gitignorePath
                     )
                 );
@@ -184,7 +186,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
-     * Install DDEV Commands.
+     *
      */
     private function installDdevCommand(): void
     {
