@@ -55,10 +55,10 @@ jobs:
       - name: Test Generated Files
         run: |
           cmp --silent -- "drainpipe/.tugboat/config.yml" ".tugboat/config.yml"
-          cmp --silent -- "drainpipe/.tugboat/steps/build.sh" ".tugboat/steps/build.sh"
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' .tugboat/steps/1-init.sh
-          cmp --silent -- "drainpipe/.tugboat/steps/init.sh" ".tugboat/steps/init.sh"
-          cmp --silent -- "drainpipe/.tugboat/steps/update.sh" ".tugboat/steps/update`.sh"
+          cmp --silent -- "drainpipe/.tugboat/steps/1-init.sh" ".tugboat/steps/1-init.sh"
+          cmp --silent -- "drainpipe/.tugboat/steps/2-build.sh" ".tugboat/steps/2-build.sh"
+          cmp --silent -- "drainpipe/.tugboat/steps/3-update.sh" ".tugboat/steps/3-update`.sh"
 
       - name: Upload test artifacts
         if: ${{ always() }}
