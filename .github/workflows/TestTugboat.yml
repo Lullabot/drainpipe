@@ -38,6 +38,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
+          ddev config --nodejs-version "18"
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
@@ -55,6 +56,13 @@ jobs:
         run: |
           cmp --silent -- "drainpipe/.tugboat/config.yml" ".tugboat/config.yml"
           cmp --silent -- "drainpipe/.tugboat/steps/build.sh" ".tugboat/steps/build.sh"
+          sed -i '/#drainpipe-start/,/#drainpipe-end/d' .tugboat/steps/1-init.sh
           cmp --silent -- "drainpipe/.tugboat/steps/init.sh" ".tugboat/steps/init.sh"
           cmp --silent -- "drainpipe/.tugboat/steps/update.sh" ".tugboat/steps/update`.sh"
 
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: .tugboat
+          path: .tugboat
