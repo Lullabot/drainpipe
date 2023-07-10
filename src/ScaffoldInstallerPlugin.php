@@ -314,11 +314,11 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $twig = new Environment($loader);
                 file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/1-init.sh', $twig->render('steps/1-init.sh.twig', $tugboatConfig));
-                file_put_contents('./.tugboat/steps/2-build.sh', $twig->render('steps/2-build.sh.twig', $tugboatConfig));
-                file_put_contents('./.tugboat/steps/3-update.sh', $twig->render('steps/3-update.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/2-update.sh', $twig->render('steps/2-update.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/3-build.sh', $twig->render('steps/3-build.sh.twig', $tugboatConfig));
                 chmod('./.tugboat/steps/1-init.sh', 0755);
-                chmod('./.tugboat/steps/2-build.sh', 0755);
-                chmod('./.tugboat/steps/3-update.sh', 0755);
+                chmod('./.tugboat/steps/2-update.sh', 0755);
+                chmod('./.tugboat/steps/3-build.sh', 0755);
 
                 file_put_contents('./web/sites/default/settings.tugboat.php', $twig->render('settings.tugboat.php.twig', $tugboatConfig));
                 if (file_exists('./web/sites/default/settings.php')) {
