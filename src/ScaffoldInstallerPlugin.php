@@ -320,13 +320,12 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 chmod('./.tugboat/steps/build.sh', 0755);
                 chmod('./.tugboat/steps/update.sh', 0755);
 
-    //            // settings.php
-    //            file_put_contents('./web/sites/default/settings.tugboat.php', $twig->render('settings.tugboat.php.twig', $tugboatConfig));
-    //            $settings = file_get_contents('./web/sites/default/settings.php');
-    //            if (!str_contains($settings, 'include __DIR__ . "/settings.tugboat.php";')) {
-    //                $include = 'include __DIR__ . "/settings.tugboat.php";';
-    //                file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
-    //            }
+                file_put_contents('./web/sites/default/settings.tugboat.php', $twig->render('settings.tugboat.php.twig', $tugboatConfig));
+                $settings = file_get_contents('./web/sites/default/settings.php');
+                if (!str_contains($settings, 'include __DIR__ . "/settings.tugboat.php";')) {
+                    $include = 'include __DIR__ . "/settings.tugboat.php";';
+                    file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
+                }
             }
         }
     }
