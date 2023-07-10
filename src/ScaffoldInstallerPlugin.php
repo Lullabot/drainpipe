@@ -307,18 +307,18 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
             }
 
-    //        if (count($tugboatConfig) > 0) {
-    //            $fs->ensureDirectoryExists('./.tugboat');
-    //            $fs->ensureDirectoryExists('./.tugboat/steps');
-    //            $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
-    //            $twig = new Environment($loader);
-    //            file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
-    //            file_put_contents('./.tugboat/steps/init.sh', $twig->render('steps/init.sh.twig', $tugboatConfig));
-    //            file_put_contents('./.tugboat/steps/build.sh', $twig->render('steps/build.sh.twig', $tugboatConfig));
-    //            file_put_contents('./.tugboat/steps/update.sh', $twig->render('steps/update.sh.twig', $tugboatConfig));
-    //            chmod('./.tugboat/steps/init.sh', 0755);
-    //            chmod('./.tugboat/steps/build.sh', 0755);
-    //            chmod('./.tugboat/steps/update.sh', 0755);
+            if (count($tugboatConfig) > 0) {
+                $fs->ensureDirectoryExists('./.tugboat');
+                $fs->ensureDirectoryExists('./.tugboat/steps');
+                $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
+                $twig = new Environment($loader);
+                file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/init.sh', $twig->render('steps/init.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/build.sh', $twig->render('steps/build.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/update.sh', $twig->render('steps/update.sh.twig', $tugboatConfig));
+                chmod('./.tugboat/steps/init.sh', 0755);
+                chmod('./.tugboat/steps/build.sh', 0755);
+                chmod('./.tugboat/steps/update.sh', 0755);
 
     //            // settings.php
     //            file_put_contents('./web/sites/default/settings.tugboat.php', $twig->render('settings.tugboat.php.twig', $tugboatConfig));
@@ -327,7 +327,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     //                $include = 'include __DIR__ . "/settings.tugboat.php";';
     //                file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
     //            }
-    //        }
+            }
         }
     }
 }
