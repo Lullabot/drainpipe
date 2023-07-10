@@ -17,4 +17,3 @@ services:
     commands:
       update:
         - echo "Nothing to do as we import databases from the Drupal service."
-

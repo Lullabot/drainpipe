@@ -436,7 +436,13 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
   - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
   - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
 
-## Tugboat Integration
+This will setup Merge Request deployment to Pantheon Multidev environments. See
+[scaffold/gitlab/gitlab-ci.example.yml] for an example. You can also just
+include which will give you helpers that you can include and reference for tasks
+such as setting up [Terminus](https://pantheon.io/docs/terminus). See
+[scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
+
+### Tugboat
 
 Add the following to `composer.json` to add Tugboat configuration:
 
@@ -452,44 +458,5 @@ Add the following to `composer.json` to add Tugboat configuration:
 }
 ```
 
-The PHP version is autodetected based on the composer requirements.
-
-A `provider` object allows the upstream host to be determined and to determine
-if Tugboat downsyncs from the provider or does a fresh Drupal site install.
-
-### Acquia
-```json
-{
-    "extra": {
-        "drainpipe": {
-            "tugboat": {
-                "provider": {
-                    "host": "acquia",
-                    "downsync": true
-                }
-            }
-        }
-    }
-}
-```
-
-### Pantheon
-```json
-{
-    "extra": {
-        "drainpipe": {
-            "tugboat": {
-                "provider": {
-                    "host": "pantheon",
-                    "downsync": true
-                }
-            }
-        }
-    }
-}
-```
-This will setup Merge Request deployment to Pantheon Multidev environments. See
-[scaffold/gitlab/gitlab-ci.example.yml] for an example. You can also just
-include which will give you helpers that you can include and reference for tasks
-such as setting up [Terminus](https://pantheon.io/docs/terminus). See
-[scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
+The PHP and database version is autodetected based on your `pantheon.yml`, with
+the nodejs version being derived from DDEV settings.

@@ -282,7 +282,14 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs->removeDirectory('./.tugboat');
             $tugboatConfig = [];
 
-    //        // Pantheon
+            if (file_exists('./.ddev/config.yml')) {
+                $ddevConfig = Yaml::parseFile('./.ddev/config.yml');
+                if (!empty($ddevConfig['nodejs_version'])) {
+                    $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
+                }
+            }
+
+            // Pantheon
             if ($this->extra['drainpipe']['tugboat']['host'] === 'pantheon') {
                 $pantheonConfig = Yaml::parseFile('./pantheon.yml');
                 $composerJson = file_get_contents('composer.json');
@@ -293,13 +300,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     'database_version' => $pantheonConfig['database']['version'],
                     'nodejs_version' =>  '18',
                 ];
-
-                if (file_exists('./.ddev/config.yml')) {
-                    $ddevConfig = Yaml::parseFile('./.ddev/config.yml');
-                    if (!empty($ddevConfig['nodejs_version'])) {
-                        $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
-                    }
-                }
 
                 if (is_array($composerFullConfig['require']) && in_array('drupal/redis', array_keys($composerFullConfig['require']))) {
                     $tugboatConfig['memory_cache_type'] = 'redis';
