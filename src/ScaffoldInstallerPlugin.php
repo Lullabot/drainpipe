@@ -283,29 +283,29 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $tugboatConfig = [];
 
     //        // Pantheon
-    //        if ($this->extra['drainpipe']['tugboat']['host'] === 'pantheon') {
-    //            $pantheonConfig = Yaml::parseFile('./pantheon.yml');
-    //            $composerJson = file_get_contents('composer.json');
-    //            $composerFullConfig = json_decode($composerJson, true);
-    //            $tugboatConfig = [
-    //                'php_version' => $pantheonConfig['php_version'],
-    //                'database_type' => 'mariadb',
-    //                'database_version' => $pantheonConfig['database']['version'],
-    //                'nodejs_version' =>  '18',
-    //            ];
+            if ($this->extra['drainpipe']['tugboat']['host'] === 'pantheon') {
+                $pantheonConfig = Yaml::parseFile('./pantheon.yml');
+                $composerJson = file_get_contents('composer.json');
+                $composerFullConfig = json_decode($composerJson, true);
+                $tugboatConfig = [
+                    'php_version' => $pantheonConfig['php_version'],
+                    'database_type' => 'mariadb',
+                    'database_version' => $pantheonConfig['database']['version'],
+                    'nodejs_version' =>  '18',
+                ];
 
-    //            if (file_exists('./.ddev/config.yml')) {
-    //                $ddevConfig = Yaml::parseFile('./.ddev/config.yml');
-    //                if (!empty($ddevConfig['nodejs_version'])) {
-    //                    $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
-    //                }
-    //            }
+                if (file_exists('./.ddev/config.yml')) {
+                    $ddevConfig = Yaml::parseFile('./.ddev/config.yml');
+                    if (!empty($ddevConfig['nodejs_version'])) {
+                        $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
+                    }
+                }
 
-    //            if (is_array($composerFullConfig['require']) && in_array('drupal/redis', array_keys($composerFullConfig['require']))) {
-    //                $tugboatConfig['memory_cache_type'] = 'redis';
-    //                $tugboatConfig['memory_cache_version'] = 7;
-    //            }
-    //        }
+                if (is_array($composerFullConfig['require']) && in_array('drupal/redis', array_keys($composerFullConfig['require']))) {
+                    $tugboatConfig['memory_cache_type'] = 'redis';
+                    $tugboatConfig['memory_cache_version'] = 7;
+                }
+            }
 
     //        if (count($tugboatConfig) > 0) {
     //            $fs->ensureDirectoryExists('./.tugboat');
