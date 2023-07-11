@@ -54,3 +54,4 @@ node_modules
 # Tests #
 #########
 test_result
+.prettiercache
