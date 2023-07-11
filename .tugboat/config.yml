@@ -13,7 +13,7 @@ services:
       build: ./.tugboat/steps/3-build.sh
 
   mariadb:
-    image: tugboatqa/mariadb:10.6
+    image: tugboatqa/mariadb:10.4
     commands:
       update:
         - echo "Nothing to do as we import databases from the Drupal service."

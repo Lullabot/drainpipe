@@ -39,6 +39,7 @@ jobs:
         run: |
           ddev config --auto
           ddev config --nodejs-version "18"
+          ddev config --database=mariadb:10.4
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
