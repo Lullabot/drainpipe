@@ -50,6 +50,10 @@ curl -fsSL https://deb.nodesource.com/setup_{{ nodejs_version }}.x | bash -
 apt-get install -y nodejs
 # This only works for node > 16, but that version is unsupported now anyway.
 corepack enable
+{% if webserver_image == "php" %}
+# Apache
+a2enmod headers rewrite
+{% endif %}
 
 # Needed to bring in task
 composer install

@@ -3,5 +3,5 @@
 set -eux
 echo "Building..."
 
-./vendor/bin/task build
+./vendor/bin/task {{ build_command }}
 ./vendor/bin/task drupal:update

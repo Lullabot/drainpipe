@@ -455,8 +455,17 @@ Add the following to `composer.json` to add Tugboat configuration:
     }
 }
 ```
+
 The following will be autodetected based on your `.ddev/config.yml`:
 - PHP version
 - Database type and version
 - nodejs version
 - Redis (Obtained with `ddev get ddev/ddev-redis`)
+
+It is assumed the following tasks exist:
+- `build`
+- `sync`
+
+The `build` task can be overridden with a `build:tugboat` task if required (you
+will need to re-run `composer install` to regenerate the Tugboat scripts if you
+are adding this task to your `Taskfile.yml` for the first time)

@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Test-Tugboat-Pantheon:
+  Test-Tugboat:
     runs-on: ubuntu-latest
     steps:
       - name: Create a Drupal project
@@ -47,7 +47,7 @@ jobs:
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev composer config minimum-stability dev
-          ddev composer config extra.drainpipe --json '{"tugboat": {"host": "pantheon"}}'
+          ddev composer config extra.drainpipe --json '{"tugboat": {}}'
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
       # Compare the generated files to the ones used to build this repository
@@ -61,6 +61,16 @@ jobs:
           cmp -b drainpipe/.tugboat/steps/1-init.sh .tugboat/steps/1-init.sh
           cmp -b drainpipe/.tugboat/steps/2-update.sh .tugboat/steps/2-update.sh
           cmp -b drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
+
+      - name: Add a build:tugboat step
+        run: |
+          echo "  build:tugboat:" >> Taskfile.yml
+          echo "    cmds:" >> Taskfile.yml
+          echo "      - echo \"Tugboat build\"" >> Taskfile.yml
+          ddev composer install
+          if ! grep -q './vendor/bin/task build:tugboat' .tugboat/steps/3-build.sh; then
+            exit 1
+          fi
 
       - name: Upload test artifacts
         if: ${{ always() }}

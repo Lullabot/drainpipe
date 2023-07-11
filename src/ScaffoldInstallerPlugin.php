@@ -286,6 +286,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'database_type' => 'mariadb',
                 'database_version' => '10.6',
                 'php_version' => '8.1',
+                'build_command' => 'build',
             ];
 
             if (file_exists('./.ddev/config.yml')) {
@@ -308,6 +309,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $redisImage = explode(':', $redisConfig['services']['redis']['image']);
                 $tugboatConfig['memory_cache_type'] = 'redis';
                 $tugboatConfig['memory_cache_version'] = array_pop($redisImage);
+            }
+
+            if (file_exists('Taskfile.yml')) {
+                $taskfile = Yaml::parseFile('./Taskfile.yml');
+                if (isset($taskfile['tasks']['build:tugboat'])) {
+                    $tugboatConfig['build_command'] = 'build:tugboat';
+                }
             }
 
             if (count($tugboatConfig) > 0) {
