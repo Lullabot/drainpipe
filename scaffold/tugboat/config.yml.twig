@@ -20,8 +20,8 @@ services:
     commands:
       update:
         - echo "Nothing to do as we import databases from the Drupal service."
-
 {% if memory_cache_type %}
   {{ memory_cache_type }}:
+
     image: tugboatqa/{{ memory_cache_type }}:{{ memory_cache_version }}
 {% endif %}
