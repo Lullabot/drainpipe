@@ -35,7 +35,6 @@ curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 apt-get install -y nodejs
 # This only works for node > 16, but that version is unsupported now anyway.
 corepack enable
-
 #drainpipe-start
 # This is necessary for testing as this repository doesn't hold a Drupal site.
 shopt -s dotglob
@@ -56,3 +55,6 @@ cp web/sites/default/default.settings.php web/sites/default/settings.php
 cp .tugboat/settings.tugboat.php web/sites/default/settings.tugboat.php
 echo "include __DIR__ . '/settings.tugboat.php';" >> web/sites/default/settings.php
 #drainpipe-end
+
+# Needed to bring in task
+composer install
