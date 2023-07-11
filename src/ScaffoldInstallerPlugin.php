@@ -291,11 +291,10 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
             if (file_exists('./.ddev/config.yaml')) {
                 $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
-                $tugboatConfig = [
-                    'database_type' => $ddevConfig['database']['type'],
-                    'database_version' => $ddevConfig['database']['version'],
-                    'php_version' => $ddevConfig['php_version'],
-                ];
+                $tugboatConfig['database_type'] = $ddevConfig['database']['type'];
+                $tugboatConfig['database_version'] = $ddevConfig['database']['version'];
+                $tugboatConfig['php_version'] = $ddevConfig['php_version'];
+
                 if (!empty($ddevConfig['nodejs_version'])) {
                     $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
                 }
