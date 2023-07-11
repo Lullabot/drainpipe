@@ -278,10 +278,11 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         }
 
         // Tugboat
-        if (!empty($this->extra['drainpipe']['tugboat']['host'])) {
+        if (isset($this->extra['drainpipe']['tugboat'])) {
             $fs->removeDirectory('./.tugboat');
             $tugboatConfig = [
                 'nodejs_version' =>  '18',
+                'webserver_image' => 'php-nginx',
                 'database_type' => 'mariadb',
                 'database_version' => '10.6',
                 'php_version' => '8.1',
@@ -289,24 +290,24 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
             if (file_exists('./.ddev/config.yml')) {
                 $ddevConfig = Yaml::parseFile('./.ddev/config.yml');
+                $tugboatConfig = [
+                    'database_type' => $ddevConfig['database']['type'],
+                    'database_version' => $ddevConfig['database']['version'],
+                    'php_version' => $ddevConfig['php_version'],
+                ];
                 if (!empty($ddevConfig['nodejs_version'])) {
                     $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
                 }
+                if (!empty($ddevConfig['webserver_type']) && $ddevConfig['webserver_type'] === 'apache-fpm') {
+                    $tugboatConfig['webserver_image'] = 'php';
+                }
             }
 
-            // Pantheon
-            if ($this->extra['drainpipe']['tugboat']['host'] === 'pantheon') {
-                $pantheonConfig = Yaml::parseFile('./pantheon.yml');
-                $composerJson = file_get_contents('composer.json');
-                $composerFullConfig = json_decode($composerJson, true);
-
-                $tugboatConfig['php_version'] = $pantheonConfig['php_version'];
-                $tugboatConfig['database_version'] = $pantheonConfig['database']['version'];
-
-                if (is_array($composerFullConfig['require']) && in_array('drupal/redis', array_keys($composerFullConfig['require']))) {
-                    $tugboatConfig['memory_cache_type'] = 'redis';
-                    $tugboatConfig['memory_cache_version'] = 7;
-                }
+            if (file_exists('./.ddev/docker-compose.redis.yaml')) {
+                $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
+                $redisImage = explode(':', $redisConfig['services']['redis']['image']);
+                $tugboatConfig['memory_cache_type'] = 'redis';
+                $tugboatConfig['memory_cache_version'] = array_pop($redisImage);
             }
 
             if (count($tugboatConfig) > 0) {

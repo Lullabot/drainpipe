@@ -1,7 +1,7 @@
 services:
   php:
     http: false
-    image: tugboatqa/php-nginx:{{ php_version }}-fpm
+    image: tugboatqa/{{ webserver_image }}:{{ php_version }}-fpm
     default: true
 
     depends:

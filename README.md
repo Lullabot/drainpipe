@@ -442,7 +442,7 @@ include which will give you helpers that you can include and reference for tasks
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
 
-### Tugboat
+## Tugboat
 
 Add the following to `composer.json` to add Tugboat configuration:
 
@@ -450,13 +450,13 @@ Add the following to `composer.json` to add Tugboat configuration:
 {
     "extra": {
         "drainpipe": {
-            "tugboat": {
-              "provider": "pantheon"
-            }
+            "tugboat": {}
         }
     }
 }
 ```
-
-The PHP and database version is autodetected based on your `pantheon.yml`, with
-the nodejs version being derived from DDEV settings.
+The following will be autodetected based on your `.ddev/config.yml`:
+- PHP version
+- Database type and version
+- nodejs version
+- Redis (Obtained with `ddev get ddev/ddev-redis`)
