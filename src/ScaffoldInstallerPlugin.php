@@ -282,7 +282,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs->removeDirectory('./.tugboat');
             $tugboatConfig = [
                 'nodejs_version' =>  '18',
-                'webserver_image' => 'php-nginx',
+                'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm',
                 'database_type' => 'mariadb',
                 'database_version' => '10.6',
                 'php_version' => '8.1',
@@ -293,13 +293,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
                 $tugboatConfig['database_type'] = $ddevConfig['database']['type'];
                 $tugboatConfig['database_version'] = $ddevConfig['database']['version'];
-                $tugboatConfig['php_version'] = $ddevConfig['php_version'];
+                $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm';
 
                 if (!empty($ddevConfig['nodejs_version'])) {
                     $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
                 }
                 if (!empty($ddevConfig['webserver_type']) && $ddevConfig['webserver_type'] === 'apache-fpm') {
-                    $tugboatConfig['webserver_image'] = 'php';
+                    $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache';
                 }
             }
 

@@ -1,7 +1,7 @@
 services:
   php:
     http: false
-    image: tugboatqa/{{ webserver_image }}:{{ php_version }}-fpm
+    image: {{ webserver_image }}
     default: true
 
     depends:
