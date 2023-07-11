@@ -36,10 +36,10 @@ docker-php-ext-install gd
 # Install ImageMagick. This is recommended by both Acquia and Pantheon instead
 # of GD. Lullabot will likely be publishing an ADR recommending it too.
 apt-get install -y imagemagick
-
 {% if memory_cache_type == "memcached" %}
 # Install the PHP memcache extension. The Drupal Redis module recommends
 # phpredis so no PHP extension is required.
+
 apt-get install -y zlib1g-dev
 pecl install memcache
 echo 'extension=memcache.so' > /usr/local/etc/php/conf.d/memcache.ini
