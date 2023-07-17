@@ -64,6 +64,9 @@ runs:
           ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
         fi
 
+        # DDEV requires an .env file to start.
+        cp '.env.defaults' '.env' || true
+
         ddev start
         ddev describe
 
