@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Tugboat Drupal settings.
+ */
+
 if (getenv('TUGBOAT_REPO') !== FALSE) {
   $databases['default']['default'] = [
     'database' => 'tugboat',
