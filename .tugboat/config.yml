@@ -8,12 +8,14 @@ services:
       - mariadb
 
     commands:
-      init: ./.tugboat/steps/1-init.sh
+      init:
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v3.24.0/install-task.sh)" -- -d
+        - ./.tugboat/steps/1-init.sh
       update: ./.tugboat/steps/2-update.sh
       build: ./.tugboat/steps/3-build.sh
 
   mariadb:
     image: tugboatqa/mariadb:10.4
     commands:
-      update:
-        - echo "Nothing to do as we import databases from the Drupal service."
+      init:
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v3.24.0/install-task.sh)" -- -d

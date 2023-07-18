@@ -54,6 +54,9 @@ corepack enable
 # Apache
 a2enmod headers rewrite
 {% endif %}
+{% if php_init %}
 
-# Needed to bring in task
+task tugboat:php:init
+{% endif %}
+
 composer install

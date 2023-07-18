@@ -11,15 +11,20 @@ services:
 {% endif %}
 
     commands:
-      init: ./.tugboat/steps/1-init.sh
+      init:
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d
+        - ./.tugboat/steps/1-init.sh
       update: ./.tugboat/steps/2-update.sh
       build: ./.tugboat/steps/3-build.sh
 
   {{ database_type }}:
     image: tugboatqa/{{ database_type }}:{{ database_version }}
+    {% if mysql_init %}
     commands:
-      update:
-        - echo "Nothing to do as we import databases from the Drupal service."
+      init:
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d
+        - task tugboat:mysql:init
+    {% endif %}
 {% if memory_cache_type %}
   {{ memory_cache_type }}:
 

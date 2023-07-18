@@ -280,6 +280,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat'])) {
             $fs->removeDirectory('./.tugboat');
+            $binaryInstallerPlugin = new BinaryInstallerPlugin();
             $tugboatConfig = [
                 'nodejs_version' =>  '18',
                 'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm',
@@ -287,6 +288,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'database_version' => '10.6',
                 'php_version' => '8.1',
                 'build_command' => 'build',
+                'php_init' => false,
+                'mysql_init' => false,
+                'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
             ];
 
             if (file_exists('./.ddev/config.yaml')) {
@@ -311,9 +315,16 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             }
 
             if (file_exists('Taskfile.yml')) {
+                // Get steps out of the Taskfile.
                 $taskfile = Yaml::parseFile('./Taskfile.yml');
                 if (isset($taskfile['tasks']['build:tugboat'])) {
                     $tugboatConfig['build_command'] = 'build:tugboat';
+                }
+                if (isset($taskfile['tasks']['tugboat:php:init'])) {
+                    $tugboatConfig['php_init'] = true;
+                }
+                if (isset($taskfile['tasks']['tugboat:mysql:init'])) {
+                    $tugboatConfig['mysql_init'] = true;
                 }
             }
 

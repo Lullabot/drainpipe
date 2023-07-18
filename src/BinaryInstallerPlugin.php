@@ -34,4 +34,14 @@ class BinaryInstallerPlugin extends BinaryInstaller
             'version' => '3.24.0',
         ],
     ];
+
+    /**
+     * Gets the version for a binary.
+     *
+     * @param $binary
+     * @return mixed|string
+     */
+    public function getBinaryVersion($binary) {
+        return $this->binaries[$binary]['version'];
+    }
 }

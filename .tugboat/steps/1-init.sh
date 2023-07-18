@@ -56,5 +56,4 @@ cp .tugboat/settings.tugboat.php web/sites/default/settings.tugboat.php
 echo "include __DIR__ . '/settings.tugboat.php';" >> web/sites/default/settings.php
 #drainpipe-end
 
-# Needed to bring in task
 composer install
