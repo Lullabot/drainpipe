@@ -56,7 +56,6 @@ corepack enable
 {% if 'apache' in webserver_image %}
 # Apache
 a2enmod headers rewrite
-service apache2 restart
 {% endif %}
 {% if php_init %}
 
