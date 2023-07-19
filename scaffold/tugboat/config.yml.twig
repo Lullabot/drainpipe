@@ -12,7 +12,7 @@ services:
 
     commands:
       init:
-        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
         - ./.tugboat/steps/1-init.sh
       update: ./.tugboat/steps/2-update.sh
       build: ./.tugboat/steps/3-build.sh
@@ -22,7 +22,7 @@ services:
     {% if mysql_init %}
     commands:
       init:
-        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
         - task tugboat:mysql:init
     {% endif %}
 {% if memory_cache_type %}
