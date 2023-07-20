@@ -18,8 +18,8 @@ services:
   {{ database_type }}:
     image: tugboatqa/{{ database_type }}:{{ database_version }}
 {% if init.mysql %}
-  checkout: true
-  commands:
+    checkout: true
+    commands:
       init:
         - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
         - task tugboat:mysql:init
