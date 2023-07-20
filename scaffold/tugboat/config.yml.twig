@@ -19,9 +19,9 @@ services:
     image: tugboatqa/{{ database_type }}:{{ database_version }}
     {% if init.mysql %}
 commands:
-  init:
-    - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
-     task tugboat:mysql:init
+      init:
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
+         task tugboat:mysql:init
     {% endif %}
   {% if memory_cache_type %}
 
@@ -29,8 +29,8 @@ commands:
     image: tugboatqa/{{ memory_cache_type }}:{{ memory_cache_version }}
     {% if init.redis %}
 commands:
-  init:
-    - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
-    - task tugboat:redis:init
+      init:
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
+        - task tugboat:redis:init
     {% endif %}
   {% endif %}
