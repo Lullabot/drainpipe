@@ -290,6 +290,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'build_command' => 'build',
                 'php_init' => false,
                 'mysql_init' => false,
+                'redis_init' => false,
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
             ];
 
@@ -325,6 +326,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
                 if (isset($taskfile['tasks']['tugboat:mysql:init'])) {
                     $tugboatConfig['mysql_init'] = true;
+                }
+                if (isset($taskfile['tasks']['tugboat:redis:init'])) {
+                    $tugboatConfig['redis_init'] = true;
                 }
             }
 

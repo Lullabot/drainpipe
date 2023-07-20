@@ -470,5 +470,18 @@ The `build` task can be overridden with a `build:tugboat` task if required (you
 will need to re-run `composer install` to regenerate the Tugboat scripts if you
 are adding this task to your `Taskfile.yml` for the first time).
 
-`composer install` should also be re-run if any chances are made to the DDEV
+>>>
+💡
+`composer install` should be re-run if any changes are made to the DDEV
 configuration.
+>>>
+
+You can hook into the `init` step of images by adding them to your
+`Taskfile.yml`, e.g.
+
+```
+tugboat:php:init:
+  cmds:
+    - apt-get install -y libldap2-dev
+    - docker-php-ext-install ldap
+```

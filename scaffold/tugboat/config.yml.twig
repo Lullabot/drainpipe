@@ -27,4 +27,10 @@ services:
   {{ memory_cache_type }}:
 
     image: tugboatqa/{{ memory_cache_type }}:{{ memory_cache_version }}
+    {% if redis_init %}
+    commands:
+      init:
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
+        - task tugboat:redis:init
+    {% endif %}
 {% endif %}
