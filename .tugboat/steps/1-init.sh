@@ -19,6 +19,9 @@ ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
 # decent performance.
 docker-php-ext-install opcache
 
+# Zip extension.
+docker-php-ext-install zip
+
 # GD dependencies.
 apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev
 
