@@ -38,7 +38,8 @@ tasks:
   sync:
     desc: "Sync a database from production and import it"
     cmds:
-      # Replace this with a command to fetch your datbase.
+      # Replace this with a command to fetch your data
+      base.
       - ./vendor/bin/drush site:install -y
       - echo "🧹 Sanitising database"
       - ./vendor/bin/drush sql:sanitize --yes
