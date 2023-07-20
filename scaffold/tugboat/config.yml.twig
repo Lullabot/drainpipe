@@ -24,6 +24,7 @@ services:
         - task tugboat:mysql:init
     {% endif %}
   {% if memory_cache_type %}
+
   {{ memory_cache_type }}:
     image: tugboatqa/{{ memory_cache_type }}:{{ memory_cache_version }}
     {% if init.redis %}
