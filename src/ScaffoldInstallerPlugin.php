@@ -288,9 +288,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'database_version' => '10.6',
                 'php_version' => '8.1',
                 'build_command' => 'build',
-                'php_init' => false,
-                'mysql_init' => false,
-                'redis_init' => false,
+                'sync_command' => 'sync',
+                'init' => [],
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
             ];
 
@@ -321,14 +320,17 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 if (isset($taskfile['tasks']['build:tugboat'])) {
                     $tugboatConfig['build_command'] = 'build:tugboat';
                 }
+                if (isset($taskfile['tasks']['sync:tugboat'])) {
+                    $tugboatConfig['build_command'] = 'sync:tugboat';
+                }
                 if (isset($taskfile['tasks']['tugboat:php:init'])) {
-                    $tugboatConfig['php_init'] = true;
+                    $tugboatConfig['init']['php'] = true;
                 }
                 if (isset($taskfile['tasks']['tugboat:mysql:init'])) {
-                    $tugboatConfig['mysql_init'] = true;
+                    $tugboatConfig['init']['mysql'] = true;
                 }
                 if (isset($taskfile['tasks']['tugboat:redis:init'])) {
-                    $tugboatConfig['redis_init'] = true;
+                    $tugboatConfig['init']['redis'] = true;
                 }
             }
 

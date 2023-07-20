@@ -57,7 +57,7 @@ corepack enable
 # Apache
 a2enmod headers rewrite
 {% endif %}
-{% if php_init %}
+{% if init.php %}
 
 # Bring in tasks.
 composer install --ignore-platform-reqs

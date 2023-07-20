@@ -466,9 +466,10 @@ It is assumed the following tasks exist:
 - `build`
 - `sync`
 
-The `build` task can be overridden with a `build:tugboat` task if required (you
-will need to re-run `composer install` to regenerate the Tugboat scripts if you
-are adding this task to your `Taskfile.yml` for the first time).
+The `build` and `sync` tasks can be overridden with a `build:tugboat` and
+`sync:tugboat` task if required (you will need to re-run `composer install` to
+regenerate the Tugboat scripts if you  are adding this task to your
+`Taskfile.yml` for the first time).
 
 >>>
 💡
