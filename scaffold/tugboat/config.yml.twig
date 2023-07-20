@@ -22,6 +22,8 @@ services:
     commands:
       init:
         - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
+        - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+        - yq -i 'del(."includes")' Taskfile.yml
         - task tugboat:mysql:init
 {% endif %}
 {% if memory_cache_type %}
@@ -33,6 +35,8 @@ services:
     commands:
       init:
         - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
+        - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+        - yq -i 'del(."includes")' Taskfile.yml
         - task tugboat:redis:init
 {% endif %}
 {% endif %}
