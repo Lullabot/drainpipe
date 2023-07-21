@@ -64,6 +64,15 @@ corepack enable
 # Apache
 a2enmod headers rewrite
 {% endif %}
+{% if pantheon %}
+
+# Pantheon
+mkdir -p ~/terminus && cd ~/terminus
+curl -L https://github.com/pantheon-systems/terminus/releases/download/3.2.1/terminus.phar --output terminus
+chmod +x terminus
+./terminus self:update
+sudo ln -s ~/terminus/terminus /usr/local/bin/terminus
+{% endif %}
 {% if init.php %}
 
 # Bring in tasks.

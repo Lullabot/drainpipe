@@ -279,7 +279,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat'])) {
-            $fs->removeDirectory('.tugboat');
+            $fs->removeDirectory('./.tugboat');
             $binaryInstallerPlugin = new BinaryInstallerPlugin();
             $tugboatConfig = [
                 'nodejs_version' =>  '18',
@@ -291,6 +291,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'sync_command' => 'sync',
                 'init' => [],
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
+                'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
             ];
 
             if (file_exists('./.ddev/config.yaml')) {
