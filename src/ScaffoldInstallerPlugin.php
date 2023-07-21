@@ -279,7 +279,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat'])) {
-            $fs->removeDirectory('./.tugboat');
+            $fs->removeDirectory('.tugboat');
             $binaryInstallerPlugin = new BinaryInstallerPlugin();
             $tugboatConfig = [
                 'nodejs_version' =>  '18',
