@@ -5,38 +5,13 @@
  * Tugboat Drupal settings.
  */
 
-if (getenv('TUGBOAT_REPO') !== FALSE) {
-  $databases['default']['default'] = [
-    'database' => 'tugboat',
-    'username' => 'tugboat',
-    'password' => 'tugboat',
-    'prefix' => '',
-    'host' => '{{ database_type }}',
-    'port' => '3306',
-    'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
-    'driver' => 'mysql',
-  ];
-{% if memory_cache_type == "redis" %}
-
-  $redis_config = 'modules/contrib/redis/example.services.yml';
-  if (file_exists($redis_config) && is_readable($redis_config)) {
-    $settings['container_yamls'][] = $redis_config;
-    $settings['redis.connection']['interface'] = 'PhpRedis';
-    $settings['redis.connection']['host'] = 'redis';
-    $settings['cache']['default'] = 'cache.backend.redis';
-  }
-  else {
-    error_log("This project is configured to use Redis for caching. Please download and install the Drupal Redis module. See https://architecture.lullabot.com/adr/20220906-identical-cache-backends/.");
-  }
-{% endif %}
-{% if memory_cache_type == "memcached" %}
-
-  if (file_exists('modules/contrib/memcache/memcache.info.yml')) {
-    $settings['memcache']['servers'] = ['memcached:11211' => 'default'];
-    $settings['cache']['default'] = 'cache.backend.memcache';
-  }
-  else {
-    error_log("This project is configured to use Memcached for caching. Please download and install the Drupal Memcache module. See https://architecture.lullabot.com/adr/20220906-identical-cache-backends/.");
-  }
-{% endif %}
-}
+$databases['default']['default'] = [
+  'database' => 'tugboat',
+  'username' => 'tugboat',
+  'password' => 'tugboat',
+  'prefix' => '',
+  'host' => '{{ database_type }}',
+  'port' => '3306',
+  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+  'driver' => 'mysql',
+];
