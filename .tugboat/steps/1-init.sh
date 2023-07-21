@@ -15,6 +15,11 @@ apt-get install -y mariadb-client
 # repository, change that here. This example links /web to the docroot
 ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
 
+# Create the Drupal private and public files directories if they aren't
+# already present.
+mkdir -p "${DOCROOT}/sites/default/files"
+chmod 777 "${DOCROOT}/sites/default/files"
+
 # Install the PHP opcache as it's not included by default and needed for
 # decent performance.
 docker-php-ext-install opcache
