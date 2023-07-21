@@ -72,6 +72,7 @@ curl -L https://github.com/pantheon-systems/terminus/releases/download/3.2.1/ter
 chmod +x terminus
 ./terminus self:update
 sudo ln -s ~/terminus/terminus /usr/local/bin/terminus
+cd ${TUGBOAT_ROOT}
 {% endif %}
 {% if init.php %}
 
