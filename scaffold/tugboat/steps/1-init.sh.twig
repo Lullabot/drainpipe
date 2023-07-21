@@ -54,8 +54,10 @@ echo 'extension=memcache.so' > /usr/local/etc/php/conf.d/memcache.ini
 {% endif %}
 
 # Install node
-curl -fsSL https://deb.nodesource.com/setup_{{ nodejs_version }}.x | bash -
+curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
 apt-get install -y nodejs
+npm install -g n
+n {{ nodejs_version }}
 # This only works for node > 16, but that version is unsupported now anyway.
 corepack enable
 {% if 'apache' in webserver_image %}
