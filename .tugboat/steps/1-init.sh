@@ -58,11 +58,11 @@ composer config --no-plugins allow-plugins.composer/installers true
 composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
 composer config --no-plugins allow-plugins.lullabot/drainpipe true
 composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": true}}'
+composer config extra.drainpipe --json '{"tugboat": {}}'
 composer config minimum-stability dev
 composer require lullabot/drainpipe --with-all-dependencies
 mv drainpipe/.tugboat .
 cp web/sites/default/default.settings.php web/sites/default/settings.php
-echo "include __DIR__ . '/settings.tugboat.php';" >> web/sites/default/settings.php
 #drainpipe-end
 
 composer install
