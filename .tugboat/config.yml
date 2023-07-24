@@ -1,0 +1,16 @@
+services:
+  php:
+    http: false
+    image: tugboatqa/php-nginx:8.1-fpm
+    default: true
+
+    depends:
+      - mariadb
+
+    commands:
+      init: ./.tugboat/steps/1-init.sh
+      update: ./.tugboat/steps/2-update.sh
+      build: ./.tugboat/steps/3-build.sh
+
+  mariadb:
+    image: tugboatqa/mariadb:10.4

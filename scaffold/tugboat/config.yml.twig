@@ -1,0 +1,42 @@
+services:
+  php:
+    http: false
+    image: {{ webserver_image }}
+    default: true
+
+    depends:
+      - {{ database_type }}
+{% if memory_cache_type %}
+      - {{ memory_cache_type }}
+{% endif %}
+
+    commands:
+      init: ./.tugboat/steps/1-init.sh
+      update: ./.tugboat/steps/2-update.sh
+      build: ./.tugboat/steps/3-build.sh
+
+  {{ database_type }}:
+    image: tugboatqa/{{ database_type }}:{{ database_version }}
+{% if init.mysql %}
+    checkout: true
+    commands:
+      init:
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
+        - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+        - yq -i 'del(."includes")' Taskfile.yml
+        - task tugboat:mysql:init
+{% endif %}
+{% if memory_cache_type %}
+
+  {{ memory_cache_type }}:
+    image: tugboatqa/{{ memory_cache_type }}:{{ memory_cache_version }}
+{% if init.redis %}
+    checkout: true
+    commands:
+      init:
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
+        - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+        - yq -i 'del(."includes")' Taskfile.yml
+        - task tugboat:redis:init
+{% endif %}
+{% endif %}
