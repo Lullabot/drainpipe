@@ -62,8 +62,6 @@ composer config minimum-stability dev
 composer require lullabot/drainpipe --with-all-dependencies
 mv drainpipe/.tugboat .
 cp web/sites/default/default.settings.php web/sites/default/settings.php
-cp .tugboat/settings.tugboat.php web/sites/default/settings.tugboat.php
-echo "include __DIR__ . '/settings.tugboat.php';" >> web/sites/default/settings.php
 #drainpipe-end
 
 composer install
