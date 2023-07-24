@@ -13,6 +13,8 @@ use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
 use Composer\Util\Filesystem;
 use Symfony\Component\Yaml\Yaml;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterface
 {
@@ -154,7 +156,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (strpos($contents, '.task') === false) {
                 $this->io->warning(
                     sprintf(
-                    '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
+                        '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
                         $gitignorePath
                     )
                 );
@@ -184,7 +186,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
-     * Install DDEV Commands.
+     *
      */
     private function installDdevCommand(): void
     {
@@ -271,6 +273,90 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 else if ($github === 'ComposerLockDiff') {
                     $fs->ensureDirectoryExists('./.github/workflows');
                     $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
+                }
+            }
+        }
+
+        // Tugboat
+        if (isset($this->extra['drainpipe']['tugboat'])) {
+            $fs->removeDirectory('./.tugboat');
+            $binaryInstallerPlugin = new BinaryInstallerPlugin();
+            $tugboatConfig = [
+                'nodejs_version' =>  '18',
+                'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm',
+                'database_type' => 'mariadb',
+                'database_version' => '10.6',
+                'php_version' => '8.1',
+                'build_command' => 'build',
+                'sync_command' => 'sync',
+                'init' => [],
+                'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
+                'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
+            ];
+
+            if (file_exists('./.ddev/config.yaml')) {
+                $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
+                $tugboatConfig['database_type'] = $ddevConfig['database']['type'];
+                $tugboatConfig['database_version'] = $ddevConfig['database']['version'];
+                $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm';
+
+                if (!empty($ddevConfig['nodejs_version'])) {
+                    $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
+                }
+                if (!empty($ddevConfig['webserver_type']) && $ddevConfig['webserver_type'] === 'apache-fpm') {
+                    $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache';
+                }
+            }
+
+            if (file_exists('./.ddev/docker-compose.redis.yaml')) {
+                $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
+                $redisImage = explode(':', $redisConfig['services']['redis']['image']);
+                $tugboatConfig['memory_cache_type'] = 'redis';
+                $tugboatConfig['memory_cache_version'] = array_pop($redisImage);
+            }
+
+            if (file_exists('Taskfile.yml')) {
+                // Get steps out of the Taskfile.
+                $taskfile = Yaml::parseFile('./Taskfile.yml');
+                if (isset($taskfile['tasks']['build:tugboat'])) {
+                    $tugboatConfig['build_command'] = 'build:tugboat';
+                }
+                if (isset($taskfile['tasks']['sync:tugboat'])) {
+                    $tugboatConfig['sync_command'] = 'sync:tugboat';
+                }
+                if (isset($taskfile['tasks']['tugboat:php:init'])) {
+                    $tugboatConfig['init']['php'] = true;
+                }
+                if (isset($taskfile['tasks']['tugboat:mysql:init'])) {
+                    $tugboatConfig['init']['mysql'] = true;
+                }
+                if (isset($taskfile['tasks']['tugboat:redis:init'])) {
+                    $tugboatConfig['init']['redis'] = true;
+                }
+            }
+
+            if (count($tugboatConfig) > 0) {
+                $fs->ensureDirectoryExists('./.tugboat');
+                $fs->ensureDirectoryExists('./.tugboat/steps');
+                $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
+                $twig = new Environment($loader);
+                file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/1-init.sh', $twig->render('steps/1-init.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/2-update.sh', $twig->render('steps/2-update.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/3-build.sh', $twig->render('steps/3-build.sh.twig', $tugboatConfig));
+                chmod('./.tugboat/steps/1-init.sh', 0755);
+                chmod('./.tugboat/steps/2-update.sh', 0755);
+                chmod('./.tugboat/steps/3-build.sh', 0755);
+
+                file_put_contents('./web/sites/default/settings.tugboat.php', $twig->render('settings.tugboat.php.twig', $tugboatConfig));
+                if (file_exists('./web/sites/default/settings.php')) {
+                    $settings = file_get_contents('./web/sites/default/settings.php');
+                    if (strpos($settings, 'settings.tugboat.php') === false) {
+                        $include = <<<'EOT'
+include __DIR__ . "/settings.tugboat.php";
+EOT;
+                        file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
+                    }
                 }
             }
         }
