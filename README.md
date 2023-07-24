@@ -28,6 +28,7 @@ for a Drupal site, including:
 * [GitLab CI Integration](#gitlab-ci-integration)
     + [Composer Lock Diff](#composer-lock-diff-1)
     + [Pantheon](#pantheon-2)
+* [Tugboat Integration](#tugboat)
 ---
 ## Installation
 
