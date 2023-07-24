@@ -23,7 +23,7 @@ if (file_exists(__DIR__ . '/settings.tugboat.php') && getenv('TUGBOAT_PREVIEW_ID
   $settings['hash_salt'] = hash('sha256', getenv('TUGBOAT_REPO_ID'));
 
   $settings['trusted_host_patterns'] = [
-  '\.tugboatqa\.com$',
+    '\.tugboatqa\.com$',
   ];
 
   $config['environment_indicator.indicator']['name'] = '☑️ Tugboat';
