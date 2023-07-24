@@ -24,8 +24,8 @@ ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
 
 # Create the Drupal private and public files directories if they aren't
 # already present.
-mkdir -p "${DOCROOT}/sites/default/files"
-chmod 777 "${DOCROOT}/sites/default/files"
+mkdir -p "${TUGBOAT_ROOT}/web/sites/default/files"
+chmod 777 "${TUGBOAT_ROOT}/web/sites/default/files"
 
 # Install the PHP opcache as it's not included by default and needed for
 # decent performance.
