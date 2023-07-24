@@ -39,8 +39,10 @@ docker-php-ext-install gd
 apt-get install -y imagemagick
 
 # Install node
-curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
 apt-get install -y nodejs
+npm install -g n
+n 18
 # This only works for node > 16, but that version is unsupported now anyway.
 corepack enable
 #drainpipe-start
