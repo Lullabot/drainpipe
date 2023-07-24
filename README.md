@@ -28,6 +28,7 @@ for a Drupal site, including:
 * [GitLab CI Integration](#gitlab-ci-integration)
     + [Composer Lock Diff](#composer-lock-diff-1)
     + [Pantheon](#pantheon-2)
+* [Tugboat Integration](#tugboat)
 ---
 ## Installation
 
@@ -419,8 +420,101 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 }
 ```
 
+- Add the following the composer.json to enable deployment of Pantheon Review Apps
+  ```json
+  "extra": {
+      "drainpipe": {
+          "github": ["PantheonReviewApps"]
+      }
+  }
+  ```
+- Run `composer install`
+- Add your Pantheon `site-name` to the last job in the new
+  workflow file at `.github/workflows/PantheonReviewApps.yml`
+- Add the following secrets to your repository:
+  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
+  - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
+  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
+  - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
+
 This will setup Merge Request deployment to Pantheon Multidev environments. See
 [scaffold/gitlab/gitlab-ci.example.yml] for an example. You can also just
 include which will give you helpers that you can include and reference for tasks
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
+
+## Tugboat
+
+Add the following to `composer.json` to add Tugboat configuration:
+
+```json
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {}
+        }
+    }
+}
+```
+
+The following will be autodetected based on your `.ddev/config.yml`:
+- Web server (nginx or apache)
+- PHP version
+- Database type and version
+- nodejs version
+- Redis (Obtained with `ddev get ddev/ddev-redis`)
+
+Additionally, Pantheon Terminus can be added:
+```json
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {
+              "terminus": true
+            }
+        }
+    }
+}
+```
+
+It is assumed the following tasks exist:
+- `build`
+- `sync`
+
+The `build` and `sync` tasks can be overridden with a `build:tugboat` and
+`sync:tugboat` task if required (you will need to re-run `composer install` to
+regenerate the Tugboat scripts if you  are adding this task to your
+`Taskfile.yml` for the first time).
+
+```
+  sync:
+    desc: "Fetches a database from Pantheon and imports it"
+    cmds:
+      - task: pantheon:fetch-db
+      - task: drupal:import-db
+  sync:tugboat:
+    desc: "Fetches a database from Pantheon and imports it in Tugboat"
+    cmds:
+      - task: pantheon:fetch-db
+        vars:
+          DB_DIR: /var/lib/tugboat/files/db
+      - task: drupal:import-db
+        vars:
+          DB_DIR: /var/lib/tugboat/files/db
+```
+
+>>>
+💡
+`composer install` should be re-run if any changes are made to the DDEV
+configuration.
+>>>
+
+You can hook into the `init` step of images by adding them to your
+`Taskfile.yml`, e.g.
+
+```
+tugboat:php:init:
+  cmds:
+    - apt-get install -y libldap2-dev
+    - docker-php-ext-install ldap
+```

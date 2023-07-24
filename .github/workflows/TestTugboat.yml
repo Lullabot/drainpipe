@@ -1,0 +1,75 @@
+name: "Test Tugboat"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-Tugboat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v3
+        with:
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev config --php-version "8.1"
+          ddev config --nodejs-version "18"
+          ddev config --database=mariadb:10.4
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer config extra.drainpipe --json '{"tugboat": {}}'
+          ddev composer require lullabot/drainpipe --with-all-dependencies
+
+      # Compare the generated files to the ones used to build this repository
+      # preview - they should be the same.
+      - name: Test Generated Files
+        run: |
+          cmp -b drainpipe/.tugboat/config.yml .tugboat/config.yml
+          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/1-init.sh
+          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/2-update.sh
+          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/3-build.sh
+          cmp -b drainpipe/.tugboat/steps/1-init.sh .tugboat/steps/1-init.sh
+          cmp -b drainpipe/.tugboat/steps/2-update.sh .tugboat/steps/2-update.sh
+          cmp -b drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
+
+      - name: Add a build:tugboat step
+        run: |
+          echo "  build:tugboat:" >> Taskfile.yml
+          echo "    cmds:" >> Taskfile.yml
+          echo "      - echo \"Tugboat build\"" >> Taskfile.yml
+          ddev composer install
+          if ! grep -q './vendor/bin/task build:tugboat' .tugboat/steps/3-build.sh; then
+            exit 1
+          fi
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: .tugboat
+          path: .tugboat
