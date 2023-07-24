@@ -457,6 +457,7 @@ Add the following to `composer.json` to add Tugboat configuration:
 ```
 
 The following will be autodetected based on your `.ddev/config.yml`:
+- Web server (nginx or apache)
 - PHP version
 - Database type and version
 - nodejs version
