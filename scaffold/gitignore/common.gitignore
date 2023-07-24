@@ -40,8 +40,8 @@ vendor
 ########
 # Yarn #
 ########
+.pnp.*
 .yarn/*
-!.yarn/cache
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
@@ -54,3 +54,4 @@ node_modules
 # Tests #
 #########
 test_result
+.prettiercache

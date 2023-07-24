@@ -35,3 +35,11 @@ tasks:
 # assets:watch:
 #   desc: "Builds assets such as CSS & JS, and watches them for changes"
 #   deps: [sass:watch, javascript:watch]
+  sync:
+    desc: "Sync a database from production and import it"
+    cmds:
+      # Replace this with a command to fetch your database.
+      - ./vendor/bin/drush site:install -y
+      - echo "🧹 Sanitising database"
+      - ./vendor/bin/drush sql:sanitize --yes
+

@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * @file
+ * Tugboat Drupal settings.
+ *
+ * This file cannot be edited, but you can add/override Tugboat settings after
+ * it has been included in the main settings.php file.
+ */
+
+if (file_exists(__DIR__ . '/settings.tugboat.php') && getenv('TUGBOAT_PREVIEW_ID')) {
+  $databases['default']['default'] = [
+    'database' => 'tugboat',
+    'username' => 'tugboat',
+    'password' => 'tugboat',
+    'prefix' => '',
+    'host' => '{{ database_type }}',
+    'port' => '3306',
+    'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+    'driver' => 'mysql',
+  ];
+
+  $settings['hash_salt'] = hash('sha256', getenv('TUGBOAT_REPO_ID'));
+
+  $settings['trusted_host_patterns'] = [
+    '\.tugboatqa\.com$',
+  ];
+
+  $config['environment_indicator.indicator']['name'] = '☑️ Tugboat';
+  $config['environment_indicator.indicator']['bg_color'] = '#07688c';
+  $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
+}

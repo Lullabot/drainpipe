@@ -61,7 +61,7 @@ tasks:
         done
       - |
         if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn prettier --check .
+          yarn prettier --check --cache-location=.prettiercache .
         elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
           npm run prettier --check .
         fi
