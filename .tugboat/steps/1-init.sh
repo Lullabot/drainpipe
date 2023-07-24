@@ -61,13 +61,11 @@ composer config repositories.drainpipe --json '{"type": "path", "url": "drainpip
 composer config extra.drainpipe --json '{"tugboat": {}}'
 composer config minimum-stability dev
 composer require lullabot/drainpipe --with-all-dependencies
-mv drainpipe/.tugboat .
 cp web/sites/default/default.settings.php web/sites/default/settings.php
-mv .tugboat .tugboat-tmp
 #drainpipe-end
 
 composer install
 #drainpipe-start
 rm -rf .tugboat
-mv .tugboat-tmp .tugboat
+mv drainpipe/.tugboat .tugboat
 #drainpipe-end
