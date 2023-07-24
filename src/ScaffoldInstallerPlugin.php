@@ -322,7 +322,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     $tugboatConfig['build_command'] = 'build:tugboat';
                 }
                 if (isset($taskfile['tasks']['sync:tugboat'])) {
-                    $tugboatConfig['build_command'] = 'sync:tugboat';
+                    $tugboatConfig['sync_command'] = 'sync:tugboat';
                 }
                 if (isset($taskfile['tasks']['tugboat:php:init'])) {
                     $tugboatConfig['init']['php'] = true;

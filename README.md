@@ -462,6 +462,19 @@ The following will be autodetected based on your `.ddev/config.yml`:
 - nodejs version
 - Redis (Obtained with `ddev get ddev/ddev-redis`)
 
+Additionally, Pantheon Terminus can be added:
+```json
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {
+              "terminus": true
+            }
+        }
+    }
+}
+```
+
 It is assumed the following tasks exist:
 - `build`
 - `sync`
@@ -470,6 +483,23 @@ The `build` and `sync` tasks can be overridden with a `build:tugboat` and
 `sync:tugboat` task if required (you will need to re-run `composer install` to
 regenerate the Tugboat scripts if you  are adding this task to your
 `Taskfile.yml` for the first time).
+
+```
+  sync:
+    desc: "Fetches a database from Pantheon and imports it"
+    cmds:
+      - task: pantheon:fetch-db
+      - task: drupal:import-db
+  sync:tugboat:
+    desc: "Fetches a database from Pantheon and imports it in Tugboat"
+    cmds:
+      - task: pantheon:fetch-db
+        vars:
+          DB_DIR: /var/lib/tugboat/files/db
+      - task: drupal:import-db
+        vars:
+          DB_DIR: /var/lib/tugboat/files/db
+```
 
 >>>
 💡
