@@ -67,12 +67,8 @@ a2enmod headers rewrite
 {% if pantheon %}
 
 # Pantheon
-mkdir -p ~/terminus && cd ~/terminus
-curl -L https://github.com/pantheon-systems/terminus/releases/download/3.2.1/terminus.phar --output terminus
-chmod +x terminus
-./terminus self:update
-sudo ln -s ~/terminus/terminus /usr/local/bin/terminus
-cd ${TUGBOAT_ROOT}
+curl --fail -sSL https://github.com/pantheon-systems/terminus/releases/download/$(curl -L --fail --silent "https://api.github.com/repos/pantheon-systems/terminus/releases/latest" | perl -nle'print $& while m{"tag_name": "\K.*?(?=")}g')/terminus.phar --output /usr/local/bin/terminus
+chmod 777 /usr/local/bin/terminus
 {% endif %}
 {% if init.php %}
 

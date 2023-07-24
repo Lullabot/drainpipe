@@ -14,6 +14,3 @@ services:
 
   mariadb:
     image: tugboatqa/mariadb:10.4
-    commands:
-      init:
-        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v3.24.0/install-task.sh)" -- -d -b /usr/local/bin
