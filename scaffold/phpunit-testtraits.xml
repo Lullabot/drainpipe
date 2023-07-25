@@ -26,10 +26,10 @@
     -->
     <env name="BROWSERTEST_OUTPUT_BASE_URL" value=""/>
     <!-- Example for changing the driver args to webdriver tests MINK_DRIVER_ARGS_WEBDRIVER value: '["chrome", { "chromeOptions": { "w3c": false } }, "http://localhost:4444/wd/hub"]' For using the Firefox browser, replace "chrome" with "firefox" -->
-    <env name="MINK_DRIVER_ARGS_WEBDRIVER" value='["chrome", {"browserName":"chrome","chromeOptions":{"args":["---no-sandbox","--ignore-certificate-errors", "--allow-insecure-localhost"]}}, "http://chrome:4444/wd/hub"]'/>
+    <env name="MINK_DRIVER_ARGS_WEBDRIVER" value='["chrome", {"browserName":"chrome","chromeOptions":{"args":["---no-sandbox","--ignore-certificate-errors", "--allow-insecure-localhost"]}}, "http://chrome:4444"]'/>
     <!-- DTT settings https://gitlab.com/weitzman/drupal-test-traits -->
     <env name="DTT_BASE_URL" value="http://web"/>
-    <env name="DTT_MINK_DRIVER_ARGS" value='["chrome", {"browserName":"chrome","chromeOptions":{"args":["---no-sandbox","--ignore-certificate-errors", "--allow-insecure-localhost"]}}, "http://chrome:4444/wd/hub"]'/>
+    <env name="DTT_MINK_DRIVER_ARGS" value='["chrome", {"browserName":"chrome","chromeOptions":{"args":["---no-sandbox","--ignore-certificate-errors", "--allow-insecure-localhost"]}}, "http://chrome:4444"]'/>
   </php>
   <testsuites>
     <testsuite name="unit">
