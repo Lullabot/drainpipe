@@ -6,10 +6,12 @@ try {
   drupalCommandsPath = resolveToUnqualified('@lullabot/nightwatch-drupal-commands', __filename).replace(/\/$/, '');
   yarn2 = true;
 } catch(e) {
-  a11yPath = './node_modules/nightwatch-accessibility';
+  a11yPath = './node_modules/nightwatch-accessibility/nightwatch';
   drupalCommandsPath = './node_modules/@lullabot/nightwatch-drupal-commands';
 }
 
+const firefoxLaunchUrl = process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX && process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX.length ? process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX.replace(/\/$/, '') : process.env.NIGHTWATCH_DRUPAL_URL;
+const chromeLaunchUrl = process.env.NIGHTWATCH_DRUPAL_URL_CHROME && process.env.NIGHTWATCH_DRUPAL_URL_CHROME.length ? process.env.NIGHTWATCH_DRUPAL_URL_CHROME.replace(/\/$/, '') : process.env.NIGHTWATCH_DRUPAL_URL;
 
 module.exports = {
   // An array of folders (excluding subfolders) where your tests are located;
@@ -32,50 +34,33 @@ module.exports = {
 
   webdriver: {},
 
+  test_workers: {
+    enabled: false
+  },
+
   test_settings: {
     default: {
       filter: '**/*.nightwatch.js',
-      "screenshots" : {
-        "enabled" : true,
-        "on_failure" : true,
-        "on_error" : false,
-        "path" : "test_result"
-      }
-    },
-    firefox: {
-      desiredCapabilities: {
-        resolution: "1240x4000",
-        browserName: 'firefox',
-        acceptInsecureCerts: true,
-        alwaysMatch: {
-          'moz:firefoxOptions': {
-            args: [
-              //'-headless',
-              // '-verbose'
-            ]
-          }
-        }
-      },
-      webdriver: {
-        start_process: false,
-        host: 'firefox',
-        port: 4444,
-        cli_args: [
-          // very verbose geckodriver logs
-          // '-vv'
-        ]
-      },
-      globals: {
-        drupalUrl: process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX && process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX.length ? process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX.replace(/\/$/, '') : process.env.NIGHTWATCH_DRUPAL_URL,
+      disable_error_log: false,
+      screenshots: {
+        enabled: false,
+        on_failure: true,
+        on_error: false,
+        path: 'test_result',
       },
     },
+
     chrome: {
+      selenium: {
+        start_process: false,
+        host: 'chrome',
+        port: 4444
+      },
       desiredCapabilities: {
-        resolution: "1240x4000",
         browserName: 'chrome',
+        esolution: "1240x4000",
         'goog:chromeOptions': {
-          // More info on Chromedriver: https://sites.google.com/a/chromium.org/chromedriver/
-          //
+          w3c: true,
           args: [
             '--no-sandbox',
             '--ignore-certificate-errors',
@@ -84,17 +69,33 @@ module.exports = {
           ]
         }
       },
-      webdriver: {
+      globals: {
+        drupalUrl: chromeLaunchUrl,
+      },
+      launch_url: chromeLaunchUrl,
+    },
+
+    firefox: {
+      selenium: {
         start_process: false,
-        host: 'chrome',
-        port: 4444,
-        cli_args: [
-          // --verbose
-        ]
+        host: 'firefox',
+        port: 4444
+      },
+      desiredCapabilities: {
+        browserName: 'firefox',
+        resolution: "1240x4000",
+        acceptInsecureCerts: true,
+        'moz:firefoxOptions': {
+          args: [
+            // '-headless',
+            // '-verbose'
+          ]
+        }
       },
       globals: {
-        drupalUrl: process.env.NIGHTWATCH_DRUPAL_URL_CHROME && process.env.NIGHTWATCH_DRUPAL_URL_CHROME.length ? process.env.NIGHTWATCH_DRUPAL_URL_CHROME.replace(/\/$/, '') : process.env.NIGHTWATCH_DRUPAL_URL,
+        drupalUrl: firefoxLaunchUrl,
       },
+      launch_url: firefoxLaunchUrl,
     },
   }
 };

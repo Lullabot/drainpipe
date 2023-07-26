@@ -276,7 +276,7 @@ tasks:
     cmds:
       - |
         if [ -f "package-lock.json" ]; then
-          npm run nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
+          npx nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
         elif [ -f "yarn.lock" ]; then
           yarn nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
         else
