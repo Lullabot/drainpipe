@@ -19,6 +19,7 @@ ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
 # already present.
 mkdir -p "${TUGBOAT_ROOT}/web/sites/default/files"
 chmod 777 "${TUGBOAT_ROOT}/web/sites/default/files"
+chgrp -R www-data "${DOCROOT}/sites/default/files"
 
 # Install the PHP opcache as it's not included by default and needed for
 # decent performance.
