@@ -4,7 +4,7 @@ set -eux
 echo "Initializing..."
 
 # Install task
-sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v3.24.0/install-task.sh)" -- -d -b /usr/local/bin
+sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v3.28.0/install-task.sh)" -- -d -b /usr/local/bin
 
 # Install mysql or mariadb client.
 apt-get update
