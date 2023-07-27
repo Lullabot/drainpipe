@@ -208,7 +208,7 @@ tasks:
     interactive: true
     cmds:
       - |
-        PACKAGES="nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands"
+        PACKAGES="nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands"
         if [ ! -f "package.json" ]; then
           echo -n "No package.json exists, would you like to use yarn1, npm, or yarn? "
           read -r PACKAGE_MANAGER
@@ -225,6 +225,11 @@ tasks:
           elif [ "$PACKAGE_MANAGER" == "yarn" ]; then
             yarn set version berry
             yarn init
+            echo "packageExtensions:" >> .yarnrc.yml
+            echo '  "nightwatch@*":' >> .yarnrc.yml
+            echo '    dependencies:' >> .yarnrc.yml
+            echo '      ws: "*"' >> .yarnrc.yml
+            echo '      lodash: "*"' >> .yarnrc.yml
             yarn add $PACKAGES --dev
           else
             echo "Sorry I'm not aware of that package manager. Please first init package.json with it yourself manually."
