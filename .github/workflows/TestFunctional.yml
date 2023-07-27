@@ -35,6 +35,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
+          ddev config --nodejs-version "18"
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
@@ -95,7 +96,7 @@ jobs:
       - name: Setup Nightwatch
         run: |
           ddev npm init -y
-          ddev npm install nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands --save-dev
+          ddev npm install nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --save-dev
 
       - name: Install Drupal
         run: |
@@ -144,7 +145,7 @@ jobs:
         run: |
           ddev yarn set version classic
           ddev yarn init -y
-          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands --dev
+          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
         run: |
@@ -194,7 +195,7 @@ jobs:
           ddev yarn set version berry
           ddev yarn init -y
           yarn config set nodeLinker node-modules
-          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands --dev
+          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
         run: |
@@ -247,7 +248,8 @@ jobs:
           echo '  "nightwatch@*":' >> .yarnrc.yml
           echo '    dependencies:' >> .yarnrc.yml
           echo '      ws: "*"' >> .yarnrc.yml
-          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands ws --dev
+          echo '      lodash: "*"' >> .yarnrc.yml
+          ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
           yarn
 
       - name: Install Drupal
