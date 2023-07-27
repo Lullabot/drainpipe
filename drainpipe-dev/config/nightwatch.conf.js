@@ -1,15 +1,6 @@
-let a11yPath, drupalCommandsPath;
-let yarn2 = false;
-try {
-  const { resolveToUnqualified } = require('pnpapi');
-  a11yPath = resolveToUnqualified('nightwatch-accessibility', __filename).replace(/\/$/, '');
-  drupalCommandsPath = resolveToUnqualified('@lullabot/nightwatch-drupal-commands', __filename).replace(/\/$/, '');
-  yarn2 = true;
-} catch(e) {
-  a11yPath = './node_modules/nightwatch-accessibility/nightwatch';
-  drupalCommandsPath = './node_modules/@lullabot/nightwatch-drupal-commands';
-}
+const path = require('path');
 
+const drupalCommandsPath = path.dirname(require.resolve('@lullabot/nightwatch-drupal-commands/README.md'));
 const firefoxLaunchUrl = process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX && process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX.length ? process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX.replace(/\/$/, '') : process.env.NIGHTWATCH_DRUPAL_URL;
 const chromeLaunchUrl = process.env.NIGHTWATCH_DRUPAL_URL_CHROME && process.env.NIGHTWATCH_DRUPAL_URL_CHROME.length ? process.env.NIGHTWATCH_DRUPAL_URL_CHROME.replace(/\/$/, '') : process.env.NIGHTWATCH_DRUPAL_URL;
 
@@ -24,10 +15,10 @@ module.exports = {
   page_objects_path: [`${drupalCommandsPath}/page_objects`],
 
   // See https://nightwatchjs.org/guide/extending-nightwatch/#writing-custom-commands
-  custom_commands_path:  [`${a11yPath}/commands`, `${drupalCommandsPath}/commands`],
+  custom_commands_path:  [`${drupalCommandsPath}/commands`],
 
   // See https://nightwatchjs.org/guide/extending-nightwatch/#writing-custom-assertions
-  custom_assertions_path: [`${a11yPath}/assertions`],
+  custom_assertions_path: [],
 
   // See https://nightwatchjs.org/guide/#external-globals
   globals_path : '',
