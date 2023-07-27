@@ -543,3 +543,23 @@ tugboat:php:init:
     - apt-get install -y libldap2-dev
     - docker-php-ext-install ldap
 ```
+
+## Contributor Docs
+
+This repo is public.
+
+Please be careful to remove sensitive customer specifics when posting Issues or comments.
+
+Firsttime contributors need a maintainers approval for automated tests to run.
+(This is so we aren't at risk of getting a big CI bill accidentally, or maliciously.)
+
+Peer Reviewing by looking at PR code changes is nice.
+
+Testing PR code changes on real sites is extra beneficial.
+
+## Release
+
+The https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.yml action needs some manual follow-ups
+to remove the branch name, so that the tag and branch name being the same doesn't cause complications.
+
+Before making a new release, post in the lullabot internal #devops slack channel to coordinate with other maintainers.
