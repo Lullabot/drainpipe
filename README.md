@@ -180,6 +180,31 @@ All the below static code analysis tests can be run with `task test:static`
 | PHPCS     | task test:phpcs          | Runs PHPCS with Drupal coding standards provided by [Coder module](https://www.drupal.org/project/coder                                                                                                                                                                |
 
 
+#### Excluding Files from PHP_CodeSniffer
+
+`phpcs.xml` can be altered using Drupal's
+[composer scaffold](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4).
+
+- Edit `phpcs.xml` in the root of your project, e.g. to an exclude pattern:
+  ```
+  <!-- Custom excludes -->
+  <exclude-pattern>web/sites/sites.php</exclude-pattern>
+  ```
+- Create a patch file
+  ```
+  diff -urN vendor/lullabot/drainpipe-dev/scaffold/phpcs.xml phpcs.xml > patches/custom/phpcs.xml.patch
+  ```
+- Add the patch to `composer.json`
+  ```
+  "scripts": {
+        "post-drupal-scaffold-cmd": [
+                "patch phpcs.xml < patches/custom/phpcs.xml.patch"
+        ]
+  },
+  ```
+- Delete the `vendor` directory and `phpcs.xml` and then run `composer install`
+  to verify everything works as expected
+
 ### Functional Tests
 
 Functional tests require some mechanism of creating a functing Drupal site to
