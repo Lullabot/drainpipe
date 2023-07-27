@@ -96,7 +96,7 @@ jobs:
       - name: Setup Nightwatch
         run: |
           ddev npm init -y
-          ddev npm install nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands --save-dev
+          ddev npm install nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --save-dev
 
       - name: Install Drupal
         run: |
@@ -145,7 +145,7 @@ jobs:
         run: |
           ddev yarn set version classic
           ddev yarn init -y
-          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands --dev
+          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
         run: |
@@ -195,7 +195,7 @@ jobs:
           ddev yarn set version berry
           ddev yarn init -y
           yarn config set nodeLinker node-modules
-          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands --dev
+          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
         run: |
