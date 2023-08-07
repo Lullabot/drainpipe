@@ -567,7 +567,7 @@ This repo is public.
 
 Please be careful to remove sensitive customer specifics when posting Issues or comments.
 
-Firsttime contributors need a maintainers approval for automated tests to run.
+First time contributors need a maintainers approval for automated tests to run.
 (This is so we aren't at risk of getting a big CI bill accidentally, or maliciously.)
 
 Peer Reviewing by looking at PR code changes is nice.
