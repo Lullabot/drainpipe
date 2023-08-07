@@ -8,28 +8,41 @@ for a Drupal site, including:
 - Automated testing setup
 - Integration with DDEV
 - CI integration
----
-* [Installation](#installation)
-* [.env support](#env-support)
-* [SASS Compilation](#sass-compilation)
-* [JavaScript Compilation](#javascript-compilation)
-* [Testing](#testing)
-    + [Static Tests](#static-tests)
-    + [Functional Tests](#functional-tests)
-        - [PHPUnit](#phpunit)
-        - [Nightwatch](#nightwatch)
-    + [Autofix](#autofix)
-* [Hosting Provider Integration](#hosting-provider-integration)
-    + [Generic](#generic)
-    + [Pantheon](#pantheon)
-* [GitHub Actions Integration](#github-actions-integration)
-    + [Composer Lock Diff](#composer-lock-diff)
-    + [Pantheon](#pantheon-1)
-* [GitLab CI Integration](#gitlab-ci-integration)
-    + [Composer Lock Diff](#composer-lock-diff-1)
-    + [Pantheon](#pantheon-2)
-* [Tugboat Integration](#tugboat)
----
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Installation](#installation)
+- [.env support](#env-support)
+- [SASS Compilation](#sass-compilation)
+  - [Setup](#setup)
+- [JavaScript Compilation](#javascript-compilation)
+  - [Setup](#setup-1)
+- [Testing](#testing)
+  - [Static Tests](#static-tests)
+    - [Excluding Files from PHP_CodeSniffer](#excluding-files-from-php_codesniffer)
+  - [Functional Tests](#functional-tests)
+    - [PHPUnit](#phpunit)
+    - [Nightwatch](#nightwatch)
+  - [Autofix](#autofix)
+- [Hosting Provider Integration](#hosting-provider-integration)
+  - [Generic](#generic)
+    - [Importing/Exporting Databases](#importingexporting-databases)
+    - [Snapshots](#snapshots)
+  - [Pantheon](#pantheon)
+- [GitHub Actions Integration](#github-actions-integration)
+  - [Composer Lock Diff](#composer-lock-diff)
+  - [Pantheon](#pantheon-1)
+- [GitLab CI Integration](#gitlab-ci-integration)
+  - [Composer Lock Diff](#composer-lock-diff-1)
+  - [Pantheon](#pantheon-2)
+- [Tugboat](#tugboat)
+- [Contributor Docs](#contributor-docs)
+- [Release](#release)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Installation
 
 ```sh
