@@ -563,7 +563,17 @@ Testing PR code changes on real sites is extra beneficial.
 
 ## Release
 
+When making a release, increase the version based on https://semver.org/
+
+> MAJOR version when you make incompatible API changes
+> MINOR version when you add functionality in a backward compatible manner
+> PATCH version when you make backward compatible bug fixes
+
+Specifically for drainpipe, when a new "check" is added, that might break builds in projects,
+that would usually be a MINOR release, with a release note about the change.
+
+Before making a new release, post in the lullabot internal #devops slack channel to coordinate with other maintainers.
+
 The https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.yml action needs some manual follow-ups
 to remove the branch name, so that the tag and branch name being the same doesn't cause complications.
 
-Before making a new release, post in the lullabot internal #devops slack channel to coordinate with other maintainers.
