@@ -13,3 +13,10 @@ tests/fixtures/drainpipe-test-project/*
 !.yarn/sdks
 !.yarn/versions
 .npmrc
+
+################
+# Editors / OS #
+################
+.idea
+.DS_Store
+.vscode
