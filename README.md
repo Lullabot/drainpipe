@@ -185,7 +185,7 @@ All the below static code analysis tests can be run with `task test:static`
 `phpcs.xml` can be altered using Drupal's
 [composer scaffold](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4).
 
-- Edit `phpcs.xml` in the root of your project, e.g. to an exclude pattern:
+- Edit `phpcs.xml` in the root of your project, e.g. to add an exclude pattern:
   ```
   <!-- Custom excludes -->
   <exclude-pattern>web/sites/sites.php</exclude-pattern>
@@ -197,11 +197,15 @@ All the below static code analysis tests can be run with `task test:static`
 - Add the patch to `composer.json`
   ```
   "scripts": {
+        "pre-drupal-scaffold-cmd": [
+            "if [ -f \"phpcs.xml\" ]; then rm phpcs.xml; fi"
+        ],
         "post-drupal-scaffold-cmd": [
-                "patch phpcs.xml < patches/custom/phpcs.xml.patch"
+            "if [ -f \"phpcs.xml\" ]; then patch phpcs.xml < patches/custom/phpcs.xml.patch; fi"
         ]
   },
   ```
+  The pre hook is needed otherwise the composer scaffold attempts to re-patch a file it no longer has control over when running `composer install --no-dev`
 - Delete the `vendor` directory and `phpcs.xml` and then run `composer install`
   to verify everything works as expected
 
