@@ -7,7 +7,7 @@ tasks:
       Given a directory, pushes it to a git remote whilst maintaining a linear
       history with the remote.
 
-      usage: task deploy:git d="/tmp/release" b=main r="git@github.com:Lullabot/drainpipe.git" m="Initial commit" ge="bot@example.com" gn="Drainpipe Bot"
+      usage: task deploy:git directory="/tmp/release" branch=main remote="git@github.com:Lullabot/drainpipe.git" message="Initial commit" push=true
 
       directory=<directory>   A directory containing the files to be pushed
       branch=<branch>         Name of the branch to push to e.g. "main"
@@ -32,6 +32,6 @@ tasks:
         git checkout -B {{.branch}}
         git add -A
         git commit --quiet --message {{shellQuote .message}} --allow-empty
-        git push origin {{.branch}}
-        # Not using a bash-style comparison here due to https://github.com/go-task/task/issues/609
-        {{if eq .push "true"}}git push origin {{.branch}}{{end}}
+        if [ "" == {{shellQuote .push}} ] || [ {{shellQuote .push}} == "true" ]; then
+          git push origin {{.branch}}
+        fi
