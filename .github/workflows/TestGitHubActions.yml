@@ -11,6 +11,8 @@ concurrency:
 jobs:
   Test-GitHub-Actions:
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
     steps:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
