@@ -348,6 +348,12 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 chmod('./.tugboat/steps/2-update.sh', 0755);
                 chmod('./.tugboat/steps/3-build.sh', 0755);
 
+                if ($tugboatConfig['database_type'] === 'mysql') {
+                    $fs->ensureDirectoryExists('./.tugboat/scripts');
+                    $fs->copy("$scaffoldPath/tugboat/scripts/install-mysql-client.sh", './.tugboat/scripts/install-mysql-client.sh');
+                    chmod('./.tugboat/scripts/install-mysql-client.sh', 0755);
+                }
+
                 file_put_contents('./web/sites/default/settings.tugboat.php', $twig->render('settings.tugboat.php.twig', $tugboatConfig));
                 if (file_exists('./web/sites/default/settings.php')) {
                     $settings = file_get_contents('./web/sites/default/settings.php');
