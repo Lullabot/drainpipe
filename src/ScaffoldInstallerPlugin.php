@@ -304,7 +304,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'php_version' => '8.1',
                 'sync_command' => 'sync',
                 'build_command' => 'build',
-                'update_command' => 'update',
+                'update_command' => 'drupal:update',
                 'init' => [],
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
                 'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
@@ -339,6 +339,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
                 if (isset($taskfile['tasks']['build:tugboat'])) {
                     $tugboatConfig['build_command'] = 'build:tugboat';
+                }
+                if (isset($taskfile['tasks']['update'])) {
+                    $tugboatConfig['update_command'] = 'update';
                 }
                 if (isset($taskfile['tasks']['update:tugboat'])) {
                     $tugboatConfig['update_command'] = 'update:tugboat';
