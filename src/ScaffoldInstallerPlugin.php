@@ -132,6 +132,21 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     break;
                 }
             }
+            if (empty($projectTaskfile['tasks']['sync'])) {
+                $this->io->warning(
+                    'Taskfile.yml does not contain a "sync" task.'
+                );
+            }
+            if (empty($projectTaskfile['tasks']['build'])) {
+                $this->io->warning(
+                    'Taskfile.yml does not contain a "build" task.'
+                );
+            }
+            if (empty($projectTaskfile['tasks']['update'])) {
+                $this->io->warning(
+                    'Taskfile.yml does not contain an "update" task and will fall back to using "task drupal:update".'
+                );
+            }
         }
     }
 

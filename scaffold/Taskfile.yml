@@ -45,6 +45,7 @@ tasks:
       # $settings['config_exclude_modules'] = ['stage_file_proxy', 'field_ui', 'views_ui'];
       # - ./vendor/bin/drush pm:enable stage_file_proxy views_ui field_ui -y
 
+  # Drush aliases will be passed through e.g. task update site=@staging
   update:
     desc: "Runs the Drupal update process"
     cmds:

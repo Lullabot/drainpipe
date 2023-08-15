@@ -52,7 +52,7 @@ jobs:
         run: ddev task "github:actions:lint directories='./drainpipe/scaffold/github/actions ./drainpipe/scaffold/github/workflows'"
 
       - name: Run Database Updates
-        run: ddev task drupal:update
+        run: ddev task update
 
       - name: Create pantheon.yml
         run: |
