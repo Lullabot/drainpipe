@@ -187,7 +187,7 @@ tasks:
         # Disallow uncommitted changes in the index
         if ! git diff-index --cached --quiet HEAD --ignore-submodules; then
           git diff-index --cached --name-status -r --ignore-submodules HEAD
-          echo "Your index contains uncommitteed changes"
+          echo "Your index contains uncommitted changes"
         exit 1
         fi
   nightwatch:check:
