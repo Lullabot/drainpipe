@@ -58,6 +58,12 @@ jobs:
         run: |
           sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
 
+      - name: Create a git repository
+        run: |
+          git init
+          git add .
+          git commit -m "Initial commit"
+
       - name: Run Static Tests
         run: ddev task test:static
 
