@@ -60,6 +60,8 @@ jobs:
 
       - name: Create a git repository
         run: |
+          git config --global user.email "no-reply@example.com"
+          git config --global user.name "Drainpipe Bot"
           git init
           git add .
           git commit -m "Initial commit"
