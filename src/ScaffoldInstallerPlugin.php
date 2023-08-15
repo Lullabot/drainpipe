@@ -287,8 +287,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'database_type' => 'mariadb',
                 'database_version' => '10.6',
                 'php_version' => '8.1',
-                'build_command' => 'build',
                 'sync_command' => 'sync',
+                'build_command' => 'build',
+                'update_command' => 'update',
                 'init' => [],
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
                 'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
@@ -318,11 +319,14 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (file_exists('Taskfile.yml')) {
                 // Get steps out of the Taskfile.
                 $taskfile = Yaml::parseFile('./Taskfile.yml');
+                if (isset($taskfile['tasks']['sync:tugboat'])) {
+                    $tugboatConfig['sync_command'] = 'sync:tugboat';
+                }
                 if (isset($taskfile['tasks']['build:tugboat'])) {
                     $tugboatConfig['build_command'] = 'build:tugboat';
                 }
-                if (isset($taskfile['tasks']['sync:tugboat'])) {
-                    $tugboatConfig['sync_command'] = 'sync:tugboat';
+                if (isset($taskfile['tasks']['update:tugboat'])) {
+                    $tugboatConfig['update_command'] = 'update:tugboat';
                 }
                 if (isset($taskfile['tasks']['tugboat:php:init'])) {
                     $tugboatConfig['init']['php'] = true;

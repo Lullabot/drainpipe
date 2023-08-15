@@ -21,11 +21,24 @@ silent: true
 #    web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
 
 tasks:
+  sync:
+    desc: "Sync a database from production and import it"
+    cmds:
+      # Replace this with a command to fetch your database.
+      - ./vendor/bin/drush site:install -y
+      - echo "🧹 Sanitising database"
+      - ./vendor/bin/drush sql:sanitize --yes
+
   build:
     desc: "Builds the project for production"
     deps: [drupal:composer:production]
     cmds:
       - echo "Nothing to do"
+
+  update:
+    desc: "Runs the Drupal update process"
+    cmds:
+      - task: drupal:update
 # assets:
 #   desc: "Builds assets such as CSS & JS"
 #   cmds:
@@ -35,11 +48,4 @@ tasks:
 # assets:watch:
 #   desc: "Builds assets such as CSS & JS, and watches them for changes"
 #   deps: [sass:watch, javascript:watch]
-  sync:
-    desc: "Sync a database from production and import it"
-    cmds:
-      # Replace this with a command to fetch your database.
-      - ./vendor/bin/drush site:install -y
-      - echo "🧹 Sanitising database"
-      - ./vendor/bin/drush sql:sanitize --yes
 
