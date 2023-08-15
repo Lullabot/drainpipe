@@ -34,17 +34,27 @@ tasks:
     deps: [drupal:composer:production]
     cmds:
       - echo "Nothing to do"
+      #- task: assets
+
+  build:dev:
+    desc: "Builds the project for development"
+    deps: [drupal:composer]
+    cmds:
+      - echo "Nothing to do"
+      # - ./vendor/bin/drush pm:enable stage_file_proxy views_ui field_ui -y
 
   update:
     desc: "Runs the Drupal update process"
     cmds:
       - task: drupal:update
+
 # assets:
 #   desc: "Builds assets such as CSS & JS"
 #   cmds:
-#     - if [ -f "yarn.lock" ]; then yarn; else npm install; fi
+#     - yarn install
 #     - task: javascript:compile
 #     - task: sass:compile
+#
 # assets:watch:
 #   desc: "Builds assets such as CSS & JS, and watches them for changes"
 #   deps: [sass:watch, javascript:watch]
