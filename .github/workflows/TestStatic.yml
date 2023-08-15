@@ -54,10 +54,6 @@ jobs:
         run: |
           test -f phpcs.xml
 
-      - name: Fix settings.php
-        run: |
-          sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
-
       - name: Create a git repository
         run: |
           git config --global user.email "no-reply@example.com"
@@ -65,6 +61,25 @@ jobs:
           git init
           git add .
           git commit -m "Initial commit"
+
+      - name: Fix settings.php
+        run: |
+          sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
+
+      - name: Test for untracked and modified files
+        run:
+          |
+          if ! ddev task test:untracked 2>/dev/null; then
+            echo "Modified file was not detected"
+            exit 1
+          fi
+          echo "foo" > bar.txt
+          if ! ddev task test:untracked 2>/dev/null; then
+            echo "Untracked file was not detected"
+            exit 1
+          fi
+          git add .
+          git commit -m "Second commit"
 
       - name: Run Static Tests
         run: ddev task test:static
