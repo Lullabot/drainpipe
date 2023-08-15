@@ -132,6 +132,21 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     break;
                 }
             }
+            if (empty($projectTaskfile['tasks']['sync'])) {
+                $this->io->warning(
+                    'Taskfile.yml does not contain a "sync" task.'
+                );
+            }
+            if (empty($projectTaskfile['tasks']['build'])) {
+                $this->io->warning(
+                    'Taskfile.yml does not contain a "build" task.'
+                );
+            }
+            if (empty($projectTaskfile['tasks']['update'])) {
+                $this->io->warning(
+                    'Taskfile.yml does not contain an "update" task and will fall back to using "task drupal:update".'
+                );
+            }
         }
     }
 
@@ -287,8 +302,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'database_type' => 'mariadb',
                 'database_version' => '10.6',
                 'php_version' => '8.1',
-                'build_command' => 'build',
                 'sync_command' => 'sync',
+                'build_command' => 'build',
+                'update_command' => 'drupal:update',
                 'init' => [],
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
                 'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
@@ -318,11 +334,17 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (file_exists('Taskfile.yml')) {
                 // Get steps out of the Taskfile.
                 $taskfile = Yaml::parseFile('./Taskfile.yml');
+                if (isset($taskfile['tasks']['sync:tugboat'])) {
+                    $tugboatConfig['sync_command'] = 'sync:tugboat';
+                }
                 if (isset($taskfile['tasks']['build:tugboat'])) {
                     $tugboatConfig['build_command'] = 'build:tugboat';
                 }
-                if (isset($taskfile['tasks']['sync:tugboat'])) {
-                    $tugboatConfig['sync_command'] = 'sync:tugboat';
+                if (isset($taskfile['tasks']['update'])) {
+                    $tugboatConfig['update_command'] = 'update';
+                }
+                if (isset($taskfile['tasks']['update:tugboat'])) {
+                    $tugboatConfig['update_command'] = 'update:tugboat';
                 }
                 if (isset($taskfile['tasks']['tugboat:php:init'])) {
                     $tugboatConfig['init']['php'] = true;

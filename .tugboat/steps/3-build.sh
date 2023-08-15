@@ -7,4 +7,4 @@ set -eux
 echo "Building..."
 
 ./vendor/bin/task build
-./vendor/bin/task drupal:update
+./vendor/bin/task update
