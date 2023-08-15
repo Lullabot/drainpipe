@@ -18,7 +18,7 @@ tasks:
       - if [ ! -d {{ shellQuote (.directory | default "") }} ]; then echo "Please provide a path to a directory to deploy" && exit 1; fi
       - if [ "" == {{ shellQuote (.branch | default "") }} ]; then echo "Please provide a branch to deploy to" && exit 1; fi
       - if [ "" == {{ shellQuote (.remote | default "") }} ]; then echo "Please provide a remote git repository to push to" && exit 1; fi
-      - if [ "" == {{ shellQuote (.mesage | default "") }} ]; then echo "Please provide a commit message" && exit 1; fi
+      - if [ "" == {{ shellQuote (.message | default "") }} ]; then echo "Please provide a commit message" && exit 1; fi
       - |
         TMP_DIR=$(mktemp -d)
         (git clone --depth 1 --branch {{.branch}} {{.remote}} $TMP_DIR && cd $TMP_DIR) || true
