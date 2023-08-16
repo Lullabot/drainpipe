@@ -179,17 +179,10 @@ tasks:
       - |
         git update-index -q --ignore-submodules --refresh
         # Disallow unstaged changes in the working tree
-        if ! git diff-files --quiet --ignore-submodules --; then
-          git diff-files --name-status -r --ignore-submodules --
-          echo "You have unstaged changes"
-          exit 1
-        fi
+        git diff-files --name-status -r --ignore-submodules --
         # Disallow uncommitted changes in the index
-        if ! git diff-index --cached --quiet HEAD --ignore-submodules --; then
-          git diff-index --cached --name-status -r --ignore-submodules HEAD --
-          echo "Your index contains uncommitted changes"
-        exit 1
-        fi
+        git diff-index --cached --name-status -r --ignore-submodules HEAD --
+    cleanup: echo "Uncommittedd or unstaged changes detected, either commit them or add them to .gitignore"
   nightwatch:check:
     #desc: Verifies Nightwatch is setup correctly
     cmds:
