@@ -67,19 +67,21 @@ jobs:
           sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
 
       - name: Test for untracked and modified files
-        run:
-          |
-          if ! ddev task test:untracked 2>/dev/null; then
-            echo "Modified file was not detected"
+        continue-on-error: true
+        run: |
+          ddev task test:untracked
+          echo $? > untracked_result
+
+      - name: Test for untracked and modified files
+        run: |
+          if [ "$(cat untracked_result)" = "0"]; then
             exit 1
           fi
-          echo "foo" > bar.txt
-          if ! ddev task test:untracked 2>/dev/null; then
-            echo "Untracked file was not detected"
-            exit 1
-          fi
+          rm untracked_result
+          echo "/drainpipe" >> .gitignore
           git add .
           git commit -m "Second commit"
+          ddev task test:untracked
 
       - name: Run Static Tests
         run: ddev task test:static
