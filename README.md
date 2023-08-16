@@ -10,6 +10,7 @@ for a Drupal site, including:
 - CI integration
 ---
 * [Installation](#installation)
+* [Database Updates](#database-updates)
 * [.env support](#env-support)
 * [SASS Compilation](#sass-compilation)
 * [JavaScript Compilation](#javascript-compilation)
@@ -70,6 +71,22 @@ ln -s web/ docroot
 ```
 
 ---
+
+## Database Updates
+
+The `drupal:update` command follows the same procedure as the
+['drush deploy'](https://www.drush.org/12.x/deploycommand/) command, with the
+exception that it runs the configuration import twice as in some cases the
+import can fail due to memory exhaustion before completion.
+
+```
+drush updatedb --no-cache-clear
+drush cache:rebuild
+drush config:import || true
+drush config:import
+drush cache:rebuild
+drush deploy:hook
+```
 
 ## .env support
 Drainpipe will add `.env` file support for managing environment variables.
