@@ -176,13 +176,15 @@ tasks:
   untracked:
     desc: Checks for any untracked files in git
     cmds:
-      - |
-        git update-index -q --ignore-submodules --refresh
-        # Disallow unstaged changes in the working tree
-        git diff-files --name-status -r --ignore-submodules --
-        # Disallow uncommitted changes in the index
-        git diff-index --cached --name-status -r --ignore-submodules HEAD --
-    cleanup: echo "Uncommittedd or unstaged changes detected, either commit them or add them to .gitignore"
+      - defer: git diff-index --cached HEAD --
+      - defer: git diff-files
+      - defer: git ls-files --exclude-standard --others
+      # Check for staged changes
+      - git diff-index --quiet --cached HEAD --
+      # Check for working tree changes
+      - git diff-files --quiet
+      # Untracked and unignored
+      - test -z "$(git ls-files --exclude-standard --others)"
   nightwatch:check:
     #desc: Verifies Nightwatch is setup correctly
     cmds:
