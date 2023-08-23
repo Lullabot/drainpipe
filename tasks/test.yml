@@ -159,7 +159,7 @@ tasks:
       - ./vendor/bin/phpcbf
       - |
         if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn prettier --write .
+          yarn prettier --write --cache-location=.prettiercache .
         elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
           npm run prettier --write .
         fi
