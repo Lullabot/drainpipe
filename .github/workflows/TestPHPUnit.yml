@@ -48,15 +48,11 @@ jobs:
           ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev composer config minimum-stability dev
+          ddev composer require lullabot/php-webdriver:dev-main --dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
           ddev restart
-
-      - name: Override instaclick/php-webdriver
-        run: |
-          ddev composer config repositories.php-webdriver git https://github.com/Lullabot/php-webdriver
-          ddev composer require instaclick/php-webdriver:"dev-justafish-patch-1 as 1.4.14"
 
       - name: Add Custom Testing Module
         run: |
