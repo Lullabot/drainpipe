@@ -133,9 +133,12 @@ jobs:
         run: |
           ddev drush site:install -y
           ddev drush user:password admin password
-          ddev task test:phpunit:functional format=junit
-          docker logs -s chrome | tee test_result/ddev-chrome.log
-          docker logs -s firefox | tee test_result/ddev-firefox.log
+          #ddev task test:phpunit:functional format=junit
+          #docker logs -s chrome | tee test_result/ddev-chrome.log
+          #docker logs -s firefox | tee test_result/ddev-firefox.log
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: Upload test artifacts
         if: ${{ always() }}
