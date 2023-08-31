@@ -115,10 +115,10 @@ jobs:
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
           ddev composer config --no-plugins allow-plugins.weitzman/drupal-test-traits true
-          ddev composer require lullabot/php-webdriver:dev-main --dev
           ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev composer config minimum-stability dev
+          ddev composer require lullabot/php-webdriver:dev-main --dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" weitzman/drupal-test-traits behat/mink-selenium2-driver --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
