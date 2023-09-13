@@ -1,0 +1,270 @@
+name: Test Functional Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v3
+        with:
+          path: drainpipe
+
+      - name: Setup drainpipe-dev
+        run: mv drainpipe/drainpipe-dev .
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev config --nodejs-version "18"
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
+          ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+
+      - name: Setup Nightwatch
+        run: |
+          echo "hooks:" >> .ddev/config.yaml
+          echo "  post-start:" >> .ddev/config.yaml
+          echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS firefox; GRANT ALL ON firefox.* TO 'db'@'%';\"" >> .ddev/config.yaml
+          echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO 'db'@'%';\"" >> .ddev/config.yaml
+          ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"
+          ddev config --additional-hostnames="*.drainpipe"
+
+      - name: Create Artifact
+        run: zip -r /tmp/drainpipe.zip ./
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-functional-build
+          path: /tmp/drainpipe.zip
+
+  Test-NPM:
+    runs-on: ubuntu-latest
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-functional-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Nightwatch
+        run: |
+          ddev npm init -y
+          ddev npm install nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --save-dev
+
+      - name: Install Drupal
+        run: |
+          ddev drush --yes site:install
+          ddev drush --uri=https://drupal_firefox --yes site:install
+          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev drush config:export --yes
+
+      - name: Run Functional Tests
+        run: ddev task test:functional
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_result
+          path: test_result
+
+  Test-Yarn-Classic:
+    runs-on: ubuntu-latest
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-functional-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Nightwatch
+        run: |
+          ddev yarn set version classic
+          ddev yarn init -y
+          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
+
+      - name: Install Drupal
+        run: |
+          ddev drush --yes site:install
+          ddev drush --uri=https://drupal_firefox --yes site:install
+          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev drush config:export --yes
+
+      - name: Run Functional Tests
+        run: ddev task test:functional
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_result
+          path: test_result
+
+  Test-Yarn-Berry-Node-Linker:
+    runs-on: ubuntu-latest
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-functional-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Nightwatch
+        run: |
+          ddev yarn set version berry
+          ddev yarn init -y
+          yarn config set nodeLinker node-modules
+          ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
+
+      - name: Install Drupal
+        run: |
+          ddev drush --yes site:install
+          ddev drush --uri=https://drupal_firefox --yes site:install
+          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev drush config:export --yes
+
+      - name: Run Functional Tests
+        run: ddev task test:functional
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_result
+          path: test_result
+
+  Test-Yarn-Berry:
+    runs-on: ubuntu-latest
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-functional-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Nightwatch
+        run: |
+          ddev yarn set version berry
+          ddev yarn init -y
+          echo "packageExtensions:" >> .yarnrc.yml
+          echo '  "nightwatch@*":' >> .yarnrc.yml
+          echo '    dependencies:' >> .yarnrc.yml
+          echo '      ws: "*"' >> .yarnrc.yml
+          echo '      lodash: "*"' >> .yarnrc.yml
+          ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
+          yarn
+
+      - name: Install Drupal
+        run: |
+          ddev drush --yes site:install
+          ddev drush --uri=https://drupal_firefox --yes site:install
+          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev drush config:export --yes
+
+      - name: Run Functional Tests
+        run: ddev task test:functional
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_result
+          path: test_result

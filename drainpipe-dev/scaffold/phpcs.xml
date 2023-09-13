@@ -20,6 +20,9 @@
         <exclude name="Drupal.Semantics.FunctionT.NotLiteralString"/>
     </rule>
 
+    <!-- See ADR: Use strict types in PHP code -->
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
+
     <file>web/modules/custom</file>
     <file>web/themes/custom</file>
     <file>web/sites</file>

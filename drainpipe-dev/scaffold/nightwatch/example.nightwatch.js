@@ -1,7 +1,8 @@
 module.exports = {
   'Demo test' : function(browser) {
     browser
-      .initAccessibility()
+      .axeInject()
+      .axeRun('body')
       .drupalUrl('/user')
       .assert.titleContains('Log in')
       .drush('user:login', (url) => {
