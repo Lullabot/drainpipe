@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-if (file_exists(__DIR__ . '/settings.tugboat.php') && getenv('TUGBOAT_PREVIEW_ID')) {
+if (getenv('TUGBOAT_REPO')) {
   $databases['default']['default'] = [
     'database' => 'tugboat',
     'username' => 'tugboat',
