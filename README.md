@@ -10,6 +10,7 @@ for a Drupal site, including:
 - CI integration
 ---
 * [Installation](#installation)
+* [Database Updates](#database-updates)
 * [.env support](#env-support)
 * [SASS Compilation](#sass-compilation)
 * [JavaScript Compilation](#javascript-compilation)
@@ -81,6 +82,22 @@ ln -s web/ docroot
 ```
 
 ---
+
+## Database Updates
+
+The `drupal:update` command follows the same procedure as the
+['drush deploy'](https://www.drush.org/12.x/deploycommand/) command, with the
+exception that it runs the configuration import twice as in some cases the
+import can fail due to memory exhaustion before completion.
+
+```
+drush updatedb --no-cache-clear
+drush cache:rebuild
+drush config:import || true
+drush config:import
+drush cache:rebuild
+drush deploy:hook
+```
 
 ## .env support
 Drainpipe will add `.env` file support for managing environment variables.
@@ -196,7 +213,7 @@ All the below static code analysis tests can be run with `task test:static`
 `phpcs.xml` can be altered using Drupal's
 [composer scaffold](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4).
 
-- Edit `phpcs.xml` in the root of your project, e.g. to an exclude pattern:
+- Edit `phpcs.xml` in the root of your project, e.g. to add an exclude pattern:
   ```
   <!-- Custom excludes -->
   <exclude-pattern>web/sites/sites.php</exclude-pattern>
@@ -208,11 +225,15 @@ All the below static code analysis tests can be run with `task test:static`
 - Add the patch to `composer.json`
   ```
   "scripts": {
+        "pre-drupal-scaffold-cmd": [
+            "if [ -f \"phpcs.xml\" ]; then rm phpcs.xml; fi"
+        ],
         "post-drupal-scaffold-cmd": [
-                "patch phpcs.xml < patches/custom/phpcs.xml.patch"
+            "if [ -f \"phpcs.xml\" ]; then patch phpcs.xml < patches/custom/phpcs.xml.patch; fi"
         ]
   },
   ```
+  The pre hook is needed otherwise the composer scaffold attempts to re-patch a file it no longer has control over when running `composer install --no-dev`
 - Delete the `vendor` directory and `phpcs.xml` and then run `composer install`
   to verify everything works as expected
 
@@ -514,13 +535,14 @@ Additionally, Pantheon Terminus can be added:
 ```
 
 It is assumed the following tasks exist:
-- `build`
 - `sync`
+- `build`
+- `update`
 
-The `build` and `sync` tasks can be overridden with a `build:tugboat` and
-`sync:tugboat` task if required (you will need to re-run `composer install` to
-regenerate the Tugboat scripts if you  are adding this task to your
-`Taskfile.yml` for the first time).
+The `build`, `sync`, and `update` tasks can be overridden with `sync:tugboat`,
+`build:tugboat`, and `update:tugboat` tasks if required (you will need to re-run
+`composer install` to regenerate the Tugboat scripts if you  are adding this
+task to your `Taskfile.yml` for the first time).
 
 ```
   sync:

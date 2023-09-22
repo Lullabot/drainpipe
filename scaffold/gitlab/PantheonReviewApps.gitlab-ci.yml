@@ -18,6 +18,8 @@
     - |
       if [ "$PANTHEON_MULTIDEV_RUN_INSTALLER" == "true" ]; then
         ./vendor/bin/drush @$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --yes site:install --existing-config
+      elif ./vendor/bin/task -l | grep '* update: '; then
+        ./vendor/bin/task site=@$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID update
       else
         task site=@$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID drupal:update
       fi

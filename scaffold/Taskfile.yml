@@ -21,20 +21,6 @@ silent: true
 #    web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
 
 tasks:
-  build:
-    desc: "Builds the project for production"
-    deps: [drupal:composer:production]
-    cmds:
-      - echo "Nothing to do"
-# assets:
-#   desc: "Builds assets such as CSS & JS"
-#   cmds:
-#     - if [ -f "yarn.lock" ]; then yarn; else npm install; fi
-#     - task: javascript:compile
-#     - task: sass:compile
-# assets:watch:
-#   desc: "Builds assets such as CSS & JS, and watches them for changes"
-#   deps: [sass:watch, javascript:watch]
   sync:
     desc: "Sync a database from production and import it"
     cmds:
@@ -42,4 +28,37 @@ tasks:
       - ./vendor/bin/drush site:install -y
       - echo "🧹 Sanitising database"
       - ./vendor/bin/drush sql:sanitize --yes
+
+  build:
+    desc: "Builds the project for production"
+    deps: [drupal:composer:production]
+    cmds:
+      - echo "Nothing to do"
+      #- task: assets
+
+  build:dev:
+    desc: "Builds the project for development"
+    deps: [drupal:composer]
+    cmds:
+      - echo "Nothing to do"
+      # Ignore the below modules in sites/default/settings.php e.g.
+      # $settings['config_exclude_modules'] = ['stage_file_proxy', 'field_ui', 'views_ui'];
+      # - ./vendor/bin/drush pm:enable stage_file_proxy views_ui field_ui -y
+
+  # Drush aliases will be passed through e.g. task update site=@staging
+  update:
+    desc: "Runs the Drupal update process"
+    cmds:
+      - task: drupal:update
+
+# assets:
+#   desc: "Builds assets such as CSS & JS"
+#   cmds:
+#     - yarn install
+#     - task: javascript:compile
+#     - task: sass:compile
+#
+# assets:watch:
+#   desc: "Builds assets such as CSS & JS, and watches them for changes"
+#   deps: [sass:watch, javascript:watch]
 

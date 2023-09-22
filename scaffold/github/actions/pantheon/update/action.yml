@@ -28,6 +28,8 @@ runs:
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.${{ inputs.environment }} --yes site:install --existing-config"
+        elif drainpipe_exec "./vendor/bin/task -l | grep '* update: ')"; then
+          drainpipe_exec "./vendor/bin/task update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
         else
           drainpipe_exec "task drupal:update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
         fi
