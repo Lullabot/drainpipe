@@ -52,7 +52,7 @@ echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.co
 apt-get update
 apt-get -qq install nodejs
 # This only works for node > 16, but that version is unsupported now anyway.
-corepack enable
+#corepack enable
 
 #drainpipe-start
 # This is necessary for testing as this repository doesn't hold a Drupal site.
