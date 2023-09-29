@@ -6,5 +6,5 @@
 set -eux
 echo "Building..."
 
-{{ task_path }} build
-{{ task_path }} update
+{{ task_path }} {{ build_command }}
+{{ task_path }} {{ update_command }}
