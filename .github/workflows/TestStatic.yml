@@ -67,7 +67,7 @@ jobs:
           mkdir -p custom-yaml-directory
           echo 'key: value' >> custom-yaml-directory/test.yml
           ddev task test:static YAML_DIRS="custom-yaml-directory/*.yml" | tee static.log
-          [[ $(grep '[OK] All 1 YAML files contain valid syntax.' static.log | wc -l) -eq 1 ]]
+          [[ $(grep '\[OK] All 1 YAML files contain valid syntax.' static.log | wc -l) -eq 1 ]]
 
       - name: Upload test artifacts
         if: ${{ always() }}
