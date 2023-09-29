@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-if (file_exists(__DIR__ . '/settings.tugboat.php') && getenv('TUGBOAT_PREVIEW_ID')) {
+if (getenv('TUGBOAT_REPO')) {
   $databases['default']['default'] = [
     'database' => 'tugboat',
     'username' => 'tugboat',
@@ -28,7 +28,8 @@ if (file_exists(__DIR__ . '/settings.tugboat.php') && getenv('TUGBOAT_PREVIEW_ID
     '\.tugboatqa\.com$',
   ];
 
+  # Following https://architecture.lullabot.com/adr/20210609-environment-indicator/
   $config['environment_indicator.indicator']['name'] = '☑️ Tugboat';
-  $config['environment_indicator.indicator']['bg_color'] = '#07688c';
+  $config['environment_indicator.indicator']['bg_color'] = '#990055';
   $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
 }
