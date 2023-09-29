@@ -63,12 +63,11 @@ jobs:
 
       - name: Confirm custom directories are scanned
         run: |
+          set -x
           mkdir -p custom-yaml-directory
           echo 'key: value' >> custom-yaml-directory/test.yml
-          # Show the version in case future updates break this.
-          composer show j13k/yaml-lint
           ddev task test:static YAML_DIRS="custom-yaml-directory/*.yml" | tee static.log
-          grep -q 'parsing custom-yaml-directory/test.yml' static.log
+          [[ $(grep '[OK] All 1 YAML files contain valid syntax.' static.log | wc -l) -eq 1 ]]
 
       - name: Upload test artifacts
         if: ${{ always() }}
