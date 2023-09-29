@@ -318,6 +318,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'build_command' => 'build',
                 'update_command' => 'drupal:update',
                 'init' => [],
+                'task_path' => $this->extra['drainpipe']['global-binaries']['task'] ? 'task': './vendor/bin/task',
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
                 'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
             ];
