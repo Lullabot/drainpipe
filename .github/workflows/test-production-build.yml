@@ -74,6 +74,8 @@ jobs:
           ddev config --project-type=drupal9
           ddev start
           ddev composer install
+          # ddev won't create settings.ddev.php until settings.php exists.
+          ddev config --project-type=drupal9
           ddev restart
 
       - name: Install Drupal
