@@ -40,7 +40,7 @@ jobs:
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev composer config repositories.drainpipe --json "{\"type\": \"path\", \"url\": \"drainpipe\", \"options\": {\"symlink\": false}}"
           ddev composer config minimum-stability dev
-          cat composer.json | jq --indent 4 '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/dotenv.php"]}' | tee composer.json > /dev/null
+          cat composer.json | jq --indent 4 '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/dotenv.php"]}' | tee composer.json
           ddev composer update --lock
           ddev composer validate
           ddev composer require lullabot/drainpipe --with-all-dependencies
