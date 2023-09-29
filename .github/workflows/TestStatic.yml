@@ -61,6 +61,13 @@ jobs:
       - name: Run Static Tests
         run: ddev task test:static
 
+      - name: Confirm custom directories are scanned
+        run: |
+          mkdir -p custom-yaml-directory
+          echo 'key: value' >> custom-yaml-directory/test.yml
+          ddev task test:static YAML_DIRS="custom-yaml-directory" | tee static.log
+          grep -q 'parsing custom-yaml-directory/test.yml' static.log
+
       - name: Upload test artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
