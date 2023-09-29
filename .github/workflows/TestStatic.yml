@@ -65,7 +65,9 @@ jobs:
         run: |
           mkdir -p custom-yaml-directory
           echo 'key: value' >> custom-yaml-directory/test.yml
-          ddev task test:static YAML_DIRS="custom-yaml-directory" | tee static.log
+          # Show the version in case future updates break this.
+          composer show j13k/yaml-lint
+          ddev task test:static YAML_DIRS="custom-yaml-directory/*.yml" | tee static.log
           grep -q 'parsing custom-yaml-directory/test.yml' static.log
 
       - name: Upload test artifacts
