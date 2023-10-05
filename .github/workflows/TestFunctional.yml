@@ -249,10 +249,9 @@ jobs:
           echo '    dependencies:' >> .yarnrc.yml
           echo '      ws: "*"' >> .yarnrc.yml
           echo '      lodash: "*"' >> .yarnrc.yml
-          #ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
-          #yarn
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+          echo '      rimraf: "*"' >> .yarnrc.yml
+          ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
+          yarn
 
       - name: Install Drupal
         run: |
