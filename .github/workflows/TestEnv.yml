@@ -16,7 +16,7 @@ jobs:
         run: |
           composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: drainpipe
 
