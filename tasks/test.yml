@@ -1,15 +1,13 @@
 version: '3'
 
-# @todo allow these to be overridden or document them as required folder
-# structures. See also config/phpstan.neon
 vars:
-  YAML_DIRS: 'web/**/*.yml'
-  TWIG_DIRS: 'web/modules web/profiles web/themes'
+  YAML_DIRS: '{{ default "web/**/*.yml" .YAML_DIRS }}'
+  TWIG_DIRS: '{{ default "web/modules web/profiles web/themes" .TWIG_DIRS }}'
   # These directories are configured in phpcs.xml. However, phpcs will fail if
   # those directories do not exist, so we create them with the assumption that
   # every Drupal site will eventually have these directories.
-  TEST_DIRS: 'web/modules/custom web/themes/custom web/sites'
-  NIGHTWATCH_TEST_DIRS: 'test'
+  TEST_DIRS: '{{ default "web/modules/custom web/themes/custom web/sites" .TEST_DIRS }}'
+  NIGHTWATCH_TEST_DIRS: '{{ default "test" .NIGHTWATCH_TEST_DIRS }}'
   FUNC_ENSURE_DIRS: |
     DIRS_ARR=({{.TEST_DIRS}})
     for DIR in "${DIRS_ARR[@]}"; do

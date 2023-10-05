@@ -17,7 +17,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: drainpipe
 
@@ -61,9 +61,17 @@ jobs:
       - name: Run Static Tests
         run: ddev task test:static
 
+      - name: Confirm custom directories are scanned
+        run: |
+          set -x
+          mkdir -p custom-yaml-directory
+          echo 'key: value' >> custom-yaml-directory/test.yml
+          ddev task test:static YAML_DIRS="custom-yaml-directory/*.yml" | tee static.log
+          [[ $(grep '\[OK] All 1 YAML files contain valid syntax.' static.log | wc -l) -eq 1 ]]
+
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test_result
           path: test_result
