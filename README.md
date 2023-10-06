@@ -57,7 +57,7 @@ ddev restart
 ```
 
 This will scaffold out various files, most importantly a `Taskfile.yml` in the
-root of your repository. [https://taskfile.dev/](Task) is a task runner / build tool that aims to be
+root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool that aims to be
 simpler and easier to use than, for example, GNU Make. Since it's written in Go,
 Task is just a single binary and has no other dependencies. It's also
 cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
