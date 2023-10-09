@@ -1,7 +1,0 @@
-name: Test Submodule
-type: module
-description: Example DTTs
-core_version_requirement: ^9
-dependencies:
-  - node:node
-  - filter:filter
