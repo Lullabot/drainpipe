@@ -37,6 +37,7 @@ echo '  "nightwatch@*":' >> .yarnrc.yml
 echo '    dependencies:' >> .yarnrc.yml
 echo '      ws: "*"' >> .yarnrc.yml
 echo '      lodash: "*"' >> .yarnrc.yml
+echo '      rimraf: "*"' >> .yarnrc.yml
 ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
 yarn
 
