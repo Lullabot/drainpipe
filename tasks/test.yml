@@ -40,8 +40,7 @@ tasks:
         else
           ./vendor/bin/local-php-security-checker
         fi
-      # JUnit output blocked on https://github.com/drush-ops/drush/issues/4817
-      - ./vendor/bin/drush pm:security
+      - composer audit
   lint:
     desc: Runs lint on composer, YAML, and Twig files
     # @todo JUnit output
