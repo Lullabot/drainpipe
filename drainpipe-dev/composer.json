@@ -18,7 +18,7 @@
         "mikey179/vfsstream": "^1.6",
         "mockery/mockery": "^1.4",
         "behat/mink": "^1.8",
-        "symfony/phpunit-bridge": "^5.3",
+        "symfony/phpunit-bridge": "^5.3|^6.3",
         "lullabot/drainpipe": "*",
         "mglaman/phpstan-drupal": "^1.0.3",
         "symfony/yaml": "^4|^5|^6",
