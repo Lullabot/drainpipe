@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   Build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
@@ -68,7 +68,7 @@ jobs:
           path: /tmp/drainpipe.zip
 
   Test-NPM:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3
@@ -116,7 +116,7 @@ jobs:
           path: test_result
 
   Test-Yarn-Classic:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3
@@ -165,7 +165,7 @@ jobs:
           path: test_result
 
   Test-Yarn-Berry-Node-Linker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3
@@ -215,7 +215,7 @@ jobs:
           path: test_result
 
   Test-Yarn-Berry:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3

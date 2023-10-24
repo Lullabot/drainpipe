@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   Test-Composer-Lock-Diff:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project:10.0.9 . --ignore-platform-req=ext-gd
