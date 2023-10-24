@@ -221,6 +221,7 @@ tasks:
             yarn add $PACKAGES lodash --dev
           elif [ "$PACKAGE_MANAGER" == "yarn" ]; then
             yarn set version berry
+            yarn set version 3
             yarn init
             echo "packageExtensions:" >> .yarnrc.yml
             echo '  "nightwatch@*":' >> .yarnrc.yml

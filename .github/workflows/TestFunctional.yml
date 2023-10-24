@@ -192,6 +192,7 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
+          ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
           yarn config set nodeLinker node-modules
@@ -242,6 +243,7 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
+          ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
           echo "packageExtensions:" >> .yarnrc.yml
