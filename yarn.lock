@@ -865,7 +865,7 @@ __metadata:
     "@yarnpkg/esbuild-plugin-pnp": ^3.0.0-rc.2
     chokidar: ^3.5.3
     esbuild: ^0.14.36
-    yargs: ^17.4.1
+    yargs: ^17.7.2
   bin:
     drainpipe-javascript: ./esbuild.js
   languageName: unknown
@@ -885,7 +885,7 @@ __metadata:
     modern-normalize: ^1.1.0
     postcss: ^8.4.31
     sass: ^1.62.0
-    yargs: ^17.7.1
+    yargs: ^17.7.2
   bin:
     drainpipe-sass: ./gulp.js
   languageName: unknown
@@ -9482,7 +9482,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"yargs@npm:^17.4.1, yargs@npm:^17.7.1":
+"yargs@npm:^17.7.2":
   version: 17.7.2
   resolution: "yargs@npm:17.7.2"
   dependencies:
