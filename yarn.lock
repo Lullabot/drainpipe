@@ -883,7 +883,7 @@ __metadata:
     gulp-sass-glob: ^1.1.0
     gulp-sourcemaps: ^3.0.0
     modern-normalize: ^1.1.0
-    postcss: ^8.4.21
+    postcss: ^8.4.31
     sass: ^1.62.0
     yargs: ^17.7.1
   bin:
@@ -7340,7 +7340,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.21":
+"postcss@npm:^8.4.31":
   version: 8.4.31
   resolution: "postcss@npm:8.4.31"
   dependencies:
