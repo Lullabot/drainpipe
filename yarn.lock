@@ -876,7 +876,7 @@ __metadata:
   resolution: "@lullabot/drainpipe-sass@workspace:metapackages/sass"
   dependencies:
     autoprefixer: ^10.4.4
-    cssnano: ^6.0.0
+    cssnano: ^6.0.1
     gulp: ^4.0.2
     gulp-postcss: ^9.0.1
     gulp-sass: ^5.1.0
@@ -2654,7 +2654,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cssnano@npm:^6.0.0":
+"cssnano@npm:^6.0.1":
   version: 6.0.1
   resolution: "cssnano@npm:6.0.1"
   dependencies:
