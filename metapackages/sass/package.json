@@ -13,7 +13,7 @@
     "modern-normalize": "^1.1.0",
     "postcss": "^8.4.31",
     "sass": "^1.62.0",
-    "yargs": "^17.7.1"
+    "yargs": "^17.7.2"
   },
   "repository": {
     "type": "git",
