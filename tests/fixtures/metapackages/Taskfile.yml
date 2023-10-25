@@ -4,6 +4,7 @@ dotenv: ['.env', '.env.defaults']
 
 includes:
   sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
+  javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
 
 output: prefixed
 silent: true
@@ -11,10 +12,16 @@ silent: true
 vars:
   DRAINPIPE_SASS: |
     style.scss:style.css
+  DRAINPIPE_JAVASCRIPT: |
+    script.js:script.min.js
 
 tasks:
-  assets:
+  sass:
     desc: "Builds assets such as CSS & JS"
     cmds:
-      - if [ -f "yarn.lock" ]; then yarn; else npm install; fi
       - task: sass:compile
+
+  javascript:
+    desc: "Builds assets such as CSS & JS"
+    cmds:
+      - task: javascript:compile

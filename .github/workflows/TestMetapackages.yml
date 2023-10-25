@@ -1,4 +1,4 @@
-name: Test Sass Compilation
+name: Test Sass and JavaScript Compilation
 on:
   push:
     branches:
@@ -51,8 +51,10 @@ jobs:
 
       - name: Setup Test Files
         run: |
-          cp drainpipe/tests/fixtures/sass/Taskfile.yml .
-          cp drainpipe/tests/fixtures/sass/style.scss .
+          cp drainpipe/tests/fixtures/metapackages/Taskfile.yml .
+          cp drainpipe/tests/fixtures/metapackages/style.scss .
+          cp -R drainpipe/tests/fixtures/metapackages/js .
+          cp drainpipe/tests/fixtures/metapackages/script.js .
 
       - name: Create Artifact
         run: zip -r /tmp/drainpipe.zip ./
@@ -60,7 +62,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: test-sass-build
+          name: test-metapackage-build
           path: /tmp/drainpipe.zip
 
   Test-Sass-NPM:
@@ -69,7 +71,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
         with:
-          name: test-sass-build
+          name: test-metapackage-build
 
       - name: Restore Workspace
         run: |
@@ -95,15 +97,15 @@ jobs:
           ddev npm install drainpipe/metapackages/sass --save-dev
 
       - name: Compile Sass
-        run: ddev task assets
+        run: ddev task sass
 
-  Test-Yarn-Classic:
+  Test-Sass-Yarn-Classic:
     runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3
         with:
-          name: test-sass-build
+          name: test-metapackage-build
 
       - name: Restore Workspace
         run: |
@@ -130,15 +132,15 @@ jobs:
           ddev yarn add file:./drainpipe/metapackages/sass --dev
 
       - name: Compile Sass
-        run: ddev task assets
+        run: ddev task sass
 
-  Test-Yarn-Berry:
+  Test-Sass-Yarn-Berry:
      runs-on: ubuntu-22.04
      needs: Build
      steps:
        - uses: actions/download-artifact@v3
          with:
-           name: test-sass-build
+           name: test-metapackage-build
 
        - name: Restore Workspace
          run: |
@@ -166,4 +168,112 @@ jobs:
            ddev yarn add ./drainpipe/metapackages/sass --dev
 
        - name: Compile Sass
-         run: ddev task assets
+         run: ddev task sass
+
+  Test-JavaScript-NPM:
+    runs-on: ubuntu-22.04
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-metapackage-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Sass
+        run: |
+          ddev npm init -y
+          ddev npm install focus-trap@^6.7.3
+          ddev npm install drainpipe/metapackages/javascript --save-dev
+
+      - name: Compile JavaScript
+        run: ddev task javascript
+
+  Test-JavaScript-Yarn-Classic:
+    runs-on: ubuntu-22.04
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-metapackage-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Sass
+        run: |
+          ddev yarn set version classic
+          ddev yarn init -y
+          ddev yarn add focus-trap@^6.7.3
+          ddev yarn add file:./drainpipe/metapackages/javascript --dev
+
+      - name: Compile JavaScript
+        run: ddev task javascript
+
+  Test-JavaScript-Yarn-Berry:
+    runs-on: ubuntu-22.04
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-metapackage-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Sass
+        run: |
+          ddev yarn set version berry
+          ddev yarn set version 3
+          ddev yarn init -y
+          ddev yarn add focus-trap@^6.7.3
+          ddev yarn add ./drainpipe/metapackages/javascript --dev
+
+      - name: Compile JavaScript
+        run: ddev task javascript
