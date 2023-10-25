@@ -31,6 +31,7 @@ ddev config --additional-hostnames="*.drainpipe"
 ddev restart
 
 ddev yarn set version berry
+ddev yarn set version 3
 ddev yarn init -y
 echo "packageExtensions:" >> .yarnrc.yml
 echo '  "nightwatch@*":' >> .yarnrc.yml
