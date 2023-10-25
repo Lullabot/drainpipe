@@ -127,7 +127,7 @@ jobs:
         run: |
           ddev yarn set version classic
           ddev yarn init -y
-          ddev yarn add drainpipe/metapackages/sass --dev
+          ddev yarn add file:./drainpipe/metapackages/sass --dev
 
       - name: Compile Sass
         run: ddev task assets
@@ -163,7 +163,7 @@ jobs:
            ddev yarn set version berry
            ddev yarn set version 3
            ddev yarn init -y
-           ddev yarn add drainpipe/metapackages/sass --dev
+           ddev yarn add file:./drainpipe/metapackages/sass --dev
 
        - name: Compile Sass
          run: ddev task assets
