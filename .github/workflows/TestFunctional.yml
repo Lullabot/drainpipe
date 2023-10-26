@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   Build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
@@ -68,7 +68,7 @@ jobs:
           path: /tmp/drainpipe.zip
 
   Test-NPM:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3
@@ -116,7 +116,7 @@ jobs:
           path: test_result
 
   Test-Yarn-Classic:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3
@@ -164,8 +164,8 @@ jobs:
           name: test_result
           path: test_result
 
-  Test-Yarn-Berry-Node-Linker:
-    runs-on: ubuntu-latest
+  Test-Yarn-3-Node-Linker:
+    runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3
@@ -193,6 +193,7 @@ jobs:
       - name: Setup Nightwatch
         run: |
           ddev yarn set version berry
+          ddev yarn set version 3
           ddev yarn init -y
           yarn config set nodeLinker node-modules
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
@@ -214,8 +215,8 @@ jobs:
           name: test_result
           path: test_result
 
-  Test-Yarn-Berry:
-    runs-on: ubuntu-latest
+  Test-Yarn-3:
+    runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3
@@ -243,6 +244,7 @@ jobs:
       - name: Setup Nightwatch
         run: |
           ddev yarn set version berry
+          ddev yarn set version 3
           ddev yarn init -y
           echo "packageExtensions:" >> .yarnrc.yml
           echo '  "nightwatch@*":' >> .yarnrc.yml

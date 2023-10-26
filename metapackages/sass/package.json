@@ -3,17 +3,17 @@
   "version": "0.1.0",
   "bin": "./gulp.js",
   "dependencies": {
-    "autoprefixer": "^10.4.4",
-    "cssnano": "^6.0.0",
+    "autoprefixer": "^10.4.16",
+    "cssnano": "^6.0.1",
     "gulp": "^4.0.2",
     "gulp-postcss": "^9.0.1",
     "gulp-sass": "^5.1.0",
     "gulp-sass-glob": "^1.1.0",
     "gulp-sourcemaps": "^3.0.0",
     "modern-normalize": "^1.1.0",
-    "postcss": "^8.4.21",
-    "sass": "^1.62.0",
-    "yargs": "^17.7.1"
+    "postcss": "^8.4.31",
+    "sass": "^1.69.4",
+    "yargs": "^17.7.2"
   },
   "repository": {
     "type": "git",

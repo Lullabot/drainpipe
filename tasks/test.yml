@@ -40,8 +40,7 @@ tasks:
         else
           local-php-security-checker
         fi
-      # JUnit output blocked on https://github.com/drush-ops/drush/issues/4817
-      - ./vendor/bin/drush pm:security
+      - composer audit
   lint:
     desc: Runs lint on composer, YAML, and Twig files
     # @todo JUnit output
@@ -222,6 +221,7 @@ tasks:
             yarn add $PACKAGES lodash --dev
           elif [ "$PACKAGE_MANAGER" == "yarn" ]; then
             yarn set version berry
+            yarn set version 3
             yarn init
             echo "packageExtensions:" >> .yarnrc.yml
             echo '  "nightwatch@*":' >> .yarnrc.yml

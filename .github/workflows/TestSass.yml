@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   Build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
@@ -64,7 +64,7 @@ jobs:
           path: /tmp/drainpipe.zip
 
   Test-Sass-NPM:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3
@@ -98,7 +98,7 @@ jobs:
         run: ddev task assets
 
   Test-Yarn-Classic:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Build
     steps:
       - uses: actions/download-artifact@v3
@@ -133,7 +133,7 @@ jobs:
         run: ddev task assets
 
   Test-Yarn-Berry:
-     runs-on: ubuntu-latest
+     runs-on: ubuntu-22.04
      needs: Build
      steps:
        - uses: actions/download-artifact@v3
@@ -161,6 +161,7 @@ jobs:
        - name: Setup Sass
          run: |
            ddev yarn set version berry
+           ddev yarn set version 3
            ddev yarn init -y
            ddev yarn add @lullabot/drainpipe-sass --dev
 
