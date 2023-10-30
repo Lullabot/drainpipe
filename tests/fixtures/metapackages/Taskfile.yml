@@ -13,7 +13,7 @@ vars:
   DRAINPIPE_SASS: |
     style.scss:style.css
   DRAINPIPE_JAVASCRIPT: |
-    script.js:script.min.js
+    js/script.js:js/script.min.js
 
 tasks:
   sass:
