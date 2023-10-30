@@ -1007,7 +1007,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["gulp-sass", "npm:5.1.0"],\
             ["gulp-sass-glob", "npm:1.1.0"],\
             ["gulp-sourcemaps", "npm:3.0.0"],\
-            ["modern-normalize", "npm:1.1.0"],\
+            ["modern-normalize", "npm:2.0.0"],\
             ["postcss", "npm:8.4.31"],\
             ["sass", "npm:1.69.5"],\
             ["yargs", "npm:17.7.2"]\
@@ -6648,10 +6648,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["modern-normalize", [\
-        ["npm:1.1.0", {\
-          "packageLocation": "./.yarn/cache/modern-normalize-npm-1.1.0-8b51a7106b-edfd40650b.zip/node_modules/modern-normalize/",\
+        ["npm:2.0.0", {\
+          "packageLocation": "./.yarn/cache/modern-normalize-npm-2.0.0-51ed5415d4-866690696e.zip/node_modules/modern-normalize/",\
           "packageDependencies": [\
-            ["modern-normalize", "npm:1.1.0"]\
+            ["modern-normalize", "npm:2.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\

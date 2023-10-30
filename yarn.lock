@@ -882,7 +882,7 @@ __metadata:
     gulp-sass: ^5.1.0
     gulp-sass-glob: ^1.1.0
     gulp-sourcemaps: ^3.0.0
-    modern-normalize: ^1.1.0
+    modern-normalize: ^2.0.0
     postcss: ^8.4.31
     sass: ^1.69.5
     yargs: ^17.7.2
@@ -5906,10 +5906,10 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"modern-normalize@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "modern-normalize@npm:1.1.0"
-  checksum: edfd40650bd7250eb4761651886a02ca3c524effca41b9832932eab9ccf9f2cfa7e5da8491c7c8bc2d58e1696e5e765adebeaf90cd9d3376444bd6bc0b0f2c99
+"modern-normalize@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "modern-normalize@npm:2.0.0"
+  checksum: 866690696e1989c57416e7d9c589910bbd02221fb1b2bac0ea735e5a22e0525e9bec67269571c3eaa0de879938d5447c88dc0749675b349c61d6753038730330
   languageName: node
   linkType: hard
 
