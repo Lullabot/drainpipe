@@ -54,7 +54,6 @@ jobs:
           cp drainpipe/tests/fixtures/metapackages/Taskfile.yml .
           cp drainpipe/tests/fixtures/metapackages/style.scss .
           cp -R drainpipe/tests/fixtures/metapackages/js .
-          cp drainpipe/tests/fixtures/metapackages/script.js .
 
       - name: Create Artifact
         run: zip -r /tmp/drainpipe.zip ./
