@@ -30,7 +30,7 @@ tasks:
         fi
         FILES="{{if .DRAINPIPE_JAVASCRIPT}}{{.DRAINPIPE_JAVASCRIPT | catLines | trim}}{{end}}"
         COMMAND="node ./node_modules/.bin/drainpipe-javascript"
-        if [ -f "yarn.lock" ]; then
+        if [ -f "yarn.lock" ] && [ ! -d "node_modules" ]; then
           COMMAND="yarn drainpipe-javascript"
         fi
         echo "$COMMAND drainpipe-javascript --files=\"$FILES\" $ARGS"
