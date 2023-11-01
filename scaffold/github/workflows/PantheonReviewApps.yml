@@ -57,6 +57,12 @@ jobs:
           directory: /tmp/release
         run: |
           composer install
+          # Task is installed globally, not via composer.
+          if [ ! -f vendor/bin/task ]; then
+            .ddev/web-build/install-task.sh -b /usr/local/bin -d v3.24.0
+          fi
+          # This is a problem because if global binaries are enabled composer install
+          # won't add task
           task build
           task snapshot:directory directory=/tmp/release
 

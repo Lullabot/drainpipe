@@ -9,6 +9,11 @@
       else
         terminus multidev:create $PANTHEON_SITE_NAME.dev mr-$CI_MERGE_REQUEST_IID --yes
       fi
+    - |
+      # Task is installed globally, not via composer.
+      if [ ! -f vendor/bin/task ]; then
+        .ddev/web-build/install-task.sh -b /usr/local/bin -d v3.24.0
+      fi
     - task build
     - task snapshot:directory
     - task deploy:git
