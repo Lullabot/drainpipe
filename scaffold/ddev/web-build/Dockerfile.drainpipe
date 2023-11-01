@@ -1,7 +1,7 @@
 COPY install-task.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/install-task.sh
 # Also update .github/workflows/ValidateTaskfile.yml if changing version.
-RUN install-task.sh -b /usr/local/bin -d v3.24.0
+RUN install-task.sh -b /usr/local/bin -d v3.28.0
 
 COPY install-local-php-security-checker.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/install-local-php-security-checker.sh
