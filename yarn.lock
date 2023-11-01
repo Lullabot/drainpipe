@@ -882,9 +882,9 @@ __metadata:
     gulp-sass: ^5.1.0
     gulp-sass-glob: ^1.1.0
     gulp-sourcemaps: ^3.0.0
-    modern-normalize: ^1.1.0
+    modern-normalize: ^2.0.0
     postcss: ^8.4.31
-    sass: ^1.69.4
+    sass: ^1.69.5
     yargs: ^17.7.2
   bin:
     drainpipe-sass: ./gulp.js
@@ -5906,10 +5906,10 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"modern-normalize@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "modern-normalize@npm:1.1.0"
-  checksum: edfd40650bd7250eb4761651886a02ca3c524effca41b9832932eab9ccf9f2cfa7e5da8491c7c8bc2d58e1696e5e765adebeaf90cd9d3376444bd6bc0b0f2c99
+"modern-normalize@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "modern-normalize@npm:2.0.0"
+  checksum: 866690696e1989c57416e7d9c589910bbd02221fb1b2bac0ea735e5a22e0525e9bec67269571c3eaa0de879938d5447c88dc0749675b349c61d6753038730330
   languageName: node
   linkType: hard
 
@@ -7971,16 +7971,16 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"sass@npm:^1.69.4":
-  version: 1.69.4
-  resolution: "sass@npm:1.69.4"
+"sass@npm:^1.69.5":
+  version: 1.69.5
+  resolution: "sass@npm:1.69.5"
   dependencies:
     chokidar: ">=3.0.0 <4.0.0"
     immutable: ^4.0.0
     source-map-js: ">=0.6.2 <2.0.0"
   bin:
     sass: sass.js
-  checksum: ed5558445b59dfa711e094f804e4a360544dd916c069ee211e1c687446146721d91d4304f33fe5df3966a10de96eba43369beb2e14f0881c285424e5e44cf360
+  checksum: c66f4f02882e7aa7aa49703824dadbb5a174dcd05e3cd96f17f73687889aab6027d078b518e2c04b594dfd89b2f574824bf935c7aee46c770aa6be9aafcc49f2
   languageName: node
   linkType: hard
 

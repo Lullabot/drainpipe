@@ -10,9 +10,9 @@
     "gulp-sass": "^5.1.0",
     "gulp-sass-glob": "^1.1.0",
     "gulp-sourcemaps": "^3.0.0",
-    "modern-normalize": "^1.1.0",
+    "modern-normalize": "^2.0.0",
     "postcss": "^8.4.31",
-    "sass": "^1.69.4",
+    "sass": "^1.69.5",
     "yargs": "^17.7.2"
   },
   "repository": {

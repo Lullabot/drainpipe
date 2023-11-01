@@ -1007,9 +1007,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["gulp-sass", "npm:5.1.0"],\
             ["gulp-sass-glob", "npm:1.1.0"],\
             ["gulp-sourcemaps", "npm:3.0.0"],\
-            ["modern-normalize", "npm:1.1.0"],\
+            ["modern-normalize", "npm:2.0.0"],\
             ["postcss", "npm:8.4.31"],\
-            ["sass", "npm:1.69.4"],\
+            ["sass", "npm:1.69.5"],\
             ["yargs", "npm:17.7.2"]\
           ],\
           "linkType": "SOFT"\
@@ -6648,10 +6648,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["modern-normalize", [\
-        ["npm:1.1.0", {\
-          "packageLocation": "./.yarn/cache/modern-normalize-npm-1.1.0-8b51a7106b-edfd40650b.zip/node_modules/modern-normalize/",\
+        ["npm:2.0.0", {\
+          "packageLocation": "./.yarn/cache/modern-normalize-npm-2.0.0-51ed5415d4-866690696e.zip/node_modules/modern-normalize/",\
           "packageDependencies": [\
-            ["modern-normalize", "npm:1.1.0"]\
+            ["modern-normalize", "npm:2.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -9226,10 +9226,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["sass", [\
-        ["npm:1.69.4", {\
-          "packageLocation": "./.yarn/cache/sass-npm-1.69.4-bea57e4b30-ed5558445b.zip/node_modules/sass/",\
+        ["npm:1.69.5", {\
+          "packageLocation": "./.yarn/cache/sass-npm-1.69.5-3f0210c9f9-c66f4f0288.zip/node_modules/sass/",\
           "packageDependencies": [\
-            ["sass", "npm:1.69.4"],\
+            ["sass", "npm:1.69.5"],\
             ["chokidar", "npm:3.5.2"],\
             ["immutable", "npm:4.0.0"],\
             ["source-map-js", "npm:1.0.2"]\
