@@ -39,6 +39,7 @@ build:
       ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
     - ddev composer config minimum-stability dev
     - ddev composer require lullabot/drainpipe --with-all-dependencies
+    - ddev restart
     - ddev drush site:install minimal -y
     - echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
     - ddev drush config:export -y
