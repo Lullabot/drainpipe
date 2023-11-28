@@ -10,7 +10,7 @@ build:
   interruptible: true
   script:
     - sudo apt update
-    - sudo apt install php-cli unzip
+    - sudo apt install php-cli unzip -y
     - curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
     - |
       HASH=`curl -sS https://composer.github.io/installer.sig`
