@@ -1,4 +1,5 @@
-image: ghcr.io/catthehacker/ubuntu:runner-22.04
+include:
+  - local: 'scaffold/gitlab/DDEV.gitlab-ci.yml'
 
 variables:
   DRAINPIPE_DDEV_GIT_EMAIL: drainpipe-bot@lullabot.com
