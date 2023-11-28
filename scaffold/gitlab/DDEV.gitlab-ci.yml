@@ -16,7 +16,7 @@ variables:
 
 .drainpipe_setup_ddev:
   script:
-    - sudo chown -R runner:runner /builds/stacks-solutions/wof
+    - sudo chown -R runner:runner $CI_PROJECT_DIR
     - curl -fsSL https://ddev.com/install.sh | bash
     - ddev config global --no-bind-mounts
     - ddev start
