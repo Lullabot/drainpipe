@@ -1,0 +1,27 @@
+default:
+  image: ghcr.io/catthehacker/ubuntu:runner-22.04
+  services:
+    - name: docker:dind
+      alias: docker
+
+variables:
+  DRAINPIPE_DDEV_SSH_PRIVATE_KEY:
+  DRAINPIPE_DDEV_SSH_KNOWN_HOSTS:
+  DRAINPIPE_DDEV_GIT_EMAIL:
+  DRAINPIPE_DDEV_GIT_NAME:
+  DRAINPIPE_DDEV_COMPOSER_CACHE_DIR:
+  DRAINPIPE_DDEV_VERSION:
+  DOCKER_HOST: "tcp://docker:2375"
+  FF_NETWORK_PER_BUILD: 1
+
+.drainpipe_setup_ddev:
+  script:
+    - sudo chown -R runner:runner /builds/stacks-solutions/wof
+    - curl -fsSL https://ddev.com/install.sh | bash
+    - ddev config global --no-bind-mounts
+    - ddev start
+    - ddev debug fix-commands
+    - ddev describe
+    # Copy git credentials
+    - ddev exec "git config --global user.name \"$DRAINPIPE_DDEV_GIT_NAME\""
+    - ddev exec "git config --global user.email \"$DRAINPIPE_DDEV_GIT_EMAIL\""

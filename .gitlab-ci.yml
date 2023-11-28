@@ -1,0 +1,32 @@
+include:
+  - local: 'scaffold/DDEV.gitlab-ci.yml'
+
+variables:
+  DRAINPIPE_DDEV_GIT_EMAIL: drainpipe-bot@lullabot.com
+  DRAINPIPE_DDEV_GIT_NAME: Drainpipe Bot
+
+build:
+  stage: build
+  interruptible: true
+  script:
+    - mkdir drainpipe
+    - find . -maxdepth 1 -type f ! -name "drainpipe" -exec mv -t drainpipe {} +
+    - mv drainpipe /tmp/drainpipe
+    - composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+    - mv /tmp/drainpipe .
+    - !reference [.drainpipe_setup_ddev, script]
+    - ddev config --auto
+    - ddev start
+    - ddev composer config extra.drupal-scaffold.gitignore true
+    - ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+    - ddev composer config --no-plugins allow-plugins.composer/installers true
+    - ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+    - ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+    - |
+      ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+    - ddev composer config minimum-stability dev
+    - ddev composer require lullabot/drainpipe --with-all-dependencies
+    - ddev drush site:install minimal -y
+    - echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+    - ddev drush config:export -y
+    - ddev task update
