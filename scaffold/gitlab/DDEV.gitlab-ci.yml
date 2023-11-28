@@ -19,7 +19,7 @@ variables:
     - sudo chown -R runner:runner $CI_PROJECT_DIR
     - curl -fsSL https://ddev.com/install.sh | bash
     - ddev config global --no-bind-mounts
-    - if [ ! -f ".ddev/config.yaml" ]; then; ddev config --auto; fi
+    - if [ ! -f ".ddev/config.yaml" ]; then ddev config --auto; fi
     - ddev start
     - ddev describe
     # Copy git credentials
