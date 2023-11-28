@@ -29,7 +29,6 @@ build:
   script:
     - !reference [.drainpipe_setup_drupal, script]
     - !reference [.drainpipe_setup_ddev, script]
-    - ddev config --auto
     - ddev start
     - ddev composer config extra.drupal-scaffold.gitignore true
     - ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]

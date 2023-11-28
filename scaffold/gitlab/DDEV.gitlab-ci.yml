@@ -19,8 +19,8 @@ variables:
     - sudo chown -R runner:runner $CI_PROJECT_DIR
     - curl -fsSL https://ddev.com/install.sh | bash
     - ddev config global --no-bind-mounts
+    - if [ ! -f ".ddev/config.yaml" ]; then; ddev config --auto; fi
     - ddev start
-    - ddev debug fix-commands
     - ddev describe
     # Copy git credentials
     - ddev exec "git config --global user.name \"$DRAINPIPE_DDEV_GIT_NAME\""
