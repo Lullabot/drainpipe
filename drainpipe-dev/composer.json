@@ -20,7 +20,7 @@
         "behat/mink": "^1.10.0",
         "symfony/phpunit-bridge": "^5.3|^6.3",
         "lullabot/drainpipe": "*",
-        "mglaman/phpstan-drupal": "^1.2.1",
+        "mglaman/phpstan-drupal": "^1.2.4",
         "symfony/yaml": "^4|^5|^6",
         "drupal/coder": "^8.3.22",
         "behat/mink-browserkit-driver": "^2.1.0",
