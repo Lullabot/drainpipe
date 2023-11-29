@@ -1,4 +1,47 @@
+include:
+  - local: 'scaffold/gitlab/DDEV.gitlab-ci.yml'
+
+variables:
+  DRAINPIPE_DDEV_GIT_EMAIL: drainpipe-bot@lullabot.com
+  DRAINPIPE_DDEV_GIT_NAME: Drainpipe Bot
+
+.drainpipe_setup_drupal:
+  script:
+    - sudo apt update
+    - sudo apt install php-cli unzip -y
+    - curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
+    - |
+      HASH=`curl -sS https://composer.github.io/installer.sig`
+      php -r "if (hash_file('SHA384', '/tmp/composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('/tmp/composer-setup.php'); } echo PHP_EOL;"
+    - sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    - mkdir drainpipe
+    - |
+      shopt -s extglob
+      shopt -s dotglob
+      mv !(drainpipe) drainpipe/
+    - mv drainpipe /tmp/drainpipe
+    - composer create-project drupal/recommended-project . --ignore-platform-reqs
+    - mv /tmp/drainpipe .
+
 build:
   stage: build
+  interruptible: true
   script:
-    - echo "Hello, $GITLAB_USER_LOGIN!1!"
+    - !reference [.drainpipe_setup_drupal, script]
+    - !reference [.drainpipe_setup_ddev, script]
+    - ddev composer config extra.drupal-scaffold.gitignore true
+    - ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+    - ddev composer config --json extra.drainpipe.gitlab \[]
+    - ddev composer config --no-plugins allow-plugins.composer/installers true
+    - ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+    - ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+    - |
+      ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+    - ddev composer config minimum-stability dev
+    - ddev composer require lullabot/drainpipe --with-all-dependencies
+    - ddev restart
+    - test -f .gitlab/drainpipe/DDEV.gitlab-ci.yml
+    - ddev drush site:install minimal -y
+    - echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+    - ddev drush config:export -y
+    - ddev task update
