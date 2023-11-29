@@ -225,8 +225,14 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $fs->removeDirectory('./.drainpipe/gitlab');
         if (isset($this->extra['drainpipe']['gitlab']) && is_array($this->extra['drainpipe']['gitlab'])) {
             $fs->ensureDirectoryExists('./.drainpipe/gitlab');
-            $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
-            $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
+            if (file_exists('./.ddev/config.yaml')) {
+                $fs->copy("$scaffoldPath/gitlab/DDEV.gitlab-ci.yml", ".drainpipe/gitlab/DDEV.gitlab-ci.yml");
+                $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/DDEV.gitlab-ci.yml installed");
+            }
+            else {
+                $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
+                $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
+            }
             foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
                 $file = "gitlab/$gitlab.gitlab-ci.yml";
                 if (file_exists("$scaffoldPath/$file")) {
