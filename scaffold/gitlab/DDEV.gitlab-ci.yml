@@ -14,6 +14,14 @@ variables:
   DOCKER_HOST: "tcp://docker:2375"
   FF_NETWORK_PER_BUILD: 1
 
+cache:
+  - key:
+      files:
+        - composer.lock
+        - composer.json
+    paths:
+      - .ddev/.drainpipe-composer-cache
+
 .drainpipe_setup_ddev:
   script:
     - sudo chown -R runner:runner $CI_PROJECT_DIR
