@@ -45,8 +45,8 @@ runs:
 
         # Disable strict host key checking for Pantheon as ssh-keyscan will not
         # return a stable response.
-        if [ -f "pantheon.yml"]; then
-          echo -e "Host *.drush.in\\n\\tStrictHostKeyChecking no\\n\tLogLevel ERROR\\n" >> ~/.ssh/config
+        if [ -f "pantheon.yml" ]; then
+          echo -e "Host *.drush.in\\n\\tStrictHostKeyChecking no\\n\tLogLevel ERROR\\n" >> .ddev/homeadditions/.ssh/config
         fi
 
         chmod 600 .ddev/homeadditions/.ssh/config
