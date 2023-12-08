@@ -252,11 +252,10 @@ jobs:
           echo '      ws: "*"' >> .yarnrc.yml
           echo '      lodash: "*"' >> .yarnrc.yml
           echo '      rimraf: "*"' >> .yarnrc.yml
-          echo '      nightwatch-axe-verbose: "*"' >> .yarnrc.yml
           echo '  "@nightwatch/vrt@*":' >> .yarnrc.yml
           echo '    dependencies:' >> .yarnrc.yml
           echo '      open: "^8"' >> .yarnrc.yml
-          ddev yarn add nightwatch @nightwatch/vrt @lullabot/nightwatch-drupal-commands --dev
+          ddev yarn add nightwatch nightwatch-axe-verbose @nightwatch/vrt @lullabot/nightwatch-drupal-commands --dev
           yarn
 
       - name: Install Drupal
