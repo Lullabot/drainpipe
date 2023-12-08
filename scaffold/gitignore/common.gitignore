@@ -55,3 +55,6 @@ node_modules
 #########
 test_result
 .prettiercache
+vrt-report
+test/nightwatch/vrt/latest
+test/nightwatch/vrt/diff
