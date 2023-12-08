@@ -228,6 +228,7 @@ tasks:
             echo '    dependencies:' >> .yarnrc.yml
             echo '      ws: "*"' >> .yarnrc.yml
             echo '      lodash: "*"' >> .yarnrc.yml
+            echo '      nightwatch-axe-verbose: "*"' >> .yarnrc.yml
             echo '  "@nightwatch/vrt@*":' >> .yarnrc.yml
             echo '    dependencies:' >> .yarnrc.yml
             echo '      open: "^8"' >> .yarnrc.yml
