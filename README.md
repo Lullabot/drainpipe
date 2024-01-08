@@ -452,7 +452,40 @@ Add the following to `composer.json` for GitLab helpers:
 
 This will import [`scaffold/gitlab/Common.gitlab-ci.yml`](scaffold/gitlab/Common.gitlab-ci.yml),
 which provides helpers that can be used in GitLab CI with [includes and
-references](https://docs.gitlab.com/ee/ci/yaml/yaml_specific_features.html#reference-tags).
+references](https://docs.gitlab.com/ee/ci/yaml/yaml_specific_features.html#reference-tags),
+or `scaffold/gitlab/DDEV.gitlab-ci.yml` if you are using DDEV.
+
+```
+include:
+  - local: '.gitlab/drainpipe/DDEV.gitlab-ci.ymll'
+
+variables:
+  DRAINPIPE_DDEV_GIT_EMAIL: drainpipe-bot@example.com
+  DRAINPIPE_DDEV_GIT_NAME: Drainpipe Bot
+
+build:
+  stage: build
+  interruptible: true
+  script:
+    - !reference [.drainpipe_setup_ddev, script]
+    - composer install
+    - ddev restart
+    - ddev drush site:install minimal -y
+    - echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+    - ddev drush config:export -y
+    - ddev task update
+```
+
+Available variables are:
+
+| Variable                          |                                                                                                                                    |
+|-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| DRAINPIPE_DDEV_SSH_PRIVATE_KEY    | SSH private key used for e.g. committing to git                                                                                    |
+| DRAINPIPE_DDEV_SSH_KNOWN_HOSTS    | The result of running e.g. `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`                                              |
+| DRAINPIPE_DDEV_GIT_EMAIL          | E-mail address to use for git commits                                                                                              |
+| DRAINPIPE_DDEV_GIT_NAME           | Name to use for git commits                                                                                                        |
+| DRAINPIPE_DDEV_COMPOSER_CACHE_DIR | Set to "false" to disable composer cache dir, or another value to override the default location of .ddev/.drainpipe-composer-cache |
+| DRAINPIPE_DDEV_VERSION            | Install a specific version of DDEV instead of the latest                                                                           |
 
 ### Composer Lock Diff
 Updates Merge Request descriptions with a markdown table of any changes detected

@@ -1,0 +1,66 @@
+default:
+  image: ghcr.io/catthehacker/ubuntu:runner-22.04
+  services:
+    - name: docker:dind
+      alias: docker
+
+variables:
+  DRAINPIPE_DDEV_SSH_PRIVATE_KEY: ""
+  DRAINPIPE_DDEV_SSH_KNOWN_HOSTS: ""
+  DRAINPIPE_DDEV_GIT_EMAIL: no-reply@example.com
+  DRAINPIPE_DDEV_GIT_NAME: Drainpipe Bot
+  DRAINPIPE_DDEV_COMPOSER_CACHE_DIR: ""
+  DRAINPIPE_DDEV_VERSION: ""
+  DOCKER_HOST: "tcp://docker:2375"
+  FF_NETWORK_PER_BUILD: 1
+
+cache:
+  - key:
+      files:
+        - composer.lock
+        - composer.json
+    paths:
+      - .ddev/.drainpipe-composer-cache
+
+.drainpipe_setup_ddev:
+  script:
+    - sudo chown -R runner:runner $CI_PROJECT_DIR
+    - |
+      mkdir -p .ddev/homeadditions/.ssh
+      # Copy private key
+      if [ "$DRAINPIPE_DDEV_SSH_PRIVATE_KEY" != "" ]; then
+        echo "$DRAINPIPE_DDEV_SSH_PRIVATE_KEY" > .ddev/homeadditions/.ssh/id_rsa
+        chmod 600 .ddev/homeadditions/.ssh/id_rsa
+      fi
+      # Copy known hosts
+      if [ "$DRAINPIPE_DDEV_SSH_KNOWN_HOSTS" != "" ]; then
+        echo "$DRAINPIPE_DDEV_SSH_KNOWN_HOSTS" > .ddev/homeadditions/.ssh/known_hosts
+        chmod 644 .ddev/homeadditions/.ssh/known_hosts
+      fi
+      # SSH config file
+      touch .ddev/homeadditions/.ssh/config
+      chmod 600 .ddev/homeadditions/.ssh/config
+
+      chmod 700 .ddev/homeadditions/.ssh
+    - |
+      if [ "$DRAINPIPE_DDEV_VERSION" != "" ]; then
+        curl -fsSL https://ddev.com/install.sh | bash -s "v$DRAINPIPE_DDEV_VERSION"
+      else
+        curl -fsSL https://ddev.com/install.sh | bash
+      fi
+    - ddev config global --no-bind-mounts
+    - if [ ! -f ".ddev/config.yaml" ]; then ddev config --auto; fi
+    - |
+      if [ "$DRAINPIPE_DDEV_COMPOSER_CACHE_DIR" != "false" ]; then
+        # @todo Replace /var/www/html with an environment variable.
+        CACHE_DIR=".ddev/.drainpipe-composer-cache"
+        if [ "$DRAINPIPE_DDEV_COMPOSER_CACHE_DIR" != "" ]; then
+          CACHE_DIR="$DRAINPIPE_DDEV_COMPOSER_CACHE_DIR"
+        fi
+        ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
+      fi
+    - ddev start
+    - ddev describe
+    # Copy git credentials
+    - ddev exec "git config --global user.name \"$DRAINPIPE_DDEV_GIT_NAME\""
+    - ddev exec "git config --global user.email \"$DRAINPIPE_DDEV_GIT_EMAIL\""
