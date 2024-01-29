@@ -77,7 +77,7 @@ jobs:
       - name: Confirm All PHPUnit Functional Tests were run
         uses: GuillaumeFalourd/assert-command-line-output@v2.2
         with:
-          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
+          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
           contains: 18
           expected_result: PASSED
 
@@ -146,7 +146,7 @@ jobs:
       - name: Confirm All PHPUnit Functional Tests were run
         uses: GuillaumeFalourd/assert-command-line-output@v2
         with:
-          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
+          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
           contains: 21
           expected_result: PASSED
 
