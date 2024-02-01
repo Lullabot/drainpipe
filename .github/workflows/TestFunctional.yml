@@ -164,7 +164,7 @@ jobs:
           name: test_result
           path: test_result
 
-  Test-Yarn-3-Node-Linker:
+  Test-Yarn-4-Node-Linker:
     runs-on: ubuntu-22.04
     needs: Build
     steps:
@@ -193,7 +193,7 @@ jobs:
       - name: Setup Nightwatch
         run: |
           ddev yarn set version berry
-          ddev yarn set version 3
+          ddev yarn set version 4
           ddev yarn init -y
           yarn config set nodeLinker node-modules
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
@@ -215,7 +215,7 @@ jobs:
           name: test_result
           path: test_result
 
-  Test-Yarn-3:
+  Test-Yarn-4:
     runs-on: ubuntu-22.04
     needs: Build
     steps:
@@ -244,7 +244,7 @@ jobs:
       - name: Setup Nightwatch
         run: |
           ddev yarn set version berry
-          ddev yarn set version 3
+          ddev yarn set version 4
           ddev yarn init -y
           echo "packageExtensions:" >> .yarnrc.yml
           echo '  "nightwatch@*":' >> .yarnrc.yml
