@@ -223,10 +223,18 @@ tasks:
             yarn set version berry
             yarn set version 3
             yarn init
+            echo "packageExtensions:" >> .yarnrc.yml
+            echo '  "nightwatch@*":' >> .yarnrc.yml
+            echo '    dependencies:' >> .yarnrc.yml
+            echo '      ws: "*"' >> .yarnrc.yml
             yarn add $PACKAGES --dev
           elif [ "$PACKAGE_MANAGER" == "yarn" ]; then
             yarn set version berry
             yarn init
+            echo "packageExtensions:" >> .yarnrc.yml
+            echo '  "nightwatch@*":' >> .yarnrc.yml
+            echo '    dependencies:' >> .yarnrc.yml
+            echo '      ws: "*"' >> .yarnrc.yml
             yarn add $PACKAGES --dev
           else
             echo "Sorry I'm not aware of that package manager. Please first init package.json with it yourself manually."
