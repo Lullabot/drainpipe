@@ -28,10 +28,11 @@ echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS fi
 echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO 'db'@'%';\"" >> .ddev/config.yaml
 ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"
 ddev config --additional-hostnames="*.drainpipe"
+ddev config --nodejs-version=21
 ddev restart
 
 ddev yarn set version berry
-ddev yarn set version 3
+ddev yarn set version 4
 ddev yarn init -y
 echo "packageExtensions:" >> .yarnrc.yml
 echo '  "nightwatch@*":' >> .yarnrc.yml
