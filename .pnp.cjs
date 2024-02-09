@@ -996,7 +996,7 @@ const RAW_RUNTIME_STATE =
           ["autoprefixer", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.4.17"],\
           ["cssnano", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:6.0.3"],\
           ["gulp", "npm:4.0.2"],\
-          ["gulp-postcss", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:9.1.0"],\
+          ["gulp-postcss", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.0.0"],\
           ["gulp-sass", "npm:5.1.0"],\
           ["gulp-sass-glob", "npm:1.1.0"],\
           ["gulp-sourcemaps", "npm:3.0.0"],\
@@ -4715,22 +4715,22 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["gulp-postcss", [\
-      ["npm:9.1.0", {\
-        "packageLocation": "../../../../cache/others/berry/cache/gulp-postcss-npm-9.1.0-98fec76d86-10c0.zip/node_modules/gulp-postcss/",\
+      ["npm:10.0.0", {\
+        "packageLocation": "../../../../cache/others/berry/cache/gulp-postcss-npm-10.0.0-ccbfa30d13-10c0.zip/node_modules/gulp-postcss/",\
         "packageDependencies": [\
-          ["gulp-postcss", "npm:9.1.0"]\
+          ["gulp-postcss", "npm:10.0.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:9.1.0", {\
-        "packageLocation": "./.yarn/__virtual__/gulp-postcss-virtual-4542a941b7/5/cache/others/berry/cache/gulp-postcss-npm-9.1.0-98fec76d86-10c0.zip/node_modules/gulp-postcss/",\
+      ["virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.0.0", {\
+        "packageLocation": "./.yarn/__virtual__/gulp-postcss-virtual-d02b558011/5/cache/others/berry/cache/gulp-postcss-npm-10.0.0-ccbfa30d13-10c0.zip/node_modules/gulp-postcss/",\
         "packageDependencies": [\
-          ["gulp-postcss", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:9.1.0"],\
+          ["gulp-postcss", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.0.0"],\
           ["@types/postcss", null],\
           ["fancy-log", "npm:2.0.0"],\
           ["plugin-error", "npm:2.0.1"],\
           ["postcss", "npm:8.4.35"],\
-          ["postcss-load-config", "virtual:4542a941b70009322cae61bbe0980272ae51a57c3c6bd32bf0200fc4c28dcb76d57758fac7ef52f1a53162fff880bdb648441744cfe06060223f81cf0d36552f#npm:5.0.2"],\
+          ["postcss-load-config", "virtual:d02b558011efa25c690f7e72f3660e7d02aeb45908ac008dab2d898aad21e783b3079f249d5ab42ad6099cca0a37d6f25d259a6f381aac14d40b4f97a50ae4b4#npm:5.0.2"],\
           ["vinyl-sourcemaps-apply", "npm:0.2.1"]\
         ],\
         "packagePeers": [\
@@ -7963,10 +7963,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:4542a941b70009322cae61bbe0980272ae51a57c3c6bd32bf0200fc4c28dcb76d57758fac7ef52f1a53162fff880bdb648441744cfe06060223f81cf0d36552f#npm:5.0.2", {\
-        "packageLocation": "./.yarn/__virtual__/postcss-load-config-virtual-732af87ca9/5/cache/others/berry/cache/postcss-load-config-npm-5.0.2-b982003b00-10c0.zip/node_modules/postcss-load-config/",\
+      ["virtual:d02b558011efa25c690f7e72f3660e7d02aeb45908ac008dab2d898aad21e783b3079f249d5ab42ad6099cca0a37d6f25d259a6f381aac14d40b4f97a50ae4b4#npm:5.0.2", {\
+        "packageLocation": "./.yarn/__virtual__/postcss-load-config-virtual-b9f40af73e/5/cache/others/berry/cache/postcss-load-config-npm-5.0.2-b982003b00-10c0.zip/node_modules/postcss-load-config/",\
         "packageDependencies": [\
-          ["postcss-load-config", "virtual:4542a941b70009322cae61bbe0980272ae51a57c3c6bd32bf0200fc4c28dcb76d57758fac7ef52f1a53162fff880bdb648441744cfe06060223f81cf0d36552f#npm:5.0.2"],\
+          ["postcss-load-config", "virtual:d02b558011efa25c690f7e72f3660e7d02aeb45908ac008dab2d898aad21e783b3079f249d5ab42ad6099cca0a37d6f25d259a6f381aac14d40b4f97a50ae4b4#npm:5.0.2"],\
           ["@types/jiti", null],\
           ["@types/postcss", null],\
           ["jiti", null],\
