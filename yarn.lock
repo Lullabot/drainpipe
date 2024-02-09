@@ -878,7 +878,7 @@ __metadata:
     autoprefixer: "npm:^10.4.17"
     cssnano: "npm:^6.0.3"
     gulp: "npm:^4.0.2"
-    gulp-postcss: "npm:^9.1.0"
+    gulp-postcss: "npm:^10.0.0"
     gulp-sass: "npm:^5.1.0"
     gulp-sass-glob: "npm:^1.1.0"
     gulp-sourcemaps: "npm:^3.0.0"
@@ -4160,9 +4160,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gulp-postcss@npm:^9.1.0":
-  version: 9.1.0
-  resolution: "gulp-postcss@npm:9.1.0"
+"gulp-postcss@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "gulp-postcss@npm:10.0.0"
   dependencies:
     fancy-log: "npm:^2.0.0"
     plugin-error: "npm:^2.0.1"
@@ -4170,7 +4170,7 @@ __metadata:
     vinyl-sourcemaps-apply: "npm:^0.2.1"
   peerDependencies:
     postcss: ^8.0.0
-  checksum: 3f434f3cad6e970abd080ed56ea8cd04595ecb06d1d4b142505ca5c5c1c170ffafab481f46570a8d3fd3de827fe738f62fd761432960a79c333cbfabf88d9212
+  checksum: 042c2111879acf29a65f001b232326135b1bb15d95ebdb6074815b642aaa76555edb59f26011b975a973b2039b3ea58d0b14c6cf7c8bc566830bf57cda8dc825
   languageName: node
   linkType: hard
 
