@@ -22,7 +22,7 @@
         "lullabot/drainpipe": "*",
         "mglaman/phpstan-drupal": "^1.2.6",
         "symfony/yaml": "^4|^5|^6",
-        "drupal/coder": "^8.3.22",
+        "drupal/coder": "^8.3.23",
         "behat/mink-browserkit-driver": "^2.1.0",
         "tijsverkoyen/convert-to-junit-xml": "^1.11.0",
         "phpstan/phpstan-deprecation-rules": "^1.1.4",
