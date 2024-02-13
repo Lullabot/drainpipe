@@ -30,6 +30,7 @@ for a Drupal site, including:
     + [Composer Lock Diff](#composer-lock-diff-1)
     + [Pantheon](#pantheon-2)
 * [Tugboat Integration](#tugboat)
+* [Peer Review Guidelines for Automated Updates](#peer-review-guidelines-for-automated-updates)
 ---
 ## Installation
 
@@ -598,3 +599,51 @@ tugboat:php:init:
     - apt-get install -y libldap2-dev
     - docker-php-ext-install ldap
 ```
+
+Creating comprehensive documentation for conducting peer reviews on automated updates within the "Drainpipe" project is crucial to ensure consistency, maintainability, and the quality of the codebase. Here's a draft outline and content you could use or adapt for your documentation:
+
+## Peer Review Guidelines for Automated Updates
+
+These are guidelines for conducting peer reviews on automated dependency update pull requests created by Renovate. 
+
+## Automated Testing with GitHub Actions
+
+### Overview
+
+All automated updates submitted by Renovate undergo a series of automated tests via GitHub Actions. These tests are designed to ensure compatibility and stability with the new versions of dependencies.
+
+## Semantic Versioning and Update Types
+
+Drainpipe adheres to semantic versioning, categorizing updates into patches, minor, and major updates. Understanding these categories is crucial for the review process:
+
+- **Patch Releases (`x.y.Z`)**: Updates that fix bugs without adding new features or breaking existing functionality. If all tests pass, these updates are generally safe to merge.
+- **Minor Point Releases (`x.Y.z`)**: Updates that introduce new features without breaking backward compatibility. While these are often safe to merge if all tests pass, they require more scrutiny:
+  - Read the change logs carefully to understand the new features and fixes.
+  - Assess if the changes necessitate additional test coverage or could potentially impact existing functionality.
+  - Consider the implications of new features on the project's future development and maintenance.
+
+### Handling Test Failures
+
+Occasionally, tests may fail due to transient issues or flakiness in the test suite. In such cases:
+
+1. Verify the nature of the test failure to ensure it's not related to the dependency update.
+2. If the failure seems unrelated to the update, re-run the GitHub Actions job to confirm if the issue persists.
+3. Document any recurring flakiness or issues on the pull request then create a new issue linked to the pull request for further investigation.
+
+## Conducting the Peer Review
+
+1. **Review the Automated Update Pull Request (PR)**:
+   - Ensure the PR title and description clearly describe the update and its scope.
+   - Check the list of changed files to understand the extent of the update.
+
+2. **Assess Test Results**:
+   - Ensure all GitHub Actions tests have passed. Pay close attention to tests that touch on updated dependencies.
+   - For failed tests, follow the "Handling Test Failures" guidelines above.
+
+3. **Read the Dependency Change Logs**:
+   - For minor point releases, review the dependency's change logs to identify any significant changes or additions.
+   - Evaluate how these changes might affect the Drainpipe project.
+
+5. **Final Decision**:
+   - For patch releases with all tests passing, proceed to merge the update.
+   - For minor point releases, after thorough review and consideration, decide whether to merge the update or request manual testing before merging.
