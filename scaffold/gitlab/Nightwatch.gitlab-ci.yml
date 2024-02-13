@@ -1,0 +1,33 @@
+report-nightwatch:
+  stage: report
+  when: always
+  needs:
+    - job: functional
+      artifacts: true
+  script:
+    - echo "Nothing to do"
+  artifacts:
+    expose_as: 'Nightwatch Test Report'
+    paths:
+      - test_result/nightwatch-html-report/index.html
+      - test/nightwatch/vrt
+      - test_result
+
+report-nightwatch-vrt:
+  stage: report
+  when: always
+  script:
+    - |
+      if [ -f "vrt-report/index.html" ] && [ $GITLAB_CI = "true" ]; then
+        cp vrt-report/index.html vrt-report/index-gitlab.html
+        sed -i "s|\"/test/nightwatch/vrt/|\"../test/nightwatch/vrt/|g" vrt-report/index-gitlab.html
+      fi
+  needs:
+    - job: functional
+      artifacts: true
+  artifacts:
+    expose_as: 'VRT Test Report'
+    paths:
+      - vrt-report/index-gitlab.html
+      - test/nightwatch/vrt
+      - test_result
