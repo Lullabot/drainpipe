@@ -863,7 +863,7 @@ __metadata:
   resolution: "@lullabot/drainpipe-javascript@workspace:metapackages/javascript"
   dependencies:
     "@yarnpkg/esbuild-plugin-pnp": "npm:^3.0.0-rc.2"
-    chokidar: "npm:^3.5.3"
+    chokidar: "npm:^3.6.0"
     esbuild: "npm:^0.14.36"
     yargs: "npm:^17.7.2"
   bin:
@@ -2015,9 +2015,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:^3.5.3":
-  version: 3.5.3
-  resolution: "chokidar@npm:3.5.3"
+"chokidar@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "chokidar@npm:3.6.0"
   dependencies:
     anymatch: "npm:~3.1.2"
     braces: "npm:~3.0.2"
@@ -2030,7 +2030,7 @@ __metadata:
   dependenciesMeta:
     fsevents:
       optional: true
-  checksum: 1076953093e0707c882a92c66c0f56ba6187831aa51bb4de878c1fec59ae611a3bf02898f190efec8e77a086b8df61c2b2a3ea324642a0558bdf8ee6c5dc9ca1
+  checksum: 8361dcd013f2ddbe260eacb1f3cb2f2c6f2b0ad118708a343a5ed8158941a39cb8fb1d272e0f389712e74ee90ce8ba864eece9e0e62b9705cb468a2f6d917462
   languageName: node
   linkType: hard
 
