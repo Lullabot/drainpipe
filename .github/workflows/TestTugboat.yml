@@ -34,6 +34,8 @@ jobs:
           ddev config --php-version "8.1"
           ddev config --nodejs-version "18"
           ddev config --database=mariadb:10.4
+          ddev get ddev/ddev-redis
+          ddev get ddev/ddev-elasticsearch
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
@@ -49,7 +51,7 @@ jobs:
       # preview - they should be the same.
       - name: Test Generated Files
         run: |
-          cmp -b drainpipe/.tugboat/config.yml .tugboat/config.yml
+          cmp -b drainpipe/.tugboat/config.yml tests/tugboat.config.yml
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/1-init.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/2-update.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/3-build.sh
@@ -114,4 +116,3 @@ jobs:
         run: |
           cat .tugboat/steps/1-init.sh
           grep -q NODE_MAJOR=16 .tugboat/steps/1-init.sh
-
