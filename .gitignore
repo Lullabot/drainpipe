@@ -14,3 +14,4 @@ tests/fixtures/drainpipe-test-project/*
 !.yarn/versions
 .npmrc
 lerna-debug.log
+.idea

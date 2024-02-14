@@ -43,3 +43,8 @@ services:
         - task tugboat:redis:init
 {% endif %}
 {% endif %}
+
+{% if search_type %}
+  {{ search_type }}:
+    image: tugboatqa/{{ search_type }}:{{ search_version }}
+{% endif %}
