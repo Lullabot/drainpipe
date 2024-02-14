@@ -107,27 +107,7 @@ runs:
     - name: Deploy to Pantheon
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        # Wait for Pantheon to sync.
-        START_TIME=$(date +%s)
-        TIMEOUT=$((5 * 60))  # 5 minutes in seconds
-        while true; do
-          CURRENT_TIME=$(date +%s)
-          ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
-          # Check if the elapsed time is greater than the timeout
-          if [[ $ELAPSED_TIME -ge $TIMEOUT ]]; then
-            echo "Deployment to Pantheon is not ready yet."
-            exit 1
-          fi
-          STATUS=$(drainpipe_exec "terminus workflow:info:status ${{ inputs.site-name }} --fields=status --format=string")
-          echo "Checking deployment status: $STATUS"
-          # Check the command output
-          if [[ $STATUS == "succeeded" ]]; then
-            break
-          elif [[ $STATUS != "running" ]]; then
-            exit 1
-          fi
-          sleep 15
-        done
+        drainpipe_exec "terminus build:workflow:wait ${{ inputs.site-name }}"
 
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
