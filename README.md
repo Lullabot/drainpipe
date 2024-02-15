@@ -600,7 +600,6 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-Creating comprehensive documentation for conducting peer reviews on automated updates within the "Drainpipe" project is crucial to ensure consistency, maintainability, and the quality of the codebase. Here's a draft outline and content you could use or adapt for your documentation:
 
 ## Peer Review Guidelines for Automated Updates
 
