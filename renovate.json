@@ -4,4 +4,11 @@
     "config:base"
   ],
   "rangeStrategy": "bump"
+  "packageRules": [
+    {
+      "matchPackageNames": ["symfony/yaml", "symfony/php-unit-bridge"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "enabled": false
+    }
+  ]
 }
