@@ -40,7 +40,7 @@ tasks:
     desc: "Builds the project for development"
     deps: [drupal:composer]
     cmds:
-      - echo "Nothing to do"
+      - ./vendor/bin/drush user:unblock --uid=1
       # Ignore the below modules in sites/default/settings.php e.g.
       # $settings['config_exclude_modules'] = ['stage_file_proxy', 'field_ui', 'views_ui'];
       # - ./vendor/bin/drush pm:enable stage_file_proxy views_ui field_ui -y
