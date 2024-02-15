@@ -107,8 +107,8 @@ runs:
     - name: Deploy to Pantheon
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        # Wait for Pantheon to sync.
-        sleep 30
+        drainpipe_exec "terminus workflow:wait ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
