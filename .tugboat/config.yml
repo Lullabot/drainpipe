@@ -17,3 +17,9 @@ services:
 
   mariadb:
     image: tugboatqa/mariadb:10.4
+
+  redis:
+    image: tugboatqa/redis:6-bullseye
+
+  elasticsearch:
+    image: tugboatqa/elasticsearch:7.17.14

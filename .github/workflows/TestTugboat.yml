@@ -51,7 +51,7 @@ jobs:
       # preview - they should be the same.
       - name: Test Generated Files
         run: |
-          cmp -b drainpipe/.tugboat/config.yml tests/tugboat.config.yml
+          cmp -b drainpipe/.tugboat/config.yml .tugboat/config.yml
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/1-init.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/2-update.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/3-build.sh
