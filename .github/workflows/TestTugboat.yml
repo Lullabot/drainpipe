@@ -28,14 +28,17 @@ jobs:
           git-email: no-reply@example.com
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      # Lock in versions so tests know what to expect.
+      # Redis tag v1.2.0 == 6-bullseye
+      # Elasticsearch tag v0.3.2 == 7.17.14
       - name: Setup Project
         run: |
           ddev config --auto
           ddev config --php-version "8.1"
           ddev config --nodejs-version "18"
           ddev config --database=mariadb:10.4
-          ddev get ddev/ddev-redis
-          ddev get ddev/ddev-elasticsearch
+          ddev get ddev/ddev-redis --version v1.2.0
+          ddev get ddev/ddev-elasticsearch --version v0.3.2
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
