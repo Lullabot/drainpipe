@@ -235,6 +235,7 @@ tasks:
             echo '  "nightwatch@*":' >> .yarnrc.yml
             echo '    dependencies:' >> .yarnrc.yml
             echo '      ws: "*"' >> .yarnrc.yml
+            yarn cache clear
             yarn add $PACKAGES --dev
           else
             echo "Sorry I'm not aware of that package manager. Please first init package.json with it yourself manually."

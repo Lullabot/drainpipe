@@ -202,6 +202,7 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 4
           ddev yarn init -y
+          ddev yarn cache clear
           ddev yarn add ./drainpipe/metapackages/sass --dev
 
       - name: Compile Sass
@@ -348,6 +349,7 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 4
           ddev yarn init -y
+          ddev yarn cache clear
           ddev yarn add focus-trap@^6.7.3
           ddev yarn add ./drainpipe/metapackages/javascript --dev
 
