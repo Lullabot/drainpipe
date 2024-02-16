@@ -352,8 +352,11 @@ jobs:
           ddev yarn set version berry
           ddev yarn init -y
           ddev yarn cache clean
-          ddev yarn add nightwatch @lullabot/nightwatch-drupal-commands --dev
-          yarn
+          echo "packageExtensions:" >> .yarnrc.yml
+          echo '  "nightwatch@*":' >> .yarnrc.yml
+          echo '    dependencies:' >> .yarnrc.yml
+          echo '      ws: "*"' >> .yarnrc.yml
+          ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
 
       - name: Install Drupal
         run: |

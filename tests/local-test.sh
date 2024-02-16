@@ -32,14 +32,12 @@ ddev config --nodejs-version=21
 ddev restart
 
 ddev yarn set version berry
-ddev yarn set version 4
 ddev yarn init -y
+ddev yarn cache clear
 echo "packageExtensions:" >> .yarnrc.yml
 echo '  "nightwatch@*":' >> .yarnrc.yml
 echo '    dependencies:' >> .yarnrc.yml
 echo '      ws: "*"' >> .yarnrc.yml
-echo '      lodash: "*"' >> .yarnrc.yml
-echo '      rimraf: "*"' >> .yarnrc.yml
 ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
 yarn
 
