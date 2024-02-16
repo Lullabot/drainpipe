@@ -358,6 +358,7 @@ jobs:
           echo '  "nightwatch@*":' >> .yarnrc.yml
           echo '    dependencies:' >> .yarnrc.yml
           echo '      ws: "*"' >> .yarnrc.yml
+          ddev yarn cache clear
           ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
 
       - name: Install Drupal
