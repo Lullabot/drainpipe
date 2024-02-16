@@ -863,7 +863,7 @@ __metadata:
   resolution: "@lullabot/drainpipe-javascript@workspace:metapackages/javascript"
   dependencies:
     "@yarnpkg/esbuild-plugin-pnp": "npm:^3.0.0-rc.2"
-    chokidar: "npm:^3.5.3"
+    chokidar: "npm:^3.6.0"
     esbuild: "npm:^0.14.36"
     yargs: "npm:^17.7.2"
   bin:
@@ -878,12 +878,12 @@ __metadata:
     autoprefixer: "npm:^10.4.17"
     cssnano: "npm:^6.0.3"
     gulp: "npm:^4.0.2"
-    gulp-postcss: "npm:^9.1.0"
+    gulp-postcss: "npm:^10.0.0"
     gulp-sass: "npm:^5.1.0"
     gulp-sass-glob: "npm:^1.1.0"
     gulp-sourcemaps: "npm:^3.0.0"
     modern-normalize: "npm:^2.0.0"
-    postcss: "npm:^8.4.33"
+    postcss: "npm:^8.4.35"
     sass: "npm:^1.70.0"
     yargs: "npm:^17.7.2"
   bin:
@@ -2015,9 +2015,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:^3.5.3":
-  version: 3.5.3
-  resolution: "chokidar@npm:3.5.3"
+"chokidar@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "chokidar@npm:3.6.0"
   dependencies:
     anymatch: "npm:~3.1.2"
     braces: "npm:~3.0.2"
@@ -2030,7 +2030,7 @@ __metadata:
   dependenciesMeta:
     fsevents:
       optional: true
-  checksum: 1076953093e0707c882a92c66c0f56ba6187831aa51bb4de878c1fec59ae611a3bf02898f190efec8e77a086b8df61c2b2a3ea324642a0558bdf8ee6c5dc9ca1
+  checksum: 8361dcd013f2ddbe260eacb1f3cb2f2c6f2b0ad118708a343a5ed8158941a39cb8fb1d272e0f389712e74ee90ce8ba864eece9e0e62b9705cb468a2f6d917462
   languageName: node
   linkType: hard
 
@@ -4160,9 +4160,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gulp-postcss@npm:^9.1.0":
-  version: 9.1.0
-  resolution: "gulp-postcss@npm:9.1.0"
+"gulp-postcss@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "gulp-postcss@npm:10.0.0"
   dependencies:
     fancy-log: "npm:^2.0.0"
     plugin-error: "npm:^2.0.1"
@@ -4170,7 +4170,7 @@ __metadata:
     vinyl-sourcemaps-apply: "npm:^0.2.1"
   peerDependencies:
     postcss: ^8.0.0
-  checksum: 3f434f3cad6e970abd080ed56ea8cd04595ecb06d1d4b142505ca5c5c1c170ffafab481f46570a8d3fd3de827fe738f62fd761432960a79c333cbfabf88d9212
+  checksum: 042c2111879acf29a65f001b232326135b1bb15d95ebdb6074815b642aaa76555edb59f26011b975a973b2039b3ea58d0b14c6cf7c8bc566830bf57cda8dc825
   languageName: node
   linkType: hard
 
@@ -7299,14 +7299,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.33":
-  version: 8.4.33
-  resolution: "postcss@npm:8.4.33"
+"postcss@npm:^8.4.35":
+  version: 8.4.35
+  resolution: "postcss@npm:8.4.35"
   dependencies:
     nanoid: "npm:^3.3.7"
     picocolors: "npm:^1.0.0"
     source-map-js: "npm:^1.0.2"
-  checksum: 16eda83458fcd8a91bece287b5920c7f57164c3ea293e6c80d0ea71ce7843007bcd8592260a5160b9a7f02693e6ac93e2495b02d8c7596d3f3f72c1447e3ba79
+  checksum: e8dd04e48001eb5857abc9475365bf08f4e508ddf9bc0b8525449a95d190f10d025acebc5b56ac2e94b3c7146790e4ae78989bb9633cb7ee20d1cc9b7dc909b2
   languageName: node
   linkType: hard
 
