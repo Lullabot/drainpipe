@@ -205,7 +205,7 @@ tasks:
     interactive: true
     cmds:
       - |
-        PACKAGES="nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands"
+        PACKAGES="nightwatch @lullabot/nightwatch-drupal-commands"
         if [ ! -f "package.json" ]; then
           echo -n "No package.json exists, would you like to use yarn1, npm, yarn3 (node <= 20), or yarn (node >= 21)? "
           read -r PACKAGE_MANAGER
