@@ -10,7 +10,7 @@
         "psr-4": {"Lullabot\\Drainpipe\\Tests\\Functional\\": "tests/src/functional/"}
     },
     "require": {
-        "php": "^7.3||^8.0",
+        "php": "7.4.33",
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
         "drush/drush": "^10|^11|^12",
