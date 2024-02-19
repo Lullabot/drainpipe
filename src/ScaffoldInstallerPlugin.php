@@ -106,7 +106,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     private function installTaskfile(): void
     {
         $vendor = $this->config->get('vendor-dir');
-        $taskfilePath = $vendor.'/lullabot/drainpipe/scaffold/Taskfile.yml';
+        $taskfilePath = $vendor . '/lullabot/drainpipe/scaffold/Taskfile.yml';
 
         if (!file_exists('./Taskfile.yml')) {
             $this->io->write('<info>Creating initial Taskfile.yml...</info>');
@@ -156,7 +156,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     private function installGitignore(): void
     {
         $vendor = $this->config->get('vendor-dir');
-        $gitignorePath = $vendor.'/lullabot/drainpipe/scaffold/gitignore';
+        $gitignorePath = $vendor . '/lullabot/drainpipe/scaffold/gitignore';
         if (!file_exists('./.gitignore')) {
             $this->io->write('<info>Creating initial .gitignore...</info>');
             $fs = new Filesystem();
@@ -228,8 +228,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $fs->ensureDirectoryExists('.gitlab/drainpipe');
                 $fs->copy("$scaffoldPath/gitlab/DDEV.gitlab-ci.yml", ".gitlab/drainpipe/DDEV.gitlab-ci.yml");
                 $this->io->write("🪠 [Drainpipe] .gitlab/drainpipe/DDEV.gitlab-ci.yml installed");
-            }
-            else {
+            } else {
                 $fs->ensureDirectoryExists('./.drainpipe/gitlab');
                 $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
                 $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
@@ -240,8 +239,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     $fs->ensureDirectoryExists('./.drainpipe/gitlab');
                     $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
                     $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
-                }
-                else {
+                } else {
                     $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
                 }
 
@@ -250,8 +248,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     // .drainpipeignore
                     if (!file_exists('.drainpipeignore')) {
                         $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
-                    }
-                    else {
+                    } else {
                         $contents = file_get_contents('./.drainpipeignore');
                         if (strpos($contents, '/web/sites/default/files') === false) {
                             $this->io->warning(
@@ -288,12 +285,10 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
                     if (file_exists('./.ddev/config.yaml')) {
                         $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
-                    }
-                    else {
+                    } else {
                         $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
-                }
-                else if ($github === 'ComposerLockDiff') {
+                } else if ($github === 'ComposerLockDiff') {
                     $fs->ensureDirectoryExists('./.github/workflows');
                     $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
                 }
@@ -302,10 +297,16 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat'])) {
+            // Look for a config override file before we wipe the directory.
+            $configOverride = file_exists('./.tugboat/config.override.yml') ?
+                Yaml::parseFile('./.tugboat/config.override.yml') :
+                [];
+
+            // Wipe the Tugboat directory and define base config.
             $fs->removeDirectory('./.tugboat');
             $binaryInstallerPlugin = new BinaryInstallerPlugin();
             $tugboatConfig = [
-                'nodejs_version' =>  '18',
+                'nodejs_version' => '18',
                 'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm',
                 'database_type' => 'mariadb',
                 'database_version' => '10.6',
@@ -318,6 +319,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
             ];
 
+            // Read DDEV config.
             if (file_exists('./.ddev/config.yaml')) {
                 $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
                 $tugboatConfig['database_type'] = $ddevConfig['database']['type'];
@@ -332,6 +334,12 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
             }
 
+            // Add config overrides.
+            if (!empty($configOverride['aliases'])) {
+                $tugboatConfig['webserver_aliases'] = Yaml::dump($configOverride['aliases']);
+            }
+
+            // Add Redis service.
             if (file_exists('./.ddev/docker-compose.redis.yaml')) {
                 $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
                 $redisImage = explode(':', $redisConfig['services']['redis']['image']);
@@ -339,6 +347,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $tugboatConfig['memory_cache_version'] = array_pop($redisImage);
             }
 
+            // Add commands to Task.
             if (file_exists('Taskfile.yml')) {
                 // Get steps out of the Taskfile.
                 $taskfile = Yaml::parseFile('./Taskfile.yml');
@@ -365,6 +374,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
             }
 
+            // Write the config.yml and settings.tugboat.php files.
             if (count($tugboatConfig) > 0) {
                 $fs->ensureDirectoryExists('./.tugboat');
                 $fs->ensureDirectoryExists('./.tugboat/steps');
