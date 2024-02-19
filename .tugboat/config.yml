@@ -9,6 +9,7 @@ services:
 
     depends:
       - mariadb
+      - redis
 
     commands:
       init: ./.tugboat/steps/1-init.sh
