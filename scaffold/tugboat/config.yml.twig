@@ -13,16 +13,16 @@ services:
       - {{ memory_cache_type }}
 {% endif %}
 
-    commands:
-      init: ./.tugboat/steps/1-init.sh
-      update: ./.tugboat/steps/2-update.sh
-      build: ./.tugboat/steps/3-build.sh
-
 {% if webserver_aliases %}
     aliases:
       {{ webserver_aliases }}
 
 {% endif %}
+    commands:
+      init: ./.tugboat/steps/1-init.sh
+      update: ./.tugboat/steps/2-update.sh
+      build: ./.tugboat/steps/3-build.sh
+
   {{ database_type }}:
     image: tugboatqa/{{ database_type }}:{{ database_version }}
 {% if init.mysql %}
