@@ -52,13 +52,13 @@ apt-get install -y imagemagick
 # Install the PHP memcache extension.
 
 apt-get install -y zlib1g-dev
-pecl install memcache
+yes '' | pecl install -f memcache
 echo 'extension=memcache.so' > /usr/local/etc/php/conf.d/memcache.ini
 {% elseif memory_cache_type == "memcached" %}
 # Install the PHP redis extension.
 
-pecl install redis
-echo 'extension=redis.so' > /usr/local/etc/php/conf.d/memcache.ini
+yes '' | pecl install -f redis
+echo 'extension=redis.so' > /usr/local/etc/php/conf.d/redis.ini
 {% endif %}
 
 # Install node
