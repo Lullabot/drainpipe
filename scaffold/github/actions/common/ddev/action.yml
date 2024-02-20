@@ -60,6 +60,11 @@ runs:
           sudo apt install -y ddev
         fi
 
+        # Support local runner https://github.com/nektos/act
+        if [ "$ACT" != "" ]; then
+          sudo chown runner:docker /var/run/docker.sock
+        fi
+
         ddev config global --instrumentation-opt-in=false --omit-containers=ddev-ssh-agent
 
         if [ "${{ inputs.composer-cache-dir }}" != "false" ]; then
