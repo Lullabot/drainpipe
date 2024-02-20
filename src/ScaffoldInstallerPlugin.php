@@ -298,9 +298,11 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat'])) {
             // Look for a config override file before we wipe the directory.
-            $tugboatConfigOverride = file_exists('./.tugboat/config.override.yml') ?
-                Yaml::parseFile('./.tugboat/config.override.yml') :
-                [];
+            $tugboatConfigOverridePath = './.tugboat/config.override.yml';
+            if (file_exists($tugboatConfigOverridePath)) {
+                $tugboatConfigOverride = Yaml::parseFile($tugboatConfigOverridePath);
+                $tugboatConfigOverrideFile = file_get_contents($tugboatConfigOverridePath);
+            }
 
             // Wipe the Tugboat directory and define base config.
             $fs->removeDirectory('./.tugboat');
@@ -334,12 +336,11 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
             }
 
-            // Add config overrides.
-            if (!empty($tugboatConfigOverride['php']['aliases'])) {
-                $tugboatConfig['webserver_aliases'] = $tugboatConfigOverride['php']['aliases'];
-            }
-            if (!empty($tugboatConfigOverride['php']['urls'])) {
-                $tugboatConfig['webserver_urls'] = Yaml::dump($tugboatConfigOverride['php']['urls'], 6, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+            // Add supported config overrides.
+            foreach (['aliases','urls','visualdiff','screenshot'] as $key) {
+                if (!empty($tugboatConfigOverride['php'][$key])) {
+                    $tugboatConfig["php_${key}"] = Yaml::dump($tugboatConfigOverride['php'][$key], 6, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+                }
             }
 
             // Add Redis service.
@@ -384,7 +385,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
                 $twig = new Environment($loader);
                 file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
-                file_put_contents('./.tugboat/config.override.yml', Yaml::dump($tugboatConfigOverride, 6, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+                file_put_contents('./.tugboat/config.override.yml', $tugboatConfigOverrideFile);
                 file_put_contents('./.tugboat/steps/1-init.sh', $twig->render('steps/1-init.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/2-update.sh', $twig->render('steps/2-update.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/3-build.sh', $twig->render('steps/3-build.sh.twig', $tugboatConfig));

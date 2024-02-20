@@ -20,24 +20,29 @@ services:
       - {{ memory_cache_type }}
 {% endif %}
 
-{% if webserver_aliases %}
-    # Imported from config.override.yml
+{% if php_aliases %}
+{% set indented_aliases = php_aliases|split("\n")|map(line => '      ' ~ line)|join("\n") %}
+    # Imported from config.override.yml.
     aliases:
-{% for alias in webserver_aliases %}
-      - {{ alias }}
-{% endfor %}
-
+{{ indented_aliases }}
 {% endif %}
-{% if webserver_urls %}
-{% set indented_urls = webserver_urls
-    |split("\n")
-    |map(line => '      ' ~ line)
-    |join("\n")
-%}
-    # Imported from config.override.yml
+{% if php_urls %}
+{% set indented_urls = php_urls|split("\n")|map(line => '      ' ~ line)|join("\n") %}
+    # Imported from config.override.yml.
     urls:
 {{ indented_urls }}
-
+{% endif %}
+{% if php_visualdiff %}
+{% set indented_visualdiff = php_visualdiff|split("\n")|map(line => '      ' ~ line)|join("\n") %}
+    # Imported from config.override.yml.
+    visualdiff:
+{{ indented_visualdiff }}
+{% endif %}
+{% if php_screenshot %}
+{% set indented_screenshot = php_screenshot|split("\n")|map(line => '      ' ~ line)|join("\n") %}
+    # Imported from config.override.yml.
+    screenshot:
+{{ indented_screenshot }}
 {% endif %}
     commands:
       init: ./.tugboat/steps/1-init.sh
