@@ -335,8 +335,11 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             }
 
             // Add config overrides.
-            if (!empty($tugboatConfigOverride['aliases'])) {
-                $tugboatConfig['webserver_aliases'] = $tugboatConfigOverride['aliases'];
+            if (!empty($tugboatConfigOverride['php']['aliases'])) {
+                $tugboatConfig['webserver_aliases'] = $tugboatConfigOverride['php']['aliases'];
+            }
+            if (!empty($tugboatConfigOverride['php']['urls'])) {
+                $tugboatConfig['webserver_urls'] = Yaml::dump($tugboatConfigOverride['php']['urls'], 6, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
             }
 
             // Add Redis service.
@@ -381,7 +384,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
                 $twig = new Environment($loader);
                 file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
-                file_put_contents('./.tugboat/config.override.yml', Yaml::dump($tugboatConfigOverride));
+                file_put_contents('./.tugboat/config.override.yml', Yaml::dump($tugboatConfigOverride, 6, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
                 file_put_contents('./.tugboat/steps/1-init.sh', $twig->render('steps/1-init.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/2-update.sh', $twig->render('steps/2-update.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/3-build.sh', $twig->render('steps/3-build.sh.twig', $tugboatConfig));
