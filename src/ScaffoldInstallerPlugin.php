@@ -106,7 +106,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     private function installTaskfile(): void
     {
         $vendor = $this->config->get('vendor-dir');
-        $taskfilePath = $vendor . '/lullabot/drainpipe/scaffold/Taskfile.yml';
+        $taskfilePath = $vendor.'/lullabot/drainpipe/scaffold/Taskfile.yml';
 
         if (!file_exists('./Taskfile.yml')) {
             $this->io->write('<info>Creating initial Taskfile.yml...</info>');
@@ -156,7 +156,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     private function installGitignore(): void
     {
         $vendor = $this->config->get('vendor-dir');
-        $gitignorePath = $vendor . '/lullabot/drainpipe/scaffold/gitignore';
+        $gitignorePath = $vendor.'/lullabot/drainpipe/scaffold/gitignore';
         if (!file_exists('./.gitignore')) {
             $this->io->write('<info>Creating initial .gitignore...</info>');
             $fs = new Filesystem();
@@ -228,7 +228,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $fs->ensureDirectoryExists('.gitlab/drainpipe');
                 $fs->copy("$scaffoldPath/gitlab/DDEV.gitlab-ci.yml", ".gitlab/drainpipe/DDEV.gitlab-ci.yml");
                 $this->io->write("🪠 [Drainpipe] .gitlab/drainpipe/DDEV.gitlab-ci.yml installed");
-            } else {
+            }
+            else {
                 $fs->ensureDirectoryExists('./.drainpipe/gitlab');
                 $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
                 $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
@@ -239,7 +240,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     $fs->ensureDirectoryExists('./.drainpipe/gitlab');
                     $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
                     $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
-                } else {
+                }
+                else {
                     $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
                 }
 
@@ -248,7 +250,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     // .drainpipeignore
                     if (!file_exists('.drainpipeignore')) {
                         $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
-                    } else {
+                    }
+                    else {
                         $contents = file_get_contents('./.drainpipeignore');
                         if (strpos($contents, '/web/sites/default/files') === false) {
                             $this->io->warning(
@@ -285,10 +288,12 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
                     if (file_exists('./.ddev/config.yaml')) {
                         $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
-                    } else {
+                    }
+                    else {
                         $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
-                } else if ($github === 'ComposerLockDiff') {
+                }
+                else if ($github === 'ComposerLockDiff') {
                     $fs->ensureDirectoryExists('./.github/workflows');
                     $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
                 }
