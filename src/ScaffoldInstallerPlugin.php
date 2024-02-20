@@ -384,8 +384,11 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $fs->ensureDirectoryExists('./.tugboat/steps');
                 $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
                 $twig = new Environment($loader);
+                // Reinstate the overrides file.
+                if (isset($tugboatConfigOverrideFile)) {
+                    file_put_contents('./.tugboat/config.override.yml', $tugboatConfigOverrideFile);
+                }
                 file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
-                file_put_contents('./.tugboat/config.override.yml', $tugboatConfigOverrideFile);
                 file_put_contents('./.tugboat/steps/1-init.sh', $twig->render('steps/1-init.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/2-update.sh', $twig->render('steps/2-update.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/3-build.sh', $twig->render('steps/3-build.sh.twig', $tugboatConfig));
