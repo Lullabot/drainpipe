@@ -15,7 +15,9 @@ services:
 
 {% if webserver_aliases %}
     aliases:
-      {{ webserver_aliases }}
+{% for alias in webserver_aliases %}
+        - {{ alias }}
+{% endfor %}
 
 {% endif %}
     commands:

@@ -298,7 +298,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat'])) {
             // Look for a config override file before we wipe the directory.
-            $configOverride = file_exists('./.tugboat/config.override.yml') ?
+            $tugboatConfigOverride = file_exists('./.tugboat/config.override.yml') ?
                 Yaml::parseFile('./.tugboat/config.override.yml') :
                 [];
 
@@ -335,8 +335,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             }
 
             // Add config overrides.
-            if (!empty($configOverride['aliases'])) {
-                $tugboatConfig['webserver_aliases'] = Yaml::dump($configOverride['aliases']);
+            if (!empty($tugboatConfigOverride['aliases'])) {
+                $tugboatConfig['webserver_aliases'] = $tugboatConfigOverride['aliases'];
             }
 
             // Add Redis service.
@@ -381,6 +381,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
                 $twig = new Environment($loader);
                 file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/config.override.yml', Yaml::dump($tugboatConfigOverride));
                 file_put_contents('./.tugboat/steps/1-init.sh', $twig->render('steps/1-init.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/2-update.sh', $twig->render('steps/2-update.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/3-build.sh', $twig->render('steps/3-build.sh.twig', $tugboatConfig));

@@ -10,11 +10,6 @@ services:
     depends:
       - mariadb
 
-    aliases:
-      - example
-      - storybook
-      - foo.bar.baz
-
     commands:
       init: ./.tugboat/steps/1-init.sh
       update: ./.tugboat/steps/2-update.sh
