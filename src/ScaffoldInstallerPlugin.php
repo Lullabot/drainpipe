@@ -344,7 +344,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             // Add supported config overrides.
             foreach (['aliases','urls','visualdiff','screenshot'] as $key) {
                 if (!empty($tugboatConfigOverride['php'][$key])) {
-                    $tugboatConfig["php_${key}"] = Yaml::dump($tugboatConfigOverride['php'][$key], 6, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+                    $tugboatConfig['php_' . $key] = Yaml::dump($tugboatConfigOverride['php'][$key], 6, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
                 }
             }
 
