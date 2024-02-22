@@ -4,9 +4,17 @@
     "config:base"
   ],
   "rangeStrategy": "bump",
+  "ignoreDeps": ["drainpipe"],
   "packageRules": [
     {
-      "matchPackageNames": ["symfony/yaml", "symfony/php-unit-bridge"],
+      "matchPackageNames": [
+        "drush/drush",
+        "phpunit/phpunit",
+        "symfony/php-unit-bridge",
+        "symfony/yaml",
+        "twig/twig",
+        "vlucas/phpdotenv"
+      ],
       "matchUpdateTypes": ["minor", "patch"],
       "enabled": false
     }

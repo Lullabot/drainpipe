@@ -356,6 +356,14 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $tugboatConfig['memory_cache_version'] = array_pop($redisImage);
             }
 
+            // Add Elasticsearch service.
+            if (file_exists('./.ddev/docker-compose.elasticsearch.yaml')) {
+                $esConfig = Yaml::parseFile('.ddev/docker-compose.elasticsearch.yaml');
+                $esImage = explode(':', $esConfig['services']['elasticsearch']['image']);
+                $tugboatConfig['search_type'] = 'elasticsearch';
+                $tugboatConfig['search_version'] = array_pop($esImage);
+            }
+
             // Add commands to Task.
             if (file_exists('Taskfile.yml')) {
                 // Get steps out of the Taskfile.
@@ -389,7 +397,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $fs->ensureDirectoryExists('./.tugboat/steps');
                 $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
                 $twig = new Environment($loader);
-                // Reinstate the overrides file.
+                // Reinstate the override file.
                 if (isset($tugboatConfigOverrideFile)) {
                     file_put_contents('./.tugboat/config.override.yml', $tugboatConfigOverrideFile);
                 }
