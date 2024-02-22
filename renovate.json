@@ -15,8 +15,7 @@
         "twig/twig",
         "vlucas/phpdotenv"
       ],
-      "matchUpdateTypes": ["minor", "patch"],
-      "enabled": false
+      "rangeStrategy": "widen"
     }
   ]
 }
