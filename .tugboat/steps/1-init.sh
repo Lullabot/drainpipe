@@ -42,6 +42,11 @@ docker-php-ext-install gd
 # of GD. Lullabot will likely be publishing an ADR recommending it too.
 apt-get install -y imagemagick
 
+# Install the PHP redis extension.
+
+yes '' | pecl install -f redis
+echo 'extension=redis.so' > /usr/local/etc/php/conf.d/redis.ini
+
 # Install node
 apt-get install -y ca-certificates gnupg
 mkdir -p /etc/apt/keyrings
