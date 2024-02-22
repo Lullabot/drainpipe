@@ -369,6 +369,18 @@ includes:
 
 See below for CI specific integrations for hosting providers.
 
+### Acquia
+Acquia specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.yml).
+Add the following to your `Taskfile.yml`'s `includes` section to use them:
+```yml
+includes:
+  acquia: ./vendor/lullabot/drainpipe/tasks/acquia.yml
+```
+|                        |                                                                                                                                                                |
+|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `task acquia:fetch-db` | Fetches a database from Pantheon. Set `ACQUIA_ENVIRONMENT_ID` in Taskfile `vars`, along with `ACQUIA_API_KEY` and `ACQUIA_API_SECRET` as environment variables |
+
+
 ## GitHub Actions Integration
 
 Add the following to `composer.json` for generic GitHub Actions that will be
