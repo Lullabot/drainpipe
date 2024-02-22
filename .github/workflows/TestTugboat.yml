@@ -28,12 +28,17 @@ jobs:
           git-email: no-reply@example.com
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      # Lock in versions so tests know what to expect.
+      # Redis tag v1.2.0 == 6-bullseye
+      # Elasticsearch tag v0.3.2 == 7.17.14
       - name: Setup Project
         run: |
           ddev config --auto
           ddev config --php-version "8.1"
           ddev config --nodejs-version "18"
           ddev config --database=mariadb:10.4
+          ddev get ddev/ddev-redis --version v1.2.0
+          ddev get ddev/ddev-elasticsearch --version v0.3.2
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
@@ -49,13 +54,13 @@ jobs:
       # preview - they should be the same.
       - name: Test Generated Files
         run: |
-          cmp -b drainpipe/.tugboat/config.yml .tugboat/config.yml
+          diff -up drainpipe/.tugboat/config.yml .tugboat/config.yml
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/1-init.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/2-update.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/3-build.sh
-          cmp -b drainpipe/.tugboat/steps/1-init.sh .tugboat/steps/1-init.sh
-          cmp -b drainpipe/.tugboat/steps/2-update.sh .tugboat/steps/2-update.sh
-          cmp -b drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
+          diff -up drainpipe/.tugboat/steps/1-init.sh .tugboat/steps/1-init.sh
+          diff -up drainpipe/.tugboat/steps/2-update.sh .tugboat/steps/2-update.sh
+          diff -up drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
 
       - name: Add a build:tugboat step
         run: |

@@ -339,6 +339,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $tugboatConfig['memory_cache_version'] = array_pop($redisImage);
             }
 
+            if (file_exists('./.ddev/docker-compose.elasticsearch.yaml')) {
+                $esConfig = Yaml::parseFile('.ddev/docker-compose.elasticsearch.yaml');
+                $esImage = explode(':', $esConfig['services']['elasticsearch']['image']);
+                $tugboatConfig['search_type'] = 'elasticsearch';
+                $tugboatConfig['search_version'] = array_pop($esImage);
+            }
+
             if (file_exists('Taskfile.yml')) {
                 // Get steps out of the Taskfile.
                 $taskfile = Yaml::parseFile('./Taskfile.yml');
