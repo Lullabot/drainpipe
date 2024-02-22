@@ -394,6 +394,9 @@ They are composite actions which can be used in any of your workflows e.g.
     ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 ```
 
+Tests can be run locally with [act](https://github.com/nektos/act):
+`act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
+
 ### Composer Lock Diff
 Update Pull Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
