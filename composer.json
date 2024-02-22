@@ -16,7 +16,7 @@
         "drush/drush": "^10|^11|^12",
         "symfony/yaml": "^3|^4|^5|^6",
         "twig/twig": "^2|^3",
-        "vlucas/phpdotenv": "^4|^5",
+        "vlucas/phpdotenv": "5.6.0",
         "ext-json": "*"
     },
     "require-dev": {
