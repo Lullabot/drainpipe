@@ -13,6 +13,7 @@
     - ./vendor/bin/task snapshot:directory
     - ./vendor/bin/task deploy:git
     # Wait for Pantheon to sync
+    - terminus workflow:wait $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID
     - sleep 30
     - terminus aliases --only $PANTHEON_SITE_NAME --yes
     - |
