@@ -15,8 +15,7 @@
         "twig/twig",
         "vlucas/phpdotenv"
       ],
-      "matchUpdateTypes": ["minor", "patch"],
-      "enabled": false
+      "addLabels": ["test only - do not merge"]
     }
   ]
 }
