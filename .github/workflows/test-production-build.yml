@@ -12,8 +12,6 @@ jobs:
     strategy:
       matrix:
         php-version: [8.1, 8.2, 8.3]
-        include:
-          - composer-flags: --prefer-lowest --prefer-stable
 
     steps:
       - uses: actions/checkout@v4
@@ -42,7 +40,14 @@ jobs:
           composer create-project drupal/recommended-project drupal --ignore-platform-req=ext-gd
           cd drupal
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
-          composer update ${{ matrix.composer-flags }}
+          composer config extra.drupal-scaffold.gitignore true
+          composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe"]'
+          composer config --no-plugins allow-plugins.composer/installers true
+          composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          composer config minimum-stability dev
+          composer require "lullabot/drainpipe @dev" --with-all-dependencies
 
       - name: Run static tests
         run: |
