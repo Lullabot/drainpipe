@@ -64,8 +64,7 @@ runs:
 
         if [ "${{ inputs.replace-ddev-binary-url }}" != "" ]; then
           echo "Replacing ddev binary from ${{ inputs.replace-ddev-binary-url }}"
-          curl --silent --location --output /tmp/ddev.zip "${{ inputs.replace-ddev-binary-url }}"
-          unzip -o -d /usr/bin /tmp/ddev.zip
+          curl --silent --location "${{ inputs.replace-ddev-binary-url }}" | sudo unzip -o -d /usr/bin -
           ddev --version
         fi
 
