@@ -45,7 +45,7 @@ jobs:
           composer config --no-plugins allow-plugins.composer/installers true
           composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
           composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          composer config repositories.drainpipe --json '{"type": "path", "url": "../drainpipe", "options": {"symlink": false}}'
           composer config minimum-stability dev
           composer require "lullabot/drainpipe @dev" --with-all-dependencies
 
