@@ -21,12 +21,20 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+      - name: Turn on DDEV debug logging
+        run: |
+          echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Build from https://github.com/ddev/ddev/pull/5891
+          # GitHub only stores builds for 90 days, so we store a copy of this
+          # in Lullabot's Google Drive.
+          replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
       # Lock in versions so tests know what to expect.
       # Redis tag v1.2.0 == 6-bullseye
@@ -101,12 +109,20 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+      - name: Turn on DDEV debug logging
+        run: |
+          echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Build from https://github.com/ddev/ddev/pull/5891
+          # GitHub only stores builds for 90 days, so we store a copy of this
+          # in Lullabot's Google Drive.
+          replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
       - name: Setup Project
         run: |

@@ -26,11 +26,19 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+      - name: Turn on DDEV debug logging
+        run: |
+          echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
+          # Build from https://github.com/ddev/ddev/pull/5891
+          # GitHub only stores builds for 90 days, so we store a copy of this
+          # in Lullabot's Google Drive.
+          replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
       - name: Setup Project
         run: |
@@ -81,11 +89,19 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+      - name: Turn on DDEV debug logging
+        run: |
+          echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com#
+          # Build from https://github.com/ddev/ddev/pull/5891
+          # GitHub only stores builds for 90 days, so we store a copy of this
+          # in Lullabot's Google Drive.
+          replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
       - name: Start DDEV
         run: ddev start
@@ -115,11 +131,19 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+      - name: Turn on DDEV debug logging
+        run: |
+          echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com#
+          # Build from https://github.com/ddev/ddev/pull/5891
+          # GitHub only stores builds for 90 days, so we store a copy of this
+          # in Lullabot's Google Drive.
+          replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
       - name: Start DDEV
         run: ddev start
@@ -150,11 +174,19 @@ jobs:
 
        - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+       - name: Turn on DDEV debug logging
+         run: |
+           echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
        - name: Install DDEV
          uses: ./drainpipe/scaffold/github/actions/common/ddev
          with:
            git-name: Drainpipe Bot
            git-email: no-reply@example.com#
+           # Build from https://github.com/ddev/ddev/pull/5891
+           # GitHub only stores builds for 90 days, so we store a copy of this
+           # in Lullabot's Google Drive.
+           replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
        - name: Start DDEV
          run: ddev start
@@ -186,11 +218,19 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+      - name: Turn on DDEV debug logging
+        run: |
+          echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com#
+          # Build from https://github.com/ddev/ddev/pull/5891
+          # GitHub only stores builds for 90 days, so we store a copy of this
+          # in Lullabot's Google Drive.
+          replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
       - name: Start DDEV
         run: ddev start
@@ -225,11 +265,19 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+      - name: Turn on DDEV debug logging
+        run: |
+          echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com#
+          # Build from https://github.com/ddev/ddev/pull/5891
+          # GitHub only stores builds for 90 days, so we store a copy of this
+          # in Lullabot's Google Drive.
+          replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
       - name: Start DDEV
         run: ddev start
@@ -260,11 +308,19 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+      - name: Turn on DDEV debug logging
+        run: |
+          echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com#
+          # Build from https://github.com/ddev/ddev/pull/5891
+          # GitHub only stores builds for 90 days, so we store a copy of this
+          # in Lullabot's Google Drive.
+          replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
       - name: Start DDEV
         run: ddev start
@@ -296,11 +352,19 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+      - name: Turn on DDEV debug logging
+        run: |
+          echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com#
+          # Build from https://github.com/ddev/ddev/pull/5891
+          # GitHub only stores builds for 90 days, so we store a copy of this
+          # in Lullabot's Google Drive.
+          replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
       - name: Start DDEV
         run: ddev start
@@ -333,11 +397,19 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
+      - name: Turn on DDEV debug logging
+        run: |
+          echo "DDEV_DEBUG=true" >> $GITHUB_ENV
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com#
+          # Build from https://github.com/ddev/ddev/pull/5891
+          # GitHub only stores builds for 90 days, so we store a copy of this
+          # in Lullabot's Google Drive.
+          replace-ddev-binary-url:  https://drive.google.com/uc?export=download&id=1-IGFxQ_uBWZtK8yAyZmNX9xqubLT4SqY
 
       - name: Start DDEV
         run: ddev start

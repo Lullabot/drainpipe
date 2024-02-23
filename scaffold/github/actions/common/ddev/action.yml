@@ -19,6 +19,8 @@ inputs:
   version:
     description: "Override the DDEV version .e.g. '1.19.0'"
     required: false
+  replace-ddev-binary-url:
+    description: "Overwrite the ddev binary with a binary in a zip file. Useful for testing ddev pull requests."
 runs:
   using: "composite"
   steps:
@@ -58,6 +60,13 @@ runs:
           sudo apt install -y ddev=${{inputs.version}}
         else
           sudo apt install -y ddev
+        fi
+
+        if [ "${{ inputs.replace-ddev-binary-url }}" != "" ]; then
+          echo "Replacing ddev binary from ${{ inputs.replace-ddev-binary-url }}"
+          curl -s -L -o /tmp/ddev.zip "${{ inputs.replace-ddev-binary-url }}"
+          unzip -d /usr/bin /tmp/ddev.zip
+          ddev --version
         fi
 
         # Support local runner https://github.com/nektos/act
