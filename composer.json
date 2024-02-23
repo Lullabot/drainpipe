@@ -15,7 +15,7 @@
         "composer-plugin-api": "^2.0",
         "drush/drush": "^10|^11|^12",
         "symfony/yaml": "^3|^4|^5|^6",
-        "twig/twig": "^2|^3",
+        "twig/twig": "3.8.0",
         "vlucas/phpdotenv": "^4|^5",
         "ext-json": "*"
     },
