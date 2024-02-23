@@ -49,15 +49,15 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer config extra.drainpipe --json '{"tugboat": {}}'
           mkdir -p .tugboat
-          echo "php:" >  .tugboat/config-drainpipe-override.yml
-          echo "  aliases:" >> .tugboat/config-drainpipe-override.yml
-          echo "    - foo" >> .tugboat/config-drainpipe-override.yml
-          echo "  urls:" >> .tugboat/config-drainpipe-override.yml
-          echo "    - /" >> .tugboat/config-drainpipe-override.yml
-          echo "  screenshot:" >> .tugboat/config-drainpipe-override.yml
-          echo "    timeout: 45" >> .tugboat/config-drainpipe-override.yml
-          echo "  visualdiff:" >> .tugboat/config-drainpipe-override.yml
-          echo "    fullPage: false" >> .tugboat/config-drainpipe-override.yml
+          echo "php:" >  .tugboat/config.drainpipe-override.yml
+          echo "  aliases:" >> .tugboat/config.drainpipe-override.yml
+          echo "    - foo" >> .tugboat/config.drainpipe-override.yml
+          echo "  urls:" >> .tugboat/config.drainpipe-override.yml
+          echo "    - /" >> .tugboat/config.drainpipe-override.yml
+          echo "  screenshot:" >> .tugboat/config.drainpipe-override.yml
+          echo "    timeout: 45" >> .tugboat/config.drainpipe-override.yml
+          echo "  visualdiff:" >> .tugboat/config.drainpipe-override.yml
+          echo "    fullPage: false" >> .tugboat/config.drainpipe-override.yml
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
       # Compare the generated files to the ones used to build this repository
