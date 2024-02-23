@@ -19,6 +19,7 @@ services:
 {% if memory_cache_type %}
       - {{ memory_cache_type }}
 {% endif %}
+
     commands:
       init: ./.tugboat/steps/1-init.sh
       update: ./.tugboat/steps/2-update.sh

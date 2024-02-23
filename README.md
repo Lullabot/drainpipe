@@ -601,3 +601,14 @@ tugboat:php:init:
     - apt-get install -y libldap2-dev
     - docker-php-ext-install ldap
 ```
+
+Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
+it. The following keys can be added to your `config.yml` via a
+`.tugboat/config.drainppipe-override.yml` file:
+```
+php:
+  aliases:
+  urls:
+  screenshot:
+  visualdiff:
+```
