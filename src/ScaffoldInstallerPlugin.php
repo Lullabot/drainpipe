@@ -350,7 +350,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }, ARRAY_FILTER_USE_KEY);
                 $overrideOutput = [];
                 foreach (explode(PHP_EOL, Yaml::dump($tugboatConfigOverride['php'], 2, 2)) as $line) {
-                    $overrideOutput[] = str_repeat(' ', 2) . $line;
+                    $overrideOutput[] = str_repeat(' ', 4) . $line;
                 }
                 $tugboatConfig['overrides']['php'] = implode("\n", $overrideOutput);
             }
