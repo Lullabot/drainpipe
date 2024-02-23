@@ -19,7 +19,7 @@
         "mockery/mockery": "^1.6.7",
         "behat/mink": "^1.11.0",
         "symfony/phpunit-bridge": "^5|^6",
-        "lullabot/drainpipe": "*",
+        "lullabot/drainpipe": "3.4.1",
         "mglaman/phpstan-drupal": "^1.2.7",
         "symfony/yaml": "^3|^4|^5|^6",
         "drupal/coder": "^8.3.23",
