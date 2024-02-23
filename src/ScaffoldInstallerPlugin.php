@@ -303,7 +303,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat'])) {
             // Look for a config override file before we wipe the directory.
-            $tugboatConfigOverridePath = './.tugboat/config.override.yml';
+            $tugboatConfigOverride = [];
+            $tugboatConfigOverridePath = './.tugboat/config.drainpipe-override.yml';
             if (file_exists($tugboatConfigOverridePath)) {
                 $tugboatConfigOverride = Yaml::parseFile($tugboatConfigOverridePath);
                 $tugboatConfigOverrideFile = file_get_contents($tugboatConfigOverridePath);
@@ -324,6 +325,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'init' => [],
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
                 'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
+                'overrides' => ['php' => ''],
             ];
 
             // Read DDEV config.
@@ -341,11 +343,16 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
             }
 
-            // Add supported config overrides.
-            foreach (['aliases','urls','visualdiff','screenshot'] as $key) {
-                if (!empty($tugboatConfigOverride['php'][$key])) {
-                    $tugboatConfig['php_' . $key] = Yaml::dump($tugboatConfigOverride['php'][$key], 6, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+            // Filter out unsupported config overrides.
+            if (!empty($tugboatConfigOverride['php']) && is_array($tugboatConfigOverride['php'])) {
+                $tugboatConfigOverride['php'] = array_filter($tugboatConfigOverride['php'], function($key) {
+                    return in_array($key, ['aliases', 'urls', 'visualdiff', 'screenshot']);
+                }, ARRAY_FILTER_USE_KEY);
+                $overrideOutput = [];
+                foreach (explode(PHP_EOL, Yaml::dump($tugboatConfigOverride['php'], 2, 2)) as $line) {
+                    $overrideOutput[] = str_repeat(' ', 2) . $line;
                 }
+                $tugboatConfig['overrides']['php'] = implode("\n", $overrideOutput);
             }
 
             // Add Redis service.
@@ -399,7 +406,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $twig = new Environment($loader);
                 // Reinstate the override file.
                 if (isset($tugboatConfigOverrideFile)) {
-                    file_put_contents('./.tugboat/config.override.yml', $tugboatConfigOverrideFile);
+                    file_put_contents('./.tugboat/config.drainpipe-override.yml', $tugboatConfigOverrideFile);
                 }
                 file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/1-init.sh', $twig->render('steps/1-init.sh.twig', $tugboatConfig));
