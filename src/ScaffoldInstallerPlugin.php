@@ -352,7 +352,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 foreach (explode(PHP_EOL, Yaml::dump($tugboatConfigOverride['php'], 2, 2)) as $line) {
                     $overrideOutput[] = str_repeat(' ', 4) . $line;
                 }
-                $tugboatConfig['overrides']['php'] = implode("\n", $overrideOutput);
+                $tugboatConfig['overrides']['php'] = rtrim(implode("\n", $overrideOutput));
             }
 
             // Add Redis service.
