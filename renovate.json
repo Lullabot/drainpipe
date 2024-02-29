@@ -3,5 +3,19 @@
   "extends": [
     "config:base"
   ],
-  "rangeStrategy": "bump"
+  "rangeStrategy": "bump",
+  "ignoreDeps": ["drainpipe"],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "drush/drush",
+        "phpunit/phpunit",
+        "symfony/php-unit-bridge",
+        "symfony/yaml",
+        "twig/twig",
+        "vlucas/phpdotenv"
+      ],
+      "addLabels": ["test only - do not merge"]
+    }
+  ]
 }

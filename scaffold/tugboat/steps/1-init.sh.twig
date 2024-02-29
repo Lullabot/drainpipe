@@ -49,12 +49,18 @@ docker-php-ext-install gd
 # of GD. Lullabot will likely be publishing an ADR recommending it too.
 apt-get install -y imagemagick
 {% if memory_cache_type == "memcached" %}
-# Install the PHP memcache extension. The Drupal Redis module recommends
-# phpredis so no PHP extension is required.
+
+# Install the PHP memcache extension.
 
 apt-get install -y zlib1g-dev
-pecl install memcache
+yes '' | pecl install -f memcache
 echo 'extension=memcache.so' > /usr/local/etc/php/conf.d/memcache.ini
+{% elseif memory_cache_type == "redis" %}
+
+# Install the PHP redis extension.
+
+yes '' | pecl install -f redis
+echo 'extension=redis.so' > /usr/local/etc/php/conf.d/redis.ini
 {% endif %}
 
 # Install node

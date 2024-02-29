@@ -302,10 +302,19 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat'])) {
+            // Look for a config override file before we wipe the directory.
+            $tugboatConfigOverride = [];
+            $tugboatConfigOverridePath = './.tugboat/config.drainpipe-override.yml';
+            if (file_exists($tugboatConfigOverridePath)) {
+                $tugboatConfigOverride = Yaml::parseFile($tugboatConfigOverridePath);
+                $tugboatConfigOverrideFile = file_get_contents($tugboatConfigOverridePath);
+            }
+
+            // Wipe the Tugboat directory and define base config.
             $fs->removeDirectory('./.tugboat');
             $binaryInstallerPlugin = new BinaryInstallerPlugin();
             $tugboatConfig = [
-                'nodejs_version' =>  '18',
+                'nodejs_version' => '18',
                 'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm',
                 'database_type' => 'mariadb',
                 'database_version' => '10.6',
@@ -316,8 +325,10 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'init' => [],
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
                 'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
+                'overrides' => ['php' => ''],
             ];
 
+            // Read DDEV config.
             if (file_exists('./.ddev/config.yaml')) {
                 $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
                 $tugboatConfig['database_type'] = $ddevConfig['database']['type'];
@@ -332,6 +343,19 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
             }
 
+            // Filter out unsupported config overrides.
+            if (!empty($tugboatConfigOverride['php']) && is_array($tugboatConfigOverride['php'])) {
+                $tugboatConfigOverride['php'] = array_filter($tugboatConfigOverride['php'], function($key) {
+                    return in_array($key, ['aliases', 'urls', 'visualdiff', 'screenshot']);
+                }, ARRAY_FILTER_USE_KEY);
+                $overrideOutput = [];
+                foreach (explode(PHP_EOL, Yaml::dump($tugboatConfigOverride['php'], 2, 2)) as $line) {
+                    $overrideOutput[] = str_repeat(' ', 4) . $line;
+                }
+                $tugboatConfig['overrides']['php'] = rtrim(implode("\n", $overrideOutput));
+            }
+
+            // Add Redis service.
             if (file_exists('./.ddev/docker-compose.redis.yaml')) {
                 $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
                 $redisImage = explode(':', $redisConfig['services']['redis']['image']);
@@ -339,6 +363,15 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $tugboatConfig['memory_cache_version'] = array_pop($redisImage);
             }
 
+            // Add Elasticsearch service.
+            if (file_exists('./.ddev/docker-compose.elasticsearch.yaml')) {
+                $esConfig = Yaml::parseFile('.ddev/docker-compose.elasticsearch.yaml');
+                $esImage = explode(':', $esConfig['services']['elasticsearch']['image']);
+                $tugboatConfig['search_type'] = 'elasticsearch';
+                $tugboatConfig['search_version'] = array_pop($esImage);
+            }
+
+            // Add commands to Task.
             if (file_exists('Taskfile.yml')) {
                 // Get steps out of the Taskfile.
                 $taskfile = Yaml::parseFile('./Taskfile.yml');
@@ -365,11 +398,16 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 }
             }
 
+            // Write the config.yml and settings.tugboat.php files.
             if (count($tugboatConfig) > 0) {
                 $fs->ensureDirectoryExists('./.tugboat');
                 $fs->ensureDirectoryExists('./.tugboat/steps');
                 $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
                 $twig = new Environment($loader);
+                // Reinstate the override file.
+                if (isset($tugboatConfigOverrideFile)) {
+                    file_put_contents('./.tugboat/config.drainpipe-override.yml', $tugboatConfigOverrideFile);
+                }
                 file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/1-init.sh', $twig->render('steps/1-init.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/2-update.sh', $twig->render('steps/2-update.sh.twig', $tugboatConfig));
