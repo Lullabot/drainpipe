@@ -18,8 +18,8 @@ runs:
         chmod 700 ~/.ssh
         touch ~/.ssh/config
         chmod 600 ~/.ssh/config
-        if [ "{{ inputs.ssh-known-hosts}}" != "" ]; then
-          echo "$ {{ inputs.ssh-known-hosts }}" >> ~/.ssh/known_hosts
+        if [ "${{ inputs.ssh-known-hosts}}" != "" ]; then
+          echo "${{ inputs.ssh-known-hosts }}" >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
         fi
       shell: bash
