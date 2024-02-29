@@ -603,7 +603,6 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-<<<<<<< HEAD
 
 ## Peer Review Guidelines for Automated Updates
 
@@ -615,15 +614,19 @@ These are guidelines for conducting peer reviews on automated dependency update 
 
 All automated updates submitted by Renovate undergo a series of automated tests via GitHub Actions. These tests are designed to ensure compatibility and stability with the new versions of dependencies.
 
-## Semantic Versioning and Update Types
+All Renovate peer reviews regardless if they're a minor or patch release require:
+1. Reading the change logs carefully to understand the new features and fixes.
+   - Assess if the changes necessitate additional test coverage or could potentially impact existing functionality.
+   - Consider the implications of new features on the project's future development and maintenance.
+2. All tests and checks must pass
 
-Drainpipe adheres to semantic versioning, categorizing updates into patches, minor, and major updates. Understanding these categories is crucial for the review process:
+### Handling Version Ranges
 
-- **Patch Releases (`x.y.Z`)**: Updates that fix bugs without adding new features or breaking existing functionality. If all tests pass, these updates are generally safe to merge.
-- **Minor Point Releases (`x.Y.z`)**: Updates that introduce new features without breaking backward compatibility. While these are often safe to merge if all tests pass, they require more scrutiny:
-  - Read the change logs carefully to understand the new features and fixes.
-  - Assess if the changes necessitate additional test coverage or could potentially impact existing functionality.
-  - Consider the implications of new features on the project's future development and maintenance.
+Some dependencies allow multiple versions, like `"drush/drush": "^10|^11|^12"`. 
+- Renovate will create pull requests when any of these versions get patch or minor releases. 
+- We **DO NOT** want to merge these, because it would pin these packages to a specific version. 
+- We **DO** want to allow these pull requests to run checks. This will confirm that the latest version within the range Drainpipe supports is unlikely break builds.
+- After all GitHub Action checks pass, leave a comment on the pull request stating such, close the pull request, and delete the branch.
 
 ### Handling Test Failures
 
@@ -650,7 +653,6 @@ Occasionally, tests may fail due to transient issues or flakiness in the test su
 5. **Final Decision**:
    - For patch releases with all tests passing, proceed to merge the update.
    - For minor point releases, after thorough review and consideration, decide whether to merge the update or request manual testing before merging.
-=======
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
 it. The following keys can be added to your `config.yml` via a
 `.tugboat/config.drainppipe-override.yml` file:
@@ -661,4 +663,3 @@ php:
   screenshot:
   visualdiff:
 ```
->>>>>>> main
