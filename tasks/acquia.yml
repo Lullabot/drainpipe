@@ -5,6 +5,7 @@ tasks:
     desc: "Fetches a database from Acquia"
     env:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
+      DB_NAME: '{{default "default" .DB_NAME}}'
     cmds:
       - mkdir -p $DB_DIR
       - rm -f $DB_DIR/db.sql.gz $DB_DIR/db.sql
@@ -13,7 +14,7 @@ tasks:
       - echo "💧 Authorising with Acquia"
       - acli auth:login --no-interaction --key=${ACQUIA_API_KEY} --secret=${ACQUIA_API_SECRET}
       - echo "💧 Fetching database from Acquia"
-      - acli pull:database {{.ACQUIA_ENVIRONMENT_ID}} default --no-import --no-interaction
+      - acli pull:database {{.ACQUIA_ENVIRONMENT_ID}} $DB_NAME --no-import --no-interaction
       - |
         DB=$(ls -t /tmp/*.sql.gz | head -1)
         mv $DB $DB_DIR/db.sql.gz
