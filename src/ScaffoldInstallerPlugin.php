@@ -220,6 +220,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     private function installCICommands(): void
     {
         $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
+        $actionsPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/.github/actions';
         $fs = new Filesystem();
         // GitLab
         $fs->removeDirectory('./.drainpipe/gitlab');
@@ -318,9 +319,12 @@ EOT;
             }
             if (isset($this->extra['drainpipe']['acquia']['github'])) {
                 $fs->removeDirectory('./.github/actions/drainpipe/acquia');
+                $fs->removeDirectory('./.github/actions/drainpipe/common');
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
+                $fs->ensureDirectoryExists('./.github/actions/drainpipe/common');
                 $fs->ensureDirectoryExists('./.github/workflows');
-                $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
+                $fs->copy("$actionsPath/acquia", './.github/actions/drainpipe/acquia');
+                $fs->copy("$actionsPath/common", './.github/actions/drainpipe/common');
                 if (!file_exists('.drainpipeignore')) {
                     $fs->copy("$scaffoldPath/acquia/.drainpipeignore", '.drainpipeignore');
                 }

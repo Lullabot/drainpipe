@@ -25,21 +25,15 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./.github/actions/drainpipe/set-env
-
     - name: Create GitHub Deployment
-      uses: ../../common/deployment-create
+      uses: .github/actions/drainpipe/common/deployment-create
       with:
         github-token: ${{ inputs.github-token }}
         environment: ${{ inputs.environment }}
 
     - name: Put side in Maintenance Mode
       run: |
-        if [[ -f ".github/actions/drainpipe/set-env/bash_aliases" ]]; then
-          source .github/actions/drainpipe/set-env/bash_aliases
-        else
-          source ../../common/set-env/bash_aliases
-        fi
+        source .github/actions/drainpipe/common/set-env/bash_aliases
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
@@ -48,7 +42,7 @@ runs:
       shell: bash
 
     - name: Push to Acquia
-      uses: ../push
+      uses: .github/actions/drainpipe/acquia/push
       with:
         environment: ${{ inputs.environment }}
         commit-message: ${{ inputs.commit-message }}
@@ -56,13 +50,13 @@ runs:
         api-secret: ${{ inputs.api-secret }}
 
     - name: Run updates
-      uses: ../update
+      uses: .github/actions/drainpipe/acquia/update
       with:
         environment: ${{ inputs.environment }}
         run-installer: ${{ inputs.run-installer }}
 
     - name: Set Deployment Status
-      uses: ../../common/deployment-status
+      uses: .github/actions/drainpipe/common/deployment-status
       with:
         github-token: ${{ inputs.github-token }}
         environment-url: ${{ inputs.environment-url }}

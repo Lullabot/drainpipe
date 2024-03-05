@@ -12,11 +12,7 @@ runs:
   steps:
     - name: Update site on Acquia
       run: |
-        if [[ -f ".github/actions/drainpipe/set-env/bash_aliases" ]]; then
-          source .github/actions/drainpipe/set-env/bash_aliases
-        else
-          source ../../common/set-env/bash_aliases
-        fi
+        source .github/actions/drainpipe/common/set-env/bash_aliases
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}

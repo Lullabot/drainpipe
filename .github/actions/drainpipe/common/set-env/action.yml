@@ -1,0 +1,17 @@
+name: 'Set Env'
+description: 'Creates some useful environment variables'
+inputs:
+  github-api-token:
+    description: "GitHub API token"
+    required: true
+  github-api-token-username:
+    description: "GitHub API token username"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        echo "Setting Drainpipe environment variables:"
+        echo "DRAINPIPE_PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> $GITHUB_ENV
+        echo "DRAINPIPE_SHA=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)" >> $GITHUB_ENV
+      shell: bash

@@ -18,11 +18,7 @@ runs:
   steps:
     - name: Push to Acquia
       run: |
-        if [[ -f ".github/actions/drainpipe/set-env/bash_aliases" ]]; then
-          source .github/actions/drainpipe/set-env/bash_aliases
-        else
-          source ../../common/set-env/bash_aliases
-        fi
+        source .github/actions/drainpipe/common/set-env/bash_aliases
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENV_INFO=$(drainpipe_exec "acli api:environments:find ${{ inputs.environment }}")
         VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
