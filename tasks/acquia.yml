@@ -1,6 +1,12 @@
 version: '3'
 
 tasks:
+  auth:
+    cmds:
+      - if [ -z "$ACQUIA_API_KEY" ]; then echo "ACQUIA_API_KEY is empty, please add it to your .env file"; exit 1; fi
+      - if [ -z "$ACQUIA_API_SECRET" ]; then echo "ACQUIA_API_SECRET is empty, please add it to your .env file"; exit 1; fi
+      - echo "💧 Authorising with Acquia"
+      - acli auth:login --no-interaction --key=${ACQUIA_API_KEY} --secret=${ACQUIA_API_SECRET}
   fetch-db:
     desc: "Fetches a database from Acquia"
     env:
@@ -9,10 +15,7 @@ tasks:
     cmds:
       - mkdir -p $DB_DIR
       - rm -f $DB_DIR/db.sql.gz $DB_DIR/db.sql
-      - if [ -z "$ACQUIA_API_KEY" ]; then echo "ACQUIA_API_KEY is empty, please add it to your .env file"; exit 1; fi
-      - if [ -z "$ACQUIA_API_SECRET" ]; then echo "ACQUIA_API_SECRET is empty, please add it to your .env file"; exit 1; fi
-      - echo "💧 Authorising with Acquia"
-      - acli auth:login --no-interaction --key=${ACQUIA_API_KEY} --secret=${ACQUIA_API_SECRET}
+      - task: auth
       - echo "💧 Fetching database from Acquia"
       - acli pull:database {{.ACQUIA_ENVIRONMENT_ID}} $DB_NAME --no-import --no-interaction
       - |

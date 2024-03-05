@@ -1,0 +1,90 @@
+name: "Test Acquia"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency: development
+
+jobs:
+  Test-Pantheon:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+          ssh-private-key: ${{ secrets.ACQUIA_SSH_PRIVATE_KEY }}
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config extra.drainpipe.acquia --json '{"settings": true, "github": []}'
+          ddev composer config minimum-stability dev
+          ddev composer require lullabot/drainpipe --with-all-dependencies
+
+      - name: Install Drupal
+        run: |
+          ddev drush site:install minimal -y
+          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+          ddev drush config:export -y
+
+      - name: Create .drainpipeignore
+        run: |
+          echo "/web/sites/default/files" >> .drainpipeignore
+          echo "/.ddev" >> .drainpipeignore
+          echo "settings.ddev.php" >> .drainpipeignore
+          echo "/drainpipe" >> .drainpipeignore
+
+      - name: Create settings.php
+        run: |
+          echo '<?php' > web/sites/default/settings.php
+          echo "\$settings['container_yamls'][] = __DIR__ . '/services.yml';" >> web/sites/default/settings.php
+          echo "include __DIR__ . \"/settings.acquia.php\";" >> web/sites/default/settings.php
+          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+
+      - name: Snapshot Project
+        env:
+          directory: /tmp/release
+          remote:
+          message:
+          site:
+        run: |
+          echo "/drainpipe" >> .drainpipeignore
+          ddev task snapshot:directory directory=/tmp/release
+
+      - name: Clone from production to dev
+        uses: ./drainpipe/scaffold/github/actions/acquia/clone-env
+        with:
+          source-environment: lullabotsandbox.prod
+          target-environment: lullabotsandbox.dev
+          api-key: ${{ secrets.ACQUIA_API_KEY }}
+          api-secret: ${{ secrets.ACQUIA_API_SECRET }}
+
+      - name: Deploy to dev
+        uses: ./drainpipe/scaffold/github/actions/acquia/deploy
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          environment: lullabotsandbox.dev
+          environment-url: https://lullabotsandboxffi2ugpgwh.devcloud.acquia-sites.com
+          run-installer: true
+          commit-message: ${{ github.sha }}
+          api-key: ${{ secrets.ACQUIA_API_KEY }}
+          api-secret: ${{ secrets.ACQUIA_API_SECRET }}

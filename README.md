@@ -380,6 +380,16 @@ includes:
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `task acquia:fetch-db` | Fetches a database from Pantheon. Set `ACQUIA_ENVIRONMENT_ID` in Taskfile `vars`, along with `ACQUIA_API_KEY` and `ACQUIA_API_SECRET` as environment variables |
 
+To enable auto configuration of Acquia Cloud settings:
+```json
+"extra": {
+    "drainpipe": {
+        "acquia": {
+            "settings": true
+        },
+    }
+}
+```
 
 ## GitHub Actions Integration
 
@@ -388,7 +398,9 @@ copied to `.github/actions/drainpipe` in your project:
 ```json
 "extra": {
   "drainpipe": {
-    "github": []
+    "acquia": {
+      "github": []
+    }
   }
 }
 ```

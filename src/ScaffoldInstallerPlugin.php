@@ -300,6 +300,33 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             }
         }
 
+        if (isset($this->extra['drainpipe']['acquia'])) {
+            if (!empty($this->extra['drainpipe']['acquia']['settings'])) {
+                // settings.acquia.php
+                if (!file_exists('./web/sites/default/settings.acquia.php')) {
+                    $fs->copy("$scaffoldPath/acquia/settings.acquia.php", './web/sites/default/settings.acquia.php');
+                }
+                if (file_exists('./web/sites/default/settings.php')) {
+                    $settings = file_get_contents('./web/sites/default/settings.php');
+                    if (strpos($settings, 'settings.acquia.php') === false) {
+                        $include = <<<'EOT'
+include __DIR__ . "/settings.acquia.php";
+EOT;
+                        file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
+                    }
+                }
+            }
+            if (isset($this->extra['drainpipe']['acquia']['github'])) {
+                $fs->removeDirectory('./.github/actions/drainpipe/acquia');
+                $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
+                if (!file_exists('.drainpipeignore')) {
+                    $fs->copy("$scaffoldPath/acquia/.drainpipeignore", '.drainpipeignore');
+                }
+            }
+        }
+
         // Tugboat
         if (isset($this->extra['drainpipe']['tugboat'])) {
             $fs->removeDirectory('./.tugboat');

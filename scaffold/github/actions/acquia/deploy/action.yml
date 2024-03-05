@@ -1,0 +1,69 @@
+name: 'Deploy a branch to Acquia'
+description: 'Deploys a review app to Pantheon Multidev'
+inputs:
+  github-token:
+    description: "GitHub token as generated automatically in secrets.GITHUB_TOKEN"
+    required: true
+  environment:
+    description: "The environment to push to, either uuid or alias"
+    required: true
+  environment-url:
+    description: "The environment URL"
+    required: true
+  run-installer:
+    description: "Whether or not to run the Drupal site installer. Defaults to false."
+    required: false
+  commit-message:
+    description: "The commit message to use when pushing to Acquia"
+    required: true
+  api-key:
+    description: "Acquia API Key"
+    required: true
+  api-secret:
+    description: "Acquia API Secret"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/drainpipe/set-env
+
+    - name: Create GitHub Deployment
+      uses: ../../common/deployment-create
+      with:
+        github-token: ${{ inputs.github-token }}
+        environment: ${{ inputs.environment }}
+
+    - name: Put side in Maintenance Mode
+      run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+        ENVIRONMENT="${{ inputs.environment }}"
+        APPLICATION=${ENVIRONMENT%.*}
+        drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
+        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabot8.dev"
+      shell: bash
+
+    - name: Push to Acquia
+      uses: ../push
+      with:
+        environment: ${{ inputs.environment }}
+        commit-message: ${{ inputs.commit-message }}
+        api-key: ${{ inputs.api-key }}
+        api-secret: ${{ inputs.api-secret }}
+
+    - name: Run updates
+      uses: ../update
+      with:
+        environment: ${{ inputs.environment }}
+        run-installer: ${{ inputs.run-installer }}
+
+    - name: Set Deployment Status
+      uses: ../../common/deployment-status
+      with:
+        github-token: ${{ inputs.github-token }}
+        environment-url: ${{ inputs.environment-url }}
+
+    - name: Take site out of Maintenance Mode
+      run: |
+        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@${{ inputs.environment }}"
+      shell: bash
