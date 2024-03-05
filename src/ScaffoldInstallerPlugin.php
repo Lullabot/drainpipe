@@ -318,13 +318,11 @@ EOT;
                 }
             }
             if (isset($this->extra['drainpipe']['acquia']['github'])) {
-                $fs->removeDirectory('./.github/actions/drainpipe/acquia');
-                $fs->removeDirectory('./.github/actions/drainpipe/common');
+                $fs->removeDirectory('./.github/actions/drainpipe');
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
-                $fs->ensureDirectoryExists('./.github/actions/drainpipe/common');
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$actionsPath/acquia", './.github/actions/drainpipe/acquia');
-                $fs->copy("$actionsPath/common", './.github/actions/drainpipe/common');
+                $fs->copy("$actionsPath/common", './.github/actions/drainpipe');
                 if (!file_exists('.drainpipeignore')) {
                     $fs->copy("$scaffoldPath/acquia/.drainpipeignore", '.drainpipeignore');
                 }
