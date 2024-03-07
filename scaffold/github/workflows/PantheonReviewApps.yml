@@ -48,7 +48,7 @@ jobs:
       - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
         with:
           pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
-          terminus-plugins: ${{ secrets.TERMINUS_PLUGINS }}
+          terminus-plugins: ${{ vars.TERMINUS_PLUGINS || secrets.TERMINUS_PLUGINS }}
 
       - uses: php-actions/composer@v6
 
