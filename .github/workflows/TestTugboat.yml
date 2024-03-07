@@ -68,9 +68,11 @@ jobs:
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/1-init.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/2-update.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/3-build.sh
+          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/4-online.sh
           diff -up drainpipe/.tugboat/steps/1-init.sh .tugboat/steps/1-init.sh
           diff -up drainpipe/.tugboat/steps/2-update.sh .tugboat/steps/2-update.sh
           diff -up drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
+          diff -up drainpipe/.tugboat/steps/4-online.sh .tugboat/steps/4-online.sh
 
       - name: Add a build:tugboat step
         run: |

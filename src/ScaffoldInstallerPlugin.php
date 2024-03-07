@@ -323,6 +323,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'build_command' => 'build',
                 'update_command' => 'drupal:update',
                 'init' => [],
+                'online_command' => 'online',
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
                 'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
                 'overrides' => ['php' => ''],
@@ -387,6 +388,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 if (isset($taskfile['tasks']['update:tugboat'])) {
                     $tugboatConfig['update_command'] = 'update:tugboat';
                 }
+                if (isset($taskfile['tasks']['online:tugboat'])) {
+                    $tugboatConfig['online_command'] = 'online:tugboat';
+                }
                 if (isset($taskfile['tasks']['tugboat:php:init'])) {
                     $tugboatConfig['init']['php'] = true;
                 }
@@ -412,9 +416,11 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 file_put_contents('./.tugboat/steps/1-init.sh', $twig->render('steps/1-init.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/2-update.sh', $twig->render('steps/2-update.sh.twig', $tugboatConfig));
                 file_put_contents('./.tugboat/steps/3-build.sh', $twig->render('steps/3-build.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/4-online.sh', $twig->render('steps/4-online.sh.twig', $tugboatConfig));
                 chmod('./.tugboat/steps/1-init.sh', 0755);
                 chmod('./.tugboat/steps/2-update.sh', 0755);
                 chmod('./.tugboat/steps/3-build.sh', 0755);
+                chmod('./.tugboat/steps/4-online.sh', 0755);
 
                 if ($tugboatConfig['database_type'] === 'mysql') {
                     $fs->ensureDirectoryExists('./.tugboat/scripts');
