@@ -514,10 +514,10 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 - Run `composer install`
 - Add your Pantheon `site-name` to the last job in the new
   workflow file at `.github/workflows/PantheonReviewApps.yml`
-- Add the following secrets to your repository:
-  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
-  - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
-  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
+- Add the following [variables to your GitLab repository](https://docs.gitlab.com/ee/ci/variables/#for-a-project):
+  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
+  - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
+  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`  (enable the _Mask variable_ checkbox)
   - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
