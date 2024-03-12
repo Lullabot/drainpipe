@@ -370,7 +370,7 @@ includes:
 See below for CI specific integrations for hosting providers.
 
 ### Acquia
-Acquia specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.yml).
+Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
 ```yml
 includes:
