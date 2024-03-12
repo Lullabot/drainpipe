@@ -13,6 +13,7 @@ tests/fixtures/drainpipe-test-project/*
 !.yarn/sdks
 !.yarn/versions
 .npmrc
+lerna-debug.log
 
 ################
 # Editors / OS #

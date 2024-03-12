@@ -10,27 +10,26 @@
         "psr-4": {"Lullabot\\DrainpipeDev\\Tests\\Functional\\": "tests/src/functional/"}
     },
     "require": {
-        "php": "^7.3||^8.0",
+        "php": "^8.1",
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
         "phpunit/phpunit": "^8|^9",
-        "j13k/yaml-lint": "^1.1",
-        "sserbin/twig-linter": "^3.0",
-        "mikey179/vfsstream": "^1.6",
-        "mockery/mockery": "^1.4",
-        "behat/mink": "^1.8",
-        "symfony/phpunit-bridge": "^5.3",
+        "sserbin/twig-linter": "^3.1.0",
+        "mikey179/vfsstream": "^1.6.11",
+        "mockery/mockery": "^1.6.9",
+        "behat/mink": "^1.11.0",
+        "symfony/phpunit-bridge": "^5|^6",
         "lullabot/drainpipe": "*",
-        "mglaman/phpstan-drupal": "^1.0.3",
-        "symfony/yaml": "^4|^5|^6",
-        "drupal/coder": "^8.3",
-        "friends-of-behat/mink-browserkit-driver": "^1.5",
-        "tijsverkoyen/convert-to-junit-xml": "^1.9",
-        "phpstan/phpstan-deprecation-rules": "^1.0.0",
+        "mglaman/phpstan-drupal": "^1.2.7",
+        "symfony/yaml": "^3|^4|^5|^6",
+        "drupal/coder": "^8.3.23",
+        "behat/mink-browserkit-driver": "^2.2.0",
+        "tijsverkoyen/convert-to-junit-xml": "^1.11.0",
+        "phpstan/phpstan-deprecation-rules": "^1.1.4",
         "phpspec/prophecy-phpunit": "^2"
     },
     "require-dev": {
-        "composer/composer": "^2.0"
+        "composer/composer": "^2.7.2"
     },
     "bin": [
         "bin/drainpipe-twig-linter",

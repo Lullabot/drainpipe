@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   Test-PHPUnit-Functional:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
@@ -20,7 +20,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: drainpipe
 
@@ -64,25 +64,25 @@ jobs:
           ddev drush site:install -y
           ddev drush user:password admin password
           ddev task test:phpunit:functional format=junit
-          docker logs -s chrome | tee test_result/ddev-chrome.log
-          docker logs -s firefox | tee test_result/ddev-firefox.log
+          docker logs ddev-drainpipe-chrome | tee test_result/ddev-chrome.log
+          docker logs ddev-drainpipe-firefox | tee test_result/ddev-firefox.log
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test_result
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@v2
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
         with:
-          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
+          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
           contains: 18
           expected_result: PASSED
 
   Test-PHPUnit-Functional-DTT:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
@@ -90,7 +90,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: drainpipe
 
@@ -133,12 +133,12 @@ jobs:
           ddev drush site:install -y
           ddev drush user:password admin password
           ddev task test:phpunit:functional format=junit
-          docker logs -s chrome | tee test_result/ddev-chrome.log
-          docker logs -s firefox | tee test_result/ddev-firefox.log
+          docker logs ddev-drainpipe-chrome | tee test_result/ddev-chrome.log
+          docker logs ddev-drainpipe-firefox | tee test_result/ddev-firefox.log
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test_result
           path: test_result
@@ -146,12 +146,12 @@ jobs:
       - name: Confirm All PHPUnit Functional Tests were run
         uses: GuillaumeFalourd/assert-command-line-output@v2
         with:
-          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
+          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
           contains: 21
           expected_result: PASSED
 
   Test-PHPUnit-Static:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
@@ -159,7 +159,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: drainpipe
 
@@ -203,7 +203,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test_result
           path: test_result

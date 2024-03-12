@@ -10,12 +10,12 @@ concurrency:
 
 jobs:
   Test-GitHub-Actions:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: drainpipe
 
@@ -52,7 +52,7 @@ jobs:
         run: ddev task "github:actions:lint directories='./drainpipe/scaffold/github/actions ./drainpipe/scaffold/github/workflows'"
 
       - name: Run Database Updates
-        run: ddev task drupal:update
+        run: ddev task update
 
       - name: Create pantheon.yml
         run: |

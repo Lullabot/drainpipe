@@ -58,7 +58,7 @@ ddev restart
 ```
 
 This will scaffold out various files, most importantly a `Taskfile.yml` in the
-root of your repository. Task is a task runner / build tool that aims to be
+root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool that aims to be
 simpler and easier to use than, for example, GNU Make. Since it's written in Go,
 Task is just a single binary and has no other dependencies. It's also
 cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
@@ -83,6 +83,22 @@ ln -s web/ docroot
 ```
 
 ---
+
+## Database Updates
+
+The `drupal:update` command follows the same procedure as the
+['drush deploy'](https://www.drush.org/12.x/deploycommand/) command, with the
+exception that it runs the configuration import twice as in some cases the
+import can fail due to memory exhaustion before completion.
+
+```
+drush updatedb --no-cache-clear
+drush cache:rebuild
+drush config:import || true
+drush config:import
+drush cache:rebuild
+drush deploy:hook
+```
 
 ## .env support
 Drainpipe will add `.env` file support for managing environment variables.
@@ -390,6 +406,9 @@ They are composite actions which can be used in any of your workflows e.g.
     ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 ```
 
+Tests can be run locally with [act](https://github.com/nektos/act):
+`act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
+
 ### Composer Lock Diff
 Update Pull Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
@@ -437,7 +456,40 @@ Add the following to `composer.json` for GitLab helpers:
 
 This will import [`scaffold/gitlab/Common.gitlab-ci.yml`](scaffold/gitlab/Common.gitlab-ci.yml),
 which provides helpers that can be used in GitLab CI with [includes and
-references](https://docs.gitlab.com/ee/ci/yaml/yaml_specific_features.html#reference-tags).
+references](https://docs.gitlab.com/ee/ci/yaml/yaml_specific_features.html#reference-tags),
+or `scaffold/gitlab/DDEV.gitlab-ci.yml` if you are using DDEV.
+
+```
+include:
+  - local: '.gitlab/drainpipe/DDEV.gitlab-ci.ymll'
+
+variables:
+  DRAINPIPE_DDEV_GIT_EMAIL: drainpipe-bot@example.com
+  DRAINPIPE_DDEV_GIT_NAME: Drainpipe Bot
+
+build:
+  stage: build
+  interruptible: true
+  script:
+    - !reference [.drainpipe_setup_ddev, script]
+    - composer install
+    - ddev restart
+    - ddev drush site:install minimal -y
+    - echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+    - ddev drush config:export -y
+    - ddev task update
+```
+
+Available variables are:
+
+| Variable                          |                                                                                                                                    |
+|-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| DRAINPIPE_DDEV_SSH_PRIVATE_KEY    | SSH private key used for e.g. committing to git                                                                                    |
+| DRAINPIPE_DDEV_SSH_KNOWN_HOSTS    | The result of running e.g. `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`                                              |
+| DRAINPIPE_DDEV_GIT_EMAIL          | E-mail address to use for git commits                                                                                              |
+| DRAINPIPE_DDEV_GIT_NAME           | Name to use for git commits                                                                                                        |
+| DRAINPIPE_DDEV_COMPOSER_CACHE_DIR | Set to "false" to disable composer cache dir, or another value to override the default location of .ddev/.drainpipe-composer-cache |
+| DRAINPIPE_DDEV_VERSION            | Install a specific version of DDEV instead of the latest                                                                           |
 
 ### Composer Lock Diff
 Updates Merge Request descriptions with a markdown table of any changes detected
@@ -520,13 +572,14 @@ Additionally, Pantheon Terminus can be added:
 ```
 
 It is assumed the following tasks exist:
-- `build`
 - `sync`
+- `build`
+- `update`
 
-The `build` and `sync` tasks can be overridden with a `build:tugboat` and
-`sync:tugboat` task if required (you will need to re-run `composer install` to
-regenerate the Tugboat scripts if you  are adding this task to your
-`Taskfile.yml` for the first time).
+The `build`, `sync`, and `update` tasks can be overridden with `sync:tugboat`,
+`build:tugboat`, and `update:tugboat` tasks if required (you will need to re-run
+`composer install` to regenerate the Tugboat scripts if you  are adding this
+task to your `Taskfile.yml` for the first time).
 
 ```
   sync:
@@ -561,6 +614,7 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
+<<<<<<< HEAD
 ## Contributor Docs
 
 This repo is public.
@@ -590,3 +644,15 @@ Before making a new release, post in the lullabot internal #devops slack channel
 The https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.yml action needs some manual follow-ups
 to remove the branch name, so that the tag and branch name being the same doesn't cause complications.
 
+=======
+Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
+it. The following keys can be added to your `config.yml` via a
+`.tugboat/config.drainppipe-override.yml` file:
+```
+php:
+  aliases:
+  urls:
+  screenshot:
+  visualdiff:
+```
+>>>>>>> main
