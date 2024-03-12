@@ -14,6 +14,7 @@ for a Drupal site, including:
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Installation](#installation)
+- [Database Updates](#database-updates)
 - [.env support](#env-support)
 - [SASS Compilation](#sass-compilation)
   - [Setup](#setup)
