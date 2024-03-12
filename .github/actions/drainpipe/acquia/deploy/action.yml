@@ -1,5 +1,5 @@
 name: 'Deploy a branch to Acquia'
-description: 'Deploys a review app to Pantheon Multidev'
+description: 'Deploys a review app to an Acquia Environment'
 inputs:
   github-token:
     description: "GitHub token as generated automatically in secrets.GITHUB_TOKEN"
