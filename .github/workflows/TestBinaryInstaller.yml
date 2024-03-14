@@ -30,6 +30,7 @@ jobs:
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
+          composer-cache-dir: composer-cache
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
 
@@ -51,5 +52,5 @@ jobs:
 
       - name: Simulate failure
         run: |
-          ddev exec touch /mnt/ddev-global-cache/composer/files/lullabot/drainpipe/bin/task/3.28.0/task_linux_amd64.tar
+          ddev exec touch /var/www/html/composer-cache/files/lullabot/drainpipe/bin/task/3.28.0/task_linux_amd64.tar
           ddev composer install
