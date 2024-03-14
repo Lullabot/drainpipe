@@ -615,7 +615,17 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-<<<<<<< HEAD
+Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
+it. The following keys can be added to your `config.yml` via a
+`.tugboat/config.drainppipe-override.yml` file:
+```
+php:
+  aliases:
+  urls:
+  screenshot:
+  visualdiff:
+```
+
 ## Contributor Docs
 
 This repo is public.
@@ -631,6 +641,8 @@ Testing PR code changes on real sites is extra beneficial.
 
 ## Release
 
+### Drainpipe and Drainpipe-dev release process
+
 When making a release, increase the version based on https://semver.org/
 
 > MAJOR version when you make incompatible API changes
@@ -642,18 +654,18 @@ that would usually be a MINOR release, with a release note about the change.
 
 Before making a new release, post in the lullabot internal #devops slack channel to coordinate with other maintainers.
 
-The https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.yml action needs some manual follow-ups
-to remove the branch name, so that the tag and branch name being the same doesn't cause complications.
+1. Generate a GitHub release for drainpipe
+  1. Supply the correct tag based on the changes and semantic versioning standards.
+  2. Use the suggested release notes.
+  3. Set this release as latest and publish.
+2. The release when published will automatically kick off a release of [drainpipe-dev](https://github.com/Lullabot/drainpipe) using the [DrainpipeDev GitHub workflow](https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.ym). However this needs some manual followups:
+  1. This action ends up creating a branch in drainpipe-dev with the same name as the tag you just entered in the release.
+  2. Delete the branch that was created in drainpipe-dev.
+  3. Create a release with the same tag name in drainpipe-dev and in the release notes, just link to the drainpipe release that was made in step 1.
 
-=======
-Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
-it. The following keys can be added to your `config.yml` via a
-`.tugboat/config.drainppipe-override.yml` file:
-```
-php:
-  aliases:
-  urls:
-  screenshot:
-  visualdiff:
-```
->>>>>>> main
+### NPM package release process
+
+To generate new NPM package releases:
+
+1. Have the latest main branch checked out locally
+2. Run `yarn learna publish`
