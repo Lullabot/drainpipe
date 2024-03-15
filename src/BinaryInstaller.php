@@ -210,6 +210,8 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         }
 
         if ('.tar.gz' === substr($fileName, -7)) {
+            // Remove .tar
+            $fs->remove(substr($cacheDestination, 0, -3));
             $archive = new \PharData($cacheDestination);
             $archive->decompress();
             $archive = new \PharData(substr($cacheDestination, 0, -3));
