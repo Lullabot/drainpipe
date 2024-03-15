@@ -75,7 +75,7 @@ jobs:
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        uses: GuillaumeFalourd/assert-command-line-output@v2.3
         with:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
           contains: 18
