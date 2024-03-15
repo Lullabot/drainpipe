@@ -133,7 +133,7 @@ jobs:
       - name: Compile Sass
         run: ddev task sass
 
-  Test-Sass-Yarn-Berry:
+  Test-Sass-Yarn-3:
      runs-on: ubuntu-22.04
      needs: Build
      steps:
@@ -168,6 +168,45 @@ jobs:
 
        - name: Compile Sass
          run: ddev task sass
+
+  Test-Sass-Yarn-4:
+    runs-on: ubuntu-22.04
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-metapackage-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Sass
+        run: |
+          ddev config --nodejs-version=21
+          ddev restart
+          ddev yarn set version berry
+          ddev yarn set version 4
+          ddev yarn init -y
+          ddev yarn cache clear
+          ddev yarn add ./drainpipe/metapackages/sass --dev
+
+      - name: Compile Sass
+        run: ddev task sass
 
   Test-JavaScript-NPM:
     runs-on: ubuntu-22.04
@@ -240,7 +279,7 @@ jobs:
       - name: Compile JavaScript
         run: ddev task javascript
 
-  Test-JavaScript-Yarn-Berry:
+  Test-JavaScript-Yarn-3:
     runs-on: ubuntu-22.04
     needs: Build
     steps:
@@ -271,6 +310,46 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
+          ddev yarn add focus-trap@^6.7.3
+          ddev yarn add ./drainpipe/metapackages/javascript --dev
+
+      - name: Compile JavaScript
+        run: ddev task javascript
+
+  Test-JavaScript-Yarn-4:
+    runs-on: ubuntu-22.04
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: test-metapackage-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Sass
+        run: |
+          ddev config --nodejs-version=21
+          ddev restart
+          ddev yarn set version berry
+          ddev yarn set version 4
+          ddev yarn init -y
+          ddev yarn cache clear
           ddev yarn add focus-trap@^6.7.3
           ddev yarn add ./drainpipe/metapackages/javascript --dev
 

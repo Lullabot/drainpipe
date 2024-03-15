@@ -11,10 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        php-version: [7.3, 7.4, 8.0]
-        include:
-          - php-version: 7.3
-            composer-flags: --prefer-lowest --prefer-stable
+        php-version: [8.1, 8.2, 8.3]
 
     steps:
       - uses: actions/checkout@v4
@@ -36,14 +33,21 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
+
       - name: Install Drupal
         run: |
           cd ../
-          mkdir drupal
+          composer create-project drupal/recommended-project drupal --ignore-platform-req=ext-gd
           cd drupal
-          cp ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-production-build/composer.json .
-          cp ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-production-build/Taskfile.yml .
-          composer update ${{ matrix.composer-flags }}
+          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
+          composer config extra.drupal-scaffold.gitignore true
+          composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe"]'
+          composer config --no-plugins allow-plugins.composer/installers true
+          composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          composer config repositories.drainpipe --json '{"type": "path", "url": "../drainpipe", "options": {"symlink": false}}'
+          composer config minimum-stability dev
+          composer require "lullabot/drainpipe @dev" --with-all-dependencies
 
       - name: Run production build
         run: |
