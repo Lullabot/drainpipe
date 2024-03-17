@@ -18,9 +18,13 @@ tasks:
   static:
     desc: Runs all static tests
     deps: [security, lint, phpstan, phpunit:static, phpcs]
+    cmds:
+      - task: untracked
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
     deps: [config, phpunit:functional, nightwatch]
+    cmds:
+      - task: untracked
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
@@ -166,6 +170,18 @@ tasks:
         elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
           npm run stylelint "**/*.{css,scss,sass}" --fix
         fi
+  untracked:
+    desc: Checks for any untracked files in git
+    cmds:
+      - defer: git diff-index --cached HEAD --
+      - defer: git diff-files
+      - defer: git ls-files --exclude-standard --others
+      # Check for staged changes
+      - git diff-index --quiet --cached HEAD --
+      # Check for working tree changes
+      - git diff-files --quiet
+      # Untracked and unignored
+      - test -z "$(git ls-files --exclude-standard --others)"
   nightwatch:check:
     #desc: Verifies Nightwatch is setup correctly
     cmds:
