@@ -70,6 +70,17 @@ for an example of this in use.
 ln -s web/ docroot
 ```
 
+### Binaries
+If you receive an error such as `exec format error: ./vendor/bin/task`, then
+you may have the wrong binary for your architecture. If your architecture
+wasn't detected correctly, please open an issue with the output of `php -r "echo php_uname('m');"`,
+along with information on your hardware and operating system.
+
+You can override the platform and processor with environment variables `DRAINPIPE_PLATFORM`
+and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `windows`,
+and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
+upstream dependencies e.g. https://github.com/go-task/task/releases
+
 ---
 
 ## Database Updates
