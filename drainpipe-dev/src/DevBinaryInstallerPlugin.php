@@ -14,18 +14,18 @@ class DevBinaryInstallerPlugin extends BinaryInstaller {
         'local-php-security-checker' => [
             'releases' => [
                 'linux' => [
-                    'amd64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v1.0.0/local-php-security-checker_1.0.0_linux_amd64', 'sha' => 'e5b12488ca78bc07c149e9352278bf10667b88a8461caac10154f9a6f5476369'],
-                    '386' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v1.0.0/local-php-security-checker_1.0.0_linux_386', 'sha' => 'ed395fbb6441bd7b21020a08c05919600419b47709a8e5c9679e3ee0a2952d05'],
-                    'arm64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v1.0.0/local-php-security-checker_1.0.0_linux_arm64', 'sha' => 'd2c0bd8b3f6059e55a55ece56461d04728eeaad73ece902a8e8078d287721eb3'],
+                    '386' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.6/local-php-security-checker_2.0.6_linux_386', 'sha' => '90cc98e306a91d5a3fa3ccdf20e428e21a8e62cc8a8994863c34e864475bbf1e'],
+                    'amd64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.6/local-php-security-checker_2.0.6_linux_amd64', 'sha' => '314309702970bd8f2eed68301c3c42012a938fb8ae5c977c4ab0db57bb69b23c'],
+                    'arm64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.6/local-php-security-checker_2.0.6_linux_arm64', 'sha' => '532bb013d51fc649293a3704a1051683acbf6870f13fe7bdb9d476790ede1e97'],
                 ],
                 'darwin' => [
-                    'amd64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v1.0.0/local-php-security-checker_1.0.0_darwin_amd64', 'sha' => '8c363d605116e84cf9ac28ac3838ca7979f7306916049bdb3f0f1fe2a8764d82'],
-                    // The Macbook M1 will run the amd64 binary in emulation mode.
-                    'arm64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v1.0.0/local-php-security-checker_1.0.0_darwin_amd64', 'sha' => '8c363d605116e84cf9ac28ac3838ca7979f7306916049bdb3f0f1fe2a8764d82'],
+                    'amd64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.6/local-php-security-checker_2.0.6_darwin_amd64', 'sha' => 'd7bd8154d76ace5a1e9d7f6af3176714830971b5af2ca81f1b63576a885e07b5'],
+                    'arm64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.6/local-php-security-checker_2.0.6_darwin_arm64', 'sha' => 'e69a499967ab2ddbdcf829fe3d51d925c6c2483a63190c9de768a94e517a08f3'],
                 ],
                 'windows' => [
-                    'amd64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v1.0.0/local-php-security-checker_1.0.0_windows_amd64.exe', 'sha' => '6dd4d20483b263fd6ad9464976f8bb8b4467c5e7e8b3b4630156a654ce8dbe4d'],
-                    '386' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v1.0.0/local-php-security-checker_1.0.0_windows_386.exe', 'sha' => '6fe96de992da1579c30e7b3da3c90d389db3cb09a689c8b05b4e5cc0d8ae97bf5c2316ff3321cfeed930a9fc80ba5578f9cf9c45'],
+                    '386' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.6/local-php-security-checker_2.0.6_windows_386.exe', 'sha' => '401560fdff8e25e5a46bd596d8f8603159404dbe8d4930c7c69f4051951779f0'],
+                    'amd64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.6/local-php-security-checker_2.0.6_windows_amd64.exe', 'sha' => '3d4836d083cf1999287a03ccbbda67ef1c2b5143b52910de4eea905f77e1026e'],
+                    'arm64' => ['url' => 'https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.6/local-php-security-checker_2.0.6_windows_arm64.exe', 'sha' => 'abdb194e6ef8f9ff7566f22755ba649ec5bee66917fad81161eea8ade87fb0cc'],
                 ],
             ],
             'hashalgo' => 'sha256',

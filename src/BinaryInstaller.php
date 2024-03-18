@@ -62,13 +62,19 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $this->io = $io;
         $this->config = $composer->getConfig();
         $this->platform = strtolower(\PHP_OS_FAMILY);
-        $uname = strtolower(php_uname('v'));
-        if (false !== strpos($uname, 'arm64')) {
+        $uname = strtolower(php_uname('m'));
+        if ($uname === 'arm64' || $uname === 'aarch64') {
             $this->processor = 'arm64';
-        } elseif (\PHP_INT_SIZE === 8) {
+        } elseif ($uname === 'x86_64' || $uname === 'amd64') {
             $this->processor = 'amd64';
         } else {
             $this->processor = '386';
+        }
+        if (!empty(getenv('DRAINPIPE_PLATFORM'))) {
+            $this->platform = getenv('DRAINPIPE_PLATFORM');
+        }
+        if (!empty(getenv('DRAINPIPE_PROCESSOR'))) {
+            $this->processor = 'DRAINPIPE_PROCESSOR';
         }
 
         $this->cache = new Cache(
@@ -210,6 +216,8 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         }
 
         if ('.tar.gz' === substr($fileName, -7)) {
+            // Remove .tar
+            $fs->remove(substr($cacheDestination, 0, -3));
             $archive = new \PharData($cacheDestination);
             $archive->decompress();
             $archive = new \PharData(substr($cacheDestination, 0, -3));
