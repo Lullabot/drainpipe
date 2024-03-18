@@ -79,6 +79,9 @@ jobs:
           echo "  build:tugboat:" >> Taskfile.yml
           echo "    cmds:" >> Taskfile.yml
           echo "      - echo \"Tugboat build\"" >> Taskfile.yml
+          echo "  online:tugboat:" >> Taskfile.yml
+          echo "    cmds:" >> Taskfile.yml
+          echo "      - echo \"Tugboat online\"" >> Taskfile.yml
           ddev composer install
           if ! grep -q './vendor/bin/task build:tugboat' .tugboat/steps/3-build.sh; then
             exit 1
