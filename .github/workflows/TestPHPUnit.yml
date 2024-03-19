@@ -69,9 +69,9 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test_result
+          name: test_result-phpunit-functional
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
@@ -138,9 +138,9 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test_result
+          name: test_result-phpunit-dtt
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
@@ -203,9 +203,9 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test_result
+          name: test_result-phpunit-static
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
