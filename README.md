@@ -47,8 +47,8 @@ for a Drupal site, including:
     - [Handling Test Failures](#handling-test-failures)
   - [Conducting the Peer Review](#conducting-the-peer-review)
   - [Releases](#releases)
-  - [drainpipe and drainpipe-dev release process](#drainpipe-and-drainpipe-dev-release-process)
-  - [NPM package release process](#npm-package-release-process)
+    - [drainpipe and drainpipe-dev release process](#drainpipe-and-drainpipe-dev-release-process)
+    - [NPM package release process](#npm-package-release-process)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -712,7 +712,7 @@ Occasionally, tests may fail due to transient issues or flakiness in the test su
 
 ### Releases
 
-### drainpipe and drainpipe-dev release process
+#### drainpipe and drainpipe-dev release process
 
 When making a release, increase the version based on https://semver.org/
 
@@ -734,7 +734,7 @@ Before making a new release, post in the lullabot internal #devops slack channel
   2. Delete the branch that was created in drainpipe-dev.
   3. Create a release with the same tag name in drainpipe-dev and in the release notes, just link to the drainpipe release that was made in step 1.
 
-### NPM package release process
+#### NPM package release process
 
 To generate new NPM package releases:
 
