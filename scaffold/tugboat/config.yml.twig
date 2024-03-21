@@ -24,6 +24,9 @@ services:
       init: ./.tugboat/steps/1-init.sh
       update: ./.tugboat/steps/2-update.sh
       build: ./.tugboat/steps/3-build.sh
+{% if online_command|length > 0 %}
+      online: ./.tugboat/steps/4-online.sh
+{% endif %}
 {% if overrides.php|length > 0 %}
 
 {{ overrides.php }}

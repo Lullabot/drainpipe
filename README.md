@@ -85,6 +85,17 @@ for an example of this in use.
 ln -s web/ docroot
 ```
 
+### Binaries
+If you receive an error such as `exec format error: ./vendor/bin/task`, then
+you may have the wrong binary for your architecture. If your architecture
+wasn't detected correctly, please open an issue with the output of `php -r "echo php_uname('m');"`,
+along with information on your hardware and operating system.
+
+You can override the platform and processor with environment variables `DRAINPIPE_PLATFORM`
+and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `windows`,
+and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
+upstream dependencies e.g. https://github.com/go-task/task/releases
+
 ---
 
 ## Database Updates
@@ -437,12 +448,13 @@ To enable deployment of Pantheon Review Apps:
   }
   ```
 - Run `composer install` to install the workflow to `.github/workflows`
-- Add the following secrets to your repository:
+- Add the following [variables to your GitHub repository](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository):
+    - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
+    - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
+- Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
-    - `PANTHEON_SITE_NAME` The canonical site name
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
-    - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth local
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
 
@@ -528,10 +540,10 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 - Run `composer install`
 - Add your Pantheon `site-name` to the last job in the new
   workflow file at `.github/workflows/PantheonReviewApps.yml`
-- Add the following secrets to your repository:
-  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
-  - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
-  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
+- Add the following [variables to your GitLab repository](https://docs.gitlab.com/ee/ci/variables/#for-a-project):
+  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
+  - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
+  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`  (enable the _Mask variable_ checkbox)
   - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
@@ -616,6 +628,9 @@ tugboat:php:init:
     - apt-get install -y libldap2-dev
     - docker-php-ext-install ldap
 ```
+
+You can additionally add an `online` step by adding a task named `online:tugboat`
+and re-running `composer install`.
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
 it. The following keys can be added to your `config.yml` via a
