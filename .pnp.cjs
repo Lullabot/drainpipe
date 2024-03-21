@@ -993,7 +993,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./metapackages/sass/",\
         "packageDependencies": [\
           ["@lullabot/drainpipe-sass", "workspace:metapackages/sass"],\
-          ["autoprefixer", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.4.18"],\
+          ["autoprefixer", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.4.19"],\
           ["cssnano", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:6.1.1"],\
           ["gulp", "npm:4.0.2"],\
           ["gulp-postcss", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.0.0"],\
@@ -1864,20 +1864,20 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["autoprefixer", [\
-      ["npm:10.4.18", {\
-        "packageLocation": "../../../../cache/others/berry/cache/autoprefixer-npm-10.4.18-98c236b887-10c0.zip/node_modules/autoprefixer/",\
+      ["npm:10.4.19", {\
+        "packageLocation": "../../../../cache/others/berry/cache/autoprefixer-npm-10.4.19-7c86a73b2f-10c0.zip/node_modules/autoprefixer/",\
         "packageDependencies": [\
-          ["autoprefixer", "npm:10.4.18"]\
+          ["autoprefixer", "npm:10.4.19"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.4.18", {\
-        "packageLocation": "./.yarn/__virtual__/autoprefixer-virtual-52be7ff2a6/5/cache/others/berry/cache/autoprefixer-npm-10.4.18-98c236b887-10c0.zip/node_modules/autoprefixer/",\
+      ["virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.4.19", {\
+        "packageLocation": "./.yarn/__virtual__/autoprefixer-virtual-8bfabdf35a/5/cache/others/berry/cache/autoprefixer-npm-10.4.19-7c86a73b2f-10c0.zip/node_modules/autoprefixer/",\
         "packageDependencies": [\
-          ["autoprefixer", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.4.18"],\
+          ["autoprefixer", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.4.19"],\
           ["@types/postcss", null],\
           ["browserslist", "npm:4.23.0"],\
-          ["caniuse-lite", "npm:1.0.30001591"],\
+          ["caniuse-lite", "npm:1.0.30001599"],\
           ["fraction.js", "npm:4.3.7"],\
           ["normalize-range", "npm:0.1.2"],\
           ["picocolors", "npm:1.0.0"],\
@@ -2235,10 +2235,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:1.0.30001591", {\
-        "packageLocation": "../../../../cache/others/berry/cache/caniuse-lite-npm-1.0.30001591-88044eed22-10c0.zip/node_modules/caniuse-lite/",\
+      ["npm:1.0.30001599", {\
+        "packageLocation": "../../../../cache/others/berry/cache/caniuse-lite-npm-1.0.30001599-834cd4cb82-10c0.zip/node_modules/caniuse-lite/",\
         "packageDependencies": [\
-          ["caniuse-lite", "npm:1.0.30001591"]\
+          ["caniuse-lite", "npm:1.0.30001599"]\
         ],\
         "linkType": "HARD"\
       }]\
