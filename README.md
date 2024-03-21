@@ -30,6 +30,7 @@ for a Drupal site, including:
     + [Composer Lock Diff](#composer-lock-diff-1)
     + [Pantheon](#pantheon-2)
 * [Tugboat Integration](#tugboat)
+* [Peer Review Guidelines for Automated Updates](#peer-review-guidelines-for-automated-updates)
 ---
 ## Installation
 
@@ -627,3 +628,53 @@ php:
   screenshot:
   visualdiff:
 ```
+
+## Peer Review Guidelines for Automated Updates
+
+These are guidelines for conducting peer reviews on automated dependency update pull requests created by Renovate. 
+
+## Automated Testing with GitHub Actions
+
+### Overview
+
+All automated updates submitted by Renovate undergo a series of automated tests via GitHub Actions. These tests are designed to ensure compatibility and stability with the new versions of dependencies.
+
+All Renovate peer reviews regardless if they're a minor or patch release require:
+1. Reading the change logs carefully to understand the new features and fixes.
+   - Assess if the changes necessitate additional test coverage or could potentially impact existing functionality.
+   - Consider the implications of new features on the project's future development and maintenance.
+2. All tests and checks must pass
+
+### Handling Version Ranges
+
+Some dependencies allow multiple versions, like `"drush/drush": "^10|^11|^12"`. 
+- Renovate will create pull requests when any of these versions get patch or minor releases. 
+- We **DO NOT** want to merge these, because it would pin these packages to a specific version. 
+- We **DO** want to allow these pull requests to run checks. This will confirm that the latest version within the range Drainpipe supports is unlikely break builds.
+- After all GitHub Action checks pass, leave a comment on the pull request stating such, close the pull request, and delete the branch.
+
+### Handling Test Failures
+
+Occasionally, tests may fail due to transient issues or flakiness in the test suite. In such cases:
+
+1. Verify the nature of the test failure to ensure it's not related to the dependency update.
+2. If the failure seems unrelated to the update, re-run the GitHub Actions job to confirm if the issue persists.
+3. Document any recurring flakiness or issues on the pull request then create a new issue linked to the pull request for further investigation.
+
+## Conducting the Peer Review
+
+1. **Review the Automated Update Pull Request (PR)**:
+   - Ensure the PR title and description clearly describe the update and its scope.
+   - Check the list of changed files to understand the extent of the update.
+
+2. **Assess Test Results**:
+   - Ensure all GitHub Actions tests have passed. Pay close attention to tests that touch on updated dependencies.
+   - For failed tests, follow the "Handling Test Failures" guidelines above.
+
+3. **Read the Dependency Change Logs**:
+   - For minor point releases, review the dependency's change logs to identify any significant changes or additions.
+   - Evaluate how these changes might affect the Drainpipe project.
+
+5. **Final Decision**:
+   - For patch releases with all tests passing, proceed to merge the update.
+   - For minor point releases, after thorough review and consideration, decide whether to merge the update or request manual testing before merging.
