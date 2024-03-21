@@ -41,6 +41,8 @@ for a Drupal site, including:
 - [Tugboat](#tugboat)
 - [Contributor Docs](#contributor-docs)
 - [Release](#release)
+  - [Drainpipe and Drainpipe-dev release process](#drainpipe-and-drainpipe-dev-release-process)
+  - [NPM package release process](#npm-package-release-process)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
