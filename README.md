@@ -603,6 +603,16 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
+Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
+it. The following keys can be added to your `config.yml` via a
+`.tugboat/config.drainppipe-override.yml` file:
+```
+php:
+  aliases:
+  urls:
+  screenshot:
+  visualdiff:
+```
 
 ## Peer Review Guidelines for Automated Updates
 
@@ -653,13 +663,3 @@ Occasionally, tests may fail due to transient issues or flakiness in the test su
 5. **Final Decision**:
    - For patch releases with all tests passing, proceed to merge the update.
    - For minor point releases, after thorough review and consideration, decide whether to merge the update or request manual testing before merging.
-Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
-it. The following keys can be added to your `config.yml` via a
-`.tugboat/config.drainppipe-override.yml` file:
-```
-php:
-  aliases:
-  urls:
-  screenshot:
-  visualdiff:
-```
