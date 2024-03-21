@@ -16,7 +16,7 @@
         "phpunit/phpunit": "^8|^9",
         "sserbin/twig-linter": "^3.1.0",
         "mikey179/vfsstream": "^1.6.11",
-        "mockery/mockery": "^1.6.10",
+        "mockery/mockery": "^1.6.11",
         "behat/mink": "^1.11.0",
         "symfony/phpunit-bridge": "^5|^6",
         "lullabot/drainpipe": "*",
