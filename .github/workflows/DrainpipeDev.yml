@@ -28,6 +28,7 @@ jobs:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
           log-public-key: false
 
+      # @todo This step might need to be re-worked to checkout to a different directory and copy the contents over instead of doing a reset. Not sure that will work with deleted files.
       - name: Create git checkout of drainpipe-dev
         working-directory: drainpipe-dev
         run: |
