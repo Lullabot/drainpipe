@@ -1,9 +1,9 @@
 name: Push Drainpipe Dev Package
 
 on:
-  pull_request:
   push:
     branches:
+      - 460-drainpipe-dev-use-deploy-token
       - main
     tags:
       - 'v*'
@@ -38,14 +38,6 @@ jobs:
           git reset --mixed origin/main
           git config user.email "no-reply@github.com"
           git config user.name "Drainpipe Bot"
-
-      - name: Test push branch to drainpipe-dev
-        if: ${{ github.event_name == 'pull_request' }}
-        working-directory: drainpipe-dev
-        run: |
-          git add -A
-          git commit -m "${{ github.event.head_commit.message }}" --allow-empty
-          git push origin ${{ github.head_ref }}
 
       - name: Push branch to drainpipe-dev
         if: ${{ startsWith(github.ref, 'refs/heads/') }}
