@@ -1,6 +1,7 @@
 name: Push Drainpipe Dev Package
 
 on:
+  pull_request:
   push:
     branches:
       - main
@@ -8,7 +9,7 @@ on:
       - 'v*'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref || github.sha }}
   cancel-in-progress: false
 
 permissions:
@@ -21,36 +22,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get information about the current branch
-        id: branch-name
-        uses: tj-actions/branch-names@v8
-
       - name: Add drainpipe-dev deploy key in order to run git clone
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
           log-public-key: false
 
+      # @todo This step might need to be re-worked to checkout to a different directory and copy the contents over instead of doing a reset. Not sure that will work with deleted files.
       - name: Create git checkout of drainpipe-dev
         working-directory: drainpipe-dev
         run: |
           git init
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
-          git reset --mixed origin/${{ github.ref_name }}
+          git reset --mixed origin/main
           git config user.email "no-reply@github.com"
           git config user.name "Drainpipe Bot"
 
-      - name: Push branch commit to drainpipe-dev
-        if: startsWith(github.ref, 'refs/heads/')
+      - name: Push branch to drainpipe-dev
+        if: ${{ startsWith(github.ref, 'refs/heads/') }}
         working-directory: drainpipe-dev
         run: |
           git add -A
           git commit -m "${{ github.event.head_commit.message }}" --allow-empty
-          git push origin ${{ github.ref_name }}
+          git push origin ${{ github.head_ref || github.ref_name }}
 
       - name: Push tag to drainpipe-dev
-        if: startsWith(github.ref, 'refs/tags/')
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         working-directory: drainpipe-dev
         run: |
           git tag ${{ github.ref_name }}
