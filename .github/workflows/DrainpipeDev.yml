@@ -9,7 +9,7 @@ on:
       - 'v*'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.sha }}
+  group: ${{ github.workflow }}-${{ github.ref_name || github.sha }}
   cancel-in-progress: false
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
           git config user.name "Drainpipe Bot"
 
       - name: Test push branch to drainpipe-dev
-        if: ${{ github.event_name === 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' }}
         working-directory: drainpipe-dev
         run: |
           git add -A
