@@ -33,6 +33,7 @@ jobs:
         working-directory: drainpipe-dev
         run: |
           git init
+          git branch -m ${{ github.ref_name }}
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
           git reset --mixed origin/main
