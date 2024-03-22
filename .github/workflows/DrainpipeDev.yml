@@ -22,13 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate application token
-        id: app-token
-        uses: tibdex/github-app-token@v2
-        with:
-          app_id: ${{ secrets.DRAINPIPE_APP_ID }}
-          private_key: ${{ secrets.DRAINPIPE_APP_PRIVATE_KEY }}
-
       - name: Add drainpipe-dev deploy key in order to run git clone
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -50,14 +43,12 @@ jobs:
 
       - name: Push branch to drainpipe-dev
         if: ${{ startsWith(github.ref, 'refs/heads/') }}
-        uses: planetscale/ghcommit-action@v0.1.34
-        with:
-          repo: Lullabot/drainpipe-dev
-          branch: ${{ github.ref_name }}
-          commit_message: $COMMIT_MESSAGE
-          empty: true
+        working-directory: drainpipe-dev
+        run: |
+          git add -A
+          git commit -m "$COMMIT_MESSAGE" --allow-empty
+          git push origin ${{ github.ref_name }}
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           # Workaround if the commit message contains quotes.
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
 
