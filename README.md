@@ -42,7 +42,6 @@ for a Drupal site, including:
 - [Tugboat](#tugboat)
 - [Contributor Docs](#contributor-docs)
   - [Peer Review Guidelines for Automated Updates](#peer-review-guidelines-for-automated-updates)
-    - [Overview](#overview)
     - [Handling Version Ranges](#handling-version-ranges)
     - [Handling Test Failures](#handling-test-failures)
   - [Conducting the Peer Review](#conducting-the-peer-review)
@@ -665,8 +664,6 @@ Testing PR code changes on real sites is extra beneficial.
 ### Peer Review Guidelines for Automated Updates
 
 These are guidelines for conducting peer reviews on automated dependency update pull requests created by Renovate.
-
-#### Overview
 
 All automated updates submitted by Renovate undergo a series of automated tests via GitHub Actions. These tests are designed to ensure compatibility and stability with the new versions of dependencies.
 
