@@ -8,30 +8,49 @@ for a Drupal site, including:
 - Automated testing setup
 - Integration with DDEV
 - CI integration
----
-* [Installation](#installation)
-* [Database Updates](#database-updates)
-* [.env support](#env-support)
-* [SASS Compilation](#sass-compilation)
-* [JavaScript Compilation](#javascript-compilation)
-* [Testing](#testing)
-    + [Static Tests](#static-tests)
-    + [Functional Tests](#functional-tests)
-        - [PHPUnit](#phpunit)
-        - [Nightwatch](#nightwatch)
-    + [Autofix](#autofix)
-* [Hosting Provider Integration](#hosting-provider-integration)
-    + [Generic](#generic)
-    + [Pantheon](#pantheon)
-* [GitHub Actions Integration](#github-actions-integration)
-    + [Composer Lock Diff](#composer-lock-diff)
-    + [Pantheon](#pantheon-1)
-* [GitLab CI Integration](#gitlab-ci-integration)
-    + [Composer Lock Diff](#composer-lock-diff-1)
-    + [Pantheon](#pantheon-2)
-* [Tugboat Integration](#tugboat)
-* [Peer Review Guidelines for Automated Updates](#peer-review-guidelines-for-automated-updates)
----
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Installation](#installation)
+  - [Binaries](#binaries)
+- [Database Updates](#database-updates)
+- [.env support](#env-support)
+- [SASS Compilation](#sass-compilation)
+  - [Setup](#setup)
+- [JavaScript Compilation](#javascript-compilation)
+  - [Setup](#setup-1)
+- [Testing](#testing)
+  - [Static Tests](#static-tests)
+    - [Excluding Files from PHP_CodeSniffer](#excluding-files-from-php_codesniffer)
+  - [Functional Tests](#functional-tests)
+    - [PHPUnit](#phpunit)
+    - [Nightwatch](#nightwatch)
+  - [Autofix](#autofix)
+- [Hosting Provider Integration](#hosting-provider-integration)
+  - [Generic](#generic)
+    - [Importing/Exporting Databases](#importingexporting-databases)
+    - [Snapshots](#snapshots)
+  - [Pantheon](#pantheon)
+- [GitHub Actions Integration](#github-actions-integration)
+  - [Composer Lock Diff](#composer-lock-diff)
+  - [Pantheon](#pantheon-1)
+- [GitLab CI Integration](#gitlab-ci-integration)
+  - [Composer Lock Diff](#composer-lock-diff-1)
+  - [Pantheon](#pantheon-2)
+- [Tugboat](#tugboat)
+- [Contributor Docs](#contributor-docs)
+  - [Peer Review Guidelines for Automated Updates](#peer-review-guidelines-for-automated-updates)
+    - [Handling Version Ranges](#handling-version-ranges)
+    - [Handling Test Failures](#handling-test-failures)
+  - [Conducting the Peer Review](#conducting-the-peer-review)
+  - [Releases](#releases)
+    - [drainpipe and drainpipe-dev release process](#drainpipe-and-drainpipe-dev-release-process)
+    - [NPM package release process](#npm-package-release-process)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Installation
 
 ```sh
@@ -629,13 +648,22 @@ php:
   visualdiff:
 ```
 
-## Peer Review Guidelines for Automated Updates
+## Contributor Docs
 
-These are guidelines for conducting peer reviews on automated dependency update pull requests created by Renovate. 
+This repo is public.
 
-## Automated Testing with GitHub Actions
+Please be careful to remove sensitive customer specifics when posting Issues or comments.
 
-### Overview
+First time contributors need a maintainers approval for automated tests to run.
+(This is so we aren't at risk of getting a big CI bill accidentally, or maliciously.)
+
+Peer Reviewing by looking at PR code changes is nice.
+
+Testing PR code changes on real sites is extra beneficial.
+
+### Peer Review Guidelines for Automated Updates
+
+These are guidelines for conducting peer reviews on automated dependency update pull requests created by Renovate.
 
 All automated updates submitted by Renovate undergo a series of automated tests via GitHub Actions. These tests are designed to ensure compatibility and stability with the new versions of dependencies.
 
@@ -645,15 +673,15 @@ All Renovate peer reviews regardless if they're a minor or patch release require
    - Consider the implications of new features on the project's future development and maintenance.
 2. All tests and checks must pass
 
-### Handling Version Ranges
+#### Handling Version Ranges
 
-Some dependencies allow multiple versions, like `"drush/drush": "^10|^11|^12"`. 
-- Renovate will create pull requests when any of these versions get patch or minor releases. 
-- We **DO NOT** want to merge these, because it would pin these packages to a specific version. 
+Some dependencies allow multiple versions, like `"drush/drush": "^10|^11|^12"`.
+- Renovate will create pull requests when any of these versions get patch or minor releases.
+- We **DO NOT** want to merge these, because it would pin these packages to a specific version.
 - We **DO** want to allow these pull requests to run checks. This will confirm that the latest version within the range Drainpipe supports is unlikely break builds.
 - After all GitHub Action checks pass, leave a comment on the pull request stating such, close the pull request, and delete the branch.
 
-### Handling Test Failures
+#### Handling Test Failures
 
 Occasionally, tests may fail due to transient issues or flakiness in the test suite. In such cases:
 
@@ -661,7 +689,7 @@ Occasionally, tests may fail due to transient issues or flakiness in the test su
 2. If the failure seems unrelated to the update, re-run the GitHub Actions job to confirm if the issue persists.
 3. Document any recurring flakiness or issues on the pull request then create a new issue linked to the pull request for further investigation.
 
-## Conducting the Peer Review
+### Conducting the Peer Review
 
 1. **Review the Automated Update Pull Request (PR)**:
    - Ensure the PR title and description clearly describe the update and its scope.
@@ -678,3 +706,34 @@ Occasionally, tests may fail due to transient issues or flakiness in the test su
 5. **Final Decision**:
    - For patch releases with all tests passing, proceed to merge the update.
    - For minor point releases, after thorough review and consideration, decide whether to merge the update or request manual testing before merging.
+
+### Releases
+
+#### drainpipe and drainpipe-dev release process
+
+When making a release, increase the version based on https://semver.org/
+
+> MAJOR version when you make incompatible API changes
+> MINOR version when you add functionality in a backward compatible manner
+> PATCH version when you make backward compatible bug fixes
+
+Specifically for drainpipe, when a new "check" is added, that might break builds in projects,
+that would usually be a MINOR release, with a release note about the change.
+
+Before making a new release, post in the lullabot internal #devops slack channel to coordinate with other maintainers.
+
+1. Generate a GitHub release for drainpipe
+  1. Supply the correct tag based on the changes and semantic versioning standards.
+  2. Use the suggested release notes.
+  3. Set this release as latest and publish.
+2. The release when published will automatically kick off a release of [drainpipe-dev](https://github.com/Lullabot/drainpipe) using the [DrainpipeDev GitHub workflow](https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.ym). However this needs some manual followups:
+  1. This action ends up creating a branch in drainpipe-dev with the same name as the tag you just entered in the release.
+  2. Delete the branch that was created in drainpipe-dev.
+  3. Create a release with the same tag name in drainpipe-dev and in the release notes, just link to the drainpipe release that was made in step 1.
+
+#### NPM package release process
+
+To generate new NPM package releases:
+
+1. Have the latest main branch checked out locally
+2. Run `yarn learna publish`
