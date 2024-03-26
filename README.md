@@ -724,12 +724,13 @@ Before making a new release, post in the lullabot internal #devops slack channel
 
 1. Generate a GitHub release for drainpipe
   1. Supply the correct tag based on the changes and semantic versioning standards.
-  2. Use the suggested release notes.
+  2. Use the _Generate release notes_ button and review the changes to confirm the new version is correct based on semantic versioning.
   3. Set this release as latest and publish.
 2. The release when published will automatically kick off a release of [drainpipe-dev](https://github.com/Lullabot/drainpipe) using the [DrainpipeDev GitHub workflow](https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.ym). However this needs some manual followups:
   1. This action ends up creating a branch in drainpipe-dev with the same name as the tag you just entered in the release.
   2. Delete the branch that was created in drainpipe-dev.
   3. Create a release with the same tag name in drainpipe-dev and in the release notes, just link to the drainpipe release that was made in step 1.
+3. Visit the [project board](https://github.com/orgs/Lullabot/projects/12/views/1) and archive the _Ready to Release_ column.
 
 #### NPM package release process
 
