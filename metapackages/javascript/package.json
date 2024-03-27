@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "bin": "./esbuild.js",
   "dependencies": {
-    "@yarnpkg/esbuild-plugin-pnp": "^3.0.0-rc.2",
+    "@yarnpkg/esbuild-plugin-pnp": "^3.0.0-rc.15",
     "chokidar": "^3.6.0",
     "esbuild": "^0.14.36",
     "yargs": "^17.7.2"
