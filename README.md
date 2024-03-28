@@ -400,6 +400,26 @@ includes:
 
 See below for CI specific integrations for hosting providers.
 
+When using Pantheon with Drainpipe, the Pantheon site should be configured to
+override some of Pantheon's default behaviors. Because Drainpipe installs
+composer dependencies, Pantheon's [Integrated Composer](https://docs.pantheon.io/guides/integrated-composer)
+should be disabled. Add `build_step: false` to your pantheon.yml file:
+```yml
+---
+api_version: 1
+build_step: false
+```
+
+Additionally, Pantheon sites start with "[Autopilot](https://docs.pantheon.io/guides/autopilot)",
+which provides updates from the Drupal upstream. Usually this feature
+conflicts with an external Git repository such as GitHub or GitLab. It is
+recommended to disable this by setting an empty upstream with terminus.
+```
+ddev ssh
+terminus site:upstream:set [site_name] empty
+```
+
+
 ## GitHub Actions Integration
 
 Add the following to `composer.json` for generic GitHub Actions that will be
