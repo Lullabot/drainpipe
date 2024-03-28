@@ -70,7 +70,6 @@ if (uniqueFileExtension.length !== 1) {
       bundle: true,
       sourcemap: true,
       minify: !!argv.minify,
-      incremental: !!argv.watch,
       logLevel: 'info',
     });
 
