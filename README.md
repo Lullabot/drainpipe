@@ -402,7 +402,7 @@ See below for CI specific integrations for hosting providers.
 
 When using Pantheon with Drainpipe, the Pantheon site should be configured to
 override some of Pantheon's default behaviors. Because Drainpipe installs
-composer dependencies, Pantheon's (Integrated Composer)[https://docs.pantheon.io/guides/integrated-composer]
+composer dependencies, Pantheon's [Integrated Composer](https://docs.pantheon.io/guides/integrated-composer)
 should be disabled. Add `build_step: false` to your pantheon.yml file:
 ```yml
 ---
