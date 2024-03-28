@@ -82,6 +82,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
+        $this->installDdevTask();
         $this->installCICommands();
         $this->installEnvSupport();
     }
@@ -96,6 +97,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
+        $this->installDdevTask();
         $this->installCICommands();
         $this->installEnvSupport();
     }
@@ -197,6 +199,16 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $composerFullConfig = json_decode($composerJson, true);
         if (empty($composerFullConfig['autoload-dev']['files']) || !in_array("$vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php", $composerFullConfig['autoload-dev']['files'])) {
             $this->io->warning("🪠 [Drainpipe] $vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php' missing from autoload-dev files");
+        }
+    }
+
+    private function installDdevTask(): void
+    {
+        if (file_exists('./.ddev/config.yaml')) {
+            $vendor = $this->config->get('vendor-dir');
+            $webBuildPath = $vendor . '/lullabot/drainpipe/scaffold/ddev/web-build/';
+            $fs = new Filesystem();
+            $fs->copy($webBuildPath, './.ddev/web-build');
         }
     }
 
@@ -323,6 +335,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'build_command' => 'build',
                 'update_command' => 'drupal:update',
                 'init' => [],
+                'task_path' => isset($this->extra['drainpipe']['global-binaries']['task']) && $this->extra['drainpipe']['global-binaries']['task'] ? 'task' : './vendor/bin/task',
                 'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
                 'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
                 'overrides' => ['php' => ''],

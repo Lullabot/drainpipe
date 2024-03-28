@@ -24,6 +24,6 @@ runs:
         elif drainpipe_exec "./vendor/bin/task -l | grep '* update: ')"; then
           drainpipe_exec "./vendor/bin/task update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
         else
-          drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
+          drainpipe_exec "task drupal:update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
         fi
       shell: bash

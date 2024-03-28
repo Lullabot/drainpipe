@@ -39,7 +39,7 @@ jobs:
           cd ../
           composer create-project drupal/recommended-project drupal --ignore-platform-req=ext-gd
           cd drupal
-          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
+          cp ${GITHUB_WORKSPACE}/tests/fixtures/drainpipe-test-production-build/Taskfile.yml .
           composer config extra.drupal-scaffold.gitignore true
           composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe"]'
           composer config --no-plugins allow-plugins.composer/installers true
@@ -49,7 +49,44 @@ jobs:
           composer config minimum-stability dev
           composer require "lullabot/drainpipe @dev" --with-all-dependencies
 
-      - name: Run static tests
+      - name: Run production build
         run: |
           cd ../drupal
           ./vendor/bin/task build
+
+  Test-Production-Build-DDEV-Global-Binary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Setup Project
+        run: |
+          cp drainpipe/tests/fixtures/drainpipe-test-production-build/composer-ddev-global-binary.json composer.json
+          cp drainpipe/tests/fixtures/drainpipe-test-production-build/Taskfile.yml .
+          ddev config --project-type=drupal9
+          ddev start
+          ddev composer install
+          # ddev won't create settings.ddev.php until settings.php exists.
+          ddev config --project-type=drupal9
+          ddev restart
+
+      - name: Install Drupal
+        run: |
+          ddev drush site:install minimal -y
+          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+          ddev drush config:export -y
+
+      - name: Run production build
+        run: ddev task build
