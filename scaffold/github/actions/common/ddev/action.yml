@@ -74,11 +74,11 @@ runs:
             CACHE_DIR="${{ inputs.composer-cache-dir }}"
           fi
           # Workaround for https://github.com/ddev/ddev/issues/6044
-          if yq -re .type .ddev/config.yaml; then
-            ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR" --project-type="$(yq -re .type .ddev/config.yaml)"
-          else
-            ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
-          fi
+          #if yq -re .type .ddev/config.yaml; then
+          #  ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR" --project-type="$(yq -re .type .ddev/config.yaml)"
+          #else
+          ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
+          #fi
         fi
 
         ddev start
