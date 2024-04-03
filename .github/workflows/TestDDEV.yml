@@ -54,6 +54,9 @@ jobs:
           ddev stop --remove-data --omit-snapshot
           rm -rf web/core vendor/
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
