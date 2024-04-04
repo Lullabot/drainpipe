@@ -207,9 +207,11 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     {
         if (file_exists('./.ddev/config.yaml')) {
             $vendor = $this->config->get('vendor-dir');
+            $this->io->warning('💃 [penyaskito] $vendor is ' . $vendor);
             $ddevCommandPath = $vendor . '/lullabot/drainpipe/scaffold/ddev/task-command.sh';
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
+            $this->io->warning('💃 [penyaskito] $ddevCommandPath is ' . $ddevCommandPath);
             $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
         }
     }
