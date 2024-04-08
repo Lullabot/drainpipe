@@ -44,5 +44,6 @@ ddev drush --uri=https://drupal_firefox --yes site:install
 ddev drush --uri=https://drupal_chrome --yes site:install
 ddev drush config:export --yes
 
-ddev yarn add drainpipe-javascript@file:../drainpipe/metapackages/javascript/
-ddev yarn add drainpipe-sass@file:../drainpipe/metapackages/sass/
+cp -R ../drainpipe/metapackages .
+ddev yarn add drainpipe-javascript@file:./metapackages/javascript/
+ddev yarn add drainpipe-sass@file:./metapackages/sass/

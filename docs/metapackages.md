@@ -16,6 +16,6 @@ Drainpipe comes with packages that are published to npm:
   ```
 - Install focal trap (used by `js/mobile-nav.js`)
   ```
-  ddev yarn add focal-trap
+  ddev yarn add focus-trap
   ```
 - Run commands from `Taskfile.yml` e.g. `ddev task javascript`, `ddev task sass`
