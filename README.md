@@ -8,29 +8,49 @@ for a Drupal site, including:
 - Automated testing setup
 - Integration with DDEV
 - CI integration
----
-* [Installation](#installation)
-* [Database Updates](#database-updates)
-* [.env support](#env-support)
-* [SASS Compilation](#sass-compilation)
-* [JavaScript Compilation](#javascript-compilation)
-* [Testing](#testing)
-    + [Static Tests](#static-tests)
-    + [Functional Tests](#functional-tests)
-        - [PHPUnit](#phpunit)
-        - [Nightwatch](#nightwatch)
-    + [Autofix](#autofix)
-* [Hosting Provider Integration](#hosting-provider-integration)
-    + [Generic](#generic)
-    + [Pantheon](#pantheon)
-* [GitHub Actions Integration](#github-actions-integration)
-    + [Composer Lock Diff](#composer-lock-diff)
-    + [Pantheon](#pantheon-1)
-* [GitLab CI Integration](#gitlab-ci-integration)
-    + [Composer Lock Diff](#composer-lock-diff-1)
-    + [Pantheon](#pantheon-2)
-* [Tugboat Integration](#tugboat)
----
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Installation](#installation)
+  - [Binaries](#binaries)
+- [Database Updates](#database-updates)
+- [.env support](#env-support)
+- [SASS Compilation](#sass-compilation)
+  - [Setup](#setup)
+- [JavaScript Compilation](#javascript-compilation)
+  - [Setup](#setup-1)
+- [Testing](#testing)
+  - [Static Tests](#static-tests)
+    - [Excluding Files from PHP_CodeSniffer](#excluding-files-from-php_codesniffer)
+  - [Functional Tests](#functional-tests)
+    - [PHPUnit](#phpunit)
+    - [Nightwatch](#nightwatch)
+  - [Autofix](#autofix)
+- [Hosting Provider Integration](#hosting-provider-integration)
+  - [Generic](#generic)
+    - [Importing/Exporting Databases](#importingexporting-databases)
+    - [Snapshots](#snapshots)
+  - [Pantheon](#pantheon)
+- [GitHub Actions Integration](#github-actions-integration)
+  - [Composer Lock Diff](#composer-lock-diff)
+  - [Pantheon](#pantheon-1)
+- [GitLab CI Integration](#gitlab-ci-integration)
+  - [Composer Lock Diff](#composer-lock-diff-1)
+  - [Pantheon](#pantheon-2)
+- [Tugboat](#tugboat)
+- [Contributor Docs](#contributor-docs)
+  - [Peer Review Guidelines for Automated Updates](#peer-review-guidelines-for-automated-updates)
+    - [Handling Version Ranges](#handling-version-ranges)
+    - [Handling Test Failures](#handling-test-failures)
+  - [Conducting the Peer Review](#conducting-the-peer-review)
+  - [Releases](#releases)
+    - [drainpipe and drainpipe-dev release process](#drainpipe-and-drainpipe-dev-release-process)
+    - [NPM package release process](#npm-package-release-process)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Installation
 
 ```sh
@@ -69,6 +89,17 @@ for an example of this in use.
 💡 If your docroot is not the standard `web/` path, you must create a symlink to it
 ln -s web/ docroot
 ```
+
+### Binaries
+If you receive an error such as `exec format error: ./vendor/bin/task`, then
+you may have the wrong binary for your architecture. If your architecture
+wasn't detected correctly, please open an issue with the output of `php -r "echo php_uname('m');"`,
+along with information on your hardware and operating system.
+
+You can override the platform and processor with environment variables `DRAINPIPE_PLATFORM`
+and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `windows`,
+and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
+upstream dependencies e.g. https://github.com/go-task/task/releases
 
 ---
 
@@ -422,12 +453,13 @@ To enable deployment of Pantheon Review Apps:
   }
   ```
 - Run `composer install` to install the workflow to `.github/workflows`
-- Add the following secrets to your repository:
+- Add the following [variables to your GitHub repository](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository):
+    - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
+    - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
+- Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
-    - `PANTHEON_SITE_NAME` The canonical site name
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
-    - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth local
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
 
@@ -513,10 +545,10 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 - Run `composer install`
 - Add your Pantheon `site-name` to the last job in the new
   workflow file at `.github/workflows/PantheonReviewApps.yml`
-- Add the following secrets to your repository:
-  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
-  - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
-  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
+- Add the following [variables to your GitLab repository](https://docs.gitlab.com/ee/ci/variables/#for-a-project):
+  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
+  - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
+  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`  (enable the _Mask variable_ checkbox)
   - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
@@ -602,6 +634,9 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
+You can additionally add an `online` step by adding a task named `online:tugboat`
+and re-running `composer install`.
+
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
 it. The following keys can be added to your `config.yml` via a
 `.tugboat/config.drainppipe-override.yml` file:
@@ -612,3 +647,94 @@ php:
   screenshot:
   visualdiff:
 ```
+
+## Contributor Docs
+
+This repo is public.
+
+Please be careful to remove sensitive customer specifics when posting Issues or comments.
+
+First time contributors need a maintainers approval for automated tests to run.
+(This is so we aren't at risk of getting a big CI bill accidentally, or maliciously.)
+
+Peer Reviewing by looking at PR code changes is nice.
+
+Testing PR code changes on real sites is extra beneficial.
+
+### Peer Review Guidelines for Automated Updates
+
+These are guidelines for conducting peer reviews on automated dependency update pull requests created by Renovate.
+
+All automated updates submitted by Renovate undergo a series of automated tests via GitHub Actions. These tests are designed to ensure compatibility and stability with the new versions of dependencies.
+
+All Renovate peer reviews regardless if they're a minor or patch release require:
+1. Reading the change logs carefully to understand the new features and fixes.
+   - Assess if the changes necessitate additional test coverage or could potentially impact existing functionality.
+   - Consider the implications of new features on the project's future development and maintenance.
+2. All tests and checks must pass
+
+#### Handling Version Ranges
+
+Some dependencies allow multiple versions, like `"drush/drush": "^10|^11|^12"`.
+- Renovate will create pull requests when any of these versions get patch or minor releases.
+- We **DO NOT** want to merge these, because it would pin these packages to a specific version.
+- We **DO** want to allow these pull requests to run checks. This will confirm that the latest version within the range Drainpipe supports is unlikely break builds.
+- After all GitHub Action checks pass, leave a comment on the pull request stating such, close the pull request, and delete the branch.
+
+#### Handling Test Failures
+
+Occasionally, tests may fail due to transient issues or flakiness in the test suite. In such cases:
+
+1. Verify the nature of the test failure to ensure it's not related to the dependency update.
+2. If the failure seems unrelated to the update, re-run the GitHub Actions job to confirm if the issue persists.
+3. Document any recurring flakiness or issues on the pull request then create a new issue linked to the pull request for further investigation.
+
+### Conducting the Peer Review
+
+1. **Review the Automated Update Pull Request (PR)**:
+   - Ensure the PR title and description clearly describe the update and its scope.
+   - Check the list of changed files to understand the extent of the update.
+
+2. **Assess Test Results**:
+   - Ensure all GitHub Actions tests have passed. Pay close attention to tests that touch on updated dependencies.
+   - For failed tests, follow the "Handling Test Failures" guidelines above.
+
+3. **Read the Dependency Change Logs**:
+   - For minor point releases, review the dependency's change logs to identify any significant changes or additions.
+   - Evaluate how these changes might affect the Drainpipe project.
+
+5. **Final Decision**:
+   - For patch releases with all tests passing, proceed to merge the update.
+   - For minor point releases, after thorough review and consideration, decide whether to merge the update or request manual testing before merging.
+
+### Releases
+
+#### drainpipe and drainpipe-dev release process
+
+When making a release, increase the version based on https://semver.org/
+
+> MAJOR version when you make incompatible API changes
+> MINOR version when you add functionality in a backward compatible manner
+> PATCH version when you make backward compatible bug fixes
+
+Specifically for drainpipe, when a new "check" is added, that might break builds in projects,
+that would usually be a MINOR release, with a release note about the change.
+
+Before making a new release, post in the lullabot internal #devops slack channel to coordinate with other maintainers.
+
+1. Generate a GitHub release for drainpipe
+  1. Supply the correct tag based on the changes and semantic versioning standards.
+  2. Use the _Generate release notes_ button and review the changes to confirm the new version is correct based on semantic versioning.
+  3. Set this release as latest and publish.
+2. The release when published will automatically kick off a release of [drainpipe-dev](https://github.com/Lullabot/drainpipe) using the [DrainpipeDev GitHub workflow](https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.ym). However this needs some manual followups:
+  1. This action ends up creating a branch in drainpipe-dev with the same name as the tag you just entered in the release.
+  2. Delete the branch that was created in drainpipe-dev.
+  3. Create a release with the same tag name in drainpipe-dev and in the release notes, just link to the drainpipe release that was made in step 1.
+3. Visit the [project board](https://github.com/orgs/Lullabot/projects/12/views/1) and archive the _Ready to Release_ column.
+
+#### NPM package release process
+
+To generate new NPM package releases:
+
+1. Have the latest main branch checked out locally
+2. Run `yarn learna publish`

@@ -22,6 +22,7 @@ services:
       init: ./.tugboat/steps/1-init.sh
       update: ./.tugboat/steps/2-update.sh
       build: ./.tugboat/steps/3-build.sh
+      online: ./.tugboat/steps/4-online.sh
 
     aliases:
       - foo

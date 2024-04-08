@@ -1,4 +1,4 @@
-name: Test Static Tests
+name: Test DDEV Integration
 on:
   push:
     branches:
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Test-Static:
+  Test-DDEV-Install:
     runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
@@ -35,6 +35,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
+          ddev config --nodejs-version "18"
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
@@ -47,31 +48,17 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
-          # Restart is required to enable the provided Selenium containers
-          ddev restart
 
-      - name: Verify files were created
+      - name: Reset Project
         run: |
-          test -f phpcs.xml
+          ddev stop --remove-data --omit-snapshot
+          rm -rf web/core vendor/ web/sites/default/settings.ddev.php
 
-      - name: Fix settings.php
-        run: |
-          sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
-
-      - name: Run Static Tests
-        run: ddev task test:static
-
-      - name: Confirm custom directories are scanned
-        run: |
-          set -x
-          mkdir -p custom-yaml-directory
-          echo 'key: value' >> custom-yaml-directory/test.yml
-          ddev task test:static YAML_DIRS="custom-yaml-directory/*.yml" | tee static.log
-          [[ $(grep '\[OK] All 1 YAML files contain valid syntax.' static.log | wc -l) -eq 1 ]]
-
-      - name: Upload test artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
-          name: test_result-static
-          path: test_result
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Test DDEV Settings Generated
+        run: test -f web/sites/default/settings.ddev.php

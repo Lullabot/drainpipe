@@ -16,8 +16,8 @@ runs:
     - name: Update site on Pantheon
       run: |
         # Wait for Pantheon to sync.
-        drainpipe_exec "terminus workflow:wait ${{ inputs.site-name }}.${{ inputs.environment }}"
         source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "terminus workflow:wait ${{ inputs.site-name }}.${{ inputs.environment }}"
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.${{ inputs.environment }} --yes site:install --existing-config"
