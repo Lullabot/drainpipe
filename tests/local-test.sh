@@ -38,12 +38,11 @@ echo '  "nightwatch@*":' >> .yarnrc.yml
 echo '    dependencies:' >> .yarnrc.yml
 echo '      ws: "*"' >> .yarnrc.yml
 ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
-yarn
 
 ddev drush --yes site:install
 ddev drush --uri=https://drupal_firefox --yes site:install
 ddev drush --uri=https://drupal_chrome --yes site:install
 ddev drush config:export --yes
 
-yarn add drainpipe-javascript@file:../drainpipe/metapackages/javascript/
-yarn add drainpipe-sass@file:../drainpipe/metapackages/sass/
+ddev yarn add drainpipe-javascript@file:../drainpipe/metapackages/javascript/
+ddev yarn add drainpipe-sass@file:../drainpipe/metapackages/sass/
