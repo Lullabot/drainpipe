@@ -72,17 +72,7 @@ if (uniqueFileExtension.length !== 1) {
       minify: !!argv.minify,
       logLevel: 'info',
     };
-    let builder = await context({
-      plugins,
-      entryPoints: scripts.map(script => script.split(':')[0]),
-      outdir: uniqueBaseDir[0],
-      outbase: uniqueBaseDir[0],
-      entryNames: `[dir]/[name].${uniqueFileExtension[0]}`,
-      bundle: true,
-      sourcemap: true,
-      minify: !!argv.minify,
-      logLevel: 'info',
-    });
+    let builder = await context(config);
     await build(config);
 
     if (!!argv.watch) {
