@@ -7,7 +7,7 @@ cd drainpipe-test
 cp -R ../drainpipe .
 
 ddev config --auto
-ddev config --nodejs-version "18"
+ddev config --nodejs-version "21"
 ddev start
 ddev composer config extra.drupal-scaffold.gitignore true
 ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
@@ -28,7 +28,6 @@ echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS fi
 echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO 'db'@'%';\"" >> .ddev/config.yaml
 ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"
 ddev config --additional-hostnames="*.drainpipe"
-ddev config --nodejs-version=21
 ddev restart
 
 ddev yarn set version berry
@@ -45,3 +44,6 @@ ddev drush --yes site:install
 ddev drush --uri=https://drupal_firefox --yes site:install
 ddev drush --uri=https://drupal_chrome --yes site:install
 ddev drush config:export --yes
+
+yarn add drainpipe-javascript@file:../drainpipe/metapackages/javascript/
+yarn add drainpipe-sass@file:../drainpipe/metapackages/sass/
