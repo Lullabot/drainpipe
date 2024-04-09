@@ -3,7 +3,6 @@ name: Push Drainpipe Dev Package
 on:
   push:
     branches:
-      - 460-drainpipe-dev-use-deploy-token
       - main
     tags:
       - 'v*'
