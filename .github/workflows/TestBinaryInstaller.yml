@@ -54,3 +54,6 @@ jobs:
         run: |
           ddev exec touch /var/www/html/composer-cache/files/lullabot/drainpipe/bin/task/3.28.0/task_linux_amd64.tar
           ddev composer install
+
+      - name: Test installing without composer cache
+        run: ddev composer install --no-cache
