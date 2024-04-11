@@ -1,0 +1,27 @@
+name: Repo Lockdown
+
+on:
+  issues:
+    types: opened
+  pull_request_target:
+    types: opened
+  schedule:
+    - cron: '0 * * * *'
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dessant/repo-lockdown@v4
+        with:
+          issue-comment: >
+            Please file your issue in the upstream Drainpipe repository at https://github.com/Lullabot/drainpipe/issues.
+          skip-closed-issue-comment: true
+          pr-comment: >
+            Please submit your pull request against the upstream Drainpipe repository at https://github.com/Lullabot/drainpipe/pulls.
+            Note that the drainpipe-dev code is contained inside the root `/drainpipe-dev` directory.
+          skip-closed-pr-comment: true
