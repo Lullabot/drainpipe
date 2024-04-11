@@ -77,16 +77,18 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $this->processor = 'DRAINPIPE_PROCESSOR';
         }
 
-        $this->cache = new Cache(
-            $this->io,
-            implode(\DIRECTORY_SEPARATOR, [
-                $this->config->get('cache-dir'),
-                'files',
-                'lullabot',
-                'drainpipe',
-                'bin',
-            ])
-        );
+        if ($this->cache->isEnabled()) {
+            $this->cache = new Cache(
+                $this->io,
+                implode(\DIRECTORY_SEPARATOR, [
+                    $this->config->get('cache-dir'),
+                    'files',
+                    'lullabot',
+                    'drainpipe',
+                    'bin',
+                ])
+            );
+        }
     }
 
     /**
@@ -196,10 +198,13 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $httpDownloader = Factory::createHttpDownloader($this->io, $this->config);
         $parts = explode('/', $url);
         $fileName = array_pop($parts);
-        $cacheFolder = $this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version;
-        $cacheDestination = $cacheFolder.\DIRECTORY_SEPARATOR.$fileName;
-        $cacheExtractedBinary = $cacheFolder.\DIRECTORY_SEPARATOR.$binary;
-        $binDestination = $bin.\DIRECTORY_SEPARATOR.$binary;
+        $cacheFolder = $this->cache->getRoot() . $binary . \DIRECTORY_SEPARATOR . $version;
+        if (!$this->cache->isEnabled()) {
+            $cacheFolder =  sys_get_temp_dir() . \DIRECTORY_SEPARATOR . $binary . \DIRECTORY_SEPARATOR . $version;
+        }
+        $cacheDestination = $cacheFolder . \DIRECTORY_SEPARATOR . $fileName;
+        $cacheExtractedBinary = $cacheFolder . \DIRECTORY_SEPARATOR . $binary;
+        $binDestination = $bin . \DIRECTORY_SEPARATOR . $binary;
 
         // Check the cache.
         $fs->ensureDirectoryExists($cacheFolder);

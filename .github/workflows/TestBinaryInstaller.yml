@@ -56,4 +56,10 @@ jobs:
           ddev composer install
 
       - name: Test installing without composer cache
-        run: ddev composer install --no-cache
+        run: |
+          ddev composer install --no-cache
+          ddev composer install
+          rm -rf vendor
+          ddev composer install
+          rm -rf vendor
+          ddev composer install --no-cache
