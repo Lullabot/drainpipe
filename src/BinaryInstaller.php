@@ -77,7 +77,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $this->processor = 'DRAINPIPE_PROCESSOR';
         }
 
-        if ($this->cache->isEnabled()) {
+        if (!empty($this->cache) && $this->cache instanceof Cache && $this->cache->isEnabled()) {
             $this->cache = new Cache(
                 $this->io,
                 implode(\DIRECTORY_SEPARATOR, [
@@ -199,7 +199,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $parts = explode('/', $url);
         $fileName = array_pop($parts);
         $cacheFolder = $this->cache->getRoot() . $binary . \DIRECTORY_SEPARATOR . $version;
-        if (!$this->cache->isEnabled()) {
+        if (empty($this->cache) || !($this->cache instanceof Cache) || !$this->cache->isEnabled()) {
             $cacheFolder =  sys_get_temp_dir() . \DIRECTORY_SEPARATOR . $binary . \DIRECTORY_SEPARATOR . $version;
         }
         $cacheDestination = $cacheFolder . \DIRECTORY_SEPARATOR . $fileName;
