@@ -1,4 +1,4 @@
-name: "Push Drainpipe Dev Package"
+name: Push Drainpipe Dev Package
 
 on:
   push:
@@ -8,43 +8,51 @@ on:
       - 'v*'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: drainpipe-dev
   cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   Drainpipe-Dev:
-    runs-on: ubuntu-22.04
+    name: Push branch to drainpipe-dev
+    runs-on: ubuntu-latest
     steps:
-
-      - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
-
       - uses: actions/checkout@v4
+
+      - name: Add drainpipe-dev deploy key in order to run git clone
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          path: drainpipe
+          ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
+          log-public-key: false
 
-      - uses: ./drainpipe/scaffold/github/actions/common/set-env
-
-      - name: Install DDEV
-        uses: ./drainpipe/scaffold/github/actions/common/ddev
-        with:
-          git-name: Drainpipe Bot
-          git-email: no-reply@example.com
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-
-      - name: Setup Project
+      # Commits made by the https://github.com/apps/lullabot-drainpipe application.
+      # @see https://github.com/orgs/community/discussions/24664
+      - name: Create git checkout of drainpipe-dev
+        working-directory: drainpipe-dev
         run: |
-          ddev config --auto
-          ddev start
-          ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
-          ddev composer config --no-plugins allow-plugins.composer/installers true
-          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe --with-all-dependencies
+          git init
+          git branch -m ${{ github.ref_name }}
+          git remote add origin git@github.com:Lullabot/drainpipe-dev.git
+          git fetch origin
+          git reset --mixed origin/${{ github.ref_name }}
+          git config user.name "Lullabot-Drainpipe[bot]"
+          git config user.email "157769597+Lullabot-Drainpipe[bot]@users.noreply.github.com"
 
-      - name: Push drainpipe-dev
-        run: ddev exec "./vendor/bin/task deploy:git directory=/var/www/html/drainpipe/drainpipe-dev branch=${{ github.ref_name }} remote=https://${{ secrets.DRAINPIPE_DEV_GITHUB_TOKEN_USERNAME }}:${{ secrets.DRAINPIPE_DEV_GITHUB_TOKEN }}@github.com/lullabot/drainpipe-dev.git message=\"${{ github.event.head_commit.message }}\""
+      - name: Push branch to drainpipe-dev
+        working-directory: drainpipe-dev
+        run: |
+          git add -A
+          git commit -m "$COMMIT_MESSAGE" --allow-empty
+          git push origin ${{ github.ref_name }}
+        env:
+          # Workaround if the commit message contains quotes.
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+
+      - name: Push tag to drainpipe-dev
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        working-directory: drainpipe-dev
+        run: |
+          git tag ${{ github.ref_name }}
+          git push origin ${{ github.ref_name }}
