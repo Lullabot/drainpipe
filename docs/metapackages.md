@@ -19,3 +19,12 @@ Drainpipe comes with packages that are published to npm:
   ddev yarn add focus-trap
   ```
 - Run commands from `Taskfile.yml` e.g. `ddev task javascript`, `ddev task sass`
+
+## Publishing Changes
+- Make sure your user has access to the lullabot org on npm
+- Check out a new branch and bump the version numbers in the metapackage's
+  `package.json` files
+- Commit the changes
+- Run `yarn lerna publish`
+- Enter your OTP for npm
+- Once published, push the branch to GitHub and merge
