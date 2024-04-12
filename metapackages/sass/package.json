@@ -1,6 +1,6 @@
 {
   "name": "@lullabot/drainpipe-sass",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "bin": "./gulp.js",
   "dependencies": {
     "autoprefixer": "^10.4.19",
