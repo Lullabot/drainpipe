@@ -1,6 +1,6 @@
 {
   "name": "@lullabot/drainpipe-javascript",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "bin": "./esbuild.js",
   "dependencies": {
     "@yarnpkg/esbuild-plugin-pnp": "^3.0.0-rc.15",
