@@ -198,8 +198,11 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $httpDownloader = Factory::createHttpDownloader($this->io, $this->config);
         $parts = explode('/', $url);
         $fileName = array_pop($parts);
-        $cacheFolder = $this->cache->getRoot() . $binary . \DIRECTORY_SEPARATOR . $version;
-        if (empty($this->cache) || !($this->cache instanceof Cache) || !$this->cache->isEnabled()) {
+        $hasCache = !empty($this->cache) && $this->cache instanceof Cache) && $this->cache->isEnabled();
+        if ($hasCache) {
+            $cacheFolder = $this->cache->getRoot() . $binary . \DIRECTORY_SEPARATOR . $version;
+        }
+        else {
             $cacheFolder =  sys_get_temp_dir() . \DIRECTORY_SEPARATOR . $binary . \DIRECTORY_SEPARATOR . $version;
         }
         $cacheDestination = $cacheFolder . \DIRECTORY_SEPARATOR . $fileName;
@@ -208,7 +211,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
 
         // Check the cache.
         $fs->ensureDirectoryExists($cacheFolder);
-        if (!$this->cache->isEnabled() || !file_exists($cacheDestination) || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $sha)) {
+        if (!$hasCache || !file_exists($cacheDestination) || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $sha)) {
             // Fetch a new copy of the binary.
             $httpDownloader->copy($url, $cacheDestination);
         } else {
