@@ -77,18 +77,16 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $this->processor = 'DRAINPIPE_PROCESSOR';
         }
 
-        if (!empty($this->cache) && $this->cache instanceof Cache && $this->cache->isEnabled()) {
-            $this->cache = new Cache(
-                $this->io,
-                implode(\DIRECTORY_SEPARATOR, [
-                    $this->config->get('cache-dir'),
-                    'files',
-                    'lullabot',
-                    'drainpipe',
-                    'bin',
-                ])
-            );
-        }
+        $this->cache = new Cache(
+            $this->io,
+            implode(\DIRECTORY_SEPARATOR, [
+                $this->config->get('cache-dir'),
+                'files',
+                'lullabot',
+                'drainpipe',
+                'bin',
+            ])
+        );
     }
 
     /**
@@ -198,8 +196,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $httpDownloader = Factory::createHttpDownloader($this->io, $this->config);
         $parts = explode('/', $url);
         $fileName = array_pop($parts);
-        $hasCache = !empty($this->cache) && $this->cache instanceof Cache) && $this->cache->isEnabled();
-        if ($hasCache) {
+        if ($this->cache->isEnabled()) {
             $cacheFolder = $this->cache->getRoot() . $binary . \DIRECTORY_SEPARATOR . $version;
         }
         else {
@@ -211,7 +208,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
 
         // Check the cache.
         $fs->ensureDirectoryExists($cacheFolder);
-        if (!$hasCache || !file_exists($cacheDestination) || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $sha)) {
+        if (!$this->cache->isEnabled() || !file_exists($cacheDestination) || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $sha)) {
             // Fetch a new copy of the binary.
             $httpDownloader->copy($url, $cacheDestination);
         } else {
