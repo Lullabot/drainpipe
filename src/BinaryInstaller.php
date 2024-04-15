@@ -200,7 +200,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $cacheFolder = $this->cache->getRoot() . $binary . \DIRECTORY_SEPARATOR . $version;
         }
         else {
-            $cacheFolder =  sys_get_temp_dir() . \DIRECTORY_SEPARATOR . $binary . \DIRECTORY_SEPARATOR . $version;
+            $cacheFolder = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . $binary . \DIRECTORY_SEPARATOR . $version;
         }
         $cacheDestination = $cacheFolder . \DIRECTORY_SEPARATOR . $fileName;
         $cacheExtractedBinary = $cacheFolder . \DIRECTORY_SEPARATOR . $binary;
