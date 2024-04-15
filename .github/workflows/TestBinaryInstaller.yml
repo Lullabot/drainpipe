@@ -58,8 +58,12 @@ jobs:
       - name: Test installing without composer cache
         run: |
           ddev composer install --no-cache
+          test -x vendor/bin/task
           ddev composer install
+          test -x vendor/bin/task
           rm -rf vendor
           ddev composer install
+          test -x vendor/bin/task
           rm -rf vendor
           ddev composer install --no-cache
+          test -x vendor/bin/task
