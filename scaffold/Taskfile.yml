@@ -38,7 +38,7 @@ tasks:
 
   build:dev:
     desc: "Builds the project for development"
-    deps: [drupal:composer]
+    deps: [drupal:composer:development]
     cmds:
       # @see https://architecture.lullabot.com/adr/20211026-one-time-login-first-drupal-user-account/
       - ./vendor/bin/drush user:unblock --uid=1
