@@ -88,7 +88,7 @@ jobs:
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
-          git-email: no-reply@example.com#
+          git-email: no-reply@example.com
 
       - name: Start DDEV
         run: ddev start
