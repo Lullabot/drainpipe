@@ -196,10 +196,15 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $httpDownloader = Factory::createHttpDownloader($this->io, $this->config);
         $parts = explode('/', $url);
         $fileName = array_pop($parts);
-        $cacheFolder = $this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version;
-        $cacheDestination = $cacheFolder.\DIRECTORY_SEPARATOR.$fileName;
-        $cacheExtractedBinary = $cacheFolder.\DIRECTORY_SEPARATOR.$binary;
-        $binDestination = $bin.\DIRECTORY_SEPARATOR.$binary;
+        if ($this->cache->isEnabled()) {
+            $cacheFolder = $this->cache->getRoot() . $binary . \DIRECTORY_SEPARATOR . $version;
+        }
+        else {
+            $cacheFolder = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . $binary . \DIRECTORY_SEPARATOR . $version;
+        }
+        $cacheDestination = $cacheFolder . \DIRECTORY_SEPARATOR . $fileName;
+        $cacheExtractedBinary = $cacheFolder . \DIRECTORY_SEPARATOR . $binary;
+        $binDestination = $bin . \DIRECTORY_SEPARATOR . $binary;
 
         // Check the cache.
         $fs->ensureDirectoryExists($cacheFolder);
