@@ -1,0 +1,62 @@
+name: "Composer Lock Diff"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Composer-Lock-Diff:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - uses: ./.github/actions/drainpipe/set-env
+
+      - name: Install and Start DDEV
+        uses: ./.github/actions/drainpipe/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Build Project
+        run: ddev composer install
+
+      - name: Install composer lock diff
+        run: ddev composer global require davidrjonas/composer-lock-diff:^1.0
+
+      - name: Prepare repository
+        run: |
+          git reset --soft HEAD^1
+          git reset .
+
+      - name: Run composer lock diff
+        run: |
+          curl -f \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer  ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER | jq '. | {body}' > pull_request.json
+          ddev task "github:composer-lock-diff pull_request='pull_request.json' json_file='processed.json'"
+          curl -f \
+            -X PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER \
+            -d @processed.json

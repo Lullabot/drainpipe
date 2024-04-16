@@ -10,27 +10,40 @@ class BinaryInstallerPlugin extends BinaryInstaller
      * @var array[]
      */
     protected $binaries = [
+        // Also update if changing version
+        // - .github/workflows/ValidateTaskfile.yml
+        // - Tugboat templates
         'task' => [
             'releases' => [
                 'linux' => [
-                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.9.0/task_linux_amd64.tar.gz', 'sha' => 'cad72446d2b939ec611fea14c48f7ce28713c68cc902701fb4f1c2b12fe1fd1c'],
-                    'arm' => ['url' => 'https://github.com/go-task/task/releases/download/v3.9.0/task_linux_arm.tar.gz', 'sha' => 'dfbfdcef356cbdd0c0554fbc7e7ba07554d484ef3e1c2aa2a0a1cea8eb70e39f'],
-                    '386' => ['url' => 'https://github.com/go-task/task/releases/download/v3.9.0/task_linux_386.tar.gz', 'sha' => 'c927265a095204f18b73495936ad5d041267fe76b71626bb9b5ef726c7b91400'],
-                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.9.0/task_linux_arm64.tar.gz', 'sha' => '03ef53f20c77572ce175ef9cbf3110ebda68e4b75450edc69ee756837cd7a9bd'],
+                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_linux_amd64.tar.gz', 'sha' => 'a6d127f91c3a78512d8a20b4aca7b48b0b420c057fc09391ee1ae311293a565e'],
+                    'arm' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_linux_arm.tar.gz', 'sha' => '1be7e3bfbe1ad29d807c6a85ef33ab0bdfbc8c7c5fe33d6e08043646e02db43a'],
+                    '386' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_linux_386.tar.gz', 'sha' => 'cc4db4b0df9f947498e5a93dddf8398dd9f1d4faab11fd3c29d773b4b3920503'],
+                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_linux_arm64.tar.gz', 'sha' => '031b26ca68a5274c0d88263bdd1b334c4f87c381f750c0e22e7777a1fb3374f7'],
                 ],
                 'darwin' => [
-                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.9.0/task_darwin_amd64.tar.gz', 'sha' => '11945c7e9f699a64f959bd96b3ece4f6d3c7dba79b52d7a2283aa66556abc3a9'],
-                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.9.0/task_darwin_arm64.tar.gz', 'sha' => 'd492fe0bbb7992c02fce2f141e0b1220df16e61cca21b80039d2db2e470df5e8'],
+                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_darwin_amd64.tar.gz', 'sha' => '068f4d35b47419047afea167cbdff7d446ea4218548dfb3b541ca8b9a378fe84'],
+                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_darwin_arm64.tar.gz', 'sha' => 'e962a63a46251952a34c1bd0a060f2eb91009058de13ea4f7750c8ae00513f95'],
                 ],
                 'windows' => [
-                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.9.0/task_windows_amd64.zip', 'sha' => '8a9ed4c33c94d014c09ac3cf214ed2687f00f4a9bcfa570b603f36f755fe97af'],
-		    'arm' => ['url' => 'https://github.com/go-task/task/releases/download/v3.9.0/task_windows_arm.zip', 'sha' => 'f205e736904d56a373bf47353c53d36f17863bfa132fea11b3630ebcadaa3174'],
-                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.9.0/task_windows_arm64.zip', 'sha' => 'f7f68826d8480fe45647357e55a6b7cdd0eed5c4269e53d819070dbdd4716669'],
-                    '386' => ['url' => 'https://github.com/go-task/task/releases/download/v3.9.0/task_windows_386.zip', 'sha' => 'aad0c5b65b02e3df19035ad5eba4570b5d495c8acf2bd101e9c078fff9ae53c7'],
+                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_windows_amd64.zip', 'sha' => 'd46e1f3a8ce6951e2d7978c5094661b3f1473cba291bcc2fa53a7af224c403a8'],
+		            'arm' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_windows_arm.zip', 'sha' => '9ad664e06f4168652f211a1c6600aea36cd8e9a63e467be0f44abfb1d58f9d6a'],
+                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_windows_arm64.zip', 'sha' => '6092dc97bdbc53ca13c7451b5b4de83fad98a8058bcfdb4a1621a91e8fb320b0'],
+                    '386' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_windows_386.zip', 'sha' => 'a7fd49978db94496b19141519b5f457aeeda0b92be2ec7e61aeba13cda8461c7'],
                 ],
             ],
             'hashalgo' => 'sha256',
-            'version' => '3.9.0',
+            'version' => '3.28.0',
         ],
     ];
+
+    /**
+     * Gets the version for a binary.
+     *
+     * @param $binary
+     * @return mixed|string
+     */
+    public function getBinaryVersion($binary) {
+        return $this->binaries[$binary]['version'];
+    }
 }

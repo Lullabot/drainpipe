@@ -13,6 +13,8 @@ use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
 use Composer\Util\Filesystem;
 use Symfony\Component\Yaml\Yaml;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterface
 {
@@ -81,6 +83,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installGitignore();
         $this->installDdevCommand();
         $this->installCICommands();
+        $this->installEnvSupport();
     }
 
     /**
@@ -94,6 +97,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installGitignore();
         $this->installDdevCommand();
         $this->installCICommands();
+        $this->installEnvSupport();
     }
 
     /**
@@ -128,6 +132,21 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     break;
                 }
             }
+            if (empty($projectTaskfile['tasks']['sync'])) {
+                $this->io->warning(
+                    'Taskfile.yml does not contain a "sync" task.'
+                );
+            }
+            if (empty($projectTaskfile['tasks']['build'])) {
+                $this->io->warning(
+                    'Taskfile.yml does not contain a "build" task.'
+                );
+            }
+            if (empty($projectTaskfile['tasks']['update'])) {
+                $this->io->warning(
+                    'Taskfile.yml does not contain an "update" task and will fall back to using "task drupal:update".'
+                );
+            }
         }
     }
 
@@ -152,11 +171,32 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (strpos($contents, '.task') === false) {
                 $this->io->warning(
                     sprintf(
-                    '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
+                        '.gitignore does not contain drainpipe ignores. Compare .gitignore in the root of your repository with %s and update as needed.',
                         $gitignorePath
                     )
                 );
             }
+        }
+    }
+
+    /**
+     * Install .env support.
+     */
+    private function installEnvSupport(): void
+    {
+        $fs = new Filesystem();
+        $vendor = $this->config->get('vendor-dir');
+        // Copy this over as the other files in composer drupal-scaffold
+        // are added to the gitignore, and this should be checked in.
+        if (!is_file('./.env.defaults')) {
+            $fs->copy($vendor . '/lullabot/drainpipe/scaffold/env/env.defaults', './.env.defaults');
+        }
+        // There has to be a better way of doing this?
+        $vendorRelative = str_replace(getcwd() . DIRECTORY_SEPARATOR, '', $vendor);
+        $composerJson = file_get_contents('composer.json');
+        $composerFullConfig = json_decode($composerJson, true);
+        if (empty($composerFullConfig['autoload-dev']['files']) || !in_array("$vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php", $composerFullConfig['autoload-dev']['files'])) {
+            $this->io->warning("🪠 [Drainpipe] $vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php' missing from autoload-dev files");
         }
     }
 
@@ -167,7 +207,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     {
         if (file_exists('./.ddev/config.yaml')) {
             $vendor = $this->config->get('vendor-dir');
-            $ddevCommandPath = $vendor.'/lullabot/drainpipe/scaffold/ddev/task-command.sh';
+            $ddevCommandPath = $vendor . '/lullabot/drainpipe/scaffold/ddev/task-command.sh';
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
             $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
@@ -197,12 +237,17 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             return;
         }
 
-        $fs->ensureDirectoryExists('./.drainpipe/gitlab');
+        if (file_exists('./.ddev/config.yaml')) {
+                $fs->ensureDirectoryExists('.gitlab/drainpipe');
+                $fs->copy("$scaffoldPath/gitlab/DDEV.gitlab-ci.yml", ".gitlab/drainpipe/DDEV.gitlab-ci.yml");
+                $this->io->write("🪠 [Drainpipe] .gitlab/drainpipe/DDEV.gitlab-ci.yml installed");
+            }
+            else {$fs->ensureDirectoryExists('./.drainpipe/gitlab');
         $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
-        $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
+        $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");}
         foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
             $file = "gitlab/$gitlab.gitlab-ci.yml";
-            if (file_exists("$scaffoldPath/$file")) {
+            if (file_exists("$scaffoldPath/$file")) {$fs->ensureDirectoryExists('./.drainpipe/gitlab');
                 $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
                 $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
             }
@@ -248,15 +293,16 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
-                if (!file_exists('./.github/workflows/PantheonReviewApps.yml')) {
-                    if (file_exists('./.ddev/config.yaml')) {
+                if (file_exists('./.ddev/config.yaml')) {
                         $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
                     else {
                         $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
                 }
-            }
+            else if ($github === 'ComposerLockDiff') {
+                    $fs->ensureDirectoryExists('./.github/workflows');
+                    $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');}
         }
     }
 
@@ -279,6 +325,148 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                         "$scaffoldPath/pantheon/.drainpipeignore"
                     )
                 );
+            }
+        }
+
+        // Tugboat
+        if (isset($this->extra['drainpipe']['tugboat'])) {
+            // Look for a config override file before we wipe the directory.
+            $tugboatConfigOverride = [];
+            $tugboatConfigOverridePath = './.tugboat/config.drainpipe-override.yml';
+            if (file_exists($tugboatConfigOverridePath)) {
+                $tugboatConfigOverride = Yaml::parseFile($tugboatConfigOverridePath);
+                $tugboatConfigOverrideFile = file_get_contents($tugboatConfigOverridePath);
+            }
+
+            // Wipe the Tugboat directory and define base config.
+            $fs->removeDirectory('./.tugboat');
+            $binaryInstallerPlugin = new BinaryInstallerPlugin();
+            $tugboatConfig = [
+                'nodejs_version' => '18',
+                'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm',
+                'database_type' => 'mariadb',
+                'database_version' => '10.6',
+                'php_version' => '8.1',
+                'sync_command' => 'sync',
+                'build_command' => 'build',
+                'update_command' => 'drupal:update',
+                'init' => [],
+                'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
+                'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
+                'overrides' => ['php' => ''],
+            ];
+
+            // Read DDEV config.
+            if (file_exists('./.ddev/config.yaml')) {
+                $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
+                $tugboatConfig['database_type'] = $ddevConfig['database']['type'];
+                $tugboatConfig['database_version'] = $ddevConfig['database']['version'];
+                $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm';
+
+                if (!empty($ddevConfig['nodejs_version'])) {
+                    $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
+                }
+                if (!empty($ddevConfig['webserver_type']) && $ddevConfig['webserver_type'] === 'apache-fpm') {
+                    $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache';
+                }
+            }
+
+            // Filter out unsupported config overrides.
+            if (!empty($tugboatConfigOverride['php']) && is_array($tugboatConfigOverride['php'])) {
+                $tugboatConfigOverride['php'] = array_filter($tugboatConfigOverride['php'], function($key) {
+                    return in_array($key, ['aliases', 'urls', 'visualdiff', 'screenshot']);
+                }, ARRAY_FILTER_USE_KEY);
+                $overrideOutput = [];
+                foreach (explode(PHP_EOL, Yaml::dump($tugboatConfigOverride['php'], 2, 2)) as $line) {
+                    $overrideOutput[] = str_repeat(' ', 4) . $line;
+                }
+                $tugboatConfig['overrides']['php'] = rtrim(implode("\n", $overrideOutput));
+            }
+
+            // Add Redis service.
+            if (file_exists('./.ddev/docker-compose.redis.yaml')) {
+                $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
+                $redisImage = explode(':', $redisConfig['services']['redis']['image']);
+                $tugboatConfig['memory_cache_type'] = 'redis';
+                $tugboatConfig['memory_cache_version'] = array_pop($redisImage);
+            }
+
+            // Add Elasticsearch service.
+            if (file_exists('./.ddev/docker-compose.elasticsearch.yaml')) {
+                $esConfig = Yaml::parseFile('.ddev/docker-compose.elasticsearch.yaml');
+                $esImage = explode(':', $esConfig['services']['elasticsearch']['image']);
+                $tugboatConfig['search_type'] = 'elasticsearch';
+                $tugboatConfig['search_version'] = array_pop($esImage);
+            }
+
+            // Add commands to Task.
+            if (file_exists('Taskfile.yml')) {
+                // Get steps out of the Taskfile.
+                $taskfile = Yaml::parseFile('./Taskfile.yml');
+                if (isset($taskfile['tasks']['sync:tugboat'])) {
+                    $tugboatConfig['sync_command'] = 'sync:tugboat';
+                }
+                if (isset($taskfile['tasks']['build:tugboat'])) {
+                    $tugboatConfig['build_command'] = 'build:tugboat';
+                }
+                if (isset($taskfile['tasks']['update'])) {
+                    $tugboatConfig['update_command'] = 'update';
+                }
+                if (isset($taskfile['tasks']['update:tugboat'])) {
+                    $tugboatConfig['update_command'] = 'update:tugboat';
+                }
+                if (isset($taskfile['tasks']['online:tugboat'])) {
+                    $tugboatConfig['online_command'] = 'online:tugboat';
+                }
+                if (isset($taskfile['tasks']['tugboat:php:init'])) {
+                    $tugboatConfig['init']['php'] = true;
+                }
+                if (isset($taskfile['tasks']['tugboat:mysql:init'])) {
+                    $tugboatConfig['init']['mysql'] = true;
+                }
+                if (isset($taskfile['tasks']['tugboat:redis:init'])) {
+                    $tugboatConfig['init']['redis'] = true;
+                }
+            }
+
+            // Write the config.yml and settings.tugboat.php files.
+            if (count($tugboatConfig) > 0) {
+                $fs->ensureDirectoryExists('./.tugboat');
+                $fs->ensureDirectoryExists('./.tugboat/steps');
+                $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
+                $twig = new Environment($loader);
+                // Reinstate the override file.
+                if (isset($tugboatConfigOverrideFile)) {
+                    file_put_contents('./.tugboat/config.drainpipe-override.yml', $tugboatConfigOverrideFile);
+                }
+                file_put_contents('./.tugboat/config.yml', $twig->render('config.yml.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/1-init.sh', $twig->render('steps/1-init.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/2-update.sh', $twig->render('steps/2-update.sh.twig', $tugboatConfig));
+                file_put_contents('./.tugboat/steps/3-build.sh', $twig->render('steps/3-build.sh.twig', $tugboatConfig));
+                chmod('./.tugboat/steps/1-init.sh', 0755);
+                chmod('./.tugboat/steps/2-update.sh', 0755);
+                chmod('./.tugboat/steps/3-build.sh', 0755);
+                if (!empty($tugboatConfig['online_command'])) {
+                    file_put_contents('./.tugboat/steps/4-online.sh', $twig->render('steps/4-online.sh.twig', $tugboatConfig));
+                    chmod('./.tugboat/steps/4-online.sh', 0755);
+                }
+
+                if ($tugboatConfig['database_type'] === 'mysql') {
+                    $fs->ensureDirectoryExists('./.tugboat/scripts');
+                    $fs->copy("$scaffoldPath/tugboat/scripts/install-mysql-client.sh", './.tugboat/scripts/install-mysql-client.sh');
+                    chmod('./.tugboat/scripts/install-mysql-client.sh', 0755);
+                }
+
+                file_put_contents('./web/sites/default/settings.tugboat.php', $twig->render('settings.tugboat.php.twig', $tugboatConfig));
+                if (file_exists('./web/sites/default/settings.php')) {
+                    $settings = file_get_contents('./web/sites/default/settings.php');
+                    if (strpos($settings, 'settings.tugboat.php') === false) {
+                        $include = <<<'EOT'
+include __DIR__ . "/settings.tugboat.php";
+EOT;
+                        file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
+                    }
+                }
             }
         }
     }

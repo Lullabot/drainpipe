@@ -10,17 +10,16 @@ concurrency:
 
 jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-    - uses: actions/cache@v2
-      with:
-        path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
-        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-composer-
-
+      - uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
       - uses: ./.github/actions/drainpipe/set-env
 
       - name: Install and Start DDEV
@@ -34,9 +33,6 @@ jobs:
       - name: Build Project
         env:
           directory: /tmp/release
-          remote:
-          message:
-          site:
         run: |
           ddev composer install
           ddev task build
@@ -47,5 +43,9 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
-          site-name: [site-name]
-          commit-message: ${{ github.event.head_commit.message }}
+          commit-message: ${{ github.sha }}
+          site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
+          lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
+          lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+          # set to "true" if you want to run the installer
+          run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}

@@ -7,7 +7,7 @@ tasks:
       Given a directory, pushes it to a git remote whilst maintaining a linear
       history with the remote.
 
-      usage: task deploy:git d="/tmp/release" b=main r="git@github.com:Lullabot/drainpipe.git" m="Initial commit" ge="bot@example.com" gn="Drainpipe Bot"
+      usage: task deploy:git directory="/tmp/release" branch=main remote="git@github.com:Lullabot/drainpipe.git" message="Initial commit" push=true"
 
       directory=<directory>   A directory containing the files to be pushed
       branch=<branch>         Name of the branch to push to e.g. "main"
@@ -15,10 +15,10 @@ tasks:
       message=<message>       Commit message
       push=true               (optional) Push to the remote repository
     cmds:
-      - if [ ! -d {{shellQuote .directory}} ] || [ "" == "{{.directory}}" ]; then echo "Please provide a path to a directory to deploy" && exit 1; fi
-      - if [ "" == {{shellQuote .branch}} ]; then echo "Please provide a branch to deploy to" && exit 1; fi
-      - if [ "" == {{shellQuote .remote}} ]; then echo "Please provide a remote git repository to push to" && exit 1; fi
-      - if [ "" == {{shellQuote .message}} ]; then echo "Please provide a commit message" && exit 1; fi
+      - if [ ! -d {{ shellQuote (.directory | default "") }} ]; then echo "Please provide a path to a directory to deploy" && exit 1; fi
+      - if [ "" == {{ shellQuote (.branch | default "") }} ]; then echo "Please provide a branch to deploy to" && exit 1; fi
+      - if [ "" == {{ shellQuote (.remote | default "") }} ]; then echo "Please provide a remote git repository to push to" && exit 1; fi
+      - if [ "" == {{ shellQuote (.message | default "") }} ]; then echo "Please provide a commit message" && exit 1; fi
       - |
         TMP_DIR=$(mktemp -d)
         (git clone --depth 1 --branch {{.branch}} {{.remote}} $TMP_DIR && cd $TMP_DIR) || true
@@ -31,7 +31,7 @@ tasks:
         cd {{.directory}}
         git checkout -B {{.branch}}
         git add -A
-        git commit -m {{shellQuote .message}} --allow-empty
-        git push origin {{.branch}}
-        # Not using a bash-style comparison here due to https://github.com/go-task/task/issues/609
-        {{if eq .push "true"}}git push origin {{.branch}}{{end}}
+        git commit --quiet --message {{shellQuote .message}} --allow-empty
+        if [ {{shellQuote (.push | default "true") }} == "true" ]; then
+          git push origin {{.branch}}
+        fi

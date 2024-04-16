@@ -3,7 +3,7 @@
 tests/fixtures/drainpipe-test-project/*
 !tests/fixtures/drainpipe-test-project/composer.json
 .php-cs-fixer.cache
-composer.lock
+/composer.lock
 
 .yarn/*
 !.yarn/cache
@@ -13,3 +13,12 @@ composer.lock
 !.yarn/sdks
 !.yarn/versions
 .npmrc
+lerna-debug.log
+node_modules
+
+################
+# Editors / OS #
+################
+.idea
+.DS_Store
+.vscode

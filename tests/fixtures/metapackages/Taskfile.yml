@@ -1,0 +1,27 @@
+version: '3'
+
+dotenv: ['.env', '.env.defaults']
+
+includes:
+  sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
+  javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
+
+output: prefixed
+silent: true
+
+vars:
+  DRAINPIPE_SASS: |
+    style.scss:style.css
+  DRAINPIPE_JAVASCRIPT: |
+    js/script.js:js/script.min.js
+
+tasks:
+  sass:
+    desc: "Builds assets such as CSS & JS"
+    cmds:
+      - task: sass:compile
+
+  javascript:
+    desc: "Builds assets such as CSS & JS"
+    cmds:
+      - task: javascript:compile

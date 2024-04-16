@@ -1,0 +1,216 @@
+name: Test PHPUnit Integration
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-PHPUnit-Functional:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
+      - name: Setup drainpipe-dev
+        run: mv drainpipe/drainpipe-dev .
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
+          ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+          # Restart is required to enable the provided Selenium containers
+          ddev restart
+
+      - name: Add Custom Testing Module
+        run: |
+          mkdir web/modules/custom
+          cp -R drainpipe/tests/fixtures/phpunit/testmodule web/modules/custom/
+          cp drainpipe/tests/fixtures/phpunit/Taskfile.yml .
+
+      - name: Run PHPUnit Functional Tests
+        run: |
+          ddev drush site:install -y
+          ddev drush user:password admin password
+          ddev task test:phpunit:functional format=junit
+          docker logs ddev-drainpipe-chrome | tee test_result/ddev-chrome.log
+          docker logs ddev-drainpipe-firefox | tee test_result/ddev-firefox.log
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_result-phpunit-functional
+          path: test_result
+
+      - name: Confirm All PHPUnit Functional Tests were run
+        uses: GuillaumeFalourd/assert-command-line-output@v2.3
+        with:
+          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
+          contains: 18
+          expected_result: PASSED
+
+  Test-PHPUnit-Functional-DTT:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
+      - name: Setup drainpipe-dev
+        run: mv drainpipe/drainpipe-dev .
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe", "weitzman/drupal-test-traits"]'
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev composer config --no-plugins allow-plugins.weitzman/drupal-test-traits true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
+          ddev composer require "lullabot/drainpipe-dev @dev" weitzman/drupal-test-traits behat/mink-selenium2-driver --dev --with-all-dependencies
+          # Restart is required to enable the provided Selenium containers
+          ddev restart
+
+      - name: Add Custom Testing Module
+        run: |
+          mkdir web/modules/custom
+          cp -R drainpipe/tests/fixtures/phpunit/testmodule web/modules/custom/
+          cp drainpipe/tests/fixtures/phpunit/Taskfile-testtraits.yml Taskfile.yml
+
+      - name: Run PHPUnit Functional Tests
+        run: |
+          ddev drush site:install -y
+          ddev drush user:password admin password
+          ddev task test:phpunit:functional format=junit
+          docker logs ddev-drainpipe-chrome | tee test_result/ddev-chrome.log
+          docker logs ddev-drainpipe-firefox | tee test_result/ddev-firefox.log
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_result-phpunit-dtt
+          path: test_result
+
+      - name: Confirm All PHPUnit Functional Tests were run
+        uses: GuillaumeFalourd/assert-command-line-output@v2
+        with:
+          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
+          contains: 21
+          expected_result: PASSED
+
+  Test-PHPUnit-Static:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
+      - name: Setup drainpipe-dev
+        run: mv drainpipe/drainpipe-dev .
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
+          ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+          # Restart is required to enable the provided Selenium containers
+          ddev restart
+
+      - name: Add Custom Testing Module
+        run: |
+          mkdir web/modules/custom
+          cp -R drainpipe/tests/fixtures/phpunit/testmodule web/modules/custom/
+          cp drainpipe/tests/fixtures/phpunit/Taskfile.yml .
+
+      - name: Run PHPUnit Tests
+        run: ddev task test:phpunit:static format=junit
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_result-phpunit-static
+          path: test_result
+
+      - name: Confirm All PHPUnit Functional Tests were run
+        uses: GuillaumeFalourd/assert-command-line-output@v2
+        with:
+          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
+          contains: 12
+          expected_result: PASSED

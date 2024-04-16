@@ -1,0 +1,83 @@
+name: "Test Composer Lock Diff"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-Composer-Lock-Diff:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project:10.0.9 . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer require lullabot/drainpipe --with-all-dependencies
+
+      - name: Commit current state
+        run: |
+          echo "/drainpipe" >> .gitignore
+          git config --global user.email "no-reply@example.com"
+          git config --global user.name "Drainpipe Bot"
+          git init
+          git add .
+          git commit -m "Initial commit"
+
+      - name: Install Composer Lock Diff
+        run : ddev composer global require davidrjonas/composer-lock-diff:^1.0
+
+      - name: Add a new package
+        run: ddev composer require sebastian/version:4.0.1
+
+      - name: Run Composer Lock Diff on a Renovate PR
+        run: |
+          ddev task "github:composer-lock-diff pull_request='drainpipe/tests/fixtures/composer-lock-diff/github/renovate.json' json_file='renovate-processed.json'"
+          if [ "$(cat renovate-processed.json)" != "$(cat drainpipe/tests/fixtures/composer-lock-diff/github/renovate-after.json)" ]; then
+            echo "Expected description not produced"
+            exit 1
+          fi
+
+      - name: Run Composer Lock Diff on a PR Template
+        run: |
+          ddev task "github:composer-lock-diff pull_request='drainpipe/tests/fixtures/composer-lock-diff/github/pr-template.json' json_file='pr-template-processed.json'"
+          if [ "$(cat pr-template-processed.json)" != "$(cat drainpipe/tests/fixtures/composer-lock-diff/github/pr-template-after.json)" ]; then
+            echo "Expected description not produced"
+            exit 1
+          fi
+
+      - name: Upload artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: processed-descriptions
+          path: |
+            renovate-processed.json
+            pr-template-processed.json

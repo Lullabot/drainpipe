@@ -1,0 +1,77 @@
+name: Test Static Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-Static:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
+      - name: Setup drainpipe-dev
+        run: mv drainpipe/drainpipe-dev .
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
+          ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+          # Restart is required to enable the provided Selenium containers
+          ddev restart
+
+      - name: Verify files were created
+        run: |
+          test -f phpcs.xml
+
+      - name: Fix settings.php
+        run: |
+          sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
+
+      - name: Run Static Tests
+        run: ddev task test:static
+
+      - name: Confirm custom directories are scanned
+        run: |
+          set -x
+          mkdir -p custom-yaml-directory
+          echo 'key: value' >> custom-yaml-directory/test.yml
+          ddev task test:static YAML_DIRS="custom-yaml-directory/*.yml" | tee static.log
+          [[ $(grep '\[OK] All 1 YAML files contain valid syntax.' static.log | wc -l) -eq 1 ]]
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_result-static
+          path: test_result
