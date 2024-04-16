@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lullabot\Drainpipe;
 
 use Composer\Cache;
@@ -18,7 +20,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
     /**
      * The binaries to manage and download.
      *
-     * @var string[]
+     * @var array[]
      */
     protected $binaries = [];
 
@@ -123,7 +125,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param Event $event the event to handle
      */
-    public function onPostInstallCmd(Event $event)
+    public function onPostInstallCmd(Event $event): void
     {
         $this->installBinaries($event);
     }
@@ -133,7 +135,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param event $event The event to handle
      */
-    public function onPostUpdateCmd(Event $event)
+    public function onPostUpdateCmd(Event $event): void
     {
         $this->installBinaries($event);
     }
@@ -143,13 +145,13 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param event $event The event to handle
      */
-    public function installBinaries(Event $event)
+    public function installBinaries(Event $event): void
     {
         foreach ($this->binaries as $binary => $info) {
             $platform = $this->platform;
             $processor = $this->processor;
 
-            // Allow platform and processor to be overriden for this binary by
+            // Allow platform and processor to be overridden for this binary by
             // the user.
             if (!empty(getenv('DRAINPIPE_PLATFORM_'.$binary))) {
                 $platform = getenv('DRAINPIPE_PLATFORM_'.$binary);
@@ -177,18 +179,20 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
     /**
      * Install an individual binary.
      *
-     * @param string
+     * @param string $binary
      *  The final filename of the binary
-     * @param string
+     * @param string $version
      *  The version number of the binary
-     * @param string
+     * @param string $url
      *  The URL to download the binary
-     * @param string
+     * @param string $sha
+     *  The hash to validate
+     * @param string $hashalgo
      *  The hashing algorithm to use
      *
-     *  @see https://www.php.net/manual/en/function.hash-file.php
+     * @see https://www.php.net/manual/en/function.hash-file.php
      */
-    protected function installBinary($binary, $version, $url, $sha, $hashalgo = 'sha256')
+    protected function installBinary($binary, $version, $url, $sha, $hashalgo = 'sha256'): void
     {
         $bin = $this->config->get('bin-dir');
         $fs = new Filesystem();
@@ -208,7 +212,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
 
         // Check the cache.
         $fs->ensureDirectoryExists($cacheFolder);
-        if (!$this->cache->isEnabled() || !file_exists($cacheDestination) || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $sha)) {
+        if ($this->needsDownload($cacheDestination, $hashalgo, $sha)) {
             // Fetch a new copy of the binary.
             $httpDownloader->copy($url, $cacheDestination);
         } else {
@@ -252,5 +256,18 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
                 chmod($binDestination, 0755);
             }
         }
+    }
+
+    /**
+     * Return if a file needs to be downloaded or not.
+     *
+     * @param string $cacheDestination The destination path to the downloaded file.
+     * @param string $hashalgo The hash algorithm used to validate the file.
+     * @param string $hash The hash used to validate the file.
+     *
+     * @return bool True if the file needs to be downloaded again, false otherwise.
+     */
+    private function needsDownload(string $cacheDestination, string $hashalgo, string $hash): bool {
+        return !$this->cache->isEnabled() || !file_exists($cacheDestination) || hash_file($hashalgo, $cacheDestination) !== $hash;
     }
 }

@@ -220,83 +220,111 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     private function installCICommands(): void
     {
         $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
+        $this->installGitlabCI($scaffoldPath);
+        $this->installGitHubActions($scaffoldPath);
+    }
+
+    /**
+     * Install GitLab CI configuration if defined in composer.json
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
+     */
+    private function installGitlabCI(string $scaffoldPath): void {
         $fs = new Filesystem();
-        // GitLab
         $fs->removeDirectory('./.drainpipe/gitlab');
-        if (isset($this->extra['drainpipe']['gitlab']) && is_array($this->extra['drainpipe']['gitlab'])) {
-            if (file_exists('./.ddev/config.yaml')) {
+
+        if (!isset($this->extra['drainpipe']['gitlab']) || !is_array($this->extra['drainpipe']['gitlab'])) {
+            return;
+        }
+
+        if (file_exists('./.ddev/config.yaml')) {
                 $fs->ensureDirectoryExists('.gitlab/drainpipe');
                 $fs->copy("$scaffoldPath/gitlab/DDEV.gitlab-ci.yml", ".gitlab/drainpipe/DDEV.gitlab-ci.yml");
                 $this->io->write("🪠 [Drainpipe] .gitlab/drainpipe/DDEV.gitlab-ci.yml installed");
             }
+            else {$fs->ensureDirectoryExists('./.drainpipe/gitlab');
+        $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
+        $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");}
+        foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
+            $file = "gitlab/$gitlab.gitlab-ci.yml";
+            if (file_exists("$scaffoldPath/$file")) {$fs->ensureDirectoryExists('./.drainpipe/gitlab');
+                $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
+                $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
+            }
             else {
-                $fs->ensureDirectoryExists('./.drainpipe/gitlab');
-                $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
-                $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
+                $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
             }
-            foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
-                $file = "gitlab/$gitlab.gitlab-ci.yml";
-                if (file_exists("$scaffoldPath/$file")) {
-                    $fs->ensureDirectoryExists('./.drainpipe/gitlab');
-                    $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
-                    $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
-                }
-                else {
-                    $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
-                }
 
-                if ($gitlab === 'Pantheon') {
-                    // @TODO this isn't really specific to GitLab
-                    // .drainpipeignore
-                    if (!file_exists('.drainpipeignore')) {
-                        $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
-                    }
-                    else {
-                        $contents = file_get_contents('./.drainpipeignore');
-                        if (strpos($contents, '/web/sites/default/files') === false) {
-                            $this->io->warning(
-                                sprintf(
-                                    '.gitignore does not contain drainpipe ignores. Compare .drainpipeignore in the root of your repository with %s and update as needed.',
-                                    "$scaffoldPath/pantheon/.drainpipeignore"
-                                )
-                            );
-                        }
-                    }
-                    // pantheon.yml
-                    if (!file_exists('./pantheon.yml')) {
-                        $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
-                    }
-                    // settings.pantheon.php
-                    if (!file_exists('./web/sites/default/settings.pantheon.php')) {
-                        $fs->copy("$scaffoldPath/pantheon/settings.pantheon.php", './web/sites/default/settings.pantheon.php');
-                    }
+            if ($gitlab === 'Pantheon') {
+                // @TODO this isn't really specific to GitLab
+                $this->pantheonDrainpipeIgnore($scaffoldPath);
+                // pantheon.yml
+                if (!file_exists('./pantheon.yml')) {
+                    $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
                 }
-            }
-            if (!file_exists('./.gitlab-ci.yml')) {
-                $fs->copy("$scaffoldPath/gitlab/gitlab-ci.example.yml", './.gitlab-ci.yml');
+                // settings.pantheon.php
+                if (!file_exists('./web/sites/default/settings.pantheon.php')) {
+                    $fs->copy("$scaffoldPath/pantheon/settings.pantheon.php", './web/sites/default/settings.pantheon.php');
+                }
             }
         }
-        // GitHub
+        if (!file_exists('./.gitlab-ci.yml')) {
+            $fs->copy("$scaffoldPath/gitlab/gitlab-ci.example.yml", './.gitlab-ci.yml');
+        }
+    }
+
+    /**
+     * Install GitLab CI configuration if defined in composer.json
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
+     */
+    private function installGitHubActions(string $scaffoldPath): void {
+        $fs = new Filesystem();
         $fs->removeDirectory('./.github/actions/drainpipe');
-        if (isset($this->extra['drainpipe']['github']) && is_array($this->extra['drainpipe']['github'])) {
-            $fs->ensureDirectoryExists('./.github/actions');
-            $fs->copy("$scaffoldPath/github/actions/common", './.github/actions/drainpipe');
-            foreach ($this->extra['drainpipe']['github'] as $github) {
-                if ($github === 'PantheonReviewApps') {
-                    $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
-                    $fs->ensureDirectoryExists('./.github/workflows');
-                    $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
-                    if (file_exists('./.ddev/config.yaml')) {
+
+        if (!isset($this->extra['drainpipe']['github']) || is_array($this->extra['drainpipe']['github'])) {
+            return;
+        }
+
+        $fs->ensureDirectoryExists('./.github/actions');
+        $fs->copy("$scaffoldPath/github/actions/common", './.github/actions/drainpipe');
+        foreach ($this->extra['drainpipe']['github'] as $github) {
+            if ($github === 'PantheonReviewApps') {
+                $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
+                if (file_exists('./.ddev/config.yaml')) {
                         $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
                     else {
                         $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
                 }
-                else if ($github === 'ComposerLockDiff') {
+            else if ($github === 'ComposerLockDiff') {
                     $fs->ensureDirectoryExists('./.github/workflows');
-                    $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
-                }
+                    $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');}
+        }
+    }
+
+    /**
+     * Copy a .drainpipeignore file suitable for Pantheon deployments.
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
+     */
+    private function pantheonDrainpipeIgnore(string $scaffoldPath): void {
+        $fs = new Filesystem();
+        if (!file_exists('.drainpipeignore')) {
+            $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
+        }
+        else {
+            $contents = file_get_contents('./.drainpipeignore');
+            if (strpos($contents, '/web/sites/default/files') === false) {
+                $this->io->warning(
+                    sprintf(
+                        '.gitignore does not contain drainpipe ignores. Compare .drainpipeignore in the root of your repository with %s and update as needed.',
+                        "$scaffoldPath/pantheon/.drainpipeignore"
+                    )
+                );
             }
         }
 
