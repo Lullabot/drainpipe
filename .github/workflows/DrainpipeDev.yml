@@ -36,7 +36,7 @@ jobs:
           git branch -m ${{ github.ref_name }}
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
-          git reset --mixed ${{ github.ref_name }} || git reset --mixed origin/main
+          git reset --mixed origin/${{ github.ref_name }} || git reset --mixed origin/main
           git config user.name "Lullabot-Drainpipe[bot]"
           git config user.email "157769597+Lullabot-Drainpipe[bot]@users.noreply.github.com"
 
