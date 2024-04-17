@@ -208,7 +208,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
 
         // Check the cache.
         $fs->ensureDirectoryExists($cacheFolder);
-        if (!$this->cache->isEnabled() || !file_exists($cacheDestination) || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $sha)) {
+        if ($this->needsDownload($cacheDestination, $hashalgo, $sha)) {
             // Fetch a new copy of the binary.
             $httpDownloader->copy($url, $cacheDestination);
         } else {
@@ -252,5 +252,18 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
                 chmod($binDestination, 0755);
             }
         }
+    }
+
+    /**
+     * Return if a file needs to be downloaded or not.
+     *
+     * @param string $cacheDestination The destination path to the downloaded file.
+     * @param $hashalgo The hash algorithm used to validate the file.
+     * @param $hash The hash used to validate the file.
+     *
+     * @return bool True if the file needs to be downloaded again, false otherwise.
+     */
+    private function needsDownload(string $cacheDestination, $hashalgo, $hash): bool {
+        return !$this->cache->isEnabled() || !file_exists($cacheDestination) || hash_file($hashalgo, $cacheDestination) !== $hash;
     }
 }
