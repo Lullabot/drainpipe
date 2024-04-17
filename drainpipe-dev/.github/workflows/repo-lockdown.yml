@@ -6,7 +6,7 @@ on:
   pull_request_target:
     types: opened
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 0 * * 1'
 
 permissions:
   issues: write
