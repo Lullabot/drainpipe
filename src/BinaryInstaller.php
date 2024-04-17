@@ -18,7 +18,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
     /**
      * The binaries to manage and download.
      *
-     * @var string[]
+     * @var array[]
      */
     protected $binaries = [];
 
@@ -149,7 +149,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $platform = $this->platform;
             $processor = $this->processor;
 
-            // Allow platform and processor to be overriden for this binary by
+            // Allow platform and processor to be overridden for this binary by
             // the user.
             if (!empty(getenv('DRAINPIPE_PLATFORM_'.$binary))) {
                 $platform = getenv('DRAINPIPE_PLATFORM_'.$binary);
@@ -177,18 +177,18 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
     /**
      * Install an individual binary.
      *
-     * @param string
+     * @param string $binary
      *  The final filename of the binary
-     * @param string
+     * @param string $version
      *  The version number of the binary
-     * @param string
+     * @param string $url
      *  The URL to download the binary
-     * @param string
+     * @param string $sha
      *  The hashing algorithm to use
      *
      *  @see https://www.php.net/manual/en/function.hash-file.php
      */
-    protected function installBinary($binary, $version, $url, $sha, $hashalgo = 'sha256')
+    protected function installBinary($binary, $version, $url, $sha, $hashalgo = 'sha256'): void
     {
         $bin = $this->config->get('bin-dir');
         $fs = new Filesystem();
