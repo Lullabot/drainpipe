@@ -20,7 +20,7 @@
         "ext-json": "*"
     },
     "require-dev": {
-        "composer/composer": "^2.7.2",
+        "composer/composer": "^2.7.4",
         "phpunit/phpunit": "^9.6.19"
     },
     "extra": {
