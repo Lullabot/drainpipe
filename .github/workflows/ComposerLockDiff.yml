@@ -1,0 +1,22 @@
+name: "Composer Lock Diff"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      pr-number:
+        description: 'Pull request number'
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Composer-Lock-Diff:
+    uses: ./scaffold/github/workflows/ComposerLockDiff.yml
+    with:
+      pr-number: ${{ inputs.pr-number || github.event.number }}
+    secrets: inherit
