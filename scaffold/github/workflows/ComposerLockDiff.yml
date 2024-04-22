@@ -53,7 +53,7 @@ jobs:
           with-links: true
 
       - name: Post sticky pull request comment
-        if: ${{ steps.composer-diff.outcome != 'success' }}
+        if: ${{ steps.composer-lock-changed.outputs.any_changed == 'true' }}
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: composer-lock-diff
