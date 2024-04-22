@@ -3,6 +3,11 @@ name: "Composer Lock Diff"
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_call:
+    inputs:
+      pr-number:
+        required: true
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -17,19 +22,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Delete sticky pull request comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: composer-lock-diff
-          delete: true
-
       - name: Check if composer.lock was changed
         id: composer-lock-changed
         uses: tj-actions/changed-files@v44
         with:
           files: 'composer.lock'
 
+      - name: Delete sticky pull request comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: composer-lock-diff
+          number: ${{ inputs.pr-number || github.event.number }}
+          delete: true
+
       - uses: actions/cache@v4
+        if: ${{ steps.composer-lock-changed.outputs.any_changed == 'true' }}
         with:
           path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -50,6 +57,7 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: composer-lock-diff
+          number: ${{ inputs.pr-number || github.event.number }}
           message: |
             ### Composer package changes
             ${{ (steps.composer-diff.outcome != 'success' && 'Review any changes to composer.lock manually.') || steps.composer-diff.outputs.composer_diff || 'No changes found' }}
