@@ -16,6 +16,8 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Check if composer.lock was changed
         id: composer-lock-changed
@@ -42,7 +44,6 @@ jobs:
         id: composer-diff
         uses: IonBazan/composer-diff-action@v1
         with:
-          base: ${{ github.base_ref || github.ref_name }}
           with-platform: true
           with-links: true
 
