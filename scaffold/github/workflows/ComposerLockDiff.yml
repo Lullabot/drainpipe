@@ -31,14 +31,6 @@ jobs:
           header: composer-lock-diff
           delete: true
 
-      - uses: actions/cache@v4
-        if: ${{ steps.composer-lock-changed.outputs.any_changed == 'true' }}
-        with:
-          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
       - name: Generate composer diff
         if: ${{ steps.composer-lock-changed.outputs.any_changed == 'true' }}
         id: composer-diff
