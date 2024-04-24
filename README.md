@@ -449,8 +449,8 @@ Tests can be run locally with [act](https://github.com/nektos/act):
 `act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
 
 ### Composer Lock Diff
-Update Pull Request descriptions with a markdown table of any changes detected
-in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
+Posts a comment in Pull Requests with a markdown table of any changes detected
+in `composer.lock` using [composer-diff](https://github.com/IonBazan/composer-diff).
 
 ```json
 "extra": {
