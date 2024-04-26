@@ -73,4 +73,8 @@ apt-get update
 
 # Purge mariadb if installed
 apt-get -y --autoremove purge 'mariadb*'
-apt-get -y install mysql-client
+if [[ $PHP_VERSION =~ ^"8.2." ]]; then
+  apt-get -y install default-mysql-client
+else
+  apt-get -y install mysql-client
+fi
