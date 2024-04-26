@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          depth: 0
 
       - name: Get branch information
         id: branch-names
@@ -56,6 +58,7 @@ jobs:
           git config user.email "157769597+Lullabot-Drainpipe[bot]@users.noreply.github.com"
 
       - name: Push branch to drainpipe-dev
+        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.files-changed.outputs.any_changed == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git add -A
