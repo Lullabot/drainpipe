@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   Drainpipe-Dev:
-    name: Push branch to drainpipe-dev
+    name: Push branch or tag to drainpipe-dev
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
@@ -29,13 +29,13 @@ jobs:
 
       - name: For non-default branch and non-tags, check if drainpipe-dev was changed
         if: ${{ steps.branch-names.outputs.is_default == 'false' || steps.branch-names.outputs.is_tag == 'false' }}
-        id: drainpipe-dev-changed
+        id: files-changed
         uses: tj-actions/changed-files@v44
         with:
           files: 'drainpipe-dev/**'
 
       - name: Add drainpipe-dev deploy key in order to run git clone
-        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.drainpipe-dev-changed.outputs.any_changed == 'true' }}
+        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.files-changed.outputs.any_changed == 'true' }}
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
@@ -44,7 +44,7 @@ jobs:
       # Commits made by the https://github.com/apps/lullabot-drainpipe application.
       # @see https://github.com/orgs/community/discussions/24664
       - name: Create git checkout of drainpipe-dev
-        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.drainpipe-dev-changed.outputs.any_changed == 'true' }}
+        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.files-changed.outputs.any_changed == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git init
@@ -56,7 +56,7 @@ jobs:
           git config user.email "157769597+Lullabot-Drainpipe[bot]@users.noreply.github.com"
 
       - name: Push branch to drainpipe-dev
-        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.drainpipe-dev-changed.outputs.any_changed == 'true' }}
+        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.files-changed.outputs.any_changed == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git add -A
