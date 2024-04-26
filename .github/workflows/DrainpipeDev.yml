@@ -3,9 +3,10 @@ name: Push Drainpipe Dev Package
 on:
   push:
     branches:
-      - main
+      '**'
     tags:
       - 'v*'
+  delete:
 
 concurrency:
   group: drainpipe-dev
@@ -17,11 +18,24 @@ permissions:
 jobs:
   Drainpipe-Dev:
     name: Push branch to drainpipe-dev
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get branch information
+        id: branch-names
+        uses: tj-actions/branch-names@v8
+
+      - name: For non-default branch and non-tags, check if drainpipe-dev was changed
+        if: ${{ steps.branch-names.outputs.is_default == 'false' || steps.branch-names.outputs.is_tag == 'false' }}
+        id: drainpipe-dev-changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: 'drainpipe-dev/**'
+
       - name: Add drainpipe-dev deploy key in order to run git clone
+        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.drainpipe-dev-changed.outputs.any_changed == 'true' }}
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
@@ -30,6 +44,7 @@ jobs:
       # Commits made by the https://github.com/apps/lullabot-drainpipe application.
       # @see https://github.com/orgs/community/discussions/24664
       - name: Create git checkout of drainpipe-dev
+        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.drainpipe-dev-changed.outputs.any_changed == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git init
@@ -41,6 +56,7 @@ jobs:
           git config user.email "157769597+Lullabot-Drainpipe[bot]@users.noreply.github.com"
 
       - name: Push branch to drainpipe-dev
+        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.drainpipe-dev-changed.outputs.any_changed == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git add -A
@@ -51,8 +67,25 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
 
       - name: Push tag to drainpipe-dev
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ steps.branch-names.outputs.is_tag == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git tag ${{ github.ref_name }}
           git push origin ${{ github.ref_name }}
+
+  Drainpipe-Dev-Delete:
+    name: Delete branch from to drainpipe-dev
+    if: ${{ github.event_name == 'delete' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add drainpipe-dev deploy key in order to run git clone
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
+          log-public-key: false
+
+      # Todo could this check if the remote branch exists instead of just running this blindly?
+      - name: Delete branch from drainpipe-dev
+        run: |
+          git clone git@github.com:Lullabot/drainpipe-dev.git
+          git push --delete origin ${{ github.event.ref }} || true
