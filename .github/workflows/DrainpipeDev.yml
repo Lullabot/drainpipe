@@ -1,18 +1,15 @@
 name: Push Drainpipe Dev Package
 
 on:
-  pull_request:
-    paths:
-      - 'drainpipe-dev/**'
   push:
     branches:
-      - 'main'
+      - '**'
     tags:
       - 'v*'
   delete:
 
 concurrency:
-  group: drainpipe-dev
+  group: drainpipe-dev-${{ github.ref_name }}
   cancel-in-progress: false
 
 permissions:
@@ -26,7 +23,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get branch information
+        id: branch-names
+        uses: tj-actions/branch-names@v8
+
+      - name: For non-default branch and non-tags, check if drainpipe-dev was changed
+        if: ${{ steps.branch-names.outputs.is_default == 'false' || steps.branch-names.outputs.is_tag == 'false' }}
+        id: files-changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: 'drainpipe-dev/**'
+
       - name: Add drainpipe-dev deploy key in order to run git clone
+        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.files-changed.outputs.any_changed == 'true' }}
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
@@ -35,13 +44,14 @@ jobs:
       # Commits made by the https://github.com/apps/lullabot-drainpipe application.
       # @see https://github.com/orgs/community/discussions/24664
       - name: Create git checkout of drainpipe-dev
+        if: ${{ steps.branch-names.outputs.is_default == 'true' || steps.branch-names.outputs.is_tag == 'true' || steps.files-changed.outputs.any_changed == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git init
           git branch -m ${{ github.ref_name }}
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
-          git reset --mixed origin/${{ github.ref_name }} || git reset --mixed origin/main
+          git reset --mixed origin/${{ github.ref_name }} || git reset --mixed origin/${{ steps.branch-names.outputs.default_branch }}
           git config user.name "Lullabot-Drainpipe[bot]"
           git config user.email "157769597+Lullabot-Drainpipe[bot]@users.noreply.github.com"
 
@@ -56,7 +66,7 @@ jobs:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
 
       - name: Push tag to drainpipe-dev
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ steps.branch-names.outputs.is_tag == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git tag ${{ github.ref_name }}
