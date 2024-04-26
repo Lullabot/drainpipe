@@ -20,8 +20,8 @@ permissions:
 
 jobs:
   Drainpipe-Dev:
-    name: Push branch or tag to drainpipe-dev
-    if: ${{ github.event_name == 'push' }}
+    name: Push to drainpipe-dev
+    if: ${{ github.event_name != 'delete' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
