@@ -293,6 +293,17 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                         $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
                 }
+                elseif ($github === 'PantheonReviewAppsManual') {
+                    $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
+                    $fs->ensureDirectoryExists('./.github/workflows');
+                    $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
+                    if (file_exists('./.ddev/config.yaml')) {
+                        $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEVManual.yml", './.github/workflows/PantheonReviewApps.yml');
+                    }
+                    else {
+                        $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsManual.yml", './.github/workflows/PantheonReviewApps.yml');
+                    }
+                }
                 else if ($github === 'ComposerLockDiff') {
                     $fs->ensureDirectoryExists('./.github/workflows');
                     $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
