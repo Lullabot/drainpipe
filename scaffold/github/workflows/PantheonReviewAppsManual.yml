@@ -17,8 +17,8 @@ permissions:
 
 jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
-    runs-on: ubuntu-22.04
     if: github.event.label.name == 'pantheon-multidev'
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
