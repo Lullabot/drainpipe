@@ -667,6 +667,10 @@ Peer Reviewing by looking at PR code changes is nice.
 
 Testing PR code changes on real sites is extra beneficial.
 
+### Local Development
+
+In order to test local changes follow the instructions for the [test script](./docs/test-script.md).
+
 ### Peer Review Guidelines for Automated Updates
 
 These are guidelines for conducting peer reviews on automated dependency update pull requests created by Renovate.
