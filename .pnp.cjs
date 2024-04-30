@@ -485,7 +485,7 @@ const RAW_RUNTIME_STATE =
           ["gulp-sourcemaps", "npm:3.0.0"],\
           ["modern-normalize", "npm:2.0.0"],\
           ["postcss", "npm:8.4.38"],\
-          ["sass", "npm:1.75.0"],\
+          ["sass", "npm:1.76.0"],\
           ["yargs", "npm:17.7.2"]\
         ],\
         "linkType": "SOFT"\
@@ -8144,10 +8144,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sass", [\
-      ["npm:1.75.0", {\
-        "packageLocation": "../../../../cache/others/berry/cache/sass-npm-1.75.0-d06f84fbd4-10c0.zip/node_modules/sass/",\
+      ["npm:1.76.0", {\
+        "packageLocation": "../../../../cache/others/berry/cache/sass-npm-1.76.0-87b1e1bf50-10c0.zip/node_modules/sass/",\
         "packageDependencies": [\
-          ["sass", "npm:1.75.0"],\
+          ["sass", "npm:1.76.0"],\
           ["chokidar", "npm:3.5.2"],\
           ["immutable", "npm:4.0.0"],\
           ["source-map-js", "npm:1.0.2"]\
