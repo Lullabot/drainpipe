@@ -282,26 +282,16 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs->ensureDirectoryExists('./.github/actions');
             $fs->copy("$scaffoldPath/github/actions/common", './.github/actions/drainpipe');
             foreach ($this->extra['drainpipe']['github'] as $github) {
-                if ($github === 'PantheonReviewApps') {
+                if ($github === 'PantheonReviewApps' || $github === 'PantheonReviewAppsManual') {
                     $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
                     $fs->ensureDirectoryExists('./.github/workflows');
                     $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
+                    $is_manual = $github === 'PantheonReviewAppsManual' ? 'Manual' : '';
                     if (file_exists('./.ddev/config.yaml')) {
-                        $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
+                        $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV$is_manual.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
                     else {
-                        $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
-                    }
-                }
-                else if ($github === 'PantheonReviewAppsManual') {
-                    $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
-                    $fs->ensureDirectoryExists('./.github/workflows');
-                    $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
-                    if (file_exists('./.ddev/config.yaml')) {
-                        $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEVManual.yml", './.github/workflows/PantheonReviewApps.yml');
-                    }
-                    else {
-                        $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsManual.yml", './.github/workflows/PantheonReviewApps.yml');
+                        $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps$is_manual.yml", './.github/workflows/PantheonReviewApps.yml');
                     }
                 }
                 else if ($github === 'ComposerLockDiff') {
