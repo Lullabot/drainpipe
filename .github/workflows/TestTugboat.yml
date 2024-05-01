@@ -36,10 +36,9 @@ jobs:
           ddev config --auto
           ddev config --php-version "8.1"
           ddev config --nodejs-version "18"
-          ddev config --database=mariadb:10.4
           ddev get ddev/ddev-redis --version v1.2.0
           ddev get ddev/ddev-elasticsearch --version v0.3.2
-          ddev start
+          ddev restart
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
           ddev composer config --no-plugins allow-plugins.composer/installers true
@@ -122,8 +121,7 @@ jobs:
           ddev config --auto
           ddev config --php-version "8.1"
           ddev config --nodejs-version "16"
-          ddev config --database=mariadb:10.4
-          ddev start
+          ddev restart
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
           ddev composer config --no-plugins allow-plugins.composer/installers true

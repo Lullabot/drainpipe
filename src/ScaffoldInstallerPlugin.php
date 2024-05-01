@@ -317,7 +317,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'nodejs_version' => '18',
                 'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm',
                 'database_type' => 'mariadb',
-                'database_version' => '10.6',
+                'database_version' => '10.11',
                 'php_version' => '8.1',
                 'sync_command' => 'sync',
                 'build_command' => 'build',
