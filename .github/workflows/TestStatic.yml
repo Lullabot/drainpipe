@@ -5,6 +5,9 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+  schedule:
+    - cron: '0 0 * * *'
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -60,6 +63,10 @@ jobs:
 
       - name: Run Static Tests
         run: ddev task test:static
+
+      - name: Run Security Tests
+        if: ${{ github.event_name == 'schedule' }}
+        run: ddev task test:security
 
       - name: Confirm custom directories are scanned
         run: |
