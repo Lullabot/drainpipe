@@ -18,18 +18,18 @@ permissions:
 jobs:
   Drainpipe-Dev:
     name: Push to drainpipe-dev
-    if: ${{ github.event_name != 'delete' }}
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          depth: 0
+          fetch-depth: 0
 
       - name: Get branch information
         id: branch-names
         uses: tj-actions/branch-names@v8
 
-      - name: For non-default branch and non-tags, check if drainpipe-dev was changed
+      - name: For non-default branch pushes, check if drainpipe-dev was changed
         if: ${{ steps.branch-names.outputs.is_default == 'false' || steps.branch-names.outputs.is_tag == 'false' }}
         id: files-changed
         uses: tj-actions/changed-files@v44
@@ -86,7 +86,7 @@ jobs:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
           log-public-key: false
 
-      # Todo could this check if the remote branch exists instead of just running this blindly?
+      # @todo could this check if the remote branch exists instead of just running this blindly?
       - name: Delete branch from drainpipe-dev
         run: |
           git clone git@github.com:Lullabot/drainpipe-dev.git
