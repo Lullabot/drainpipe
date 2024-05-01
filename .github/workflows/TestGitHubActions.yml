@@ -61,7 +61,7 @@ jobs:
           echo "php_version: 8.1" >> pantheon.yml
           echo "drush_version: 10" >> pantheon.yml
           echo "database:" >> pantheon.yml
-          echo "  version: 10.6" >> pantheon.yml
+          echo "  version: 10.4" >> pantheon.yml
           echo "enforce_https: full+subdomains" >> pantheon.yml
           echo "build_step: false" >> pantheon.yml
 
