@@ -34,7 +34,7 @@ services:
       fullPage: false
 
   mariadb:
-    image: tugboatqa/mariadb:10.4
+    image: tugboatqa/mariadb:10.11
 
   redis:
     image: tugboatqa/redis:6-bullseye
