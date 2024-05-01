@@ -211,6 +211,18 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
             $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
+            if (file_exists('./web/sites/default/settings.ddev.php')) {
+                $settings = file_get_contents('./web/sites/default/settings.ddev.php');
+                if (strpos($settings, 'environment-indicator') === false) {
+                    $include = <<<'EOT'
+// See https://architecture.lullabot.com/adr/20210609-environment-indicator/
+$config['environment_indicator.indicator']['name'] = 'Local';
+$config['environment_indicator.indicator']['bg_color'] = '#505050';
+$config['environment_indicator.indicator']['fg_color'] = '#ffffff';
+EOT;
+                    file_put_contents('./web/sites/default/settings.ddev.php', $include . PHP_EOL, FILE_APPEND);
+                }
+            }
         }
     }
 
@@ -317,7 +329,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'nodejs_version' => '18',
                 'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm',
                 'database_type' => 'mariadb',
-                'database_version' => '10.6',
+                'database_version' => '10.11',
                 'php_version' => '8.1',
                 'sync_command' => 'sync',
                 'build_command' => 'build',
