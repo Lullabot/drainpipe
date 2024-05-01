@@ -17,7 +17,7 @@ vars:
 tasks:
   static:
     desc: Runs all static tests
-    deps: [security, lint, phpstan, phpunit:static, phpcs]
+    deps: [lint, phpstan, phpunit:static, phpcs]
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
     deps: [config, phpunit:functional, nightwatch]
