@@ -61,11 +61,11 @@ jobs:
         run: |
           sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
 
-      - name: Run Security Tests
+      - name: Run security tests (only on scheduled runs)
         if: ${{ github.event_name == 'schedule' }}
         run: ddev task test:security
 
-      - name: Run Static Tests
+      - name: Run static tests
         run: ddev task test:static
 
       - name: Confirm custom directories are scanned
