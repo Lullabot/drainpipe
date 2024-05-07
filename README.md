@@ -41,6 +41,7 @@ for a Drupal site, including:
   - [Pantheon](#pantheon-2)
 - [Tugboat](#tugboat)
 - [Contributor Docs](#contributor-docs)
+  - [Local Development](#local-development)
   - [Peer Review Guidelines for Automated Updates](#peer-review-guidelines-for-automated-updates)
     - [Handling Version Ranges](#handling-version-ranges)
     - [Handling Test Failures](#handling-test-failures)
