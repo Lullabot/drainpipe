@@ -21,15 +21,15 @@
         "symfony/phpunit-bridge": "^6|^7",
         "lullabot/drainpipe": "*",
         "mglaman/phpstan-drupal": "^1.2.10",
-        "symfony/yaml": "^3|^4|^5|^6",
-        "drupal/coder": "^8.3.23",
+        "symfony/yaml": "^6|^7",
+        "drupal/coder": "^8.3.24",
         "behat/mink-browserkit-driver": "^2.2.0",
         "tijsverkoyen/convert-to-junit-xml": "^1.11.0",
         "phpstan/phpstan-deprecation-rules": "^1.1.4",
         "phpspec/prophecy-phpunit": "^2"
     },
     "require-dev": {
-        "composer/composer": "^2.7.2"
+        "composer/composer": "^2.7.6"
     },
     "bin": [
         "bin/drainpipe-twig-linter",
