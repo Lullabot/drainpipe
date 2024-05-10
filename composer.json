@@ -14,7 +14,7 @@
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
         "drush/drush": "^11|^12|^13",
-        "symfony/yaml": "^6|^7",
+        "symfony/yaml": "6.4.7",
         "twig/twig": "^3",
         "vlucas/phpdotenv": "^4|^5"
     },
