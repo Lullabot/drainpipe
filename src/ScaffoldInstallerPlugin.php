@@ -298,7 +298,7 @@ EOT;
                     $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
                     $fs->ensureDirectoryExists('./.github/workflows');
                     $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
-                    $pantheon_review_apps = $github === 'PantheonReviewAppsManual' ?: 'PantheonReviewApps';
+                    $pantheon_review_apps = ($github === 'PantheonReviewApps') ? 'PantheonReviewApps' : 'PantheonReviewAppsManual';
                     if (file_exists('./.ddev/config.yaml')) {
                         $pantheon_review_apps_ddev = $pantheon_review_apps . 'DDEV';
                         $fs->copy("$scaffoldPath/github/workflows/$pantheon_review_apps_ddev.yml", './.github/workflows/PantheonReviewApps.yml');
