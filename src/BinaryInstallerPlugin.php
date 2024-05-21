@@ -7,7 +7,7 @@ class BinaryInstallerPlugin extends BinaryInstaller
     /**
      * The binaries to manage and download.
      *
-     * @var string[]
+     * @var array[]
      */
     protected $binaries = [
         // Also update if changing version
@@ -27,7 +27,7 @@ class BinaryInstallerPlugin extends BinaryInstaller
                 ],
                 'windows' => [
                     'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_windows_amd64.zip', 'sha' => 'd46e1f3a8ce6951e2d7978c5094661b3f1473cba291bcc2fa53a7af224c403a8'],
-		    'arm' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_windows_arm.zip', 'sha' => '9ad664e06f4168652f211a1c6600aea36cd8e9a63e467be0f44abfb1d58f9d6a'],
+		            'arm' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_windows_arm.zip', 'sha' => '9ad664e06f4168652f211a1c6600aea36cd8e9a63e467be0f44abfb1d58f9d6a'],
                     'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_windows_arm64.zip', 'sha' => '6092dc97bdbc53ca13c7451b5b4de83fad98a8058bcfdb4a1621a91e8fb320b0'],
                     '386' => ['url' => 'https://github.com/go-task/task/releases/download/v3.28.0/task_windows_386.zip', 'sha' => 'a7fd49978db94496b19141519b5f457aeeda0b92be2ec7e61aeba13cda8461c7'],
                 ],

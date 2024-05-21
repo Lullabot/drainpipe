@@ -13,23 +13,23 @@
         "php": "^8.1",
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
-        "phpunit/phpunit": "^8|^9",
+        "phpunit/phpunit": "^9.6.19",
         "sserbin/twig-linter": "^3.1.0",
         "mikey179/vfsstream": "^1.6.11",
-        "mockery/mockery": "^1.6.7",
+        "mockery/mockery": "^1.6.12",
         "behat/mink": "^1.11.0",
-        "symfony/phpunit-bridge": "^5|^6",
+        "symfony/phpunit-bridge": "^6|^7",
         "lullabot/drainpipe": "*",
-        "mglaman/phpstan-drupal": "^1.2.7",
-        "symfony/yaml": "^3|^4|^5|^6",
-        "drupal/coder": "^8.3.23",
+        "mglaman/phpstan-drupal": "^1.2.11",
+        "symfony/yaml": "^6|^7",
+        "drupal/coder": "^8.3.24",
         "behat/mink-browserkit-driver": "^2.2.0",
         "tijsverkoyen/convert-to-junit-xml": "^1.11.0",
-        "phpstan/phpstan-deprecation-rules": "^1.1.4",
+        "phpstan/phpstan-deprecation-rules": "^1.2.0",
         "phpspec/prophecy-phpunit": "^2"
     },
     "require-dev": {
-        "composer/composer": "^2.7.1"
+        "composer/composer": "^2.7.6"
     },
     "bin": [
         "bin/drainpipe-twig-linter",

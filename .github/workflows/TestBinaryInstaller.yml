@@ -1,4 +1,4 @@
-name: Test Static Tests
+name: Test Binary Installer
 on:
   push:
     branches:
@@ -11,9 +11,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Test-Static:
+  Test-Binary-Installer:
     runs-on: ubuntu-22.04
     steps:
+
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
@@ -29,6 +30,7 @@ jobs:
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
+          composer-cache-dir: composer-cache
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
 
@@ -47,31 +49,21 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
-          # Restart is required to enable the provided Selenium containers
-          ddev restart
 
-      - name: Verify files were created
+      - name: Simulate failure
         run: |
-          test -f phpcs.xml
+          ddev exec touch /var/www/html/composer-cache/files/lullabot/drainpipe/bin/task/3.28.0/task_linux_amd64.tar
+          ddev composer install
 
-      - name: Fix settings.php
+      - name: Test installing without composer cache
         run: |
-          sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
-
-      - name: Run Static Tests
-        run: ddev task test:static
-
-      - name: Confirm custom directories are scanned
-        run: |
-          set -x
-          mkdir -p custom-yaml-directory
-          echo 'key: value' >> custom-yaml-directory/test.yml
-          ddev task test:static YAML_DIRS="custom-yaml-directory/*.yml" | tee static.log
-          [[ $(grep '\[OK] All 1 YAML files contain valid syntax.' static.log | wc -l) -eq 1 ]]
-
-      - name: Upload test artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: test_result-static
-          path: test_result
+          ddev composer install --no-cache
+          test -x vendor/bin/task
+          ddev composer install
+          test -x vendor/bin/task
+          rm -rf vendor
+          ddev composer install
+          test -x vendor/bin/task
+          rm -rf vendor
+          ddev composer install --no-cache
+          test -x vendor/bin/task

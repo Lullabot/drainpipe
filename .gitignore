@@ -14,3 +14,11 @@ tests/fixtures/drainpipe-test-project/*
 !.yarn/versions
 .npmrc
 lerna-debug.log
+node_modules
+
+################
+# Editors / OS #
+################
+.idea
+.DS_Store
+.vscode

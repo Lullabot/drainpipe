@@ -22,6 +22,7 @@ services:
       init: ./.tugboat/steps/1-init.sh
       update: ./.tugboat/steps/2-update.sh
       build: ./.tugboat/steps/3-build.sh
+      online: ./.tugboat/steps/4-online.sh
 
     aliases:
       - foo
@@ -33,7 +34,7 @@ services:
       fullPage: false
 
   mariadb:
-    image: tugboatqa/mariadb:10.4
+    image: tugboatqa/mariadb:10.11
 
   redis:
     image: tugboatqa/redis:6-bullseye
