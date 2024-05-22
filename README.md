@@ -23,7 +23,7 @@ for a Drupal site, including:
   - [Setup](#setup-1)
 - [Testing](#testing)
   - [Static Tests](#static-tests)
-    - [Excluding Files from PHP_CodeSniffer](#excluding-files-from-php_codesniffer)
+    - [Altering PHP_CodeSniffer Configuration](#altering-php_codesniffer-configuration)
   - [Functional Tests](#functional-tests)
     - [PHPUnit](#phpunit)
     - [Nightwatch](#nightwatch)
@@ -229,10 +229,8 @@ All the below static code analysis tests can be run with `task test:static`
 | PHPCS     | task test:phpcs          | Runs PHPCS with Drupal coding standards provided by [Coder module](https://www.drupal.org/project/coder                                                                                                                                                                |
 
 
-#### Excluding Files from PHP_CodeSniffer
+#### Altering PHP_CodeSniffer Configuration
 
-`phpcs.xml` can be altered using Drupal's
-[composer scaffold](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4).
 - Create `phpcs.xml` to override the `phpcs.xml.dist` file with overrides being done in:
   ```
   <rule ref="phpcs.xml.dist">
