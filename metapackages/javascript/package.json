@@ -5,7 +5,7 @@
   "dependencies": {
     "@yarnpkg/esbuild-plugin-pnp": "^3.0.0-rc.15",
     "chokidar": "^3.6.0",
-    "esbuild": "^0.21.3",
+    "esbuild": "^0.21.4",
     "yargs": "^17.7.2"
   },
   "repository": {
