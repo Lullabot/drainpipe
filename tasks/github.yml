@@ -32,6 +32,7 @@ tasks:
       - defer: rm -f /tmp/drainpipe-composer-lock-diff-pr
       - |
         LOCK_DIFF="$(composer global exec -- "composer-lock-diff --md")"
+        LOCK_DIFF=$(echo "$LOCK_DIFF" | sed ':a;N;$!ba;s/\n/\r\n/g')
         sed -i 's/<!--Composer Lock Diff-->.*<!--\/Composer Lock Diff-->//g' /tmp/drainpipe-composer-lock-diff-pr
         DESCRIPTION=$(cat /tmp/drainpipe-composer-lock-diff-pr | jq -r '.body')
         if [ "$(cat /tmp/drainpipe-composer-lock-diff)" != "" ]; then
@@ -42,5 +43,4 @@ tasks:
         $DIFF
         <!--/Composer Lock Diff-->"
         fi
-        DESCRIPTION=$(echo "$DESCRIPTION" | sed ':a;N;$!ba;s/\n/\r\n/g' | sed -z 's/"/\\"/g')
         echo "$(jq -n --arg description "$DESCRIPTION" '{"body": $description}')" >  {{ .json_file }}
