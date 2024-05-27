@@ -14,12 +14,11 @@ tasks:
           directories=".github/workflows .github/actions"
           if [ "{{ .directories }}" != "" ]; then directories="{{ .directories }}"; fi
 
-          command="find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1"
           if command -v action-validator &> /dev/null
           then
-              $command action-validator
+              find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 action-validator
           else
-              $command npx @action-validator/cli
+              find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 npx @action-validator/cli
           fi
 
   composer-lock-diff:
