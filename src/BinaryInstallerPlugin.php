@@ -45,8 +45,9 @@ class BinaryInstallerPlugin extends BinaryInstaller
                     'amd64' => ['url' => 'https://github.com/mpalmer/action-validator/releases/download/v0.6.0/action-validator_darwin_amd64', 'sha' => '10f453ad4ed011eb3866bd35c25311bd2fe1fbf353cbe64793115de2348f8ddb'],
                     'arm64' => ['url' => 'https://github.com/mpalmer/action-validator/releases/download/v0.6.0/action-validator_darwin_arm64', 'sha' => '68e09e0793cf958daf0aebe69fb2bf858232fb9c4f74f913dab02db67d32224d'],
                 ],
-            ]
-        ]
+            ],
+            'version' => '0.6.0',
+        ],
     ];
 
     /**
