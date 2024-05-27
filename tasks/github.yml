@@ -43,4 +43,4 @@ tasks:
         <!--/Composer Lock Diff-->"
         fi
         DESCRIPTION=$(echo "$DESCRIPTION" | sed ':a;N;$!ba;s/\n/\\r\\n/g' | sed -z 's/"/\\"/g')
-        echo "{\"body\": \"$(echo "$DESCRIPTION")\"}" > {{ .json_file }}
+        echo "$(jq -n --arg description "$DESCRIPTION" '{"body": $description}')" >  {{ .json_file }}
