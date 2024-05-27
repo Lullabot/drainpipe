@@ -42,5 +42,5 @@ tasks:
         $DIFF
         <!--/Composer Lock Diff-->"
         fi
-        DESCRIPTION=$(echo "$DESCRIPTION" | sed -z 's/\n/\\n/g' | sed -z 's/"/\\"/g' | sed -z 's/\r//g')
+        DESCRIPTION=$(echo -e "$DESCRIPTION" | sed ':a;N;$!ba;s/\n/\r\n/g' | sed -z 's/"/\\"/g')
         echo "{\"body\": \"$(echo "$DESCRIPTION")\"}" > {{ .json_file }}
