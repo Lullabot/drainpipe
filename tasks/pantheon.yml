@@ -5,10 +5,11 @@ tasks:
     desc: "Fetches a database from Pantheon"
     env:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
+      SITE_ENV: '{{default "live" .SITE_ENV}}'
     cmds:
       - rm -f $DB_DIR/db.sql.gz $DB_DIR/db.sql
       - if [ -z "$PANTHEON_TOKEN" ]; then echo "PANTHEON_TOKEN is empty, please add it to your .env file"; exit 1; fi
       - echo "⚡ Authorising with Pantheon"
       - terminus auth:login --machine-token="${PANTHEON_TOKEN}"
       - echo "⚡ Fetching database from Pantheon"
-      - terminus backup:get {{.PANTHEON_SITE_ID}}.live --element=db --to=$DB_DIR/db.sql.gz
+      - terminus backup:get {{.PANTHEON_SITE_ID}}.$SITE_ENV --element=db --to=$DB_DIR/db.sql.gz
