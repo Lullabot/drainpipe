@@ -52,7 +52,7 @@ jobs:
 
       - name: Verify files were created
         run: |
-          test -f phpcs.xml
+          test -f phpcs.xml.dist
 
       - name: Fix settings.php
         run: |

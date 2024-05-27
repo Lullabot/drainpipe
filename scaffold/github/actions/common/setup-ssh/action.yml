@@ -11,7 +11,8 @@ runs:
   using: "composite"
   steps:
     - run: |
-        sudo apt install openssh-client
+        sudo apt-get update
+        sudo apt-get install -y openssh-client
         eval $(ssh-agent -s)
         echo "${{ inputs.ssh-private-key }}" | tr -d '\r' | ssh-add -
         mkdir -p ~/.ssh

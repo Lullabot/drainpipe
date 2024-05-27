@@ -7,7 +7,7 @@ class BinaryInstallerPlugin extends BinaryInstaller
     /**
      * The binaries to manage and download.
      *
-     * @var string[]
+     * @var array[]
      */
     protected $binaries = [
         // Also update if changing version
