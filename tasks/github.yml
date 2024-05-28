@@ -37,7 +37,8 @@ tasks:
         DESCRIPTION=$(cat /tmp/drainpipe-composer-lock-diff-pr | jq -r '.body')
         if [ "$(cat /tmp/drainpipe-composer-lock-diff)" != "" ]; then
             DIFF=$(cat /tmp/drainpipe-composer-lock-diff)
+            DIFF="$(jq -n --arg diff "$DIFF" '$diff')"
             DESCRIPTION="$(jq -n --arg description "$DESCRIPTION" '$description')"
-            DESCRIPTION="$DESCRIPTION"'\n<!--Composer Lock Diff-->\r\n## Composer Lock Diff\r\n'"$DIFF<!--/Composer Lock Diff-->"
+            DESCRIPTION=$DESCRIPTION'\n<!--Composer Lock Diff-->\r\n## Composer Lock Diff\r\n'$DIFF'<!--/Composer Lock Diff-->'
         fi
         echo "{\"body\": \"$(echo "$DESCRIPTION")\"}" > {{ .json_file }}
