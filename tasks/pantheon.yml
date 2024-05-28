@@ -12,4 +12,4 @@ tasks:
       - echo "⚡ Authorising with Pantheon"
       - terminus auth:login --machine-token="${PANTHEON_TOKEN}"
       - echo "⚡ Fetching database from Pantheon"
-      - terminus backup:get {{.PANTHEON_SITE_ID}}.$SITE_ENV --element=db --to=$DB_DIR/db.sql.gz
+      - terminus backup:get {{.PANTHEON_SITE_ID}}.$ENVIRONMENT --element=db --to=$DB_DIR/db.sql.gz
