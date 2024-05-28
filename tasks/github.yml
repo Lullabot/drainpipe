@@ -41,6 +41,6 @@ tasks:
             DIFF="${DIFF:1:-1}"
             DESCRIPTION=$(jq -n --arg description "$DESCRIPTION" '$description')
             DESCRIPTION="${DESCRIPTION:1:-1}"
-            DESCRIPTION=$DESCRIPTION'\n<!--Composer Lock Diff-->\r\n## Composer Lock Diff\r\n'$DIFF'<!--/Composer Lock Diff-->'
+            DESCRIPTION=$DESCRIPTION'\n<!--Composer Lock Diff-->\r\n## Composer Lock Diff\r\n'$DIFF'\n<!--/Composer Lock Diff-->'
         fi
         echo -E "{\"body\": \"$(echo -E "$DESCRIPTION")\"}" > {{ .json_file }}
