@@ -5,7 +5,7 @@ tasks:
     desc: "Fetches a database from Pantheon"
     env:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
-      SITE_ENV: '{{default "live" .SITE_ENV}}'
+      ENVIRONMENT: '{{default "live" .ENVIRONMENT}}'
     cmds:
       - rm -f $DB_DIR/db.sql.gz $DB_DIR/db.sql
       - if [ -z "$PANTHEON_TOKEN" ]; then echo "PANTHEON_TOKEN is empty, please add it to your .env file"; exit 1; fi
