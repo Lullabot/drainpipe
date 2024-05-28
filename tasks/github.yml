@@ -27,7 +27,7 @@ tasks:
     cmds:
       - if [ "" == {{shellQuote .json_file}} ]; then echo "Please provide a file to write the description to" && exit 1; fi
       - composer global exec -- "composer-lock-diff --md > /tmp/drainpipe-composer-lock-diff"
-      - sed ':a;N;$!ba;s/\n/\r\n/g' /tmp/drainpipe-composer-lock-diff > /tmp/temp.txt && mv /tmp/temp.txt i/tmp/drainpipe-composer-lock-diff
+      - sed ':a;N;$!ba;s/\n/\r\n/g' /tmp/drainpipe-composer-lock-diff > /tmp/temp.txt && mv /tmp/temp.txt /tmp/drainpipe-composer-lock-diff
       - defer: rm -f /tmp/drainpipe-composer-lock-diff
       - cp {{ .pull_request }} /tmp/drainpipe-composer-lock-diff-pr
       - defer: rm -f /tmp/drainpipe-composer-lock-diff-pr
