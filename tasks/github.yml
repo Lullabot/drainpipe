@@ -37,8 +37,8 @@ tasks:
         DESCRIPTION=$(cat /tmp/drainpipe-composer-lock-diff-pr | jq -r '.body')
         if [ "$(cat /tmp/drainpipe-composer-lock-diff)" != "" ]; then
             DIFF=$(cat /tmp/drainpipe-composer-lock-diff)
-            DIFF=$(jq -n --arg diff "$DIFF" '$diff')
-            DIFF="${DIFF:1:-1}"
+            DIFF=$(jq -n --arg diff "$DIFF" '$diff') # prepare escape sequences for json
+            DIFF="${DIFF:1:-1}" # removes extra quotes around string
             DESCRIPTION=$(jq -n --arg description "$DESCRIPTION" '$description')
             DESCRIPTION="${DESCRIPTION:1:-1}"
             DESCRIPTION=$DESCRIPTION'\n<!--Composer Lock Diff-->\r\n## Composer Lock Diff\r\n'$DIFF'\n<!--/Composer Lock Diff-->'
