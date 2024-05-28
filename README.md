@@ -382,6 +382,7 @@ includes:
 |                          |                                                                             |
 |--------------------------|-----------------------------------------------------------------------------|
 | `task pantheon:fetch-db` | Fetches a database from Pantheon. Set `PANTHEON_SITE_ID` in Taskfile `vars` |
+|                          | and optionally `ENVIRONMENT` to override the default value of `live`        |
 
 See below for CI specific integrations for hosting providers.
 
