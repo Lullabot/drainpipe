@@ -43,4 +43,4 @@ tasks:
             DESCRIPTION="${DESCRIPTION:1:-1}"
             DESCRIPTION=$DESCRIPTION'\n<!--Composer Lock Diff-->\r\n## Composer Lock Diff\r\n'$DIFF'\n<!--/Composer Lock Diff-->'
         fi
-        echo -E "{\"body\": \"$(echo -E "$DESCRIPTION")\"}" > {{ .json_file }}
+        echo "{\"body\": \"$(echo "$DESCRIPTION")\"}" > {{ .json_file }}
