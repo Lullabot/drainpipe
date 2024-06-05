@@ -16,6 +16,7 @@ tasks:
 
           if [ -f ./vendor/bin/action-validator ]; then
               find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 ./vendor/bin/action-validator
+          # Fallback for architectures that don't have a release e.g. Windows
           else
               find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 npx @action-validator/cli
           fi
