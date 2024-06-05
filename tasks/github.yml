@@ -14,9 +14,8 @@ tasks:
           directories=".github/workflows .github/actions"
           if [ "{{ .directories }}" != "" ]; then directories="{{ .directories }}"; fi
 
-          if command -v action-validator &> /dev/null
-          then
-              find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 action-validator
+          if [ -f ./vendor/bin/action-validator ]; then
+              find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 ./vendor/bin/action-validator
           else
               find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 npx @action-validator/cli
           fi
