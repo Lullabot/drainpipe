@@ -108,7 +108,6 @@ runs:
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "terminus workflow:wait ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
-        drainpipe_exec "terminus env:php-version:set ${{ inputs.site-name }}.live 8.3"
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
