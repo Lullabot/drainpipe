@@ -90,7 +90,6 @@ runs:
           drainpipe_exec "terminus env:wipe ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes"
         else
           drainpipe_exec "terminus multidev:create ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --no-db --no-files --yes"
-          drainpipe_exec "terminus env:php-version:set ${{ inputs.site-name }}.live 8.3"
         fi
         if [ "${{ inputs.run-installer }}" != "true" ]; then
             drainpipe_exec "terminus env:clone-content ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --yes"
@@ -109,7 +108,7 @@ runs:
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "terminus workflow:wait ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
-
+        drainpipe_exec "terminus env:php-version:set ${{ inputs.site-name }}.live 8.3"
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
