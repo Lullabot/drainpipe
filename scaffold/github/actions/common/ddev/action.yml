@@ -19,6 +19,7 @@ inputs:
   version:
     description: "Override the DDEV version .e.g. '1.19.0'"
     required: false
+    default: "1.23.2"
 runs:
   using: "composite"
   steps:

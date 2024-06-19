@@ -33,7 +33,6 @@ jobs:
           composer-cache-dir: composer-cache
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
-          version: '1.23.2'
 
       - name: Setup Project
         run: |
