@@ -90,6 +90,7 @@ runs:
           drainpipe_exec "terminus env:wipe ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes"
         else
           drainpipe_exec "terminus multidev:create ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --no-db --no-files --yes"
+          drainpipe_exec "terminus env:php-version:set ${{ inputs.site-name }}.live 8.3"
         fi
         if [ "${{ inputs.run-installer }}" != "true" ]; then
             drainpipe_exec "terminus env:clone-content ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --yes"
