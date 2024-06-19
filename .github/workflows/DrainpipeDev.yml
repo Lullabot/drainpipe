@@ -1,14 +1,16 @@
 name: Push Drainpipe Dev Package
 
 on:
+  pull_request:
   push:
     branches:
-      - main
+      - 'main'
     tags:
       - 'v*'
+  delete:
 
 concurrency:
-  group: drainpipe-dev
+  group: drainpipe-dev-${{ github.ref_name }}
   cancel-in-progress: false
 
 permissions:
@@ -16,12 +18,25 @@ permissions:
 
 jobs:
   Drainpipe-Dev:
-    name: Push branch to drainpipe-dev
+    name: Push to drainpipe-dev
+    if: ${{ github.event_name != 'delete' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get branch information
+        id: branch-names
+        uses: tj-actions/branch-names@v8
+
+      - name: For non-default branch pushes, check if drainpipe-dev was changed
+        if: ${{ github.event_name == 'pull_request' }}
+        id: files-changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: 'drainpipe-dev/**'
+
       - name: Add drainpipe-dev deploy key in order to run git clone
+        if: ${{ github.event_name == 'push' || steps.files-changed.outputs.any_changed == 'true' }}
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
@@ -30,17 +45,24 @@ jobs:
       # Commits made by the https://github.com/apps/lullabot-drainpipe application.
       # @see https://github.com/orgs/community/discussions/24664
       - name: Create git checkout of drainpipe-dev
+        if: ${{ github.event_name == 'push' || steps.files-changed.outputs.any_changed == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git init
           git branch -m ${{ github.ref_name }}
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
-          git reset --mixed origin/${{ github.ref_name }} || git reset --mixed origin/main
+          git reset --mixed origin/${{ github.ref_name }} || git reset --mixed origin/${{ steps.branch-names.outputs.default_branch }}
           git config user.name "Lullabot-Drainpipe[bot]"
           git config user.email "157769597+Lullabot-Drainpipe[bot]@users.noreply.github.com"
 
+      - name: Fetch latest commit message for pull requests
+        if: ${{ github.event_name == 'pull_request' }}
+        id: pr-commit-message
+        run: echo "message=$(git show -s --format=%s)" >> "$GITHUB_OUTPUT"
+
       - name: Push branch to drainpipe-dev
+        if: ${{ github.event_name == 'push' || steps.files-changed.outputs.any_changed == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git add -A
@@ -48,11 +70,28 @@ jobs:
           git push origin ${{ github.ref_name }}
         env:
           # Workaround if the commit message contains quotes.
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message || steps.pr-commit-message.outputs.message }}
 
       - name: Push tag to drainpipe-dev
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ steps.branch-names.outputs.is_tag == 'true' }}
         working-directory: drainpipe-dev
         run: |
           git tag ${{ github.ref_name }}
           git push origin ${{ github.ref_name }}
+
+  Drainpipe-Dev-Delete:
+    name: Delete branch from drainpipe-dev
+    if: ${{ github.event_name == 'delete' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add drainpipe-dev deploy key in order to run git clone
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
+          log-public-key: false
+
+      # @todo could this check if the remote branch exists instead of just running this blindly?
+      - name: Delete branch from drainpipe-dev
+        run: |
+          git clone git@github.com:Lullabot/drainpipe-dev.git
+          git push --delete origin ${{ github.event.ref }} || true
