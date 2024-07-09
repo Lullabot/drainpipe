@@ -28,14 +28,15 @@
             "\\Lullabot\\Drainpipe\\BinaryInstallerPlugin"
         ],
         "drupal-scaffold": {
-            "gitignore": true,
+            "gitignore": "true",
             "file-mapping": {
                 "[project-root]/.env": {
                     "mode": "replace",
                     "path": "scaffold/env/env",
                     "overwrite": false
                 }
-            }
+            },
+            "allowed-packages": ["lullabot/drainpipe", "lullabot/drainpipe-dev"]
         }
     },
     "config": {
