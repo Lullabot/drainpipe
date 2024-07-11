@@ -20,7 +20,7 @@ services:
 
     commands:
       init: ./.tugboat/steps/1-init.sh
-      update: sleep 1
+      update: ./.tugboat/steps/2-update.sh
       build: sleep 1
       online: sleep 1
 
