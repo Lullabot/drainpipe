@@ -20,9 +20,9 @@ services:
 
     commands:
       init: ./.tugboat/steps/1-init.sh
-      update: ./.tugboat/steps/2-update.sh
-      build: ./.tugboat/steps/3-build.sh
-      online: ./.tugboat/steps/4-online.sh
+      update: sleep 1
+      build: sleep 1
+      online: sleep 1
 
     aliases:
       - foo
