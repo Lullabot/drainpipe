@@ -26,8 +26,11 @@ tasks:
     cmds:
       # Replace this with a command to fetch your database.
       - ./vendor/bin/drush site:install -y
+      # Forcing the sessions table to exist
+      # otherwise, truncating it will fail.
+      - ./vendor/bin/drush uli | xargs wget --spider
       - echo "🧹 Sanitising database"
-      # - ./vendor/bin/drush sql:sanitize --yes
+      - ./vendor/bin/drush sql:sanitize --yes
 
   build:
     desc: "Builds the project for production"
