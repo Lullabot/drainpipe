@@ -74,7 +74,7 @@ nodejs -v | grep -q v$NODE_MAJOR
 shopt -s dotglob
 mkdir ../drainpipe-tmp
 mv * ../drainpipe-tmp/
-composer create-project drupal/recommended-project:~10.2 .
+composer create-project drupal/recommended-project:10.2.7 .
 mv ../drainpipe-tmp drainpipe
 composer config extra.drupal-scaffold.gitignore true
 composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
