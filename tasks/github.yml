@@ -13,7 +13,13 @@ tasks:
       - |
           directories=".github/workflows .github/actions"
           if [ "{{ .directories }}" != "" ]; then directories="{{ .directories }}"; fi
-          find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \)  | xargs -n1 npx @action-validator/cli
+
+          if [ -f ./vendor/bin/action-validator ]; then
+              find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 ./vendor/bin/action-validator
+          # Fallback for architectures that don't have a release e.g. Windows
+          else
+              find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 npx @action-validator/cli
+          fi
 
   composer-lock-diff:
     desc: Runs composer-lock-diff on a pull request description and produces a new description
@@ -45,4 +51,5 @@ tasks:
             DESCRIPTION="${DESCRIPTION:1:-1}"
             DESCRIPTION=$DESCRIPTION'\n<!--Composer Lock Diff-->\r\n## Composer Lock Diff\r\n'$DIFF'\n<!--/Composer Lock Diff-->'
         fi
+        DESCRIPTION=$(echo "$DESCRIPTION" | sed -z 's/\\/\\\\/g' | sed -z 's/\n/\\n/g' | sed -z 's/"/\\"/g' | sed -z 's/\r//g')
         echo "{\"body\": \"$(echo "$DESCRIPTION")\"}" > {{ .json_file }}
