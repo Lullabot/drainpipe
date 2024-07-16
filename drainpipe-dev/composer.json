@@ -13,7 +13,7 @@
         "php": "^8.1",
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
-        "phpunit/phpunit": "^9.6.19",
+        "phpunit/phpunit": "^9.6.20",
         "sserbin/twig-linter": "^3.1.0",
         "mikey179/vfsstream": "^1.6.11",
         "mockery/mockery": "^1.6.12",
