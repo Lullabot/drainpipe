@@ -9,48 +9,6 @@ for a Drupal site, including:
 - Integration with DDEV
 - CI integration
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [Installation](#installation)
-  - [Binaries](#binaries)
-- [Database Updates](#database-updates)
-- [.env support](#env-support)
-- [SASS Compilation](#sass-compilation)
-  - [Setup](#setup)
-- [JavaScript Compilation](#javascript-compilation)
-  - [Setup](#setup-1)
-- [Testing](#testing)
-  - [Static Tests](#static-tests)
-    - [Excluding Files from PHP_CodeSniffer](#excluding-files-from-php_codesniffer)
-  - [Functional Tests](#functional-tests)
-    - [PHPUnit](#phpunit)
-    - [Nightwatch](#nightwatch)
-  - [Autofix](#autofix)
-- [Hosting Provider Integration](#hosting-provider-integration)
-  - [Generic](#generic)
-    - [Importing/Exporting Databases](#importingexporting-databases)
-    - [Snapshots](#snapshots)
-  - [Pantheon](#pantheon)
-- [GitHub Actions Integration](#github-actions-integration)
-  - [Composer Lock Diff](#composer-lock-diff)
-  - [Pantheon](#pantheon-1)
-- [GitLab CI Integration](#gitlab-ci-integration)
-  - [Composer Lock Diff](#composer-lock-diff-1)
-  - [Pantheon](#pantheon-2)
-- [Tugboat](#tugboat)
-- [Contributor Docs](#contributor-docs)
-  - [Peer Review Guidelines for Automated Updates](#peer-review-guidelines-for-automated-updates)
-    - [Handling Version Ranges](#handling-version-ranges)
-    - [Handling Test Failures](#handling-test-failures)
-  - [Conducting the Peer Review](#conducting-the-peer-review)
-  - [Releases](#releases)
-    - [drainpipe and drainpipe-dev release process](#drainpipe-and-drainpipe-dev-release-process)
-    - [NPM package release process](#npm-package-release-process)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## Installation
 
 ```sh
@@ -228,34 +186,18 @@ All the below static code analysis tests can be run with `task test:static`
 | PHPCS     | task test:phpcs          | Runs PHPCS with Drupal coding standards provided by [Coder module](https://www.drupal.org/project/coder                                                                                                                                                                |
 
 
-#### Excluding Files from PHP_CodeSniffer
+#### Altering PHP_CodeSniffer Configuration
 
-`phpcs.xml` can be altered using Drupal's
-[composer scaffold](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4).
-
+- Create `phpcs.xml` to override the `phpcs.xml.dist` file with overrides being done in:
+  ```
+  <rule ref="phpcs.xml.dist">
+  </rule>
+  ```
 - Edit `phpcs.xml` in the root of your project, e.g. to add an exclude pattern:
   ```
   <!-- Custom excludes -->
   <exclude-pattern>web/sites/sites.php</exclude-pattern>
   ```
-- Create a patch file
-  ```
-  diff -urN vendor/lullabot/drainpipe-dev/scaffold/phpcs.xml phpcs.xml > patches/custom/phpcs.xml.patch
-  ```
-- Add the patch to `composer.json`
-  ```
-  "scripts": {
-        "pre-drupal-scaffold-cmd": [
-            "if [ -f \"phpcs.xml\" ]; then rm phpcs.xml; fi"
-        ],
-        "post-drupal-scaffold-cmd": [
-            "if [ -f \"phpcs.xml\" ]; then patch phpcs.xml < patches/custom/phpcs.xml.patch; fi"
-        ]
-  },
-  ```
-  The pre hook is needed otherwise the composer scaffold attempts to re-patch a file it no longer has control over when running `composer install --no-dev`
-- Delete the `vendor` directory and `phpcs.xml` and then run `composer install`
-  to verify everything works as expected
 
 ### Functional Tests
 
@@ -397,6 +339,7 @@ includes:
 |                          |                                                                             |
 |--------------------------|-----------------------------------------------------------------------------|
 | `task pantheon:fetch-db` | Fetches a database from Pantheon. Set `PANTHEON_SITE_ID` in Taskfile `vars` |
+|                          | and optionally `ENVIRONMENT` to override the default value of `live`        |
 
 See below for CI specific integrations for hosting providers.
 
@@ -681,6 +624,10 @@ Peer Reviewing by looking at PR code changes is nice.
 
 Testing PR code changes on real sites is extra beneficial.
 
+### Local Development
+
+In order to test local changes follow the instructions for the [test script](./docs/test-script.md).
+
 ### Peer Review Guidelines for Automated Updates
 
 These are guidelines for conducting peer reviews on automated dependency update pull requests created by Renovate.
@@ -746,10 +693,7 @@ Before making a new release, post in the lullabot internal #devops slack channel
   1. Supply the correct tag based on the changes and semantic versioning standards.
   2. Use the _Generate release notes_ button and review the changes to confirm the new version is correct based on semantic versioning.
   3. Set this release as latest and publish.
-2. The release when published will automatically kick off a release of [drainpipe-dev](https://github.com/Lullabot/drainpipe) using the [DrainpipeDev GitHub workflow](https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.ym). However this needs some manual followups:
-  1. This action ends up creating a branch in drainpipe-dev with the same name as the tag you just entered in the release.
-  2. Delete the branch that was created in drainpipe-dev.
-  3. Create a release with the same tag name in drainpipe-dev and in the release notes, just link to the drainpipe release that was made in step 1.
+2. The release when published will automatically kick off a release of [drainpipe-dev](https://github.com/Lullabot/drainpipe) using the [DrainpipeDev GitHub workflow](https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.ym).
 3. Visit the [project board](https://github.com/orgs/Lullabot/projects/12/views/1) and archive the _Ready to Release_ column.
 
 #### NPM package release process
@@ -757,4 +701,4 @@ Before making a new release, post in the lullabot internal #devops slack channel
 To generate new NPM package releases:
 
 1. Have the latest main branch checked out locally
-2. Run `yarn learna publish`
+2. Run `yarn install && yarn lerna publish`
