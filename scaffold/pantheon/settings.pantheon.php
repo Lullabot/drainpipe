@@ -108,6 +108,6 @@ elseif (getenv('PANTHEON_ENVIRONMENT') === 'live') {
 }
 else {
   $config['environment_indicator.indicator']['name'] = 'Multidev (' . getenv('PANTHEON_ENVIRONMENT') . ')';
-  $config['environment_indicator.indicator']['bg_color'] = '#efd01b';
-  $config['environment_indicator.indicator']['fg_color'] = '#000000';
+  $config['environment_indicator.indicator']['bg_color'] = '#990055';
+  $config['environment_indicator.indicator']['fg_color'] = '#fff';
 }

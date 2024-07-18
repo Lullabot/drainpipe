@@ -1,15 +1,13 @@
 version: '3'
 
-# @todo allow these to be overridden or document them as required folder
-# structures. See also config/phpstan.neon
 vars:
-  YAML_DIRS: 'web/**/*.yml'
-  TWIG_DIRS: 'web/modules web/profiles web/themes'
+  YAML_DIRS: '{{ default "web/**/*.yml" .YAML_DIRS }}'
+  TWIG_DIRS: '{{ default "web/modules web/profiles web/themes" .TWIG_DIRS }}'
   # These directories are configured in phpcs.xml. However, phpcs will fail if
   # those directories do not exist, so we create them with the assumption that
   # every Drupal site will eventually have these directories.
-  TEST_DIRS: 'web/modules/custom web/themes/custom web/sites'
-  NIGHTWATCH_TEST_DIRS: 'test'
+  TEST_DIRS: '{{ default "web/modules/custom web/themes/custom web/sites" .TEST_DIRS }}'
+  NIGHTWATCH_TEST_DIRS: '{{ default "test" .NIGHTWATCH_TEST_DIRS }}'
   FUNC_ENSURE_DIRS: |
     DIRS_ARR=({{.TEST_DIRS}})
     for DIR in "${DIRS_ARR[@]}"; do
@@ -46,8 +44,7 @@ tasks:
         else
           ./vendor/bin/local-php-security-checker
         fi
-      # JUnit output blocked on https://github.com/drush-ops/drush/issues/4817
-      - ./vendor/bin/drush pm:security
+      - composer audit
   lint:
     desc: Runs lint on composer, YAML, and Twig files
     # @todo JUnit output
@@ -116,13 +113,13 @@ tasks:
     desc: Runs PHPUnit unit tests
     cmds:
       - |
-        CONFIG="vendor/lullabot/drainpipe/scaffold/phpunit.xml"
+        CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
         if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
+          CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpunit --testsuite=unit -c $CONFIG --log-junit test_result/phpunit.xml
+          ./vendor/bin/phpunit --testsuite=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit.xml
         else
           ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
         fi
@@ -136,7 +133,7 @@ tasks:
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpunit --exclude-group=unit -c $CONFIG --log-junit test_result/phpunit.xml
+          ./vendor/bin/phpunit --exclude-group=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml
         else
           ./vendor/bin/phpunit -c $CONFIG --exclude-group=unit
         fi
@@ -144,8 +141,7 @@ tasks:
     desc: Runs PHPCS with Drupal Coding Standards
     summary: |
       Check your code against Drupal's coding standards. To override the default
-      ruleset, copy vendor/lullabot/drainpipe/scaffold/phpcs.xml to phpcs.xml
-      in the root of your project and edit as needed.
+      ruleset, create a phpcs.xml file and extend phpcs.xml.dist
     cmds:
       - |
         {{ .FUNC_ENSURE_DIRS }}
@@ -163,7 +159,7 @@ tasks:
       - ./vendor/bin/phpcbf
       - |
         if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn prettier --write .
+          yarn prettier --write --cache-location=.prettiercache .
         elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
           npm run prettier --write .
         fi
@@ -224,9 +220,9 @@ tasks:
     interactive: true
     cmds:
       - |
-        PACKAGES="nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands"
+        PACKAGES="nightwatch @lullabot/nightwatch-drupal-commands"
         if [ ! -f "package.json" ]; then
-          echo -n "No package.json exists, would you like to use yarn1, npm, or yarn? "
+          echo -n "No package.json exists, would you like to use yarn1, npm, yarn3 (node <= 20), or yarn (node >= 21)? "
           read -r PACKAGE_MANAGER
           if [ "$PACKAGE_MANAGER" == "npm" ]; then
             if [ "$IS_DDEV_PROJECT" == "true" ]; then
@@ -238,6 +234,15 @@ tasks:
             yarn set version classic
             yarn init -y
             yarn add $PACKAGES lodash --dev
+          elif [ "$PACKAGE_MANAGER" == "yarn3" ]; then
+            yarn set version berry
+            yarn set version 3
+            yarn init
+            echo "packageExtensions:" >> .yarnrc.yml
+            echo '  "nightwatch@*":' >> .yarnrc.yml
+            echo '    dependencies:' >> .yarnrc.yml
+            echo '      ws: "*"' >> .yarnrc.yml
+            yarn add $PACKAGES --dev
           elif [ "$PACKAGE_MANAGER" == "yarn" ]; then
             yarn set version berry
             yarn init
@@ -245,7 +250,7 @@ tasks:
             echo '  "nightwatch@*":' >> .yarnrc.yml
             echo '    dependencies:' >> .yarnrc.yml
             echo '      ws: "*"' >> .yarnrc.yml
-            echo '      lodash: "*"' >> .yarnrc.yml
+            yarn cache clear
             yarn add $PACKAGES --dev
           else
             echo "Sorry I'm not aware of that package manager. Please first init package.json with it yourself manually."

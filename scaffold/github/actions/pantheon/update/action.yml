@@ -10,24 +10,19 @@ inputs:
   environment:
     description: "The environment to run the updates or install in e.g. 'test'"
     required: true
-  sleep:
-    description: "The amount of time to wait before this step is run. Useful if you've just pushed code as it takes Pantheon time to sync. Default is 30"
-    required: false
 runs:
   using: "composite"
   steps:
     - name: Update site on Pantheon
       run: |
         # Wait for Pantheon to sync.
-        if [ "${{ inputs.sleep }}" != "" ]; then
-          sleep ${{ inputs.sleep }}
-        else
-          sleep 30
-        fi
         source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "terminus workflow:wait ${{ inputs.site-name }}.${{ inputs.environment }}"
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.${{ inputs.environment }} --yes site:install --existing-config"
+        elif drainpipe_exec "./vendor/bin/task -l | grep '* update: '"; then
+          drainpipe_exec "./vendor/bin/task update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
         else
           drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
         fi

@@ -29,11 +29,12 @@ tasks:
           ARGS="{{- .args -}}"
         fi
         FILES="{{if .DRAINPIPE_JAVASCRIPT}}{{.DRAINPIPE_JAVASCRIPT | catLines | trim}}{{end}}"
-        COMMAND="./node_modules/.bin/drainpipe-javascript"
-        if [ -f "yarn.lock" ]; then
+        COMMAND="node ./node_modules/.bin/drainpipe-javascript"
+        if [ -f "yarn.lock" ] && [ ! -d "node_modules" ]; then
           COMMAND="yarn drainpipe-javascript"
         fi
-        $COMMAND drainpipe-javascript --files="$FILES" $ARGS
+        echo "$COMMAND drainpipe-javascript --files=\"$FILES\" $ARGS"
+        $COMMAND --files="$FILES" $ARGS
   watch:
     desc: As compile, but continues running and watching for changes
     deps:

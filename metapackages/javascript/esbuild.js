@@ -12,7 +12,7 @@ catch (error) {
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers')
 const argv = yargs(hideBin(process.argv)).argv
-const { build } = require('esbuild');
+const { build, context } = require('esbuild');
 const chokidar = require('chokidar');
 const scripts = argv.files.split(' ');
 
@@ -61,7 +61,7 @@ if (uniqueFileExtension.length !== 1) {
       const { pnpPlugin } = require('@yarnpkg/esbuild-plugin-pnp');
       plugins = [pnpPlugin()]
     }
-    let builder = await build({
+    let config = {
       plugins,
       entryPoints: scripts.map(script => script.split(':')[0]),
       outdir: uniqueBaseDir[0],
@@ -70,9 +70,10 @@ if (uniqueFileExtension.length !== 1) {
       bundle: true,
       sourcemap: true,
       minify: !!argv.minify,
-      incremental: !!argv.watch,
       logLevel: 'info',
-    });
+    };
+    let builder = await context(config);
+    await build(config);
 
     if (!!argv.watch) {
       let ready = false;
@@ -98,6 +99,9 @@ if (uniqueFileExtension.length !== 1) {
               });
           }
         });
+    }
+    else {
+      process.exit(0);
     }
   } catch (err) {
     console.error(err);

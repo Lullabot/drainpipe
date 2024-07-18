@@ -42,6 +42,13 @@ runs:
         fi
         # SSH config file
         touch .ddev/homeadditions/.ssh/config
+
+        # Disable strict host key checking for Pantheon as ssh-keyscan will not
+        # return a stable response.
+        if [ -f "pantheon.yml" ]; then
+          echo -e "Host *.drush.in\\n\\tStrictHostKeyChecking no\\n\tLogLevel ERROR\\n" >> .ddev/homeadditions/.ssh/config
+        fi
+
         chmod 600 .ddev/homeadditions/.ssh/config
 
         chmod 700 .ddev/homeadditions/.ssh
@@ -53,6 +60,11 @@ runs:
           sudo apt install -y ddev
         fi
 
+        # Support local runner https://github.com/nektos/act
+        if [ "$ACT" != "" ]; then
+          sudo chown runner:docker /var/run/docker.sock
+        fi
+
         ddev config global --instrumentation-opt-in=false --omit-containers=ddev-ssh-agent
 
         if [ "${{ inputs.composer-cache-dir }}" != "false" ]; then
@@ -61,7 +73,12 @@ runs:
           if [ "${{ inputs.composer-cache-dir }}" != "" ]; then
             CACHE_DIR="${{ inputs.composer-cache-dir }}"
           fi
-          ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
+          # Workaround for https://github.com/ddev/ddev/issues/6044
+          if yq -re .type .ddev/config.yaml; then
+            ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR" --project-type="$(yq -re .type .ddev/config.yaml)"
+          else
+            ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
+          fi
         fi
 
         ddev start

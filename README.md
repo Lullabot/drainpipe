@@ -8,28 +8,7 @@ for a Drupal site, including:
 - Automated testing setup
 - Integration with DDEV
 - CI integration
----
-* [Installation](#installation)
-* [.env support](#env-support)
-* [SASS Compilation](#sass-compilation)
-* [JavaScript Compilation](#javascript-compilation)
-* [Testing](#testing)
-    + [Static Tests](#static-tests)
-    + [Functional Tests](#functional-tests)
-        - [PHPUnit](#phpunit)
-        - [Nightwatch](#nightwatch)
-    + [Autofix](#autofix)
-* [Hosting Provider Integration](#hosting-provider-integration)
-    + [Generic](#generic)
-    + [Pantheon](#pantheon)
-* [GitHub Actions Integration](#github-actions-integration)
-    + [Composer Lock Diff](#composer-lock-diff)
-    + [Pantheon](#pantheon-1)
-* [GitLab CI Integration](#gitlab-ci-integration)
-    + [Composer Lock Diff](#composer-lock-diff-1)
-    + [Pantheon](#pantheon-2)
-* [Tugboat Integration](#tugboat)
----
+
 ## Installation
 
 ```sh
@@ -45,7 +24,7 @@ ddev restart
 ```
 
 This will scaffold out various files, most importantly a `Taskfile.yml` in the
-root of your repository. Task is a task runner / build tool that aims to be
+root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool that aims to be
 simpler and easier to use than, for example, GNU Make. Since it's written in Go,
 Task is just a single binary and has no other dependencies. It's also
 cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
@@ -69,7 +48,34 @@ for an example of this in use.
 ln -s web/ docroot
 ```
 
+### Binaries
+If you receive an error such as `exec format error: ./vendor/bin/task`, then
+you may have the wrong binary for your architecture. If your architecture
+wasn't detected correctly, please open an issue with the output of `php -r "echo php_uname('m');"`,
+along with information on your hardware and operating system.
+
+You can override the platform and processor with environment variables `DRAINPIPE_PLATFORM`
+and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `windows`,
+and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
+upstream dependencies e.g. https://github.com/go-task/task/releases
+
 ---
+
+## Database Updates
+
+The `drupal:update` command follows the same procedure as the
+['drush deploy'](https://www.drush.org/12.x/deploycommand/) command, with the
+exception that it runs the configuration import twice as in some cases the
+import can fail due to memory exhaustion before completion.
+
+```
+drush updatedb --no-cache-clear
+drush cache:rebuild
+drush config:import || true
+drush config:import
+drush cache:rebuild
+drush deploy:hook
+```
 
 ## .env support
 Drainpipe will add `.env` file support for managing environment variables.
@@ -180,34 +186,18 @@ All the below static code analysis tests can be run with `task test:static`
 | PHPCS     | task test:phpcs          | Runs PHPCS with Drupal coding standards provided by [Coder module](https://www.drupal.org/project/coder                                                                                                                                                                |
 
 
-#### Excluding Files from PHP_CodeSniffer
+#### Altering PHP_CodeSniffer Configuration
 
-`phpcs.xml` can be altered using Drupal's
-[composer scaffold](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4).
-
+- Create `phpcs.xml` to override the `phpcs.xml.dist` file with overrides being done in:
+  ```
+  <rule ref="phpcs.xml.dist">
+  </rule>
+  ```
 - Edit `phpcs.xml` in the root of your project, e.g. to add an exclude pattern:
   ```
   <!-- Custom excludes -->
   <exclude-pattern>web/sites/sites.php</exclude-pattern>
   ```
-- Create a patch file
-  ```
-  diff -urN vendor/lullabot/drainpipe-dev/scaffold/phpcs.xml phpcs.xml > patches/custom/phpcs.xml.patch
-  ```
-- Add the patch to `composer.json`
-  ```
-  "scripts": {
-        "pre-drupal-scaffold-cmd": [
-            "if [ -f \"phpcs.xml\" ]; then rm phpcs.xml; fi"
-        ],
-        "post-drupal-scaffold-cmd": [
-            "if [ -f \"phpcs.xml\" ]; then patch phpcs.xml < patches/custom/phpcs.xml.patch; fi"
-        ]
-  },
-  ```
-  The pre hook is needed otherwise the composer scaffold attempts to re-patch a file it no longer has control over when running `composer install --no-dev`
-- Delete the `vendor` directory and `phpcs.xml` and then run `composer install`
-  to verify everything works as expected
 
 ### Functional Tests
 
@@ -349,8 +339,29 @@ includes:
 |                          |                                                                             |
 |--------------------------|-----------------------------------------------------------------------------|
 | `task pantheon:fetch-db` | Fetches a database from Pantheon. Set `PANTHEON_SITE_ID` in Taskfile `vars` |
+|                          | and optionally `ENVIRONMENT` to override the default value of `live`        |
 
 See below for CI specific integrations for hosting providers.
+
+When using Pantheon with Drainpipe, the Pantheon site should be configured to
+override some of Pantheon's default behaviors. Because Drainpipe installs
+composer dependencies, Pantheon's [Integrated Composer](https://docs.pantheon.io/guides/integrated-composer)
+should be disabled. Add `build_step: false` to your pantheon.yml file:
+```yml
+---
+api_version: 1
+build_step: false
+```
+
+Additionally, Pantheon sites start with "[Autopilot](https://docs.pantheon.io/guides/autopilot)",
+which provides updates from the Drupal upstream. Usually this feature
+conflicts with an external Git repository such as GitHub or GitLab. It is
+recommended to disable this by setting an empty upstream with terminus.
+```
+ddev ssh
+terminus site:upstream:set [site_name] empty
+```
+
 
 ## GitHub Actions Integration
 
@@ -377,6 +388,9 @@ They are composite actions which can be used in any of your workflows e.g.
     ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 ```
 
+Tests can be run locally with [act](https://github.com/nektos/act):
+`act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
+
 ### Composer Lock Diff
 Update Pull Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
@@ -402,12 +416,13 @@ To enable deployment of Pantheon Review Apps:
   }
   ```
 - Run `composer install` to install the workflow to `.github/workflows`
-- Add the following secrets to your repository:
+- Add the following [variables to your GitHub repository](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository):
+    - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
+    - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
+- Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
-    - `PANTHEON_SITE_NAME` The canonical site name
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
-    - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth local
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
 
@@ -424,7 +439,40 @@ Add the following to `composer.json` for GitLab helpers:
 
 This will import [`scaffold/gitlab/Common.gitlab-ci.yml`](scaffold/gitlab/Common.gitlab-ci.yml),
 which provides helpers that can be used in GitLab CI with [includes and
-references](https://docs.gitlab.com/ee/ci/yaml/yaml_specific_features.html#reference-tags).
+references](https://docs.gitlab.com/ee/ci/yaml/yaml_specific_features.html#reference-tags),
+or `scaffold/gitlab/DDEV.gitlab-ci.yml` if you are using DDEV.
+
+```
+include:
+  - local: '.gitlab/drainpipe/DDEV.gitlab-ci.ymll'
+
+variables:
+  DRAINPIPE_DDEV_GIT_EMAIL: drainpipe-bot@example.com
+  DRAINPIPE_DDEV_GIT_NAME: Drainpipe Bot
+
+build:
+  stage: build
+  interruptible: true
+  script:
+    - !reference [.drainpipe_setup_ddev, script]
+    - composer install
+    - ddev restart
+    - ddev drush site:install minimal -y
+    - echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+    - ddev drush config:export -y
+    - ddev task update
+```
+
+Available variables are:
+
+| Variable                          |                                                                                                                                    |
+|-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| DRAINPIPE_DDEV_SSH_PRIVATE_KEY    | SSH private key used for e.g. committing to git                                                                                    |
+| DRAINPIPE_DDEV_SSH_KNOWN_HOSTS    | The result of running e.g. `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`                                              |
+| DRAINPIPE_DDEV_GIT_EMAIL          | E-mail address to use for git commits                                                                                              |
+| DRAINPIPE_DDEV_GIT_NAME           | Name to use for git commits                                                                                                        |
+| DRAINPIPE_DDEV_COMPOSER_CACHE_DIR | Set to "false" to disable composer cache dir, or another value to override the default location of .ddev/.drainpipe-composer-cache |
+| DRAINPIPE_DDEV_VERSION            | Install a specific version of DDEV instead of the latest                                                                           |
 
 ### Composer Lock Diff
 Updates Merge Request descriptions with a markdown table of any changes detected
@@ -460,10 +508,10 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 - Run `composer install`
 - Add your Pantheon `site-name` to the last job in the new
   workflow file at `.github/workflows/PantheonReviewApps.yml`
-- Add the following secrets to your repository:
-  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
-  - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
-  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
+- Add the following [variables to your GitLab repository](https://docs.gitlab.com/ee/ci/variables/#for-a-project):
+  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
+  - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
+  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`  (enable the _Mask variable_ checkbox)
   - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
@@ -507,13 +555,14 @@ Additionally, Pantheon Terminus can be added:
 ```
 
 It is assumed the following tasks exist:
-- `build`
 - `sync`
+- `build`
+- `update`
 
-The `build` and `sync` tasks can be overridden with a `build:tugboat` and
-`sync:tugboat` task if required (you will need to re-run `composer install` to
-regenerate the Tugboat scripts if you  are adding this task to your
-`Taskfile.yml` for the first time).
+The `build`, `sync`, and `update` tasks can be overridden with `sync:tugboat`,
+`build:tugboat`, and `update:tugboat` tasks if required (you will need to re-run
+`composer install` to regenerate the Tugboat scripts if you  are adding this
+task to your `Taskfile.yml` for the first time).
 
 ```
   sync:
@@ -547,3 +596,109 @@ tugboat:php:init:
     - apt-get install -y libldap2-dev
     - docker-php-ext-install ldap
 ```
+
+You can additionally add an `online` step by adding a task named `online:tugboat`
+and re-running `composer install`.
+
+Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
+it. The following keys can be added to your `config.yml` via a
+`.tugboat/config.drainppipe-override.yml` file:
+```
+php:
+  aliases:
+  urls:
+  screenshot:
+  visualdiff:
+```
+
+## Contributor Docs
+
+This repo is public.
+
+Please be careful to remove sensitive customer specifics when posting Issues or comments.
+
+First time contributors need a maintainers approval for automated tests to run.
+(This is so we aren't at risk of getting a big CI bill accidentally, or maliciously.)
+
+Peer Reviewing by looking at PR code changes is nice.
+
+Testing PR code changes on real sites is extra beneficial.
+
+### Local Development
+
+In order to test local changes follow the instructions for the [test script](./docs/test-script.md).
+
+### Peer Review Guidelines for Automated Updates
+
+These are guidelines for conducting peer reviews on automated dependency update pull requests created by Renovate.
+
+All automated updates submitted by Renovate undergo a series of automated tests via GitHub Actions. These tests are designed to ensure compatibility and stability with the new versions of dependencies.
+
+All Renovate peer reviews regardless if they're a minor or patch release require:
+1. Reading the change logs carefully to understand the new features and fixes.
+   - Assess if the changes necessitate additional test coverage or could potentially impact existing functionality.
+   - Consider the implications of new features on the project's future development and maintenance.
+2. All tests and checks must pass
+
+#### Handling Version Ranges
+
+Some dependencies allow multiple versions, like `"drush/drush": "^10|^11|^12"`.
+- Renovate will create pull requests when any of these versions get patch or minor releases.
+- We **DO NOT** want to merge these, because it would pin these packages to a specific version.
+- We **DO** want to allow these pull requests to run checks. This will confirm that the latest version within the range Drainpipe supports is unlikely break builds.
+- After all GitHub Action checks pass, leave a comment on the pull request stating such, close the pull request, and delete the branch.
+
+#### Handling Test Failures
+
+Occasionally, tests may fail due to transient issues or flakiness in the test suite. In such cases:
+
+1. Verify the nature of the test failure to ensure it's not related to the dependency update.
+2. If the failure seems unrelated to the update, re-run the GitHub Actions job to confirm if the issue persists.
+3. Document any recurring flakiness or issues on the pull request then create a new issue linked to the pull request for further investigation.
+
+### Conducting the Peer Review
+
+1. **Review the Automated Update Pull Request (PR)**:
+   - Ensure the PR title and description clearly describe the update and its scope.
+   - Check the list of changed files to understand the extent of the update.
+
+2. **Assess Test Results**:
+   - Ensure all GitHub Actions tests have passed. Pay close attention to tests that touch on updated dependencies.
+   - For failed tests, follow the "Handling Test Failures" guidelines above.
+
+3. **Read the Dependency Change Logs**:
+   - For minor point releases, review the dependency's change logs to identify any significant changes or additions.
+   - Evaluate how these changes might affect the Drainpipe project.
+
+5. **Final Decision**:
+   - For patch releases with all tests passing, proceed to merge the update.
+   - For minor point releases, after thorough review and consideration, decide whether to merge the update or request manual testing before merging.
+
+### Releases
+
+#### drainpipe and drainpipe-dev release process
+
+When making a release, increase the version based on https://semver.org/
+
+> MAJOR version when you make incompatible API changes
+> MINOR version when you add functionality in a backward compatible manner
+> PATCH version when you make backward compatible bug fixes
+
+Specifically for drainpipe, when a new "check" is added, that might break builds in projects,
+that would usually be a MINOR release, with a release note about the change.
+
+Before making a new release, post in the lullabot internal #devops slack channel to coordinate with other maintainers.
+
+1. Generate a GitHub release for drainpipe
+  1. Supply the correct tag based on the changes and semantic versioning standards.
+  2. Use the _Generate release notes_ button and review the changes to confirm the new version is correct based on semantic versioning.
+  3. Set this release as latest and publish.
+2. The release when published will automatically kick off a release of [drainpipe-dev](https://github.com/Lullabot/drainpipe) using the [DrainpipeDev GitHub workflow](https://github.com/Lullabot/drainpipe/actions/workflows/DrainpipeDev.ym).
+3. Visit the [project board](https://github.com/orgs/Lullabot/projects/12/views/1) and archive the _Ready to Release_ column.
+
+#### NPM package release process
+
+To generate new NPM package releases:
+
+1. Have the latest main branch checked out locally
+2. Run `yarn install && yarn lerna publish`

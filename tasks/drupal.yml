@@ -56,15 +56,16 @@ tasks:
   update:
     desc: Run Drupal update tasks after deploying new code
     cmds:
-      - ./vendor/bin/drush {{.site}} --yes cache:clear plugin
-      - ./vendor/bin/drush {{.site}} --yes updatedb --no-post-updates
+      # See https://www.drush.org/12.x/deploycommand/
+      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
+      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       # Run config:import twice to make sure we catch any config that didn't declare
       # a dependency correctly. This is also useful when importing large config sets
       # as it can sometimes hit an out of memory error.
       - ./vendor/bin/drush {{.site}} --yes config:import || true
       - ./vendor/bin/drush {{.site}} --yes config:import
-      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
+      - ./vendor/bin/drush {{.site}} --yes deploy:hook
       - |
         if [[ $(./vendor/bin/drush {{.site}} config:status --format=json --state=Different) != '[]' ]]; then
           echo "Config export does not match database."
