@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lullabot\Drainpipe;
 
 use Composer\Cache;
