@@ -125,7 +125,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param Event $event the event to handle
      */
-    public function onPostInstallCmd(Event $event)
+    public function onPostInstallCmd(Event $event): void
     {
         $this->installBinaries($event);
     }
@@ -135,7 +135,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param event $event The event to handle
      */
-    public function onPostUpdateCmd(Event $event)
+    public function onPostUpdateCmd(Event $event): void
     {
         $this->installBinaries($event);
     }
@@ -145,7 +145,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param event $event The event to handle
      */
-    public function installBinaries(Event $event)
+    public function installBinaries(Event $event): void
     {
         foreach ($this->binaries as $binary => $info) {
             $platform = $this->platform;
