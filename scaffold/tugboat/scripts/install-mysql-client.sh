@@ -7,6 +7,8 @@
 mkdir -p /etc/apt/keyrings
 cd /etc/apt/keyrings
 
+# The following GPG key should match the latest RPM-GPG-KEY-mysql-YYYY file
+# from https://repo.mysql.com/
 cat > mysql.txt << EOD
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: SKS 1.1.6
