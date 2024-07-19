@@ -312,7 +312,7 @@ EOT;
         $fs = new Filesystem();
         $fs->removeDirectory('./.github/actions/drainpipe');
 
-        if (!isset($this->extra['drainpipe']['github']) || is_array($this->extra['drainpipe']['github'])) {
+        if (!isset($this->extra['drainpipe']['github']) || !is_array($this->extra['drainpipe']['github'])) {
             return;
         }
 
@@ -345,7 +345,7 @@ EOT;
     private function installTugboat(string $scaffoldPath): void {
         $fs = new Filesystem();
 
-        if (!isset($this->extra['drainpipe']['tugboat']) || is_array($this->extra['drainpipe']['tugboat'])) {
+        if (!isset($this->extra['drainpipe']['tugboat']) || !is_array($this->extra['drainpipe']['tugboat'])) {
             return;
         }
 
