@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lullabot\Drainpipe;
 
 use Composer\Cache;
@@ -123,7 +125,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param Event $event the event to handle
      */
-    public function onPostInstallCmd(Event $event)
+    public function onPostInstallCmd(Event $event): void
     {
         $this->installBinaries($event);
     }
@@ -133,7 +135,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param event $event The event to handle
      */
-    public function onPostUpdateCmd(Event $event)
+    public function onPostUpdateCmd(Event $event): void
     {
         $this->installBinaries($event);
     }
@@ -143,7 +145,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param event $event The event to handle
      */
-    public function installBinaries(Event $event)
+    public function installBinaries(Event $event): void
     {
         foreach ($this->binaries as $binary => $info) {
             $platform = $this->platform;
@@ -184,9 +186,11 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      * @param string $url
      *  The URL to download the binary
      * @param string $sha
+     *  The hash to validate
+     * @param string $hashalgo
      *  The hashing algorithm to use
      *
-     *  @see https://www.php.net/manual/en/function.hash-file.php
+     * @see https://www.php.net/manual/en/function.hash-file.php
      */
     protected function installBinary($binary, $version, $url, $sha, $hashalgo = 'sha256'): void
     {
@@ -258,12 +262,12 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      * Return if a file needs to be downloaded or not.
      *
      * @param string $cacheDestination The destination path to the downloaded file.
-     * @param $hashalgo The hash algorithm used to validate the file.
-     * @param $hash The hash used to validate the file.
+     * @param string $hashalgo The hash algorithm used to validate the file.
+     * @param string $hash The hash used to validate the file.
      *
      * @return bool True if the file needs to be downloaded again, false otherwise.
      */
-    private function needsDownload(string $cacheDestination, $hashalgo, $hash): bool {
+    private function needsDownload(string $cacheDestination, string $hashalgo, string $hash): bool {
         return !$this->cache->isEnabled() || !file_exists($cacheDestination) || hash_file($hashalgo, $cacheDestination) !== $hash;
     }
 }
