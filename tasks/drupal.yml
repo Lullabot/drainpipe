@@ -68,7 +68,8 @@ tasks:
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - ./vendor/bin/drush {{.site}} --yes deploy:hook
       - |
-        if [[ $(./vendor/bin/drush {{.site}} config:status --format=json --state=Different) != '[]' ]]; then
+        config_status_output=$(./vendor/bin/drush {{.site}} config:status --format=json --state=Different | tail -n1)
+        if [[ $config_status_output != '[]' ]]; then
           echo "Config export does not match database."
           ./vendor/bin/drush {{.site}} config:status
           exit 1;
