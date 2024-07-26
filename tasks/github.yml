@@ -33,6 +33,9 @@ tasks:
     cmds:
       - if [ "" == {{shellQuote .json_file}} ]; then echo "Please provide a file to write the description to" && exit 1; fi
       - composer global exec -- "composer-lock-diff --md > /tmp/drainpipe-composer-lock-diff"
+      - |
+        # Replace \n with \r\n.
+        sed ':a;N;$!ba;s/\n/\r\n/g' /tmp/drainpipe-composer-lock-diff > /tmp/temp.txt && mv /tmp/temp.txt /tmp/drainpipe-composer-lock-diff
       - defer: rm -f /tmp/drainpipe-composer-lock-diff
       - cp {{ .pull_request }} /tmp/drainpipe-composer-lock-diff-pr
       - defer: rm -f /tmp/drainpipe-composer-lock-diff-pr
@@ -42,11 +45,11 @@ tasks:
         DESCRIPTION=$(cat /tmp/drainpipe-composer-lock-diff-pr | jq -r '.body')
         if [ "$(cat /tmp/drainpipe-composer-lock-diff)" != "" ]; then
             DIFF=$(cat /tmp/drainpipe-composer-lock-diff)
-            DESCRIPTION="$DESCRIPTION
-        <!--Composer Lock Diff-->
-        ## Composer Lock Diff
-        $DIFF
-        <!--/Composer Lock Diff-->"
+            DIFF=$(jq -n --arg diff "$DIFF" '$diff') # prepare escape sequences for json
+            DIFF="${DIFF:1:-1}" # removes extra quotes around string
+            DESCRIPTION=$(jq -n --arg description "$DESCRIPTION" '$description')
+            DESCRIPTION="${DESCRIPTION:1:-1}"
+            DESCRIPTION=$DESCRIPTION'\n<!--Composer Lock Diff-->\r\n## Composer Lock Diff\r\n'$DIFF'\n<!--/Composer Lock Diff-->'
         fi
         DESCRIPTION=$(echo "$DESCRIPTION" | sed -z 's/\\/\\\\/g' | sed -z 's/\n/\\n/g' | sed -z 's/"/\\"/g' | sed -z 's/\r//g')
         echo "{\"body\": \"$(echo "$DESCRIPTION")\"}" > {{ .json_file }}
