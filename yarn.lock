@@ -283,9 +283,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lerna/create@npm:8.1.6":
-  version: 8.1.6
-  resolution: "@lerna/create@npm:8.1.6"
+"@lerna/create@npm:8.1.7":
+  version: 8.1.7
+  resolution: "@lerna/create@npm:8.1.7"
   dependencies:
     "@npmcli/arborist": "npm:7.5.3"
     "@npmcli/package-json": "npm:5.2.0"
@@ -345,6 +345,7 @@ __metadata:
     slash: "npm:^3.0.0"
     ssri: "npm:^10.0.6"
     string-width: "npm:^4.2.3"
+    strip-ansi: "npm:^6.0.1"
     strong-log-transformer: "npm:2.1.0"
     tar: "npm:6.2.1"
     temp-dir: "npm:1.0.0"
@@ -357,7 +358,7 @@ __metadata:
     write-pkg: "npm:4.0.0"
     yargs: "npm:17.7.2"
     yargs-parser: "npm:21.1.1"
-  checksum: 10c0/833920656c3254444db7d7ea3e22331773c87c635d899ef3cd785a599fe07e2a40ceec49ad46e1962d354d96877de341615ef49e12b50ed70011df6d9dda46e6
+  checksum: 10c0/9f44f4bf7741b0b594b8bd10be60c7aed8aa5335fcc9ec75bcac40744fcf4cadad40ff37b8f85445c4b9d470388df6e0bbdfcd7d5de43b681e315dc288a2fc9d
   languageName: node
   linkType: hard
 
@@ -386,7 +387,7 @@ __metadata:
     gulp-sass-glob: "npm:^1.1.0"
     gulp-sourcemaps: "npm:^3.0.0"
     modern-normalize: "npm:^2.0.0"
-    postcss: "npm:^8.4.39"
+    postcss: "npm:^8.4.40"
     sass: "npm:^1.77.8"
     yargs: "npm:^17.7.2"
   bin:
@@ -398,7 +399,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lullabot/drainpipe@workspace:."
   dependencies:
-    lerna: "npm:^8.1.6"
+    lerna: "npm:^8.1.7"
   languageName: unknown
   linkType: soft
 
@@ -4526,11 +4527,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lerna@npm:^8.1.6":
-  version: 8.1.6
-  resolution: "lerna@npm:8.1.6"
+"lerna@npm:^8.1.7":
+  version: 8.1.7
+  resolution: "lerna@npm:8.1.7"
   dependencies:
-    "@lerna/create": "npm:8.1.6"
+    "@lerna/create": "npm:8.1.7"
     "@npmcli/arborist": "npm:7.5.3"
     "@npmcli/package-json": "npm:5.2.0"
     "@npmcli/run-script": "npm:8.1.0"
@@ -4597,6 +4598,7 @@ __metadata:
     slash: "npm:3.0.0"
     ssri: "npm:^10.0.6"
     string-width: "npm:^4.2.3"
+    strip-ansi: "npm:^6.0.1"
     strong-log-transformer: "npm:2.1.0"
     tar: "npm:6.2.1"
     temp-dir: "npm:1.0.0"
@@ -4612,7 +4614,7 @@ __metadata:
     yargs-parser: "npm:21.1.1"
   bin:
     lerna: dist/cli.js
-  checksum: 10c0/282ec3b5fdc48a2b3ed6eeaac1575e6a35eeaf53c4fa4113ca6b4265d46a422bf5de99b701d7fb4c94e80ec22e0099f24cc5bcab0a4a0a47095538a88e953129
+  checksum: 10c0/aa3f4fb12eadafedc4736c9832a2ca7557757254b2e62f6454b4ed71cd4a92b354ced6acd92b505a8701cd948473df8bb70753fc0dd7213f8bbf4349d0b1c4d5
   languageName: node
   linkType: hard
 
@@ -6573,14 +6575,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.39":
-  version: 8.4.39
-  resolution: "postcss@npm:8.4.39"
+"postcss@npm:^8.4.40":
+  version: 8.4.40
+  resolution: "postcss@npm:8.4.40"
   dependencies:
     nanoid: "npm:^3.3.7"
     picocolors: "npm:^1.0.1"
     source-map-js: "npm:^1.2.0"
-  checksum: 10c0/16f5ac3c4e32ee76d1582b3c0dcf1a1fdb91334a45ad755eeb881ccc50318fb8d64047de4f1601ac96e30061df203f0f2e2edbdc0bfc49b9c57bc9fb9bedaea3
+  checksum: 10c0/65ed67573e5443beaeb582282ff27a6be7c7fe3b4d9fa15761157616f2b97510cb1c335023c26220b005909f007337026d6e3ff092f25010b484ad484e80ea7f
   languageName: node
   linkType: hard
 
