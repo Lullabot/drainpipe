@@ -36,6 +36,16 @@ $themeManager = Mockery::mock(ThemeManagerInterface::class);
 $dateFormatter = Mockery::mock(DateFormatterInterface::class);
 $fileUrlGenerator = Mockery::mock(FileUrlGenerator::class);
 
+if (class_exists('\TwigStorybook\Twig\TwigExtension')) {
+  $composer_json = json_decode(file_get_contents(__DIR__ . '/../../../../composer.json'), true);
+  if (json_last_error()) {
+    throw new \RuntimeException('Could not parse composer.json');
+  }
+
+  $web_root = $composer_json['extra']['drupal-scaffold']['locations']['web-root'];
+  $twig->addExtension(new \TwigStorybook\Twig\TwigExtension(new \TwigStorybook\Service\StoryCollector(), '/../../../../' . $web_root));
+}
+
 $twig->addExtension(new TwigExtension($renderer, $urlGenerator, $themeManager, $dateFormatter, $fileUrlGenerator));
 
 $lintCommand = new LintCommand($twig);
