@@ -17,46 +17,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
-      - uses: actions/cache@v4
+      - name: Check if composer.lock was changed
+        id: composer-lock-changed
+        uses: tj-actions/changed-files@v44
         with:
-          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+          files: 'composer.lock'
 
-      - uses: ./.github/actions/drainpipe/set-env
-
-      - name: Install and Start DDEV
-        uses: ./.github/actions/drainpipe/ddev
+      - name: Delete sticky pull request comment
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          git-name: Drainpipe Bot
-          git-email: no-reply@example.com
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          header: composer-lock-diff
+          delete: true
 
-      - name: Build Project
-        run: ddev composer install
+      - name: Generate composer diff
+        if: ${{ steps.composer-lock-changed.outputs.any_changed == 'true' }}
+        id: composer-diff
+        uses: IonBazan/composer-diff-action@v1
+        with:
+          with-platform: true
+          with-links: true
 
-      - name: Install composer lock diff
-        run: ddev composer global require davidrjonas/composer-lock-diff:^1.0
-
-      - name: Prepare repository
-        run: |
-          git reset --soft HEAD^1
-          git reset .
-
-      - name: Run composer lock diff
-        run: |
-          curl -f \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer  ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER | jq '. | {body}' > pull_request.json
-          ddev task "github:composer-lock-diff pull_request='pull_request.json' json_file='processed.json'"
-          curl -f \
-            -X PATCH \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER \
-            -d @processed.json
+      - name: Post sticky pull request comment
+        if: ${{ steps.composer-lock-changed.outputs.any_changed == 'true' }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: composer-lock-diff
+          message: |
+            ### Composer package changes
+            ${{ (steps.composer-diff.outcome != 'success' && 'Review any changes to composer.lock manually.') || steps.composer-diff.outputs.composer_diff || 'No changes found' }}
