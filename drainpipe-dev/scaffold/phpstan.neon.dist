@@ -1,6 +1,6 @@
 includes:
-    - ../../../mglaman/phpstan-drupal/extension.neon
-    - ../../../phpstan/phpstan-deprecation-rules/rules.neon
+    - ./vendor/mglaman/phpstan-drupal/extension.neon
+    - ./vendor/phpstan/phpstan-deprecation-rules/rules.neon
 
 parameters:
     excludePaths:

@@ -53,6 +53,7 @@ jobs:
       - name: Verify files were created
         run: |
           test -f phpcs.xml.dist
+          test -f phpstan.neon.dist
 
       - name: Fix settings.php
         run: |
