@@ -13,6 +13,7 @@
         "php": "^8.1",
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
+        "davidrjonas/composer-lock-diff": "^1.7",
         "phpunit/phpunit": "^9.6.20",
         "sserbin/twig-linter": "^3.1.0",
         "mikey179/vfsstream": "^1.6.11",
