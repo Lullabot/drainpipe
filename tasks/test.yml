@@ -54,7 +54,11 @@ tasks:
       - |
         DIRS_ARR=({{.TWIG_DIRS}})
         for DIR in "${DIRS_ARR[@]}"; do
-          ./vendor/bin/drainpipe-twig-linter lint $DIR
+          if [ "{{.format}}" == "junit" ]; then
+            ./vendor/bin/twig-cs-fixer lint $DIR --format junit
+          else
+            ./vendor/bin/twig-cs-fixer lint $DIR
+          fi
         done
       - |
         if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
@@ -161,6 +165,11 @@ tasks:
         elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
           npm run stylelint "**/*.{css,scss,sass}" --fix
         fi
+      - |
+        DIRS_ARR=({{.TWIG_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          ./vendor/bin/twig-cs-fixer lint --fix $DIR
+        done
   nightwatch:check:
     #desc: Verifies Nightwatch is setup correctly
     cmds:
