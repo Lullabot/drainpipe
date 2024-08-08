@@ -12,7 +12,11 @@ jobs:
     strategy:
       matrix:
         php-version: [8.1, 8.2, 8.3]
-
+        include:
+          - php-version: 8.1
+            drupal-version: ":^10"
+          - php-version: 8.2
+            drupal-version: ":^10"
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +41,7 @@ jobs:
       - name: Install Drupal
         run: |
           cd ../
-          composer create-project drupal/recommended-project drupal --ignore-platform-req=ext-gd
+          composer create-project drupal/recommended-project${{ matrix.drupal-version }} drupal --ignore-platform-reqs
           cd drupal
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
           composer config extra.drupal-scaffold.gitignore true
