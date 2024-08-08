@@ -129,8 +129,8 @@ jobs:
         run: |
           ddev exec corepack disable
           ddev exec npm i -g yarn@1.22.1
-          ddev yarn init -y
-          ddev yarn add file:./drainpipe/metapackages/sass --dev
+          ddev exec yarn init -y
+          ddev exec yarn add file:./drainpipe/metapackages/sass --dev
 
       - name: Compile Sass
         run: ddev task sass
@@ -274,9 +274,9 @@ jobs:
         run: |
           ddev exec corepack disable
           ddev exec npm i -g yarn@1.22.1
-          ddev yarn init -y
-          ddev yarn add focus-trap@^6.7.3
-          ddev yarn add file:./drainpipe/metapackages/javascript --dev
+          ddev exec yarn init -y
+          ddev exec yarn add focus-trap@^6.7.3
+          ddev exec yarn add file:./drainpipe/metapackages/javascript --dev
 
       - name: Compile JavaScript
         run: ddev task javascript
