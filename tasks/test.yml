@@ -92,11 +92,15 @@ tasks:
       - |
         {{ .FUNC_ENSURE_DIRS }}
       - |
+        CONFIG="phpstan.neon"
+        if [ ! -f phpstan.neon ]; then
+          CONFIG="vendor/lullabot/drainpipe/scaffold/phpstan.neon"
+        fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpstan analyse --error-format=junit {{.TEST_DIRS}} > test_result/phpstan.xml
+          ./vendor/bin/phpstan analyse --error-format=junit -c $CONFIG {{.TEST_DIRS}} > test_result/phpstan.xml
         else
-          ./vendor/bin/phpstan analyse {{.TEST_DIRS}}
+          ./vendor/bin/phpstan analyse -c $CONFIG {{.TEST_DIRS}}
         fi
   phpunit:
     desc: Runs PHPUnit
