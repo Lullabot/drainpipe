@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
       - uses: actions/checkout@v4
         with:
@@ -35,7 +35,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "18"
+          ddev config --nodejs-version "22"
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
@@ -197,7 +197,6 @@ jobs:
 
       - name: Setup Sass
         run: |
-          ddev config --nodejs-version=21
           ddev restart
           ddev yarn set version berry
           ddev yarn set version 4
@@ -344,7 +343,6 @@ jobs:
 
       - name: Setup Sass
         run: |
-          ddev config --nodejs-version=21
           ddev restart
           ddev yarn set version berry
           ddev yarn set version 4
