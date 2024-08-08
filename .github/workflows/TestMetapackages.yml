@@ -127,6 +127,7 @@ jobs:
       - name: Setup Sass
         run: |
           ddev yarn set version classic
+          ddev yarn set version 1
           ddev yarn init -y
           ddev yarn add file:./drainpipe/metapackages/sass --dev
 
@@ -271,6 +272,7 @@ jobs:
       - name: Setup Sass
         run: |
           ddev yarn set version classic
+          ddev yarn set version 1
           ddev yarn init -y
           ddev yarn add focus-trap@^6.7.3
           ddev yarn add file:./drainpipe/metapackages/javascript --dev
