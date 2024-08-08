@@ -17,7 +17,7 @@ vars:
 tasks:
   static:
     desc: Runs all static tests
-    deps: [security, lint, phpstan, phpunit:static, phpcs]
+    deps: [lint, phpstan, phpunit:static, phpcs]
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
     deps: [config, phpunit:functional, nightwatch]
@@ -41,6 +41,11 @@ tasks:
           ./vendor/bin/local-php-security-checker
         fi
       - composer audit
+      - |
+        ./vendor/bin/composer-lock-diff --from {{ shellQuote (.composer_lock_diff_from | default "main") }} --md
+        if [ "" != {{ shellQuote (.composer_lock_diff | default "") }} ]; then
+          ./vendor/bin/composer-lock-diff --from {{ shellQuote (.composer_lock_diff_from | default "main") }} --md > {{ shellQuote (.composer_lock_diff | default "") }}
+        fi
   lint:
     desc: Runs lint on composer, YAML, and Twig files
     # @todo JUnit output
