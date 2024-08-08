@@ -270,6 +270,9 @@ jobs:
       - name: Start DDEV
         run: ddev start
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Setup Sass
         run: |
           ddev yarn set version classic
