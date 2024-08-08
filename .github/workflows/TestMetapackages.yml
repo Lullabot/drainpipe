@@ -36,6 +36,7 @@ jobs:
         run: |
           ddev config --auto
           ddev config --nodejs-version "22"
+          ddev config --corepack-enable
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
