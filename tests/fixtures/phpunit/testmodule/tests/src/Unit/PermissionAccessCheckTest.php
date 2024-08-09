@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Drupal\Tests\user\Unit;
+namespace Drupal\Tests\testmodule\Unit;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Tests\UnitTestCase;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\user\Unit;
+namespace Drupal\Tests\testsubmodule\Unit;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Tests\UnitTestCase;
