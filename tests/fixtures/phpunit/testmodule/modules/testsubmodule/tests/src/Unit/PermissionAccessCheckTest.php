@@ -49,6 +49,7 @@ class PermissionAccessCheckTest extends UnitTestCase {
     /**
      * Provides data for the testAccess method.
      *
+     * @dataProvider providerTestAccess
      * @return array
      */
     public function providerTestAccess() {
@@ -64,9 +65,6 @@ class PermissionAccessCheckTest extends UnitTestCase {
 
     /**
      * Tests the access check method.
-     *
-     * @dataProvider providerTestAccess
-     * @covers ::access
      */
     public function testAccess($requirements, $access, array $contexts = [], $message = '') {
         $access_result = AccessResult::allowedIf($access)->addCacheContexts($contexts);
