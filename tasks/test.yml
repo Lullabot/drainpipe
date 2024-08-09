@@ -54,7 +54,11 @@ tasks:
       - |
         DIRS_ARR=({{.TWIG_DIRS}})
         for DIR in "${DIRS_ARR[@]}"; do
-          ./vendor/bin/drainpipe-twig-linter lint $DIR
+          if [ "{{.format}}" == "junit" ]; then
+            ./vendor/bin/twig-cs-fixer lint $DIR --format junit
+          else
+            ./vendor/bin/twig-cs-fixer lint $DIR
+          fi
         done
       - |
         if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
@@ -110,7 +114,7 @@ tasks:
           CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
-          mkdir -p test_result
+          mkdir -p test_result/phpunit
           ./vendor/bin/phpunit --testsuite=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit.xml
         else
           ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
@@ -124,10 +128,10 @@ tasks:
           CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
-          mkdir -p test_result
-          ./vendor/bin/phpunit --exclude-group=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml
+          mkdir -p test_result/phpunit
+          ./vendor/bin/phpunit --exclude-testsuite=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml
         else
-          ./vendor/bin/phpunit -c $CONFIG --exclude-group=unit
+          ./vendor/bin/phpunit -c $CONFIG --exclude-testsuite=unit
         fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
@@ -161,6 +165,11 @@ tasks:
         elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
           npm run stylelint "**/*.{css,scss,sass}" --fix
         fi
+      - |
+        DIRS_ARR=({{.TWIG_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          ./vendor/bin/twig-cs-fixer lint --fix $DIR
+        done
   nightwatch:check:
     #desc: Verifies Nightwatch is setup correctly
     cmds:

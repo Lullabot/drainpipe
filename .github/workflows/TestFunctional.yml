@@ -35,7 +35,8 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "18"
+          ddev config --nodejs-version "22"
+          ddev config --corepack-enable
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
@@ -143,7 +144,9 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
-          ddev yarn set version classic
+          ddev exec corepack disable
+          ddev exec npm i -g yarn@1.22.1
+          ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
           ddev yarn init -y
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
@@ -195,7 +198,7 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
-          yarn config set nodeLinker node-modules
+          ddev yarn config set nodeLinker node-modules
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
@@ -243,12 +246,11 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
-          ddev config --nodejs-version=21
           ddev restart
           ddev yarn set version berry
           ddev yarn set version 4
           ddev yarn init -y
-          yarn config set nodeLinker node-modules
+          ddev yarn config set nodeLinker node-modules
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
@@ -350,7 +352,6 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
-          ddev config --nodejs-version=21
           ddev restart
           ddev yarn set version berry
           ddev yarn init -y
