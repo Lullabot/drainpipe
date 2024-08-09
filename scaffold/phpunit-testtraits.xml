@@ -61,10 +61,6 @@
       <directory>../../../../web/modules/custom/*/tests/src/Unit</directory>
       <directory>../../../../web/modules/custom/*/*/tests/src/Unit</directory>
       <directory>../../../../web/modules/custom/*/modules/*/tests/src/Unit</directory>
-      <directory>../../../../web/themes/custom/*/tests/src/Unit</directory>
-      <directory>../../../../web/themes/custom/*/*/tests/src/Unit</directory>
-      <directory>../../../../web/profiles/custom/*/tests/src/Unit</directory>
-      <directory>../../../../web/profiles/custom/*/*/tests/src/Unit</directory>
       <directory>../../../../test/phpunit/*/Unit</directory>
     </testsuite>
     <testsuite name="kernel">
