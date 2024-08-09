@@ -129,9 +129,9 @@ tasks:
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpunit --exclude-group=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml
+          ./vendor/bin/phpunit --exclude-testsuite=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml
         else
-          ./vendor/bin/phpunit -c $CONFIG --exclude-group=unit
+          ./vendor/bin/phpunit -c $CONFIG --exclude-testsuite=unit
         fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
