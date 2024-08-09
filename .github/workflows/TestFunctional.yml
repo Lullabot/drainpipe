@@ -195,11 +195,10 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
-          ddev exec corepack enable
           ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
-          yarn config set nodeLinker node-modules
+          ddev yarn config set nodeLinker node-modules
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
@@ -245,17 +244,13 @@ jobs:
       - name: Start DDEV
         run: ddev start
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Setup Nightwatch
         run: |
-          ddev exec corepack enable
           ddev restart
           ddev yarn set version berry
           ddev yarn set version 4
           ddev yarn init -y
-          yarn config set nodeLinker node-modules
+          ddev yarn config set nodeLinker node-modules
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
