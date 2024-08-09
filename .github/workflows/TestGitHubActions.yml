@@ -59,7 +59,6 @@ jobs:
           echo "api_version: 1" >> pantheon.yml
           echo "web_docroot: true" >> pantheon.yml
           echo "php_version: 8.3" >> pantheon.yml
-          echo "drush_version: 13" >> pantheon.yml
           echo "database:" >> pantheon.yml
           echo "  version: 10.6" >> pantheon.yml
           echo "enforce_https: full+subdomains" >> pantheon.yml

@@ -114,7 +114,7 @@ tasks:
           CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
-          mkdir -p test_result
+          mkdir -p test_result/phpunit
           ./vendor/bin/phpunit --testsuite=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit.xml
         else
           ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
@@ -128,7 +128,7 @@ tasks:
           CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
-          mkdir -p test_result
+          mkdir -p test_result/phpunit
           ./vendor/bin/phpunit --exclude-testsuite=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml
         else
           ./vendor/bin/phpunit -c $CONFIG --exclude-testsuite=unit
