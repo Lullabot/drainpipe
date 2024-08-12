@@ -115,7 +115,7 @@ tasks:
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result/phpunit
-          CONFIG="$CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml"
+          CONFIG="$CONFIG --log-junit $(pwd)/test_result/phpunit.xml"
         fi
         ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
   phpunit:functional:
@@ -124,7 +124,7 @@ tasks:
       - |
         CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
         if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
+          CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-functional.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result/phpunit
