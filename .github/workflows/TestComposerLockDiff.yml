@@ -80,7 +80,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: processed-descriptions
+          name: processed-descriptions-${{ matrix.drupal-version }}
           path: |
             renovate-processed.json
             pr-template-processed.json
