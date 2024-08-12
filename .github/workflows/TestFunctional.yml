@@ -68,16 +68,19 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
           path: /tmp/drainpipe.zip
 
   Test-NPM:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -122,10 +125,13 @@ jobs:
   Test-Yarn-Classic:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -173,10 +179,13 @@ jobs:
   Test-Yarn-3-Node-Linker:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -224,10 +233,13 @@ jobs:
   Test-Yarn-4-Node-Linker:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -276,10 +288,13 @@ jobs:
   Test-Yarn-3:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -330,6 +345,9 @@ jobs:
   Test-Yarn-4:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
