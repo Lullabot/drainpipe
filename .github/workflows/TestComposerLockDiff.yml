@@ -11,9 +11,12 @@ concurrency:
 jobs:
   Test-Composer-Lock-Diff:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project:10.0.9 . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
       - uses: actions/checkout@v4
         with:
