@@ -119,7 +119,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-npm
+          name: test_result-npm-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-Classic:
@@ -173,7 +173,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-yarn-classic
+          name: test_result-yarn-classic-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-3-Node-Linker:
@@ -227,7 +227,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-yarn3-nl
+          name: test_result-yarn3-nl-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-4-Node-Linker:
@@ -282,7 +282,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-yarn4-nl
+          name: test_result-yarn4-nl-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-3:
@@ -339,7 +339,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-yarn3
+          name: test_result-yarn3-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-4:
@@ -397,5 +397,5 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-yarn4
+          name: test_result-yarn4-${{ matrix.drupal-version }}
           path: test_result
