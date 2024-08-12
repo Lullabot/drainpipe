@@ -124,7 +124,7 @@ tasks:
       - |
         CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
         if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-functional.xml"
+          CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result/phpunit
