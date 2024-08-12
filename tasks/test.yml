@@ -130,7 +130,7 @@ tasks:
           mkdir -p test_result/phpunit
           CONFIG="$CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml"
         fi
-        PHPUNIT_VERSION=$(/vendor/bin/phpunit --version | grep -Po 'PHPUnit ([0-9]+)\.') | grep -Po '[0-9]+')
+        PHPUNIT_VERSION=$(./vendor/bin/phpunit --version | grep -Po 'PHPUnit [0-9]+)\.' | grep -Po '[0-9]+')
         if [ "$PHPUNIT_VERSION" == "9" ]; then
           ./vendor/bin/phpunit -c $CONFIG --testsuite=kernel,functional,functional-javascript,existing-site,existing-site-javascript
         else
