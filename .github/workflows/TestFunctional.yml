@@ -68,7 +68,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
           path: /tmp/drainpipe.zip
 
   Test-NPM:
@@ -77,7 +77,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -125,7 +125,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -176,7 +176,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -227,7 +227,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -279,7 +279,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -333,7 +333,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
