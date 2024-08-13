@@ -1,7 +1,6 @@
 name: Clean Drainpipe Dev Package
 
-on:
-  on: delete
+on: delete
 
 concurrency:
   group: drainpipe-dev
