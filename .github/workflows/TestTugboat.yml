@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
       - uses: actions/checkout@v4
         with:
@@ -34,7 +34,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --php-version "8.1"
+          ddev config --php-version "8.3"
           ddev config --nodejs-version "18"
           ddev get ddev/ddev-redis --version v1.2.0
           ddev get ddev/ddev-elasticsearch --version v0.3.2
@@ -119,7 +119,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --php-version "8.1"
+          ddev config --php-version "8.3"
           ddev config --nodejs-version "16"
           ddev restart
           ddev composer config extra.drupal-scaffold.gitignore true

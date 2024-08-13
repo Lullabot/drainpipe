@@ -2,7 +2,7 @@
 set -eux
 # Helper script to setup a local test of Drainpipe
 # Copy this to the same directory level that your drainpipe directory is in
-composer create-project drupal/recommended-project drainpipe-test --ignore-platform-req=ext-gd
+composer create-project drupal/recommended-project drainpipe-test --ignore-platform-reqs
 cd drainpipe-test
 cp -R ../drainpipe .
 
