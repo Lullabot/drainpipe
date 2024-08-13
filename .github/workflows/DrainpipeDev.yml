@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  Drainpipe-Dev-Clean:
+  Drainpipe-Dev:
     name: Push branch to drainpipe-dev
     runs-on: ubuntu-latest
     steps:
