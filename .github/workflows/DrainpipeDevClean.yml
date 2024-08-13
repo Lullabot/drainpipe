@@ -1,11 +1,7 @@
-name: Push Drainpipe Dev Package
+name: Clean Drainpipe Dev Package
 
 on:
-  push:
-    branches:
-      - '**'
-    tags:
-      - 'v*'
+  on: delete
 
 concurrency:
   group: drainpipe-dev
@@ -40,19 +36,7 @@ jobs:
           git config user.name "Lullabot-Drainpipe[bot]"
           git config user.email "157769597+Lullabot-Drainpipe[bot]@users.noreply.github.com"
 
-      - name: Push branch to drainpipe-dev
+      - name: Delete ref from drainpipe-dev
         working-directory: drainpipe-dev
         run: |
-          git add -A
-          git commit -m "$COMMIT_MESSAGE" --allow-empty
-          git push origin ${{ github.ref_name }}
-        env:
-          # Workaround if the commit message contains quotes.
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-
-      - name: Push tag to drainpipe-dev
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        working-directory: drainpipe-dev
-        run: |
-          git tag ${{ github.ref_name }}
-          git push origin ${{ github.ref_name }}
+          git push origin --delete ${{ github.ref_name }}
