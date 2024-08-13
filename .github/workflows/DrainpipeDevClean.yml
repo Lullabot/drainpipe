@@ -1,7 +1,6 @@
 name: Clean Drainpipe Dev Package
 
-on:
-  on: delete
+on: delete
 
 concurrency:
   group: drainpipe-dev
@@ -29,14 +28,14 @@ jobs:
         working-directory: drainpipe-dev
         run: |
           git init
-          git branch -m ${{ github.ref_name }}
+          git branch -m ${{ github.event.ref }}
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
-          git reset --mixed origin/${{ github.ref_name }}
+          git reset --mixed origin/${{ github.event.ref }}
           git config user.name "Lullabot-Drainpipe[bot]"
           git config user.email "157769597+Lullabot-Drainpipe[bot]@users.noreply.github.com"
 
       - name: Delete ref from drainpipe-dev
         working-directory: drainpipe-dev
         run: |
-          git push origin --delete ${{ github.ref_name }}
+          git push origin --delete ${{ github.event.ref }}
