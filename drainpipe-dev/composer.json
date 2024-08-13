@@ -17,7 +17,7 @@
         "behat/mink-browserkit-driver": "^2.2.0",
         "drupal/coder": "^8.3.24",
         "lullabot/drainpipe": "*",
-        "mglaman/phpstan-drupal": "^1.2.11",
+        "mglaman/phpstan-drupal": "^1.2.12",
         "mikey179/vfsstream": "^1.6.11",
         "mockery/mockery": "^1.6.12",
         "phpspec/prophecy-phpunit": "^2",
