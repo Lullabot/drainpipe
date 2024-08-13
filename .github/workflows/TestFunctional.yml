@@ -13,9 +13,12 @@ concurrency:
 jobs:
   Build:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
       - uses: actions/checkout@v4
         with:
@@ -35,7 +38,8 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "18"
+          ddev config --nodejs-version "22"
+          ddev config --corepack-enable
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
@@ -64,16 +68,19 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
           path: /tmp/drainpipe.zip
 
   Test-NPM:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -112,16 +119,19 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-npm
+          name: test_result-npm-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-Classic:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -143,7 +153,9 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
-          ddev yarn set version classic
+          ddev exec corepack disable
+          ddev exec npm i -g yarn@1.22.1
+          ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
           ddev yarn init -y
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
@@ -161,16 +173,19 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-yarn-classic
+          name: test_result-yarn-classic-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-3-Node-Linker:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -195,7 +210,7 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
-          yarn config set nodeLinker node-modules
+          ddev yarn config set nodeLinker node-modules
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
@@ -212,16 +227,19 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-yarn3-nl
+          name: test_result-yarn3-nl-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-4-Node-Linker:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -243,12 +261,11 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
-          ddev config --nodejs-version=21
           ddev restart
           ddev yarn set version berry
           ddev yarn set version 4
           ddev yarn init -y
-          yarn config set nodeLinker node-modules
+          ddev yarn config set nodeLinker node-modules
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
@@ -265,16 +282,19 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-yarn4-nl
+          name: test_result-yarn4-nl-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-3:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -319,16 +339,19 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-yarn3
+          name: test_result-yarn3-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-4:
     runs-on: ubuntu-22.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -350,7 +373,6 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
-          ddev config --nodejs-version=21
           ddev restart
           ddev yarn set version berry
           ddev yarn init -y
@@ -375,5 +397,5 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-yarn4
+          name: test_result-yarn4-${{ matrix.drupal-version }}
           path: test_result
