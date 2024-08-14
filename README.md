@@ -391,7 +391,22 @@ They are composite actions which can be used in any of your workflows e.g.
 Tests can be run locally with [act](https://github.com/nektos/act):
 `act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
 
-### Composer Lock Diff
+### Security
+```json
+"extra": {
+  "drainpipe": {
+    "github": ["Security"]
+  }
+}
+```
+
+Runs security checks for composer packages and Drupal contrib, as well as posting
+a diff of `composer.lock` as a review comment.
+
+### Composer Lock Diff (Deprecated)
+
+**This is now provided as part of the Security workflow**
+
 Update Pull Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
 

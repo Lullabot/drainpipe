@@ -333,6 +333,10 @@ EOT;
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
             }
+            else if ($github === 'Security') {
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
+            }
         }
     }
 
