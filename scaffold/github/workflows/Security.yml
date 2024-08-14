@@ -44,7 +44,7 @@ jobs:
         run: ddev composer install
 
       - name: Run Security Checks
-        run: ddev task security composer_lock_diff_from=${{ github.base_ref }} composer_lock_diff=composer-lock-diff.md
+        run: ddev task test:security composer_lock_diff_from=${{ github.base_ref }} composer_lock_diff=composer-lock-diff.md
 
       - name: Publish Results
         run: |
