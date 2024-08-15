@@ -337,6 +337,14 @@ EOT;
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
             }
+            else if ($github === 'TestStatic') {
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/workflows/TestStatic.yml", './.github/workflows/TestStatic.yml');
+            }
+            else if ($github === 'TestFunctional') {
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/workflows/TestFunctional.yml", './.github/workflows/TestFunctional.yml');
+            }
         }
     }
 

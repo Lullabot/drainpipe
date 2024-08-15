@@ -1,0 +1,39 @@
+name: "Static Tests"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  Static-Tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - uses: ./.github/actions/drainpipe/set-env
+
+      - name: Install and Start DDEV
+        uses: ./.github/actions/drainpipe/ddev
+
+      - name: Install Project
+        run: ddev composer install
+
+      - name: Run Static Tests
+        run: ddev task test:static
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_result
+          path: test_result

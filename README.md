@@ -391,6 +391,25 @@ They are composite actions which can be used in any of your workflows e.g.
 Tests can be run locally with [act](https://github.com/nektos/act):
 `act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
 
+### Tests
+Workflows for running static and functional tests can be added with the following
+configuration:
+```json
+"extra": {
+  "drainpipe": {
+    "github": ["TestStatic", "TestFunctional"]
+  }
+}
+```
+
+The build process for the functional tests will use `task build:ci:functional`,
+falling back to `task build` if this doesn't exist. The static tests should not
+require a build step.
+
+These workflow flies will continue to be managed by Drainpipe and cannot be
+overridden. If you wish to do so then it's recommended you maintain your own
+workflows for testing.
+
 ### Security
 ```json
 "extra": {
