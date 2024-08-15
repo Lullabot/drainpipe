@@ -39,6 +39,8 @@ jobs:
           ddev composer install
           if ddev task --list | grep -q "build:ci:functional"; then
             ddev task build:ci:functional
+          elif ddev task --list | grep -q "build:dev"; then
+            ddev task build:dev
           else
             ddev task build
           fi
