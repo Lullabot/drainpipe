@@ -403,8 +403,8 @@ configuration:
 ```
 
 The build process for the functional tests will use `task build:ci:functional`,
-falling back to `task build` if this doesn't exist. The static tests should not
-require a build step.
+falling back to `task build:dev`, and then `task build`. The static tests
+should not require a build step.
 
 These workflow flies will continue to be managed by Drainpipe and cannot be
 overridden. If you wish to do so then it's recommended you maintain your own
