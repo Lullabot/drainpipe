@@ -21,14 +21,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+      - uses: ./scaffold/github/actions/common/set-env
 
-      - uses: ./drainpipe/scaffold/github/actions/common/setup-git
+      - uses: ./scaffold/github/actions/common/setup-git
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
 
-      - uses: ./drainpipe/scaffold/github/actions/common/setup-ssh
+      - uses: ./scaffold/github/actions/common/setup-ssh
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
           ssh-known-hosts: ${{ env.SSH_KNOWN_HOSTS }}
