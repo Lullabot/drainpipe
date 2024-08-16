@@ -21,8 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ./scaffold/github/actions/common/set-env
-
       - uses: ./scaffold/github/actions/common/setup-git
         with:
           git-name: Drainpipe Bot
@@ -32,6 +30,9 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
           ssh-known-hosts: ${{ env.SSH_KNOWN_HOSTS }}
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: Create git checkout of drainpipe-dev
         working-directory: drainpipe-dev
