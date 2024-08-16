@@ -27,9 +27,10 @@ jobs:
           git-email: no-reply@example.com
 
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.7.0
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
+          log-public-key: false
 
       - name: Create git checkout of drainpipe-dev
         working-directory: drainpipe-dev
