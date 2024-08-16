@@ -16,14 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Add drainpipe-dev deploy key in order to run git clone
+      - uses: ./scaffold/github/actions/common/setup-git
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
           log-public-key: false
 
-      # Commits made by the https://github.com/apps/lullabot-drainpipe application.
-      # @see https://github.com/orgs/community/discussions/24664
       - name: Create git checkout of drainpipe-dev
         working-directory: drainpipe-dev
         run: |
@@ -32,8 +35,6 @@ jobs:
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
           git reset --mixed origin/${{ github.event.ref }}
-          git config user.name "Lullabot-Drainpipe[bot]"
-          git config user.email "157769597+Lullabot-Drainpipe[bot]@users.noreply.github.com"
 
       - name: Delete ref from drainpipe-dev
         working-directory: drainpipe-dev

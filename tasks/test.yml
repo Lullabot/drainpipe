@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   YAML_DIRS: '{{ default "web/**/*.yml" .YAML_DIRS }}'
-  TWIG_DIRS: '{{ default "web/modules web/profiles web/themes" .TWIG_DIRS }}'
+  TWIG_DIRS: '{{ default "web/modules/custom web/profiles web/themes/custom" .TWIG_DIRS }}'
   # These directories are configured in phpcs.xml. However, phpcs will fail if
   # those directories do not exist, so we create them with the assumption that
   # every Drupal site will eventually have these directories.
