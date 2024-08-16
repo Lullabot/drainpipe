@@ -54,7 +54,7 @@ jobs:
           $(cat composer-lock-diff.md)"
           COMPOSER_LOCK_DIFF=$(echo "$COMPOSER_LOCK_DIFF" | jq -Rsa .)
           EMPTY=true
-          if [ "$(cat composer-lock-diff.md" != "" ]; then
+          if [ "$(cat composer-lock-diff.md)" != "" ]; then
             echo $COMPOSER_LOCK_DIFF >> $GITHUB_STEP_SUMMARY
             EMPTY=false
           fi
