@@ -31,7 +31,7 @@ jobs:
       - uses: ./drainpipe/scaffold/github/actions/common/setup-ssh
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
-          ssh-known-hosts: ${{ variables.SSH_KNOWN_HOSTS }}
+          ssh-known-hosts: ${{ env.SSH_KNOWN_HOSTS }}
 
       - name: Create git checkout of drainpipe-dev
         working-directory: drainpipe-dev
