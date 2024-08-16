@@ -26,13 +26,10 @@ jobs:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
 
-      - uses: ./scaffold/github/actions/common/setup-ssh
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
-          ssh-known-hosts: ${{ env.SSH_KNOWN_HOSTS }}
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
 
       - name: Create git checkout of drainpipe-dev
         working-directory: drainpipe-dev
