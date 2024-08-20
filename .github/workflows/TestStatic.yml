@@ -71,17 +71,15 @@ jobs:
           sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
 
       - name: Test for untracked and modified files
+        id: test_untracked
         continue-on-error: true
-        run: |
-          ddev task test:untracked
-          echo $? > untracked_result
+        run: ddev task test:untracked
 
       - name: Test for untracked and modified files
         run: |
-          if [ "$(cat untracked_result)" = ""]; then
+          if [ "${{ steps.test_untracked.outcome }}" != "failure"]; then
             exit 1
           fi
-          rm untracked_result
           echo "/drainpipe" >> .gitignore
           git add .
           git commit -m "Second commit"
