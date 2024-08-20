@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
       - uses: actions/checkout@v4
         with:
@@ -35,7 +35,8 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "18"
+          ddev config --nodejs-version "22"
+          ddev config --corepack-enable
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
@@ -59,7 +60,7 @@ jobs:
         run: zip -r /tmp/drainpipe.zip ./
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-metapackage-build
           path: /tmp/drainpipe.zip
@@ -68,7 +69,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: test-metapackage-build
 
@@ -102,7 +103,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: test-metapackage-build
 
@@ -126,18 +127,20 @@ jobs:
 
       - name: Setup Sass
         run: |
-          ddev yarn set version classic
-          ddev yarn init -y
-          ddev yarn add file:./drainpipe/metapackages/sass --dev
+          ddev exec corepack disable
+          ddev exec npm i -g yarn@1.22.1
+          ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
+          ddev exec yarn init -y
+          ddev exec yarn add file:./drainpipe/metapackages/sass --dev
 
       - name: Compile Sass
         run: ddev task sass
 
-  Test-Sass-Yarn-Berry:
+  Test-Sass-Yarn-3:
      runs-on: ubuntu-22.04
      needs: Build
      steps:
-       - uses: actions/download-artifact@v3
+       - uses: actions/download-artifact@v4
          with:
            name: test-metapackage-build
 
@@ -169,11 +172,49 @@ jobs:
        - name: Compile Sass
          run: ddev task sass
 
+  Test-Sass-Yarn-4:
+    runs-on: ubuntu-22.04
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: test-metapackage-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Sass
+        run: |
+          ddev restart
+          ddev yarn set version berry
+          ddev yarn set version 4
+          ddev yarn init -y
+          ddev yarn cache clear
+          ddev yarn add ./drainpipe/metapackages/sass --dev
+
+      - name: Compile Sass
+        run: ddev task sass
+
   Test-JavaScript-NPM:
     runs-on: ubuntu-22.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: test-metapackage-build
 
@@ -208,7 +249,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: test-metapackage-build
 
@@ -232,19 +273,21 @@ jobs:
 
       - name: Setup Sass
         run: |
-          ddev yarn set version classic
-          ddev yarn init -y
-          ddev yarn add focus-trap@^6.7.3
-          ddev yarn add file:./drainpipe/metapackages/javascript --dev
+          ddev exec corepack disable
+          ddev exec npm i -g yarn@1.22.1
+          ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
+          ddev exec yarn init -y
+          ddev exec yarn add focus-trap@^6.7.3
+          ddev exec yarn add file:./drainpipe/metapackages/javascript --dev
 
       - name: Compile JavaScript
         run: ddev task javascript
 
-  Test-JavaScript-Yarn-Berry:
+  Test-JavaScript-Yarn-3:
     runs-on: ubuntu-22.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: test-metapackage-build
 
@@ -271,6 +314,45 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
+          ddev yarn add focus-trap@^6.7.3
+          ddev yarn add ./drainpipe/metapackages/javascript --dev
+
+      - name: Compile JavaScript
+        run: ddev task javascript
+
+  Test-JavaScript-Yarn-4:
+    runs-on: ubuntu-22.04
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: test-metapackage-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: ddev start
+
+      - name: Setup Sass
+        run: |
+          ddev restart
+          ddev yarn set version berry
+          ddev yarn set version 4
+          ddev yarn init -y
+          ddev yarn cache clear
           ddev yarn add focus-trap@^6.7.3
           ddev yarn add ./drainpipe/metapackages/javascript --dev
 

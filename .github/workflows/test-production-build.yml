@@ -6,16 +6,21 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   Test-Production-Build:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        php-version: [7.3, 7.4, 8.0]
+        php-version: [ 8.1, 8.2, 8.3 ]
         include:
-          - php-version: 7.3
-            composer-flags: --prefer-lowest --prefer-stable
-
+          - php-version: 8.1
+            drupal-version: ":^10"
+          - php-version: 8.2
+            drupal-version: ":^10"
     steps:
       - uses: actions/checkout@v4
 
@@ -30,20 +35,27 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
+
       - name: Install Drupal
         run: |
           cd ../
-          mkdir drupal
+          composer create-project drupal/recommended-project${{ matrix.drupal-version }} drupal --ignore-platform-reqs
           cd drupal
-          cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/composer.json .
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
-          composer update ${{ matrix.composer-flags }}
+          composer config extra.drupal-scaffold.gitignore true
+          composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe"]'
+          composer config --no-plugins allow-plugins.composer/installers true
+          composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          composer config repositories.drainpipe --json '{"type": "path", "url": "../drainpipe", "options": {"symlink": false}}'
+          composer config minimum-stability dev
+          composer require "lullabot/drainpipe @dev" --with-all-dependencies
 
       - name: Run static tests
         run: |
