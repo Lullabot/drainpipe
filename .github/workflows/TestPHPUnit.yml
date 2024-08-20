@@ -124,7 +124,7 @@ jobs:
           ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
-          ddev composer require "lullabot/drainpipe-dev @dev" weitzman/drupal-test-traits behat/mink-selenium2-driver --dev --with-all-dependencies
+          ddev composer require "lullabot/drainpipe-dev @dev" weitzman/drupal-test-traits lullabot/mink-selenium2-driver --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
           ddev restart
 
