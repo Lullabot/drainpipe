@@ -163,7 +163,7 @@ jobs:
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install:all
+          ddev task test:siteinstall:all
 
       - name: Run Functional Tests
         run: ddev task test:functional
