@@ -29,7 +29,7 @@ services:
 
   firefox:
     container_name: ddev-${DDEV_SITENAME}-firefox
-    image: selenium/standalone-firefox:127.0-20240820
+    image: selenium/standalone-firefox:129.0-20240820
     labels:
       com.ddev.site-name: ${DDEV_SITENAME}
       com.ddev.approot: $DDEV_APPROOT
