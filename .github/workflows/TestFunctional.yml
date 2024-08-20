@@ -64,7 +64,7 @@ jobs:
 
       - name: Run the site installer
         run: |
-          ddev task test:siteinstall:default
+          ddev drush --yes site:install
           ddev drush config:export --yes
 
       - name: Create Artifact
