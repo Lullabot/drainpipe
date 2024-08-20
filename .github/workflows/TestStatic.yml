@@ -78,7 +78,7 @@ jobs:
 
       - name: Test for untracked and modified files
         run: |
-          if [ "$(cat untracked_result)" = "0"]; then
+          if [ "$(cat untracked_result)" = ""]; then
             exit 1
           fi
           rm untracked_result
