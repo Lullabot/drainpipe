@@ -79,7 +79,7 @@ jobs:
 
       - name: Test for untracked and modified files
         run: |
-          if [ "${{ steps.test_untracked.outcome }}" != "failure"]; then
+          if [ "${{ steps.test_untracked.outcome }}" != "failure" ]; then
             exit 1
           fi
           git add .

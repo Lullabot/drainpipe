@@ -186,7 +186,7 @@ tasks:
     desc: Checks for any untracked files in git
     cmds:
       - |
-        if [ "$(git status -s)" != "" ]; then
+        if [ "$(git status -s --ignore-submodules=dirty)" != "" ]; then
           git status -s --ignore-submodules=dirty
           echo "Untracked changes detected - please rectify or add the files to your .gitignore"
           exit 1
