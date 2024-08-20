@@ -37,9 +37,10 @@ class UserCreateTest extends BrowserTestBase {
     public function testUserAdd() {
         $user = $this->drupalCreateUser(['administer users']);
         $this->drupalLogin($user);
+        $request_time = \Drupal::time()->getRequestTime();
 
-        $this->assertEquals(REQUEST_TIME, $user->getCreatedTime(), 'Creating a user sets default "created" timestamp.');
-        $this->assertEquals(REQUEST_TIME, $user->getChangedTime(), 'Creating a user sets default "changed" timestamp.');
+        $this->assertEquals($request_time, $user->getCreatedTime(), 'Creating a user sets default "created" timestamp.');
+        $this->assertEquals($request_time, $user->getChangedTime(), 'Creating a user sets default "changed" timestamp.');
 
         // Create a field.
         $field_name = 'test_field';

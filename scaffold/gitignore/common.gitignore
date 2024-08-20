@@ -20,6 +20,10 @@ web/modules/*
 web/themes/*
 !web/themes/custom
 
+!web/profiles
+web/profiles/*
+!web/profiles/custom
+
 !web/sites
 web/sites/*
 !web/sites/sites.php
@@ -55,3 +59,6 @@ node_modules
 #########
 test_result
 .prettiercache
+vrt-report
+test/nightwatch/vrt/latest
+test/nightwatch/vrt/diff

@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
       - uses: actions/checkout@v4
         with:
@@ -35,7 +35,8 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "18"
+          ddev config --nodejs-version "22"
+          ddev config --corepack-enable
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
@@ -126,9 +127,11 @@ jobs:
 
       - name: Setup Sass
         run: |
-          ddev yarn set version classic
-          ddev yarn init -y
-          ddev yarn add file:./drainpipe/metapackages/sass --dev
+          ddev exec corepack disable
+          ddev exec npm i -g yarn@1.22.1
+          ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
+          ddev exec yarn init -y
+          ddev exec yarn add file:./drainpipe/metapackages/sass --dev
 
       - name: Compile Sass
         run: ddev task sass
@@ -197,7 +200,6 @@ jobs:
 
       - name: Setup Sass
         run: |
-          ddev config --nodejs-version=21
           ddev restart
           ddev yarn set version berry
           ddev yarn set version 4
@@ -271,10 +273,12 @@ jobs:
 
       - name: Setup Sass
         run: |
-          ddev yarn set version classic
-          ddev yarn init -y
-          ddev yarn add focus-trap@^6.7.3
-          ddev yarn add file:./drainpipe/metapackages/javascript --dev
+          ddev exec corepack disable
+          ddev exec npm i -g yarn@1.22.1
+          ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
+          ddev exec yarn init -y
+          ddev exec yarn add focus-trap@^6.7.3
+          ddev exec yarn add file:./drainpipe/metapackages/javascript --dev
 
       - name: Compile JavaScript
         run: ddev task javascript
@@ -344,7 +348,6 @@ jobs:
 
       - name: Setup Sass
         run: |
-          ddev config --nodejs-version=21
           ddev restart
           ddev yarn set version berry
           ddev yarn set version 4
