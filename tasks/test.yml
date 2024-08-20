@@ -187,7 +187,7 @@ tasks:
     cmds:
       - |
         if [ "$(git status -s)" != "" ]; then
-          git status -s
+          git status -s --ignore-submodules=dirty
           echo "Untracked changes detected - please rectify or add the files to your .gitignore"
           exit 1
         fi
