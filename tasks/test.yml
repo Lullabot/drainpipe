@@ -280,6 +280,23 @@ tasks:
           echo "ddev config --additional-hostnames=\"*.$DDEV_SITENAME\""
           echo "ddev restart"
         fi
+  siteinstall:default:
+    desc: "Runs the site installer for the default site"
+    cmds:
+      - ./vendor/bin/drush --yes site:install --existing-config
+  siteinstall:firefox:
+    desc: "Runs the site installer for the Firefox container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
+  siteinstall:chrome:
+    desc: "Runs the site installer for the Chrome container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
+  siteinstall:all:
+    desc: "Runs the site installer for the default site, Chrome, and Firefox container"
+    deps: [ siteinstall:default, siteinstall:firefox, siteinstall:chrome ]
+    cmds:
+      - echo "Default, Chrome, and Firefox installed"
   nightwatch:siteinstall:firefox:
     desc: "Runs the site installer for the Firefox container"
     cmds:
