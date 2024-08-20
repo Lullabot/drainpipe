@@ -62,6 +62,11 @@ jobs:
           ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"
           ddev config --additional-hostnames="*.drainpipe"
 
+      - name: Run the site installer
+        run: |
+          ddev task test:siteinstall:default
+          ddev drush config:export --yes
+
       - name: Create Artifact
         run: zip -r /tmp/drainpipe.zip ./
 
@@ -108,7 +113,6 @@ jobs:
       - name: Install Drupal
         run: |
           ddev task test:siteinstall:all
-          ddev drush config:export --yes
 
       - name: Run Functional Tests
         run: ddev task test:functional
@@ -159,8 +163,7 @@ jobs:
 
       - name: Install Drupal
         run: |
-          ddev task test:siteinstall:all
-          ddev drush config:export --yes
+          ddev drush --yes site:install:all
 
       - name: Run Functional Tests
         run: ddev task test:functional
@@ -212,7 +215,6 @@ jobs:
       - name: Install Drupal
         run: |
           ddev task test:siteinstall:all
-          ddev drush config:export --yes
 
       - name: Run Functional Tests
         run: ddev task test:functional
@@ -265,7 +267,6 @@ jobs:
       - name: Install Drupal
         run: |
           ddev task test:siteinstall:all
-          ddev drush config:export --yes
 
       - name: Run Functional Tests
         run: ddev task test:functional
@@ -320,7 +321,6 @@ jobs:
       - name: Install Drupal
         run: |
           ddev task test:siteinstall:all
-          ddev drush config:export --yes
 
       - name: Run Functional Tests
         run: ddev task test:functional
@@ -376,7 +376,6 @@ jobs:
       - name: Install Drupal
         run: |
           ddev task test:siteinstall:all
-          ddev drush config:export --yes
 
       - name: Run Functional Tests
         run: ddev task test:functional
