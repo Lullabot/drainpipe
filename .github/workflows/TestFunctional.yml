@@ -107,9 +107,7 @@ jobs:
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev task test:siteinstall:all
           ddev drush config:export --yes
 
       - name: Run Functional Tests
@@ -161,9 +159,7 @@ jobs:
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev task test:siteinstall:all
           ddev drush config:export --yes
 
       - name: Run Functional Tests
@@ -215,9 +211,7 @@ jobs:
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev task test:siteinstall:all
           ddev drush config:export --yes
 
       - name: Run Functional Tests
@@ -270,9 +264,7 @@ jobs:
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev task test:siteinstall:all
           ddev drush config:export --yes
 
       - name: Run Functional Tests
@@ -327,9 +319,7 @@ jobs:
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev task test:siteinstall:all
           ddev drush config:export --yes
 
       - name: Run Functional Tests
@@ -385,9 +375,7 @@ jobs:
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
+          ddev task test:siteinstall:all
           ddev drush config:export --yes
 
       - name: Run Functional Tests
