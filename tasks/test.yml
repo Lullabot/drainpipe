@@ -185,15 +185,12 @@ tasks:
   untracked:
     desc: Checks for any untracked files in git
     cmds:
-      - defer: git diff-index --cached HEAD --
-      - defer: git diff-files
-      - defer: git ls-files --exclude-standard --others
-      # Check for staged changes
-      - git diff-index --quiet --cached HEAD --
-      # Check for working tree changes
-      - git diff-files --quiet
-      # Untracked and unignored
-      - test -z "$(git ls-files --exclude-standard --others)"
+      - |
+        if [ "$(git status -s)" != "" ]; then
+          git status -s
+          echo "Untracked changes detected - please rectify or add the files to your .gitignore"
+          exit 1
+        fi
   nightwatch:check:
     #desc: Verifies Nightwatch is setup correctly
     cmds:
