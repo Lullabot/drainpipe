@@ -283,7 +283,7 @@ tasks:
   siteinstall:default:
     desc: "Runs the site installer for the default site"
     cmds:
-      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
+      - ./vendor/bin/drush --yes site:install --existing-config
   siteinstall:firefox:
     desc: "Runs the site installer for the Firefox container"
     cmds:
