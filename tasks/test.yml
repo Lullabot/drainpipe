@@ -18,9 +18,13 @@ tasks:
   static:
     desc: Runs all static tests
     deps: [lint, phpstan, phpunit:static, phpcs]
+    cmds:
+      - task: untracked
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
     deps: [config, phpunit:functional, nightwatch]
+    cmds:
+      - task: untracked
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
@@ -178,6 +182,15 @@ tasks:
         for DIR in "${DIRS_ARR[@]}"; do
           ./vendor/bin/twig-cs-fixer lint --fix $DIR
         done
+  untracked:
+    desc: Checks for any untracked files in git
+    cmds:
+      - |
+        if [ "$(git status -s --ignore-submodules=dirty)" != "" ]; then
+          git status -s --ignore-submodules=dirty
+          echo "Untracked changes detected - please rectify or add the files to your .gitignore"
+          exit 1
+        fi
   nightwatch:check:
     #desc: Verifies Nightwatch is setup correctly
     cmds:

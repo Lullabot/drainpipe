@@ -59,6 +59,7 @@ node_modules
 #########
 test_result
 .prettiercache
+.twig-cs-fixer.cache
 vrt-report
 test/nightwatch/vrt/latest
 test/nightwatch/vrt/diff
