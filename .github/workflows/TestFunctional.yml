@@ -57,6 +57,13 @@ jobs:
           git init
           echo "/drainpipe" >> .gitignore
           echo "/drainpipe-dev" >> .gitignore
+          echo ".ddev/config.yaml" >> .gitignore
+          echo ".ddev/docker-compose.selenium.yaml" >> .gitignore
+          echo ".yarnrc.yml" >> .gitignore
+          echo "package.json" >> .gitignore
+          echo "yarn.lock" >> .gitignore
+          echo "package-lock.json" >> .gitignore
+          echo "README.md" >> .gitignore
           git add .
           git commit -m "Initial commit"
 
