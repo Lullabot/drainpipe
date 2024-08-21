@@ -52,6 +52,12 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+          git config --global user.email "no-reply@example.com"
+          git config --global user.name "Drainpipe Bot"
+          echo "/drainpipe" >> .gitignore
+          echo "/drainpipe-dev" >> .gitignore
+          git add .
+          git commit -m "Initial commit"
 
       - name: Setup Nightwatch
         run: |
