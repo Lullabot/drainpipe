@@ -62,4 +62,4 @@ jobs:
           comment_mode: off
           files: |
             test_result/**/*.xml
-            test-result/**/*.json
+            test_result/**/*.json
