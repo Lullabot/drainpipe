@@ -64,7 +64,7 @@ tasks:
         DIRS_ARR=({{.TWIG_DIRS}})
         for DIR in "${DIRS_ARR[@]}"; do
           if [ "{{.format}}" == "junit" ]; then
-            ./vendor/bin/twig-cs-fixer lint $DIR --format junit
+            ./vendor/bin/twig-cs-fixer lint $DIR --report junit > test_result/twig-cs-fixer.xml
           else
             ./vendor/bin/twig-cs-fixer lint $DIR
           fi
