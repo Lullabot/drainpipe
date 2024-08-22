@@ -186,8 +186,9 @@ tasks:
     desc: Checks for any untracked files in git
     cmds:
       - |
-        if [ "$(git status -s --ignore-submodules=dirty)" != "" ]; then
-          git status -s --ignore-submodules=dirty
+        # Ignore the .ddev folder as changes are made to this in order to run tests e.g. adding environment variables.
+        if [ "$(git status -s --ignore-submodules=dirty -- ':!.ddev')" != "" ]; then
+          git status -s --ignore-submodules=dirty -- ':!.ddev'
           echo "Untracked changes detected - please rectify or add the files to your .gitignore"
           exit 1
         fi
