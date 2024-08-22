@@ -33,7 +33,6 @@
         "composer/composer": "^2.7.7"
     },
     "bin": [
-        "bin/drainpipe-twig-linter",
         "bin/drainpipe-convert-to-junit-xml"
     ],
     "extra": {
