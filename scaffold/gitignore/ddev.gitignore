@@ -4,4 +4,3 @@
 ########
 .ddev/config.local.yaml
 .ddev/commands/web/task
-.ddev/.drianpipe-composer-cache
