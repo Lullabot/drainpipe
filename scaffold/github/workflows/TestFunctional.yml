@@ -54,3 +54,12 @@ jobs:
         with:
           name: test_result
           path: test_result
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@567cc7f8dcea3eba5da355f6ebc95663310d8a07 # v2.17.0
+        if: always()
+        with:
+          comment_mode: off
+          files: |
+            test_result/**/*.xml
+            test-results/**/*.json
