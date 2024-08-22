@@ -342,3 +342,7 @@ tasks:
           echo "Unable to figure out which package manager is in use"
           exit 1;
         fi
+        if [ -d "vrt-report" ]; then
+          mkdir -p test_result
+          mv vrt-report test_result/vrt-report
+        fi
