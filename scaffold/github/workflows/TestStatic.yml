@@ -49,4 +49,3 @@ jobs:
           comment_mode: off
           files: |
             test_result/**/*.xml
-            test_result/**/*.json
