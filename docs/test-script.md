@@ -3,7 +3,7 @@
 A test script is available in `tests/local-test.sh` to setup a Drupal site
 with Drainpipe packages installed from your local checkout.
 
-Go to the directory above `drainpipe` and run the `tests/local-hest.sh` script
+Go to the directory above `drainpipe` and run the `tests/local-test.sh` script
 to setup a new test site e.g.
 ```
 ❯ pwd

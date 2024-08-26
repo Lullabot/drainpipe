@@ -44,7 +44,8 @@ tasks:
       - echo "🚮 Dropping existing database"
       - ./vendor/bin/drush {{ .site }} sql:drop --yes
       - echo "📰 Importing database"
-      - ./vendor/bin/drush {{ .site }} sql:query --file=$DB_DIR/db.sql.gz
+      - gunzip -k $DB_DIR/db.sql.gz
+      - ./vendor/bin/drush {{ .site }} sql:query --file=$DB_DIR/db.sql
       - defer: rm -f $DB_DIR/db.sql
   export-db:
     desc: "Exports a database fetched with a *:fetch-db command"
@@ -52,7 +53,7 @@ tasks:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
     cmds:
       - echo "➡ Exporting database"
-      - ./vendor/bin/drush {{.site }} sql:dump --result-file=$DB_DIR/db.sql.gz
+      - ./vendor/bin/drush {{.site }} sql:dump --gzip --result-file=$DB_DIR/db.sql
   update:
     desc: Run Drupal update tasks after deploying new code
     cmds:
@@ -67,7 +68,10 @@ tasks:
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - ./vendor/bin/drush {{.site}} --yes deploy:hook
       - |
-        if [[ $(./vendor/bin/drush {{.site}} config:status --format=json --state=Different) != '[]' ]]; then
+       # drush config:status --format=json is outputting notices in Pantheon even with the json format, 
+       # so we need to tail the last line.
+        config_status_output=$(./vendor/bin/drush {{.site}} config:status --format=json --state=Different | tail -n1)
+        if [[ $config_status_output != '[]' ]]; then
           echo "Config export does not match database."
           ./vendor/bin/drush {{.site}} config:status
           exit 1;

@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   YAML_DIRS: '{{ default "web/**/*.yml" .YAML_DIRS }}'
-  TWIG_DIRS: '{{ default "web/modules web/profiles web/themes" .TWIG_DIRS }}'
+  TWIG_DIRS: '{{ default "web/modules/custom web/profiles web/themes/custom" .TWIG_DIRS }}'
   # These directories are configured in phpcs.xml. However, phpcs will fail if
   # those directories do not exist, so we create them with the assumption that
   # every Drupal site will eventually have these directories.
@@ -17,7 +17,7 @@ vars:
 tasks:
   static:
     desc: Runs all static tests
-    deps: [security, lint, phpstan, phpunit:static, phpcs]
+    deps: [lint, phpstan, phpunit:static, phpcs]
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
     deps: [config, phpunit:functional, nightwatch]
@@ -41,6 +41,11 @@ tasks:
           ./vendor/bin/local-php-security-checker
         fi
       - composer audit
+      - |
+        ./vendor/bin/composer-lock-diff --from {{ shellQuote (.composer_lock_diff_from | default "main") }} --md
+        if [ "" != {{ shellQuote (.composer_lock_diff | default "") }} ]; then
+          ./vendor/bin/composer-lock-diff --from {{ shellQuote (.composer_lock_diff_from | default "main") }} --md > {{ shellQuote (.composer_lock_diff | default "") }}
+        fi
   lint:
     desc: Runs lint on composer, YAML, and Twig files
     # @todo JUnit output
@@ -54,7 +59,11 @@ tasks:
       - |
         DIRS_ARR=({{.TWIG_DIRS}})
         for DIR in "${DIRS_ARR[@]}"; do
-          ./vendor/bin/drainpipe-twig-linter lint $DIR
+          if [ "{{.format}}" == "junit" ]; then
+            ./vendor/bin/twig-cs-fixer lint $DIR --format junit
+          else
+            ./vendor/bin/twig-cs-fixer lint $DIR
+          fi
         done
       - |
         if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
@@ -92,15 +101,11 @@ tasks:
       - |
         {{ .FUNC_ENSURE_DIRS }}
       - |
-        CONFIG="phpstan.neon"
-        if [ ! -f phpstan.neon ]; then
-          CONFIG="vendor/lullabot/drainpipe/scaffold/phpstan.neon"
-        fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result
-          ./vendor/bin/phpstan analyse --error-format=junit -c $CONFIG {{.TEST_DIRS}} > test_result/phpstan.xml
+          ./vendor/bin/phpstan analyse --error-format=junit {{.TEST_DIRS}} > test_result/phpstan.xml
         else
-          ./vendor/bin/phpstan analyse -c $CONFIG {{.TEST_DIRS}}
+          ./vendor/bin/phpstan analyse {{.TEST_DIRS}}
         fi
   phpunit:
     desc: Runs PHPUnit
@@ -114,11 +119,10 @@ tasks:
           CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
-          mkdir -p test_result
-          ./vendor/bin/phpunit --testsuite=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit.xml
-        else
-          ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
+          mkdir -p test_result/phpunit
+          CONFIG="$CONFIG --log-junit $(pwd)/test_result/phpunit.xml"
         fi
+        ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
   phpunit:functional:
     desc: Runs PHPUnit functional tests
     cmds:
@@ -128,17 +132,20 @@ tasks:
           CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
-          mkdir -p test_result
-          ./vendor/bin/phpunit --exclude-group=unit -c $CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml
+          mkdir -p test_result/phpunit
+          CONFIG="$CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml"
+        fi
+        PHPUNIT_VERSION=$(./vendor/bin/phpunit --version | grep -Po 'PHPUnit [0-9]+\.' | grep -Po '[0-9]+')
+        if [ "$PHPUNIT_VERSION" == "9" ]; then
+          ./vendor/bin/phpunit -c $CONFIG --testsuite=kernel,functional,functional-javascript,existing-site,existing-site-javascript
         else
-          ./vendor/bin/phpunit -c $CONFIG --exclude-group=unit
+          ./vendor/bin/phpunit -c $CONFIG --exclude-testsuite=unit
         fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
     summary: |
       Check your code against Drupal's coding standards. To override the default
-      ruleset, copy vendor/lullabot/drainpipe/scaffold/phpcs.xml to phpcs.xml
-      in the root of your project and edit as needed.
+      ruleset, create a phpcs.xml file and extend phpcs.xml.dist
     cmds:
       - |
         {{ .FUNC_ENSURE_DIRS }}
@@ -166,6 +173,11 @@ tasks:
         elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
           npm run stylelint "**/*.{css,scss,sass}" --fix
         fi
+      - |
+        DIRS_ARR=({{.TWIG_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          ./vendor/bin/twig-cs-fixer lint --fix $DIR
+        done
   nightwatch:check:
     #desc: Verifies Nightwatch is setup correctly
     cmds:

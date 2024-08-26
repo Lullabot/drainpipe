@@ -13,9 +13,12 @@ concurrency:
 jobs:
   Test-Static:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
       - uses: actions/checkout@v4
         with:
@@ -52,7 +55,8 @@ jobs:
 
       - name: Verify files were created
         run: |
-          test -f phpcs.xml
+          test -f phpcs.xml.dist
+          test -f phpstan.neon.dist
 
       - name: Fix settings.php
         run: |

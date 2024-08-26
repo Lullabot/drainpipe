@@ -20,6 +20,10 @@ web/modules/*
 web/themes/*
 !web/themes/custom
 
+!web/profiles
+web/profiles/*
+!web/profiles/custom
+
 !web/sites
 web/sites/*
 !web/sites/sites.php

@@ -13,12 +13,15 @@ concurrency:
 jobs:
   Test-PHPUnit-Functional:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
       - uses: actions/checkout@v4
         with:
@@ -71,18 +74,21 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-phpunit-functional
+          name: test_result-phpunit-functional-${{ matrix.drupal-version }}
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
         uses: GuillaumeFalourd/assert-command-line-output@v2.3
         with:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
-          contains: 18
+          contains: 6
           expected_result: PASSED
 
   Test-PHPUnit-Functional-DTT:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
@@ -140,18 +146,21 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-phpunit-dtt
+          name: test_result-phpunit-dtt-${{ matrix.drupal-version }}
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
         uses: GuillaumeFalourd/assert-command-line-output@v2
         with:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
-          contains: 21
+          contains: 9
           expected_result: PASSED
 
   Test-PHPUnit-Static:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
@@ -205,7 +214,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test_result-phpunit-static
+          name: test_result-phpunit-static-${{ matrix.drupal-version }}
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run

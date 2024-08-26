@@ -9,48 +9,6 @@ for a Drupal site, including:
 - Integration with DDEV
 - CI integration
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [Installation](#installation)
-  - [Binaries](#binaries)
-- [Database Updates](#database-updates)
-- [.env support](#env-support)
-- [SASS Compilation](#sass-compilation)
-  - [Setup](#setup)
-- [JavaScript Compilation](#javascript-compilation)
-  - [Setup](#setup-1)
-- [Testing](#testing)
-  - [Static Tests](#static-tests)
-    - [Excluding Files from PHP_CodeSniffer](#excluding-files-from-php_codesniffer)
-  - [Functional Tests](#functional-tests)
-    - [PHPUnit](#phpunit)
-    - [Nightwatch](#nightwatch)
-  - [Autofix](#autofix)
-- [Hosting Provider Integration](#hosting-provider-integration)
-  - [Generic](#generic)
-    - [Importing/Exporting Databases](#importingexporting-databases)
-    - [Snapshots](#snapshots)
-  - [Pantheon](#pantheon)
-- [GitHub Actions Integration](#github-actions-integration)
-  - [Composer Lock Diff](#composer-lock-diff)
-  - [Pantheon](#pantheon-1)
-- [GitLab CI Integration](#gitlab-ci-integration)
-  - [Composer Lock Diff](#composer-lock-diff-1)
-  - [Pantheon](#pantheon-2)
-- [Tugboat](#tugboat)
-- [Contributor Docs](#contributor-docs)
-  - [Peer Review Guidelines for Automated Updates](#peer-review-guidelines-for-automated-updates)
-    - [Handling Version Ranges](#handling-version-ranges)
-    - [Handling Test Failures](#handling-test-failures)
-  - [Conducting the Peer Review](#conducting-the-peer-review)
-  - [Releases](#releases)
-    - [drainpipe and drainpipe-dev release process](#drainpipe-and-drainpipe-dev-release-process)
-    - [NPM package release process](#npm-package-release-process)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## Installation
 
 ```sh
@@ -228,34 +186,18 @@ All the below static code analysis tests can be run with `task test:static`
 | PHPCS     | task test:phpcs          | Runs PHPCS with Drupal coding standards provided by [Coder module](https://www.drupal.org/project/coder                                                                                                                                                                |
 
 
-#### Excluding Files from PHP_CodeSniffer
+#### Altering PHP_CodeSniffer Configuration
 
-`phpcs.xml` can be altered using Drupal's
-[composer scaffold](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4).
-
+- Create `phpcs.xml` to override the `phpcs.xml.dist` file with overrides being done in:
+  ```
+  <rule ref="phpcs.xml.dist">
+  </rule>
+  ```
 - Edit `phpcs.xml` in the root of your project, e.g. to add an exclude pattern:
   ```
   <!-- Custom excludes -->
   <exclude-pattern>web/sites/sites.php</exclude-pattern>
   ```
-- Create a patch file
-  ```
-  diff -urN vendor/lullabot/drainpipe-dev/scaffold/phpcs.xml phpcs.xml > patches/custom/phpcs.xml.patch
-  ```
-- Add the patch to `composer.json`
-  ```
-  "scripts": {
-        "pre-drupal-scaffold-cmd": [
-            "if [ -f \"phpcs.xml\" ]; then rm phpcs.xml; fi"
-        ],
-        "post-drupal-scaffold-cmd": [
-            "if [ -f \"phpcs.xml\" ]; then patch phpcs.xml < patches/custom/phpcs.xml.patch; fi"
-        ]
-  },
-  ```
-  The pre hook is needed otherwise the composer scaffold attempts to re-patch a file it no longer has control over when running `composer install --no-dev`
-- Delete the `vendor` directory and `phpcs.xml` and then run `composer install`
-  to verify everything works as expected
 
 ### Functional Tests
 
@@ -397,6 +339,7 @@ includes:
 |                          |                                                                             |
 |--------------------------|-----------------------------------------------------------------------------|
 | `task pantheon:fetch-db` | Fetches a database from Pantheon. Set `PANTHEON_SITE_ID` in Taskfile `vars` |
+|                          | and optionally `ENVIRONMENT` to override the default value of `live`        |
 
 See below for CI specific integrations for hosting providers.
 
@@ -448,7 +391,41 @@ They are composite actions which can be used in any of your workflows e.g.
 Tests can be run locally with [act](https://github.com/nektos/act):
 `act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
 
-### Composer Lock Diff
+### Tests
+Workflows for running static and functional tests can be added with the following
+configuration:
+```json
+"extra": {
+  "drainpipe": {
+    "github": ["TestStatic", "TestFunctional"]
+  }
+}
+```
+
+The build process for the functional tests will use `task build:ci:functional`,
+falling back to `task build:dev`, and then `task build`. The static tests
+should not require a build step.
+
+These workflow flies will continue to be managed by Drainpipe and cannot be
+overridden. If you wish to do so then it's recommended you maintain your own
+workflows for testing.
+
+### Security
+```json
+"extra": {
+  "drainpipe": {
+    "github": ["Security"]
+  }
+}
+```
+
+Runs security checks for composer packages and Drupal contrib, as well as posting
+a diff of `composer.lock` as a review comment.
+
+### Composer Lock Diff (Deprecated)
+
+**This is now provided as part of the Security workflow**
+
 Update Pull Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
 
@@ -680,6 +657,10 @@ First time contributors need a maintainers approval for automated tests to run.
 Peer Reviewing by looking at PR code changes is nice.
 
 Testing PR code changes on real sites is extra beneficial.
+
+### Local Development
+
+In order to test local changes follow the instructions for the [test script](./docs/test-script.md).
 
 ### Peer Review Guidelines for Automated Updates
 
