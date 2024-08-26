@@ -260,6 +260,10 @@ EOT;
             $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
             $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
         }
+
+        $fs->copy("$scaffoldPath/gitlab/Nightwatch.gitlab-ci.yml", ".drainpipe/gitlab/Nightwatch.gitlab-ci.yml");
+        $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Nightwatch.gitlab-ci.yml installed");
+
         foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
             $file = "gitlab/$gitlab.gitlab-ci.yml";
             if (file_exists("$scaffoldPath/$file")) {$fs->ensureDirectoryExists('./.drainpipe/gitlab');
@@ -332,6 +336,18 @@ EOT;
             else if ($github === 'ComposerLockDiff') {
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
+            }
+            else if ($github === 'Security') {
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
+            }
+            else if ($github === 'TestStatic') {
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/workflows/TestStatic.yml", './.github/workflows/TestStatic.yml');
+            }
+            else if ($github === 'TestFunctional') {
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/workflows/TestFunctional.yml", './.github/workflows/TestFunctional.yml');
             }
         }
     }
