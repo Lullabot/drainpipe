@@ -344,6 +344,6 @@ tasks:
           exit 1;
         fi
         if [ -d "vrt-report" ]; then
-          mkdir -p test_result
-          mv vrt-report test_result/vrt-report
+          mkdir -p test_result/nightwatch
+          mv vrt-report test_result/nightwatch/vrt-report
         fi
