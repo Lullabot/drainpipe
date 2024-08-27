@@ -334,7 +334,7 @@ tasks:
     env:
       NIGHTWATCH_ENV: 'firefox,chrome'
     cmds:
-      - defer: if [ -d "vrt-report" ]; then mkdir -p test_result; mv vrt-report test_result/nightwatch-vrt-report; echo "Nightwatch VTR report moved to test_result/nightwatch-vrt-report"; fi
+      - defer: { task: _nightwatch:vrt-report }
       - |
         if [ -f "package-lock.json" ]; then
           npx nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
@@ -343,4 +343,16 @@ tasks:
         else
           echo "Unable to figure out which package manager is in use"
           exit 1;
+        fi
+  _nightwatch:vrt-report:
+    desc: "Moves the VRT report into the test_results folder"
+    cmds:
+      - |
+        if [ -d "vrt-report" ]; then
+          mkdir -p test_result
+          mv vrt-report test_result/nightwatch-vrt-report
+          cp -R test/nightwatch/vrt test_result/nightwatch-vrt-report
+          mkdir -p test_result/nightwatch-vrt-report/test/nightwatch
+          mv test-result/nightwatch-vrt-report/vrt test_result/nightwatch-vrt-report/test/nightwatch
+          echo "Nightwatch VTR report moved to test_result/nightwatch-vrt-report"
         fi
