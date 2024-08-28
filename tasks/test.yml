@@ -335,6 +335,7 @@ tasks:
       NIGHTWATCH_ENV: 'firefox,chrome'
     cmds:
       - defer: { task: _nightwatch:vrt-report }
+      - rm -rf test_result/nightwatch*
       - |
         if [ -f "package-lock.json" ]; then
           npx nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
