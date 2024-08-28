@@ -52,9 +52,9 @@ module.exports = {
       filter: '**/*.nightwatch.js',
       disable_error_log: false,
       screenshots: {
-        enabled: false,
+        enabled: true,
         on_failure: true,
-        on_error: false,
+        on_error: true,
         path: 'test_result',
       },
     },
