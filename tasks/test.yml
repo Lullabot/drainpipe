@@ -18,9 +18,13 @@ tasks:
   static:
     desc: Runs all static tests
     deps: [lint, phpstan, phpunit:static, phpcs]
+    cmds:
+      - task: untracked
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
     deps: [config, phpunit:functional, nightwatch]
+    cmds:
+      - task: untracked
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
@@ -178,6 +182,15 @@ tasks:
         for DIR in "${DIRS_ARR[@]}"; do
           ./vendor/bin/twig-cs-fixer lint --fix $DIR
         done
+  untracked:
+    desc: Checks for any untracked files in git
+    cmds:
+      - |
+        if [ "$(git status -s --ignore-submodules=dirty)" != "" ]; then
+          git status -s --ignore-submodules=dirty
+          echo "Untracked changes detected - please rectify or add the files to your .gitignore"
+          exit 1
+        fi
   nightwatch:check:
     #desc: Verifies Nightwatch is setup correctly
     cmds:
@@ -217,7 +230,7 @@ tasks:
     interactive: true
     cmds:
       - |
-        PACKAGES="nightwatch @lullabot/nightwatch-drupal-commands"
+        PACKAGES="nightwatch nightwatch-axe-verbose @nightwatch/vrt @lullabot/nightwatch-drupal-commands"
         if [ ! -f "package.json" ]; then
           echo -n "No package.json exists, would you like to use yarn1, npm, yarn3 (node <= 20), or yarn (node >= 21)? "
           read -r PACKAGE_MANAGER
@@ -239,6 +252,9 @@ tasks:
             echo '  "nightwatch@*":' >> .yarnrc.yml
             echo '    dependencies:' >> .yarnrc.yml
             echo '      ws: "*"' >> .yarnrc.yml
+            echo '  "@nightwatch/vrt@*":' >> .yarnrc.yml
+            echo '    dependencies:' >> .yarnrc.yml
+            echo '      open: "^8"' >> .yarnrc.yml
             yarn add $PACKAGES --dev
           elif [ "$PACKAGE_MANAGER" == "yarn" ]; then
             yarn set version berry
@@ -247,6 +263,9 @@ tasks:
             echo '  "nightwatch@*":' >> .yarnrc.yml
             echo '    dependencies:' >> .yarnrc.yml
             echo '      ws: "*"' >> .yarnrc.yml
+            echo '  "@nightwatch/vrt@*":' >> .yarnrc.yml
+            echo '    dependencies:' >> .yarnrc.yml
+            echo '      open: "^8"' >> .yarnrc.yml
             yarn cache clear
             yarn add $PACKAGES --dev
           else
@@ -280,6 +299,23 @@ tasks:
           echo "ddev config --additional-hostnames=\"*.$DDEV_SITENAME\""
           echo "ddev restart"
         fi
+  siteinstall:default:
+    desc: "Runs the site installer for the default site"
+    cmds:
+      - ./vendor/bin/drush --yes site:install --existing-config
+  siteinstall:firefox:
+    desc: "Runs the site installer for the Firefox container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
+  siteinstall:chrome:
+    desc: "Runs the site installer for the Chrome container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
+  siteinstall:all:
+    desc: "Runs the site installer for the default site, Chrome, and Firefox container"
+    deps: [ siteinstall:default, siteinstall:firefox, siteinstall:chrome ]
+    cmds:
+      - echo "Default, Chrome, and Firefox installed"
   nightwatch:siteinstall:firefox:
     desc: "Runs the site installer for the Firefox container"
     cmds:
