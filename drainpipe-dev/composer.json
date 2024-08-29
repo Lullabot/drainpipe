@@ -19,7 +19,7 @@
         "drupal/coder": "^8.3.24",
         "lullabot/drainpipe": "*",
         "mglaman/phpstan-drupal": "^1.2.12",
-        "mikey179/vfsstream": "^1.6.11",
+        "mikey179/vfsstream": "^1.6.12",
         "mockery/mockery": "^1.6.12",
         "phpspec/prophecy-phpunit": "^2",
         "phpstan/phpstan-deprecation-rules": "^1.2.0",
