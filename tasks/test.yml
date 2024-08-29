@@ -355,5 +355,6 @@ tasks:
           cp -R test/nightwatch/vrt test_result/nightwatch-vrt-report
           mkdir -p test_result/nightwatch-vrt-report/test/nightwatch
           mv test_result/nightwatch-vrt-report/vrt test_result/nightwatch-vrt-report/test/nightwatch
+          sed -i 's/\/test\/nightwatch\/vrt\//test\/nightwatch\/vrt\//g' test_result/nightwatch-vrt-report/index.html
           echo "Nightwatch VTR report moved to test_result/nightwatch-vrt-report"
         fi
