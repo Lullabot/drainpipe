@@ -46,7 +46,7 @@ jobs:
         run: |
           git reset --mixed origin/main
           git add -A
-          git commit -m "${{ github.event.commits[0].message }}" --allow-empty
+          git commit -m "${{ github.ref_name }}" --allow-empty
 
       - name: Commit changes (Branch)
         if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
@@ -54,7 +54,7 @@ jobs:
         run: |
           git reset --mixed origin/${{ github.ref_name }} || git reset --mixed origin/main
           git add -A
-          git commit -m "${{ github.event.commits[0].message }}" --allow-empty
+          git commit -m "${{ github.event.head_commit.message }}" --allow-empty
 
       - name: Tag release
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
