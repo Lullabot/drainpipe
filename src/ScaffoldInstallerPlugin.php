@@ -410,15 +410,32 @@ EOT;
             $tugboatConfigOverride['php'] = array_filter($tugboatConfigOverride['php'],
                 function($key) {
                     return in_array($key,
-                        ['aliases', 'urls', 'visualdiff', 'screenshot']);
-                },
-                ARRAY_FILTER_USE_KEY);
+                        ['aliases', 'urls', 'visualdiff', 'screenshot']
+                    );
+            }, ARRAY_FILTER_USE_KEY);
+
+            // Prepare YAML data with custom handling for URLs.
+            $yamlData = [];
+            foreach ($tugboatConfigOverride['php'] as $key => $value) {
+                if ($key === 'urls' && is_array($value)) {
+                    // Ensure URLs are added without encoding.
+                    $yamlData[$key] = $value;
+                } else {
+                    $yamlData[$key] = $value;
+                }
+            }
+
+            // Convert the array to a YAML string.
+            $yamlString = Yaml::dump($yamlData, 2, 2);
+
+            // Indent the YAML string for formatting.
             $overrideOutput = [];
-            foreach (explode(PHP_EOL,
-                Yaml::dump($tugboatConfigOverride['php'], 2, 2)) as $line) {
+            foreach (explode(PHP_EOL, $yamlString) as $line) {
                 $overrideOutput[] = str_repeat(' ', 4) . $line;
             }
-            $tugboatConfig['overrides']['php'] = rtrim(implode("\n",
+
+            // Assign the formatted YAML string back to the configuration.
+            $tugboatConfig['overrides']['php'] = rtrim(implode("\n", 
                 $overrideOutput));
         }
 

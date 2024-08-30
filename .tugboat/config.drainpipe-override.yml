@@ -3,6 +3,7 @@ php:
     - foo
   urls:
     - /
+    - /?foo=bar
   screenshot:
     timeout: 45
   visualdiff:
