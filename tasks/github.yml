@@ -23,7 +23,7 @@ tasks:
               action_validator_bin_path="/usr/local/bin/action-validator"
               [ "$(arch)" = "x86_64" ] && bin_name="linux_amd64"
               [ "$(arch)" = "aarch64" ] && bin_name="linux_arm64"
-              curl -Lo $action_validator_bin_path "$action_validator_url_base$bin_name") || true'
+              curl -Lo $action_validator_bin_path "$action_validator_url_base$bin_name" || true'
               chmod +x $action_validator_bin_path
               echo $yamls | xargs -n1 $action_validator_bin_path
           fi
