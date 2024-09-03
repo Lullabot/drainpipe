@@ -76,3 +76,12 @@ jobs:
           rm -rf vendor
           ddev composer install --no-cache
           test -x vendor/bin/task
+
+      - name: Prove we can upgrade task within task
+        run: |
+          cd test/fixtures/drainpipe-task-upgrade
+          ddev start
+          ddev composer install
+          ddev task drupal:composer:development
+          cp composer-upgraded.lock composer.lock
+          ddev task drupal:composer:development
