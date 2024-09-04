@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c6f1302d1410e73a58cac7d306845a17",
+    "content-hash": "24595b49511e28a509041b3f2656e0e7",
     "packages": [
         {
             "name": "chi-teck/drupal-code-generator",
@@ -1663,17 +1663,11 @@
         },
         {
             "name": "lullabot/drainpipe",
-            "version": "v3.11.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Lullabot/drainpipe.git",
-                "reference": "b89fbd53d9d1e9dcf78de9fa8496083e26c34399"
-            },
+            "version": "dev-fix-upgrading-task-in-task",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Lullabot/drainpipe/zipball/b89fbd53d9d1e9dcf78de9fa8496083e26c34399",
-                "reference": "b89fbd53d9d1e9dcf78de9fa8496083e26c34399",
-                "shasum": ""
+                "type": "path",
+                "url": "drainpipe",
+                "reference": "f0e57ca248270e96b8e95df2a5b4787ccd091822"
             },
             "require": {
                 "composer-plugin-api": "^2.0",
@@ -1710,16 +1704,26 @@
                     "Lullabot\\Drainpipe\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Lullabot\\Drainpipe\\Tests\\Functional\\": "tests/src/functional/"
+                }
+            },
+            "archive": {
+                "exclude": [
+                    "/.github",
+                    "/.yarn",
+                    "/drainpipe-dev",
+                    "/metapackages"
+                ]
+            },
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "An automated build tool to allow projects to have a set standardized operations scripts.",
-            "support": {
-                "issues": "https://github.com/Lullabot/drainpipe/issues",
-                "source": "https://github.com/Lullabot/drainpipe/tree/v3.11.0"
-            },
-            "time": "2024-08-29T13:42:45+00:00"
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "nikic/php-parser",
@@ -4124,9 +4128,9 @@
     ],
     "packages-dev": [],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": [],
-    "prefer-stable": false,
+    "prefer-stable": true,
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
