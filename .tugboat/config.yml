@@ -28,7 +28,7 @@ services:
       - foo
     urls:
       - /
-      - /?v=1
+      - '/?v=1'
     screenshot:
       timeout: 45
     visualdiff:
