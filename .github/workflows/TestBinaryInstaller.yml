@@ -87,4 +87,7 @@ jobs:
           ddev task drupal:composer:development
           cp composer-upgraded.json composer.json
           cp composer-upgraded.lock composer.lock
-          ddev task drupal:composer:development
+          # Composer won't run updated plugin code until after its been
+          # installed. Once we have two new releases after 3.11.0, that upgrade
+          # task, we can remove this double call.
+          ddev task drupal:composer:development || ddev task drupal:composer:development
