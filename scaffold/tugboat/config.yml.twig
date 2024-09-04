@@ -29,7 +29,7 @@ services:
 {% endif %}
 {% if overrides.php|length > 0 %}
 
-{{ overrides.php }}
+{{ overrides.php|raw }}
 {% endif %}
 
   {{ database_type }}:
