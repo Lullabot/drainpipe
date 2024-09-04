@@ -79,7 +79,7 @@ jobs:
 
       - name: Prove we can upgrade task within task
         run: |
-          cd test/fixtures/drainpipe-task-upgrade
+          cd tests/fixtures/drainpipe-task-upgrade
           ddev start
           ddev composer install
           ddev task drupal:composer:development
