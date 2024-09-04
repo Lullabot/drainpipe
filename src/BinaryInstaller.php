@@ -250,7 +250,6 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $this->io->write(sprintf('%s v%s (%s) already exists in bin-dir, not overwriting.', $binary, $version, $sha));
         }
         else {
-            $fs->remove($binDestination);
             $fs->copy($cacheExtractedBinary, $binDestination);
             // Make executable.
             if ('windows' !== $this->platform) {
