@@ -509,7 +509,7 @@ const RAW_RUNTIME_STATE =
           ["gulp-sass", "npm:5.1.0"],\
           ["gulp-sass-glob", "npm:1.1.0"],\
           ["gulp-sourcemaps", "npm:3.0.0"],\
-          ["modern-normalize", "npm:3.0.0"],\
+          ["modern-normalize", "npm:3.0.1"],\
           ["postcss", "npm:8.4.40"],\
           ["sass", "npm:1.77.8"],\
           ["yargs", "npm:17.7.2"]\
@@ -5893,10 +5893,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["modern-normalize", [\
-      ["npm:3.0.0", {\
-        "packageLocation": "../../../../cache/others/berry/cache/modern-normalize-npm-3.0.0-bb31a0ee77-10c0.zip/node_modules/modern-normalize/",\
+      ["npm:3.0.1", {\
+        "packageLocation": "../../../../cache/others/berry/cache/modern-normalize-npm-3.0.1-f9ad4facb8-10c0.zip/node_modules/modern-normalize/",\
         "packageDependencies": [\
-          ["modern-normalize", "npm:3.0.0"]\
+          ["modern-normalize", "npm:3.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
