@@ -386,7 +386,7 @@ __metadata:
     gulp-sass: "npm:^5.1.0"
     gulp-sass-glob: "npm:^1.1.0"
     gulp-sourcemaps: "npm:^3.0.0"
-    modern-normalize: "npm:^3.0.0"
+    modern-normalize: "npm:^3.0.1"
     postcss: "npm:^8.4.40"
     sass: "npm:^1.77.8"
     yargs: "npm:^17.7.2"
@@ -5169,10 +5169,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"modern-normalize@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "modern-normalize@npm:3.0.0"
-  checksum: 10c0/8f3edf63a84f3bc1a147e0c7e9bf2558c7dbda3a6d3c4c8b1ffe9449697a6057b62cbab5e3cb1f4b49619111c25082e9cab63470d475a17cd86f90b5e5cb94d6
+"modern-normalize@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "modern-normalize@npm:3.0.1"
+  checksum: 10c0/2c19be1618178b85006e354337d7dda6758640d138be5f3e247c9ebb5dd5d7845edb0b8753cec659e789bb30e1fafe73e91eaa056a332d89055cbb107d9fecec
   languageName: node
   linkType: hard
 
