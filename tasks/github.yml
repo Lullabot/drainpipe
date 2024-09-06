@@ -19,13 +19,7 @@ tasks:
           # Fallback for architectures that don't have a release e.g. Windows
           else
               yamls=$(find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \))
-              action_validator_url_base="https://github.com/mpalmer/action-validator/releases/download/v0.6.0/action-validator_"
-              action_validator_bin_path="/usr/local/bin/action-validator"
-              [ "$(arch)" = "x86_64" ] && bin_name="linux_amd64"
-              [ "$(arch)" = "aarch64" ] && bin_name="linux_arm64"
-              curl -Lo $action_validator_bin_path "$action_validator_url_base$bin_name" || true
-              chmod +x $action_validator_bin_path
-              echo $yamls | xargs -n1 $action_validator_bin_path
+              echo $yamls | xargs -n1 action-validator
           fi
 
   composer-lock-diff:
