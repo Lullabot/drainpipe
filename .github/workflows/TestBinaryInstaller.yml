@@ -76,3 +76,18 @@ jobs:
           rm -rf vendor
           ddev composer install --no-cache
           test -x vendor/bin/task
+
+      - name: Prove we can upgrade task within task
+        run: |
+          cp -a drainpipe/tests/fixtures/drainpipe-task-upgrade .
+          cp -a drainpipe drainpipe-task-upgrade
+          cd drainpipe-task-upgrade
+          ddev start
+          ddev composer install
+          ddev task drupal:composer:development
+          cp composer-upgraded.json composer.json
+          cp composer-upgraded.lock composer.lock
+          # Composer won't run updated plugin code until after its been
+          # installed. Once we have two new releases after 3.11.0, that upgrade
+          # task, we can remove this double call.
+          ddev task drupal:composer:development || ddev task drupal:composer:development
