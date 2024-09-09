@@ -45,7 +45,7 @@ tasks:
       - |
           [ $(drush core:requirements --severity=2 --format=tsv | wc -l) -lt 1 ] \
           && echo "🟢 Status Report page checked" \
-          || false || echo "🔴 Status Report page check failed"
+          || echo "🔴 Status Report page check failed"
 
       # Ignore the below modules in sites/default/settings.php e.g.
       # $settings['config_exclude_modules'] = ['stage_file_proxy', 'field_ui', 'views_ui'];
