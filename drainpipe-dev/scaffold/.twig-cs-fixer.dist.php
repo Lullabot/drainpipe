@@ -37,7 +37,7 @@ $config->setRuleset($ruleset);
 $config->addTwigExtension(new TwigExtension($renderer, $urlGenerator, $themeManager, $dateFormatter, $fileUrlGenerator));
 
 if (class_exists('\TwigStorybook\Twig\TwigExtension')) {
-  $composer_json = json_decode(file_get_contents(__DIR__ . '/../../../../composer.json'), true);
+  $composer_json = json_decode(file_get_contents(__DIR__ . '/composer.json'), true);
   if (json_last_error()) {
     throw new \RuntimeException('Could not parse composer.json');
   }
