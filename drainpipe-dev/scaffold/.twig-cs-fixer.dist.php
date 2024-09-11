@@ -43,7 +43,7 @@ if (class_exists('\TwigStorybook\Twig\TwigExtension')) {
   }
 
   $web_root = $composer_json['extra']['drupal-scaffold']['locations']['web-root'];
-  $config->addExtension(new \TwigStorybook\Twig\TwigExtension(new \TwigStorybook\Service\StoryCollector(), '/../../../../' . $web_root));
+  $config->addTwigExtension(new \TwigStorybook\Twig\TwigExtension(new \TwigStorybook\Service\StoryCollector(), __DIR__ . $web_root));
 }
 
 return $config;
