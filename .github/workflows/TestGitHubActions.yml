@@ -44,6 +44,7 @@ jobs:
           ddev composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
           ddev composer require --dev lullabot/drainpipe-dev --with-all-dependencies
+          ls -la vendor/bin
 
       - name: Install Drupal
         run: |
@@ -52,7 +53,11 @@ jobs:
           ddev drush config:export -y
 
       - name: Lint GitHub Actions and Workflows
-        run: ddev task "github:actions:lint directories='./drainpipe/scaffold/github/actions ./drainpipe/scaffold/github/workflows'"
+        run: ddev task --verbose "github:actions:lint directories='./drainpipe/scaffold/github/actions ./drainpipe/scaffold/github/workflows'"
+
+      - name: Setup tmate session
+        if: ${{ always() }}
+        uses: mxschmitt/action-tmate@v3
 
       - name: Run Database Updates
         run: ddev task update
