@@ -42,6 +42,7 @@ jobs:
           ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe/drainpipe-dev", "options": {"symlink": false}}'
           ddev composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
+          ddev composer require --dev lullabot/drainpipe-dev --with-all-dependencies
 
       - name: Install Drupal
         run: |
