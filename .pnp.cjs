@@ -511,7 +511,7 @@ const RAW_RUNTIME_STATE =
           ["gulp-sourcemaps", "npm:3.0.0"],\
           ["modern-normalize", "npm:3.0.1"],\
           ["postcss", "npm:8.4.40"],\
-          ["sass", "npm:1.78.0"],\
+          ["sass", "npm:1.79.1"],\
           ["yargs", "npm:17.7.2"]\
         ],\
         "linkType": "SOFT"\
@@ -2152,21 +2152,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["chokidar", [\
-      ["npm:3.5.2", {\
-        "packageLocation": "../../../../cache/others/berry/cache/chokidar-npm-3.5.2-6752340fec-10c0.zip/node_modules/chokidar/",\
-        "packageDependencies": [\
-          ["chokidar", "npm:3.5.2"],\
-          ["anymatch", "npm:3.1.2"],\
-          ["braces", "npm:3.0.2"],\
-          ["fsevents", "patch:fsevents@npm%3A2.3.2#optional!builtin<compat/fsevents>::version=2.3.2&hash=df0bf1"],\
-          ["glob-parent", "npm:5.1.2"],\
-          ["is-binary-path", "npm:2.1.0"],\
-          ["is-glob", "npm:4.0.3"],\
-          ["normalize-path", "npm:3.0.0"],\
-          ["readdirp", "npm:3.6.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:3.6.0", {\
         "packageLocation": "../../../../cache/others/berry/cache/chokidar-npm-3.6.0-3c413a828f-10c0.zip/node_modules/chokidar/",\
         "packageDependencies": [\
@@ -2179,6 +2164,14 @@ const RAW_RUNTIME_STATE =
           ["is-glob", "npm:4.0.3"],\
           ["normalize-path", "npm:3.0.0"],\
           ["readdirp", "npm:3.6.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:4.0.0", {\
+        "packageLocation": "../../../../cache/others/berry/cache/chokidar-npm-4.0.0-39d260a09b-10c0.zip/node_modules/chokidar/",\
+        "packageDependencies": [\
+          ["chokidar", "npm:4.0.0"],\
+          ["readdirp", "npm:4.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -7957,6 +7950,13 @@ const RAW_RUNTIME_STATE =
           ["picomatch", "npm:2.3.0"]\
         ],\
         "linkType": "HARD"\
+      }],\
+      ["npm:4.0.1", {\
+        "packageLocation": "../../../../cache/others/berry/cache/readdirp-npm-4.0.1-17b55c8032-10c0.zip/node_modules/readdirp/",\
+        "packageDependencies": [\
+          ["readdirp", "npm:4.0.1"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["rechoir", [\
@@ -8186,11 +8186,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sass", [\
-      ["npm:1.78.0", {\
-        "packageLocation": "../../../../cache/others/berry/cache/sass-npm-1.78.0-4aa9d2730a-10c0.zip/node_modules/sass/",\
+      ["npm:1.79.1", {\
+        "packageLocation": "../../../../cache/others/berry/cache/sass-npm-1.79.1-9387e978e7-10c0.zip/node_modules/sass/",\
         "packageDependencies": [\
-          ["sass", "npm:1.78.0"],\
-          ["chokidar", "npm:3.5.2"],\
+          ["sass", "npm:1.79.1"],\
+          ["chokidar", "npm:4.0.0"],\
           ["immutable", "npm:4.0.0"],\
           ["source-map-js", "npm:1.0.2"]\
         ],\
