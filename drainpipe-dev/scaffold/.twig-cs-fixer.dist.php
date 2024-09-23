@@ -37,13 +37,13 @@ $config->setRuleset($ruleset);
 $config->addTwigExtension(new TwigExtension($renderer, $urlGenerator, $themeManager, $dateFormatter, $fileUrlGenerator));
 
 if (class_exists('\TwigStorybook\Twig\TwigExtension')) {
-  $composer_json = json_decode(file_get_contents(__DIR__ . '/../../../../composer.json'), true);
+  $composer_json = json_decode(file_get_contents(__DIR__ . '/composer.json'), true);
   if (json_last_error()) {
     throw new \RuntimeException('Could not parse composer.json');
   }
 
   $web_root = $composer_json['extra']['drupal-scaffold']['locations']['web-root'];
-  $config->addExtension(new \TwigStorybook\Twig\TwigExtension(new \TwigStorybook\Service\StoryCollector(), '/../../../../' . $web_root));
+  $config->addTwigExtension(new \TwigStorybook\Twig\TwigExtension(new \TwigStorybook\Service\StoryCollector(), __DIR__ . $web_root));
 }
 
 return $config;
