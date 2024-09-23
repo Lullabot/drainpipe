@@ -63,7 +63,7 @@ tasks:
         git config user.email 'no-reply@lullabot.com'
         git config user.name 'Lullabot Drainpipe'
         git commit --quiet --message "Initial commit" --no-gpg-sign
-        git config tar.tar.xz.command "xz -c"
+        git config tar.tar.xz.command "xz --stdout --threads=0"
         git config tar.tar.bz2.command "bzip2 -c"
         git -C $TMP_DIR archive -o "$DESTINATION" HEAD
         test -f "$DESTINATION"
