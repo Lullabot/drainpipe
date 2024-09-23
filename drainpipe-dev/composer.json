@@ -16,7 +16,7 @@
         "behat/mink": "^1.11.0",
         "behat/mink-browserkit-driver": "^2.2.0",
         "davidrjonas/composer-lock-diff": "^1.7",
-        "drupal/coder": "^8.3.24",
+        "drupal/coder": "^8.3.25",
         "lullabot/drainpipe": "*",
         "mglaman/phpstan-drupal": "^1.2.12",
         "mikey179/vfsstream": "^1.6.12",
