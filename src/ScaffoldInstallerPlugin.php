@@ -245,12 +245,12 @@ EOT;
     private function installGitlabCI(string $scaffoldPath): void {
         $fs = new Filesystem();
         $fs->removeDirectory('./.drainpipe/gitlab');
-        $fs->ensureDirectoryExists('./.drainpipe/gitlab');
-
+        
         if (!isset($this->extra['drainpipe']['gitlab']) || !is_array($this->extra['drainpipe']['gitlab'])) {
             return;
         }
 
+        $fs->ensureDirectoryExists('./.drainpipe/gitlab');
         if (file_exists('./.ddev/config.yaml')) {
             $fs->ensureDirectoryExists('.gitlab/drainpipe');
             $fs->copy("$scaffoldPath/gitlab/DDEV.gitlab-ci.yml", ".gitlab/drainpipe/DDEV.gitlab-ci.yml");
