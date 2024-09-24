@@ -245,7 +245,7 @@ EOT;
     private function installGitlabCI(string $scaffoldPath): void {
         $fs = new Filesystem();
         $fs->removeDirectory('./.drainpipe/gitlab');
-        
+
         if (!isset($this->extra['drainpipe']['gitlab']) || !is_array($this->extra['drainpipe']['gitlab'])) {
             return;
         }
