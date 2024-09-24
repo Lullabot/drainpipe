@@ -245,6 +245,7 @@ EOT;
     private function installGitlabCI(string $scaffoldPath): void {
         $fs = new Filesystem();
         $fs->removeDirectory('./.drainpipe/gitlab');
+        $fs->ensureDirectoryExists('./.drainpipe/gitlab');
 
         if (!isset($this->extra['drainpipe']['gitlab']) || !is_array($this->extra['drainpipe']['gitlab'])) {
             return;
@@ -256,7 +257,6 @@ EOT;
             $this->io->write("🪠 [Drainpipe] .gitlab/drainpipe/DDEV.gitlab-ci.yml installed");
         }
         else {
-            $fs->ensureDirectoryExists('./.drainpipe/gitlab');
             $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
             $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
         }
@@ -266,7 +266,7 @@ EOT;
 
         foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
             $file = "gitlab/$gitlab.gitlab-ci.yml";
-            if (file_exists("$scaffoldPath/$file")) {$fs->ensureDirectoryExists('./.drainpipe/gitlab');
+            if (file_exists("$scaffoldPath/$file")) {
                 $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
                 $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
             }
