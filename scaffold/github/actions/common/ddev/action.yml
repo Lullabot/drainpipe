@@ -81,6 +81,8 @@ runs:
           fi
         fi
 
+        ddev config --web-image ghcr.io/lullabot/drainpipe/ddev-webserver:v1.23.4-slim1
+
         ddev start
         ddev describe
 
