@@ -38,6 +38,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
+          ddev config --web-image ghcr.io/lullabot/drainpipe/ddev-webserver:v1.23.4-slim1
           ddev start
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
