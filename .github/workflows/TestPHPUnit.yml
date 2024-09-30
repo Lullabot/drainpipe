@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   Test-PHPUnit-Functional:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         drupal-version: [ 10, 11 ]
@@ -78,14 +78,14 @@ jobs:
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@v2.3
+        uses: GuillaumeFalourd/assert-command-line-output@v2.4
         with:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
           contains: 6
           expected_result: PASSED
 
   Test-PHPUnit-Functional-DTT:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         drupal-version: [ 10, 11 ]
@@ -157,7 +157,7 @@ jobs:
           expected_result: PASSED
 
   Test-PHPUnit-Static:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         drupal-version: [ 10, 11 ]
