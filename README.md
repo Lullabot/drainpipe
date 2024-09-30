@@ -736,3 +736,5 @@ To generate new NPM package releases:
 
 1. Have the latest main branch checked out locally
 2. Run `yarn install && yarn lerna publish`
+3. Create a pull request with the changes
+4. Once merged, locally switch to the main branch and run `yarn lerna exec -- npm publish`
