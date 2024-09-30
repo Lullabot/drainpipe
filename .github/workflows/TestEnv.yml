@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   Test-Env:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         drupal-version: [ 10, 11 ]
