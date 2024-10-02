@@ -175,7 +175,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             return;
         }
 
-        $msg = 'Configure Composer patches to Use `-p2` as `patchLevel` for Drupal core. See';
+        $msg = 'Configure Composer patches to use `-p2` as `patchLevel` for Drupal core. See';
         $link = 'https://architecture.lullabot.com/adr/20220429-composer-patchlevel/';
         $this->io->warning("$msg $link");
     }
