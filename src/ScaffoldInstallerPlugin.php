@@ -155,7 +155,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             return;
         }
 
-        $msg = 'Break Composer install if patches don\'t apply. See ';
+        $msg = 'Break Composer install if patches don\'t apply. See';
         $link = 'https://architecture.lullabot.com/adr/20220429-composer-exit-failure/';
         $this->io->warning("$msg $link");
     }
@@ -176,8 +176,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             return;
         }
 
-        $msg = 'Configure Composer patches to Use `-p2`
-            as `patchLevel` for Drupal core. See ';
+        $msg = 'Configure Composer patches to Use `-p2` as `patchLevel` for Drupal core. See';
         $link = 'https://architecture.lullabot.com/adr/20220429-composer-patchlevel/';
         $this->io->warning("$msg $link");
     }
@@ -193,7 +192,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             return;
         }
 
-        $msg = 'Store Composer patches configuration in `composer.json`. See ';
+        $msg = 'Store Composer patches configuration in `composer.json`. See';
         $link = 'https://architecture.lullabot.com/adr/20220429-composer-patches-inline/';
         $this->io->warning("$msg $link");
     }
