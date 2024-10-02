@@ -101,8 +101,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             return;
         }
 
-        // Patches content is not empty.
-        if (!$patchesContent) {
+        if (empty($patchesContent)) {
             return;
         }
 
