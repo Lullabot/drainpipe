@@ -84,7 +84,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
         // Patches defined on a separate file.
         if ($patchesInExtraFile) {
-            if (!file_exists($patchesInExtraFile. '2')) {
+            if (!file_exists($patchesInExtraFile)) {
                 $this->io->warning("The patches file `$patchesInExtraFile` can't be read.");
                 return;
             }
