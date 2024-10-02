@@ -1,0 +1,108 @@
+name: Test Scaffold Installer Plugin - Composer Checks
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-Scaffold-Installer-Plugin:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        php-version: [ 8.3 ]
+    steps:
+
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project${{ matrix.drupal-version }} . --ignore-platform-reqs
+
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
+      - name: Setup drainpipe-dev
+        run: mv drainpipe/drainpipe-dev .
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          composer-cache-dir: composer-cache
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev config --php-version ${{ matrix.php-version }}
+          ddev start
+          ddev composer config extra.drupal-scaffold.gitignore true
+          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
+          ddev composer config --no-plugins allow-plugins.composer/installers true
+          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev composer config minimum-stability dev
+          ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
+          ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+
+      - name: Composer checks Tests
+        run: |
+
+          check_composer_install_contents() {
+            local string_to_check="$1"
+            local expected="$2"
+            local file="composer-install-output.txt"
+
+            ddev composer install > $file 2>&1
+
+            # Search for the string in the file
+            if grep -q "$string_to_check" "$file"; then
+                # String is found
+                if [[ "$expected" -eq 0 ]]; then
+                    echo "Error: String '$string_to_check' found, but it was not expected."
+                    exit 1
+                fi
+            else
+                # String is not found
+                if [[ "$expected" -eq 1 ]]; then
+                    echo "Error: String '$string_to_check' not found, but it was expected."
+                    exit 1
+                fi
+            fi
+          }
+
+          ddev composer config --unset extra.composer-exit-on-patch-failure
+          check_composer_install_contents "Break Composer install if patches don't apply" 1
+
+          ddev composer config extra.composer-exit-on-patch-failure --json false
+          check_composer_install_contents "Break Composer install if patches don't apply" 1
+
+          ddev composer config extra.composer-exit-on-patch-failure --json true
+          check_composer_install_contents "Break Composer install if patches don't apply" 0
+
+          ddev composer config extra.patchLevel --json '{"drupal/core": "-p2"}'
+          check_composer_install_contents "Configure Composer patches to use \`-p2\` as \`patchLevel\` for Drupal core" 0
+
+          ddev composer config --unset extra.patchLevel
+          check_composer_install_contents "Configure Composer patches to use \`-p2\` as \`patchLevel\` for Drupal core" 1
+
+          ddev composer config extra.patches-file "composer.patches.json"
+          check_composer_install_contents "Store Composer patches configuration in \`composer.json\`" 1
+
+          ddev composer config --unset extra.patches-file
+          check_composer_install_contents "Store Composer patches configuration in \`composer.json\`" 0
+
+          ddev composer config extra.patches --json '{"drupal":{"issue-x":"http"}}'
+          check_composer_install_contents "Use local copies of patch files." 1
+
+          ddev composer config extra.patches --json '{"drupal":{"issue-x":"local-path"}}'
+          check_composer_install_contents "Use local copies of patch files." 0
