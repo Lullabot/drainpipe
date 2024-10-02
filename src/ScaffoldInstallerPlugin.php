@@ -95,13 +95,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $patchesContent = $patchesInComposer;
         }
 
-        // Patches content is not a string.
-        if (!is_array($patchesContent)) {
-            $this->io->warning("The patches content can't be validated. Check your patches defined in Composer.");
+        if (empty($patchesContent)) {
             return;
         }
 
-        if (empty($patchesContent)) {
+        // Patches content is not a string.
+        if (!is_array($patchesContent)) {
+            $this->io->warning("The patches content can't be validated. Check your patches defined in Composer.");
             return;
         }
 
