@@ -73,6 +73,132 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
+     * Composer configuration advice: Use local copies of patch files.
+     *
+     * @return void
+     */
+    private function _checkComposerPatchesAreLocal()
+    {
+        $patchesInComposer = $this->extra['patches'] ?? false;
+        $patchesInExtraFile = $this->extra['patches-file'] ?? false;
+
+        // Patches defined on a separate file.
+        if ($patchesInExtraFile) {
+            if (!file_exists($patchesInExtraFile. '2')) {
+                $this->io->warning("The patches file `$patchesInExtraFile` can't be read.");
+                return;
+            }
+
+            $patchesJsonEncoded = file_get_contents($patchesInExtraFile);
+            $patchesContent = json_decode($patchesJsonEncoded, true)['patches'] ?? [];
+        } else if ($patchesInComposer) {
+            $patchesContent = $patchesInComposer;
+        }
+
+        // Patches content is not a string.
+        if (!is_array($patchesContent)) {
+            $this->io->warning("The patches content can't be validated. Check your patches defined in Composer.");
+            return;
+        }
+
+        // Patches content is not empty.
+        if (!$patchesContent) {
+            return;
+        }
+
+        // Collecting remote patches (if any).
+        $remotePatches = [];
+        foreach ($patchesContent as $projectName => $patches) {
+            foreach ($patches as $patchName => $patchUri) {
+                if (str_starts_with($patchUri, 'http')) {
+                    $remotePatches[$projectName] = "$patchName | $patchUri";
+                }
+            }
+        }
+
+        if (!$remotePatches) {
+            return;
+        }
+
+        // Collect the remote patches info.
+        $patchesInfo = PHP_EOL;
+        $count = 1;
+        foreach ($remotePatches as $projectName => $remote_patch) {
+            $patchesInfo.= "[$count] $projectName: $remote_patch " . PHP_EOL;
+            $count++;
+        }
+        $patchesInfo = rtrim($patchesInfo, PHP_EOL);
+
+        // Communicate the user.
+        $msg = 'Use local copies of patch files. See';
+        $link = 'https://architecture.lullabot.com/adr/20220429-composer-patch-files/';
+        $this->io->warning("$msg $link $patchesInfo");
+    }
+
+    /**
+     * Composer configuration advice: "composer-exit-on-patch-failure": true
+     *
+     * @return void
+     */
+    private function _checkComposerBreaksIfPatchesDoNotApply()
+    {
+        $composerExitsOnPatchFailure = $this->extra['composer-exit-on-patch-failure']
+            ?? false;
+        $composerExitsOnPatchFailureBool = is_bool($composerExitsOnPatchFailure);
+        $condition1 = !$composerExitsOnPatchFailure ||
+            !$composerExitsOnPatchFailureBool;
+        $condition2 = $composerExitsOnPatchFailureBool
+            && $composerExitsOnPatchFailure !== true;
+        $warn = $condition1 && $condition2;
+
+        if (!$warn) {
+            return;
+        }
+
+        $msg = 'Break Composer install if patches don\'t apply. See ';
+        $link = 'https://architecture.lullabot.com/adr/20220429-composer-exit-failure/';
+        $this->io->warning("$msg $link");
+    }
+
+    /**
+     *  Composer configuration advice: "patchLevel": {"drupal/core": "-p2"}
+     *
+     * @return void
+     */
+    private function _checkDrupalCoreComposerPatchesLevel()
+    {
+        $patchLevel = $this->extra['patchLevel']['drupal/core'] ?? false;
+        $patchLevelIsString = is_string($patchLevel);
+        $warn = (!$patchLevel || !$patchLevelIsString)
+            || ($patchLevelIsString && $patchLevel != '-p2');
+
+        if (!$warn) {
+            return;
+        }
+
+        $msg = 'Configure Composer patches to Use `-p2`
+            as `patchLevel` for Drupal core. See ';
+        $link = 'https://architecture.lullabot.com/adr/20220429-composer-patchlevel/';
+        $this->io->warning("$msg $link");
+    }
+
+    /**
+     *  Composer configuration advice: "patches-file" is not set/used.
+     *
+     * @return void
+     */
+    private function _checkPatchesStoredInComposerJson()
+    {
+        if (!isset($this->extra['patches-file'])) {
+            return;
+        }
+
+        $msg = 'Store Composer patches configuration in `composer.json`. See ';
+        $link = 'https://architecture.lullabot.com/adr/20220429-composer-patches-inline/';
+        $this->io->warning("$msg $link");
+    }
+
+    /**
      * Handle post install command events.
      *
      * @param Event $event the event to handle
@@ -84,6 +210,12 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installDdevCommand();
         $this->installCICommands();
         $this->installEnvSupport();
+
+        // Composer checks.
+        $this->_checkDrupalCoreComposerPatchesLevel();
+        $this->_checkComposerBreaksIfPatchesDoNotApply();
+        $this->_checkPatchesStoredInComposerJson();
+        $this->_checkComposerPatchesAreLocal();
     }
 
     /**
