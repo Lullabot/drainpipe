@@ -1,5 +1,5 @@
 default:
-  image: ghcr.io/catthehacker/ubuntu:runner-22.04
+  image: ghcr.io/catthehacker/ubuntu:runner-24.04
   services:
     - name: docker:dind
       alias: docker

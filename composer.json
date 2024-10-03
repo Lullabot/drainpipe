@@ -19,8 +19,8 @@
         "vlucas/phpdotenv": "^4|^5"
     },
     "require-dev": {
-        "composer/composer": "^2.7.9",
-        "phpunit/phpunit": "^9.6.20"
+        "composer/composer": "^2.8.0",
+        "phpunit/phpunit": "^9.6.21"
     },
     "extra": {
         "class": [

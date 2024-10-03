@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   Build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         drupal-version: [ 10, 11 ]
@@ -91,7 +91,7 @@ jobs:
           path: /tmp/drainpipe.zip
 
   Test-NPM:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
     strategy:
       matrix:
@@ -139,7 +139,7 @@ jobs:
           path: test_result
 
   Test-Yarn-Classic:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
     strategy:
       matrix:
@@ -190,7 +190,7 @@ jobs:
           path: test_result
 
   Test-Yarn-3-Node-Linker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
     strategy:
       matrix:
@@ -241,7 +241,7 @@ jobs:
           path: test_result
 
   Test-Yarn-4-Node-Linker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
     strategy:
       matrix:
@@ -293,7 +293,7 @@ jobs:
           path: test_result
 
   Test-Yarn-3:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
     strategy:
       matrix:
@@ -350,7 +350,7 @@ jobs:
           path: test_result
 
   Test-Yarn-4:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
     strategy:
       matrix:

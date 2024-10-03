@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   Test-Tugboat:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-reqs
@@ -99,7 +99,7 @@ jobs:
           path: .tugboat
 
   Test-Non-Default-Nodejs:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
