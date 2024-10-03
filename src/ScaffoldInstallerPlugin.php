@@ -181,7 +181,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
-     *  Composer configuration advice: "patches-file" is not set/used.
+     * Composer configuration advice: "patches-file" is not set/used.
      *
      * @return void
      */
