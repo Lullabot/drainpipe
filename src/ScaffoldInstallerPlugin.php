@@ -77,7 +77,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      *
      * @return void
      */
-    private function _checkComposerPatchesAreLocal()
+    private function checkComposerPatchesAreLocal()
     {
         $patchesInComposer = $this->extra['patches'] ?? false;
         $patchesInExtraFile = $this->extra['patches-file'] ?? false;
@@ -139,7 +139,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      *
      * @return void
      */
-    private function _checkComposerBreaksIfPatchesDoNotApply()
+    private function checkComposerBreaksIfPatchesDoNotApply()
     {
         $composerExitsOnPatchFailure = $this->extra['composer-exit-on-patch-failure']
             ?? false;
@@ -164,7 +164,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      *
      * @return void
      */
-    private function _checkDrupalCoreComposerPatchesLevel()
+    private function checkDrupalCoreComposerPatchesLevel()
     {
         $patchLevel = $this->extra['patchLevel']['drupal/core'] ?? false;
         $patchLevelIsString = is_string($patchLevel);
@@ -185,7 +185,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      *
      * @return void
      */
-    private function _checkPatchesStoredInComposerJson()
+    private function checkPatchesStoredInComposerJson()
     {
         if (!isset($this->extra['patches-file'])) {
             return;
@@ -210,10 +210,10 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installEnvSupport();
 
         // Composer checks.
-        $this->_checkDrupalCoreComposerPatchesLevel();
-        $this->_checkComposerBreaksIfPatchesDoNotApply();
-        $this->_checkPatchesStoredInComposerJson();
-        $this->_checkComposerPatchesAreLocal();
+        $this->checkDrupalCoreComposerPatchesLevel();
+        $this->checkComposerBreaksIfPatchesDoNotApply();
+        $this->checkPatchesStoredInComposerJson();
+        $this->checkComposerPatchesAreLocal();
     }
 
     /**
