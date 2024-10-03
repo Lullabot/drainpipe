@@ -91,6 +91,15 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
             $patchesJsonEncoded = file_get_contents($patchesInExtraFile);
             $patchesContent = json_decode($patchesJsonEncoded, true)['patches'] ?? [];
+
+            if (json_last_error()) {
+                $this->io->warning(
+                    "The patches file `$patchesInExtraFile` can't be parsed. Message \""
+                    . json_last_error_msg(). '"'
+                );
+                return;
+            }
+
         } else if ($patchesInComposer) {
             $patchesContent = $patchesInComposer;
         }
