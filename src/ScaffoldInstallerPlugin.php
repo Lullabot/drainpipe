@@ -163,7 +163,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             return;
         }
 
-        $msg = 'Break Composer install if patches don\'t apply. See';
+        $msg = "Break Composer install if patches don't apply. See";
         $link = 'https://architecture.lullabot.com/adr/20220429-composer-exit-failure/';
         $this->io->warning("$msg $link");
     }
