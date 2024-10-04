@@ -75,6 +75,12 @@ class ComposerChecksPlugin implements PluginInterface, EventSubscriberInterface
      */
     private function checkComposerPatchesAreLocal()
     {
+
+        // Opt-out to avoid this check.
+        if ($this->extra['draipipe']['composer']['disable-local-patches-check'] ?? false) {
+            return;
+        }
+
         $patchesInComposer = $this->extra['patches'] ?? false;
         $patchesInExtraFile = $this->extra['patches-file'] ?? false;
 
@@ -146,6 +152,12 @@ class ComposerChecksPlugin implements PluginInterface, EventSubscriberInterface
      */
     private function checkComposerBreaksIfPatchesDoNotApply()
     {
+
+        // Opt-out to avoid this check.
+        if ($this->extra['draipipe']['composer']['disable-exit-on-patch-failure-check'] ?? false) {
+            return;
+        }
+
         $composerExitsOnPatchFailure = $this->extra['composer-exit-on-patch-failure']
             ?? false;
         $composerExitsOnPatchFailureBool = is_bool($composerExitsOnPatchFailure);
@@ -171,6 +183,12 @@ class ComposerChecksPlugin implements PluginInterface, EventSubscriberInterface
      */
     private function checkDrupalCoreComposerPatchesLevel()
     {
+
+        // Opt-out to avoid this check.
+        if ($this->extra['draipipe']['composer']['disable-drupal-core-patches-level-check'] ?? false) {
+            return;
+        }
+
         $patchLevel = $this->extra['patchLevel']['drupal/core'] ?? false;
         $patchLevelIsString = is_string($patchLevel);
         $warn = (!$patchLevel || !$patchLevelIsString)
@@ -192,6 +210,12 @@ class ComposerChecksPlugin implements PluginInterface, EventSubscriberInterface
      */
     private function checkPatchesStoredInComposerJson()
     {
+
+        // Opt-out to avoid this check.
+        if ($this->extra['draipipe']['composer']['disable-patches-file-check'] ?? false) {
+            return;
+        }
+
         if (!isset($this->extra['patches-file'])) {
             return;
         }
