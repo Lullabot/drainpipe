@@ -77,7 +77,7 @@ class ComposerChecksPlugin implements PluginInterface, EventSubscriberInterface
     {
 
         // Opt-out to avoid this check.
-        if ($this->extra['draipipe']['composer']['disable-local-patches-check'] ?? false) {
+        if ($this->extra['drainpipe']['composer']['disable-local-patches-check'] ?? false) {
             return;
         }
 
@@ -154,7 +154,7 @@ class ComposerChecksPlugin implements PluginInterface, EventSubscriberInterface
     {
 
         // Opt-out to avoid this check.
-        if ($this->extra['draipipe']['composer']['disable-exit-on-patch-failure-check'] ?? false) {
+        if ($this->extra['drainpipe']['composer']['disable-exit-on-patch-failure-check'] ?? false) {
             return;
         }
 
@@ -185,7 +185,7 @@ class ComposerChecksPlugin implements PluginInterface, EventSubscriberInterface
     {
 
         // Opt-out to avoid this check.
-        if ($this->extra['draipipe']['composer']['disable-drupal-core-patches-level-check'] ?? false) {
+        if ($this->extra['drainpipe']['composer']['disable-drupal-core-patches-level-check'] ?? false) {
             return;
         }
 
@@ -212,7 +212,7 @@ class ComposerChecksPlugin implements PluginInterface, EventSubscriberInterface
     {
 
         // Opt-out to avoid this check.
-        if ($this->extra['draipipe']['composer']['disable-patches-file-check'] ?? false) {
+        if ($this->extra['drainpipe']['composer']['disable-patches-file-check'] ?? false) {
             return;
         }
 
