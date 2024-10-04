@@ -58,6 +58,20 @@ jobs:
         run: |
 
           pwd
-          ls
+          echo "---------------"
+          echo "---------------"
+          ls -al
+
+          echo "---------------"
+          echo "---------------"
+          ls -al ..
+
+          echo "---------------"
+          echo "---------------"
+          ls -al drainpipe
+
+          echo "---------------"
+          echo "---------------"
+          ls -al web
 
           .github/workflows/scripts/ComposerChecks.sh
