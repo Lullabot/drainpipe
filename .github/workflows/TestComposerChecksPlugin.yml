@@ -1,4 +1,4 @@
-name: Test Scaffold Installer Plugin - Composer Checks
+name: ComposerChecksPlugin - Checks Composer checks are okay
 on:
   push:
     branches:
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Test-Scaffold-Installer-Plugin:
+  Test-Composer-Checks-Plugin:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
@@ -85,6 +85,10 @@ jobs:
 
           ddev composer config extra.composer-exit-on-patch-failure --json false
           check_composer_install_contents "Break Composer install if patches don't apply" 1
+
+          ddev composer config extra.drainpipe.composer --json '{"disable-local-patches-check": true}'
+          check_composer_install_contents "Break Composer install if patches don't apply" 0
+          ddev composer config --unset extra.drainpipe.composer
 
           ddev composer config extra.composer-exit-on-patch-failure --json true
           check_composer_install_contents "Break Composer install if patches don't apply" 0
