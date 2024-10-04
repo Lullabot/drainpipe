@@ -55,4 +55,9 @@ jobs:
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
 
       - name: Composer checks Tests
-        run: .github/workflows/scripts/ComposerChecks.sh
+        run: |
+
+          pwd
+          ls
+
+          .github/workflows/scripts/ComposerChecks.sh
