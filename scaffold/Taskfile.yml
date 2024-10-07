@@ -14,6 +14,11 @@ includes:
 output: prefixed
 silent: true
 
+# Only allow tasks to be run once per task invocation. This ensures that
+# multiple dependencies on the same task are only run once.
+# @see https://github.com/go-task/task/issues/812
+run: once
+
 #vars:
 #  DRAINPIPE_SASS: |
 #    web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
