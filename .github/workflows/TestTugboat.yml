@@ -39,14 +39,14 @@ jobs:
           ddev get ddev/ddev-redis --version v1.2.0
           ddev get ddev/ddev-elasticsearch --version v0.3.2
           ddev restart
-          ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
-          ddev composer config --no-plugins allow-plugins.composer/installers true
-          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev composer config minimum-stability dev
-          ddev composer config extra.drainpipe --json '{"tugboat": {}}'
+          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
+          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
+          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev exec --raw composer config minimum-stability dev
+          ddev exec --raw composer config extra.drainpipe --json '{"tugboat": {}}'
           mkdir -p .tugboat
           echo "php:" >  .tugboat/config.drainpipe-override.yml
           echo "  aliases:" >> .tugboat/config.drainpipe-override.yml
@@ -123,14 +123,14 @@ jobs:
           ddev config --php-version "8.3"
           ddev config --nodejs-version "16"
           ddev restart
-          ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
-          ddev composer config --no-plugins allow-plugins.composer/installers true
-          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev composer config minimum-stability dev
-          ddev composer config extra.drainpipe --json '{"tugboat": {}}'
+          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
+          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
+          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev exec --raw composer config minimum-stability dev
+          ddev exec --raw composer config extra.drainpipe --json '{"tugboat": {}}'
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
       - name: Test NODE_MAJOR is correct
