@@ -60,6 +60,13 @@ runs:
           sudo apt install -y ddev
         fi
 
+        # Override to test ddev nightly
+        wget https://nightly.link/ddev/ddev/actions/runs/11620080882/ddev-linux-amd64.zip
+        unzip ddev-linux-amd64.zip
+        chmod +x ddev
+        mv -v ddev /usr/local/bin/ddev
+        ddev --version
+
         # Support local runner https://github.com/nektos/act
         if [ "$ACT" != "" ]; then
           sudo chown runner:docker /var/run/docker.sock
