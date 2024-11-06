@@ -30,15 +30,15 @@ jobs:
         run: |
           ddev config --auto
           ddev start
-          ddev composer require lullabot/drainpipe --with-all-dependencies
           ddev composer config extra.drupal-scaffold.gitignore true
           ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
           ddev composer config --no-plugins allow-plugins.composer/installers true
           ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
           ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev composer config extra.drainpipe.acquia --json '{"settings": true, "github": []}'
           ddev composer config minimum-stability dev
+          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev composer require lullabot/drainpipe --with-all-dependencies
 
       - name: Install Drupal
         run: |
