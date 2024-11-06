@@ -391,7 +391,9 @@ copied to `.github/actions/drainpipe` in your project:
 ```json
 "extra": {
   "drainpipe": {
-    "github": []
+    "acquia": {
+      "github": []
+    }
   }
 }
 ```
