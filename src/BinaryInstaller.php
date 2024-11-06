@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lullabot\Drainpipe;
 
 use Composer\Cache;
@@ -18,7 +20,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
     /**
      * The binaries to manage and download.
      *
-     * @var string[]
+     * @var array[]
      */
     protected $binaries = [];
 
@@ -62,13 +64,19 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $this->io = $io;
         $this->config = $composer->getConfig();
         $this->platform = strtolower(\PHP_OS_FAMILY);
-        $uname = strtolower(php_uname('v'));
-        if (false !== strpos($uname, 'arm64')) {
+        $uname = strtolower(php_uname('m'));
+        if ($uname === 'arm64' || $uname === 'aarch64') {
             $this->processor = 'arm64';
-        } elseif (\PHP_INT_SIZE === 8) {
+        } elseif ($uname === 'x86_64' || $uname === 'amd64') {
             $this->processor = 'amd64';
         } else {
             $this->processor = '386';
+        }
+        if (!empty(getenv('DRAINPIPE_PLATFORM'))) {
+            $this->platform = getenv('DRAINPIPE_PLATFORM');
+        }
+        if (!empty(getenv('DRAINPIPE_PROCESSOR'))) {
+            $this->processor = 'DRAINPIPE_PROCESSOR';
         }
 
         $this->cache = new Cache(
@@ -117,7 +125,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param Event $event the event to handle
      */
-    public function onPostInstallCmd(Event $event)
+    public function onPostInstallCmd(Event $event): void
     {
         $this->installBinaries($event);
     }
@@ -127,7 +135,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param event $event The event to handle
      */
-    public function onPostUpdateCmd(Event $event)
+    public function onPostUpdateCmd(Event $event): void
     {
         $this->installBinaries($event);
     }
@@ -137,13 +145,13 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
      *
      * @param event $event The event to handle
      */
-    public function installBinaries(Event $event)
+    public function installBinaries(Event $event): void
     {
         foreach ($this->binaries as $binary => $info) {
             $platform = $this->platform;
             $processor = $this->processor;
 
-            // Allow platform and processor to be overriden for this binary by
+            // Allow platform and processor to be overridden for this binary by
             // the user.
             if (!empty(getenv('DRAINPIPE_PLATFORM_'.$binary))) {
                 $platform = getenv('DRAINPIPE_PLATFORM_'.$binary);
@@ -171,18 +179,20 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
     /**
      * Install an individual binary.
      *
-     * @param string
+     * @param string $binary
      *  The final filename of the binary
-     * @param string
+     * @param string $version
      *  The version number of the binary
-     * @param string
+     * @param string $url
      *  The URL to download the binary
-     * @param string
+     * @param string $sha
+     *  The hash to validate
+     * @param string $hashalgo
      *  The hashing algorithm to use
      *
-     *  @see https://www.php.net/manual/en/function.hash-file.php
+     * @see https://www.php.net/manual/en/function.hash-file.php
      */
-    protected function installBinary($binary, $version, $url, $sha, $hashalgo = 'sha256')
+    protected function installBinary($binary, $version, $url, $sha, $hashalgo = 'sha256'): void
     {
         $bin = $this->config->get('bin-dir');
         $fs = new Filesystem();
@@ -190,14 +200,19 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         $httpDownloader = Factory::createHttpDownloader($this->io, $this->config);
         $parts = explode('/', $url);
         $fileName = array_pop($parts);
-        $cacheFolder = $this->cache->getRoot().$binary.\DIRECTORY_SEPARATOR.$version;
-        $cacheDestination = $cacheFolder.\DIRECTORY_SEPARATOR.$fileName;
-        $cacheExtractedBinary = $cacheFolder.\DIRECTORY_SEPARATOR.$binary;
-        $binDestination = $bin.\DIRECTORY_SEPARATOR.$binary;
+        if ($this->cache->isEnabled()) {
+            $cacheFolder = $this->cache->getRoot() . $binary . \DIRECTORY_SEPARATOR . $version;
+        }
+        else {
+            $cacheFolder = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . $binary . \DIRECTORY_SEPARATOR . $version;
+        }
+        $cacheDestination = $cacheFolder . \DIRECTORY_SEPARATOR . $fileName;
+        $cacheExtractedBinary = $cacheFolder . \DIRECTORY_SEPARATOR . $binary;
+        $binDestination = $bin . \DIRECTORY_SEPARATOR . $binary;
 
         // Check the cache.
         $fs->ensureDirectoryExists($cacheFolder);
-        if (!$this->cache->isEnabled() || !file_exists($cacheDestination) || (file_exists($cacheDestination) && hash_file($hashalgo, $cacheDestination) !== $sha)) {
+        if ($this->needsDownload($cacheDestination, $hashalgo, $sha)) {
             // Fetch a new copy of the binary.
             $httpDownloader->copy($url, $cacheDestination);
         } else {
@@ -210,6 +225,8 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         }
 
         if ('.tar.gz' === substr($fileName, -7)) {
+            // Remove .tar
+            $fs->remove(substr($cacheDestination, 0, -3));
             $archive = new \PharData($cacheDestination);
             $archive->decompress();
             $archive = new \PharData(substr($cacheDestination, 0, -3));
@@ -233,11 +250,25 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $this->io->write(sprintf('%s v%s (%s) already exists in bin-dir, not overwriting.', $binary, $version, $sha));
         }
         else {
+            $fs->remove($binDestination);
             $fs->copy($cacheExtractedBinary, $binDestination);
             // Make executable.
             if ('windows' !== $this->platform) {
                 chmod($binDestination, 0755);
             }
         }
+    }
+
+    /**
+     * Return if a file needs to be downloaded or not.
+     *
+     * @param string $cacheDestination The destination path to the downloaded file.
+     * @param string $hashalgo The hash algorithm used to validate the file.
+     * @param string $hash The hash used to validate the file.
+     *
+     * @return bool True if the file needs to be downloaded again, false otherwise.
+     */
+    private function needsDownload(string $cacheDestination, string $hashalgo, string $hash): bool {
+        return !$this->cache->isEnabled() || !file_exists($cacheDestination) || hash_file($hashalgo, $cacheDestination) !== $hash;
     }
 }

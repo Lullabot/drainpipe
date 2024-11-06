@@ -7,7 +7,7 @@ set -eux
 echo "Initializing..."
 
 # Install task
-sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v3.28.0/install-task.sh)" -- -d -b /usr/local/bin
+sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v3.38.0/install-task.sh)" -- -d -b /usr/local/bin
 
 # Install mysql or mariadb client.
 apt-get update
@@ -41,6 +41,11 @@ docker-php-ext-install gd
 # Install ImageMagick. This is recommended by both Acquia and Pantheon instead
 # of GD. Lullabot will likely be publishing an ADR recommending it too.
 apt-get install -y imagemagick
+
+# Install the PHP redis extension.
+
+yes '' | pecl install -f redis
+echo 'extension=redis.so' > /usr/local/etc/php/conf.d/redis.ini
 
 # Install node
 apt-get install -y ca-certificates gnupg

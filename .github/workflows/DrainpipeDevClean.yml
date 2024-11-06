@@ -1,0 +1,42 @@
+name: Clean Drainpipe Dev Package
+
+on: delete
+
+concurrency:
+  group: drainpipe-dev
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  Drainpipe-Dev-Clean:
+    name: Push branch to drainpipe-dev
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./scaffold/github/actions/common/setup-git
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
+          log-public-key: false
+
+      - name: Create git checkout of drainpipe-dev
+        working-directory: drainpipe-dev
+        run: |
+          git init
+          git branch -m ${{ github.event.ref }}
+          git remote add origin git@github.com:Lullabot/drainpipe-dev.git
+          git fetch origin
+          git reset --mixed origin/${{ github.event.ref }}
+
+      - name: Delete ref from drainpipe-dev
+        working-directory: drainpipe-dev
+        run: |
+          git push origin --delete ${{ github.event.ref }}

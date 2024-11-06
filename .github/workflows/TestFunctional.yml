@@ -12,10 +12,13 @@ concurrency:
 
 jobs:
   Build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
       - uses: actions/checkout@v4
         with:
@@ -35,19 +38,34 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "18"
+          ddev config --nodejs-version "22"
+          ddev config --corepack-enable
           ddev start
-          ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
-          ddev composer config --no-plugins allow-plugins.composer/installers true
-          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
-          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
-          ddev composer config minimum-stability dev
+          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
+          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
+          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
+          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev exec --raw composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+          git config --global user.email "no-reply@example.com"
+          git config --global user.name "Drainpipe Bot"
+          git init
+          echo "/drainpipe" >> .gitignore
+          echo "/drainpipe-dev" >> .gitignore
+          echo ".ddev/config.yaml" >> .gitignore
+          echo ".ddev/docker-compose.selenium.yaml" >> .gitignore
+          echo ".yarnrc.yml" >> .gitignore
+          echo "package.json" >> .gitignore
+          echo "yarn.lock" >> .gitignore
+          echo "package-lock.json" >> .gitignore
+          echo "README.md" >> .gitignore
+          git add .
+          git commit -m "Initial commit"
 
       - name: Setup Nightwatch
         run: |
@@ -58,22 +76,30 @@ jobs:
           ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"
           ddev config --additional-hostnames="*.drainpipe"
 
+      - name: Run the site installer
+        run: |
+          ddev drush --yes site:install minimal
+          ddev drush config:export --yes
+
       - name: Create Artifact
         run: zip -r /tmp/drainpipe.zip ./
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
           path: /tmp/drainpipe.zip
 
   Test-NPM:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -88,7 +114,7 @@ jobs:
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
           git-name: Drainpipe Bot
-          git-email: no-reply@example.com#
+          git-email: no-reply@example.com
 
       - name: Start DDEV
         run: ddev start
@@ -100,28 +126,28 @@ jobs:
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
-          ddev drush config:export --yes
+          ddev task test:siteinstall:all
 
       - name: Run Functional Tests
         run: ddev task test:functional
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test_result
+          name: test_result-npm-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-Classic:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -143,34 +169,36 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
-          ddev yarn set version classic
+          ddev exec corepack disable
+          ddev exec npm i -g yarn@1.22.1
+          ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
           ddev yarn init -y
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
-          ddev drush config:export --yes
+          ddev task test:siteinstall:all
 
       - name: Run Functional Tests
         run: ddev task test:functional
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test_result
+          name: test_result-yarn-classic-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-3-Node-Linker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -195,33 +223,33 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
-          yarn config set nodeLinker node-modules
+          ddev yarn config set nodeLinker node-modules
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
-          ddev drush config:export --yes
+          ddev task test:siteinstall:all
 
       - name: Run Functional Tests
         run: ddev task test:functional
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test_result
+          name: test_result-yarn3-nl-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-4-Node-Linker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -243,38 +271,37 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
-          ddev config --nodejs-version=21
           ddev restart
           ddev yarn set version berry
           ddev yarn set version 4
           ddev yarn init -y
-          yarn config set nodeLinker node-modules
+          ddev yarn config set nodeLinker node-modules
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
-          ddev drush config:export --yes
+          ddev task test:siteinstall:all
 
       - name: Run Functional Tests
         run: ddev task test:functional
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test_result
+          name: test_result-yarn4-nl-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-3:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -303,32 +330,35 @@ jobs:
           echo '  "nightwatch@*":' >> .yarnrc.yml
           echo '    dependencies:' >> .yarnrc.yml
           echo '      ws: "*"' >> .yarnrc.yml
-          ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
+          echo '  "@nightwatch/vrt@*":' >> .yarnrc.yml
+          echo '    dependencies:' >> .yarnrc.yml
+          echo '      open: "^8"' >> .yarnrc.yml
+          ddev yarn add nightwatch nightwatch-axe-verbose @nightwatch/vrt @lullabot/nightwatch-drupal-commands --dev
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
-          ddev drush config:export --yes
+          ddev task test:siteinstall:all
 
       - name: Run Functional Tests
         run: ddev task test:functional
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test_result
+          name: test_result-yarn3-${{ matrix.drupal-version }}
           path: test_result
 
   Test-Yarn-4:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: Build
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: test-functional-build
+          name: test-functional-build-${{ matrix.drupal-version }}
 
       - name: Restore Workspace
         run: |
@@ -350,7 +380,6 @@ jobs:
 
       - name: Setup Nightwatch
         run: |
-          ddev config --nodejs-version=21
           ddev restart
           ddev yarn set version berry
           ddev yarn init -y
@@ -358,22 +387,22 @@ jobs:
           echo '  "nightwatch@*":' >> .yarnrc.yml
           echo '    dependencies:' >> .yarnrc.yml
           echo '      ws: "*"' >> .yarnrc.yml
+          echo '  "@nightwatch/vrt@*":' >> .yarnrc.yml
+          echo '    dependencies:' >> .yarnrc.yml
+          echo '      open: "^8"' >> .yarnrc.yml
           ddev yarn cache clear
-          ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
+          ddev yarn add nightwatch nightwatch-axe-verbose @nightwatch/vrt @nightwatch/vrt @lullabot/nightwatch-drupal-commands --dev
 
       - name: Install Drupal
         run: |
-          ddev drush --yes site:install
-          ddev drush --uri=https://drupal_firefox --yes site:install
-          ddev drush --uri=https://drupal_chrome --yes site:install
-          ddev drush config:export --yes
+          ddev task test:siteinstall:all
 
       - name: Run Functional Tests
         run: ddev task test:functional
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test_result
+          name: test_result-yarn4-${{ matrix.drupal-version }}
           path: test_result

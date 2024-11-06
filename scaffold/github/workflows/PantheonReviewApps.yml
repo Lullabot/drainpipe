@@ -17,16 +17,16 @@ permissions:
 
 jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
           echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -48,7 +48,7 @@ jobs:
       - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
         with:
           pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
-          terminus-plugins: ${{ secrets.TERMINUS_PLUGINS }}
+          terminus-plugins: ${{ vars.TERMINUS_PLUGINS || secrets.TERMINUS_PLUGINS }}
 
       - uses: php-actions/composer@v6
 
@@ -66,6 +66,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
           commit-message: ${{ github.sha }}
-          site-name: ${{ secrets.PANTHEON_SITE_NAME }}
+          site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
           lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}

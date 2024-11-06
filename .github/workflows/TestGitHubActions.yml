@@ -10,10 +10,10 @@ concurrency:
 
 jobs:
   Test-GitHub-Actions:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
       - uses: actions/checkout@v4
         with:
@@ -33,14 +33,17 @@ jobs:
         run: |
           ddev config --auto
           ddev start
-          ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
-          ddev composer config --no-plugins allow-plugins.composer/installers true
-          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev composer config minimum-stability dev
+          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
+          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
+          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe/drainpipe-dev", "options": {"symlink": false}}'
+          ddev exec --raw composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
+          ddev composer require --dev lullabot/drainpipe-dev --with-all-dependencies
 
       - name: Install Drupal
         run: |
@@ -58,10 +61,9 @@ jobs:
         run: |
           echo "api_version: 1" >> pantheon.yml
           echo "web_docroot: true" >> pantheon.yml
-          echo "php_version: 8.1" >> pantheon.yml
-          echo "drush_version: 10" >> pantheon.yml
+          echo "php_version: 8.3" >> pantheon.yml
           echo "database:" >> pantheon.yml
-          echo "  version: 10.4" >> pantheon.yml
+          echo "  version: 10.6" >> pantheon.yml
           echo "enforce_https: full+subdomains" >> pantheon.yml
           echo "build_step: false" >> pantheon.yml
 
@@ -78,7 +80,7 @@ jobs:
           echo "\$settings['container_yamls'][] = __DIR__ . '/services.yml';" >> web/sites/default/settings.php
           echo "include __DIR__ . \"/settings.pantheon.php\";" >> web/sites/default/settings.php
           echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
-          curl -o web/sites/default/settings.pantheon.php https://raw.githubusercontent.com/pantheon-systems/drops-8/default/sites/default/settings.pantheon.php
+          curl -o web/sites/default/settings.pantheon.php https://raw.githubusercontent.com/pantheon-systems/drupal-integrations/11.x/assets/settings.pantheon.php
 
       - name: Snapshot Project
         env:
@@ -101,7 +103,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
           commit-message: ${{ github.sha }}
-          site-name: ${{ secrets.PANTHEON_SITE_NAME }}
+          site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
           lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
           # set to "true" if you want to run the installer

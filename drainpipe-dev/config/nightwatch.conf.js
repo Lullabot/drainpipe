@@ -4,6 +4,13 @@ const drupalCommandsPath = path.dirname(require.resolve('@lullabot/nightwatch-dr
 const firefoxLaunchUrl = process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX && process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX.length ? process.env.NIGHTWATCH_DRUPAL_URL_FIREFOX.replace(/\/$/, '') : process.env.NIGHTWATCH_DRUPAL_URL;
 const chromeLaunchUrl = process.env.NIGHTWATCH_DRUPAL_URL_CHROME && process.env.NIGHTWATCH_DRUPAL_URL_CHROME.length ? process.env.NIGHTWATCH_DRUPAL_URL_CHROME.replace(/\/$/, '') : process.env.NIGHTWATCH_DRUPAL_URL;
 
+let nightwatchVRT = true;
+try {
+  require.resolve('@nightwatch/vrt');
+} catch(e) {
+  nightwatchVRT = false;
+}
+
 module.exports = {
   // An array of folders (excluding subfolders) where your tests are located;
   // if this is not specified, the test source must be passed as the second argument to the test runner.
@@ -23,6 +30,17 @@ module.exports = {
   // See https://nightwatchjs.org/guide/#external-globals
   globals_path : '',
 
+  plugins: nightwatchVRT ? ['@nightwatch/vrt'] : [],
+
+  '@nightwatch/vrt': {
+    latest_screenshots_path: 'test/nightwatch/vrt/latest',
+    baseline_screenshots_path: 'test/nightwatch/vrt/baseline',
+    diff_screenshots_path: 'test/nightwatch/vrt/diff',
+    threshold: 0.00,
+    prompt: false,
+    updateScreenshots: false
+  },
+
   webdriver: {},
 
   test_workers: {
@@ -34,9 +52,9 @@ module.exports = {
       filter: '**/*.nightwatch.js',
       disable_error_log: false,
       screenshots: {
-        enabled: false,
+        enabled: true,
         on_failure: true,
-        on_error: false,
+        on_error: true,
         path: 'test_result',
       },
     },

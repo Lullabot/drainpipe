@@ -1,0 +1,9 @@
+php:
+  aliases:
+    - foo
+  urls:
+    - /
+  screenshot:
+    timeout: 45
+  visualdiff:
+    fullPage: false

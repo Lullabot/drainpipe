@@ -2,12 +2,12 @@
 set -eux
 # Helper script to setup a local test of Drainpipe
 # Copy this to the same directory level that your drainpipe directory is in
-composer create-project drupal/recommended-project drainpipe-test --ignore-platform-req=ext-gd
+composer create-project drupal/recommended-project drainpipe-test --ignore-platform-reqs
 cd drainpipe-test
 cp -R ../drainpipe .
 
 ddev config --auto
-ddev config --nodejs-version "18"
+ddev config --nodejs-version "21"
 ddev start
 ddev composer config extra.drupal-scaffold.gitignore true
 ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
@@ -29,7 +29,6 @@ echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS fi
 echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO 'db'@'%';\"" >> .ddev/config.yaml
 ddev config --web-environment="NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome"
 ddev config --additional-hostnames="*.drainpipe"
-ddev config --nodejs-version=21
 ddev restart
 
 ddev yarn set version berry
@@ -40,9 +39,12 @@ echo '  "nightwatch@*":' >> .yarnrc.yml
 echo '    dependencies:' >> .yarnrc.yml
 echo '      ws: "*"' >> .yarnrc.yml
 ddev yarn add nightwatch nightwatch-axe-verbose @lullabot/nightwatch-drupal-commands --dev
-yarn
 
 ddev drush --yes site:install
 ddev drush --uri=https://drupal_firefox --yes site:install
 ddev drush --uri=https://drupal_chrome --yes site:install
 ddev drush config:export --yes
+
+cp -R ../drainpipe/metapackages .
+ddev yarn add drainpipe-javascript@file:./metapackages/javascript/
+ddev yarn add drainpipe-sass@file:./metapackages/sass/
