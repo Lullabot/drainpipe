@@ -362,6 +362,27 @@ ddev ssh
 terminus site:upstream:set [site_name] empty
 ```
 
+### Acquia
+Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
+Add the following to your `Taskfile.yml`'s `includes` section to use them:
+```yml
+includes:
+  acquia: ./vendor/lullabot/drainpipe/tasks/acquia.yml
+```
+|                        |                                                                                                                                                                |
+|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `task acquia:fetch-db` | Fetches a database from Acquia. Set `ACQUIA_ENVIRONMENT_ID` in Taskfile `vars`, along with `ACQUIA_API_KEY` and `ACQUIA_API_SECRET` as environment variables |
+
+To enable auto configuration of Acquia Cloud settings:
+```json
+"extra": {
+    "drainpipe": {
+        "acquia": {
+            "settings": true
+        },
+    }
+}
+```
 
 ## GitHub Actions Integration
 
@@ -553,6 +574,16 @@ This will setup Merge Request deployment to Pantheon Multidev environments. See
 include which will give you helpers that you can include and reference for tasks
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
+
+### Acquia
+To add Acquia specific GitHub actions, add the following composer.json
+  ```json
+  "extra": {
+      "drainpipe": {
+          "github": ["Acquia"]
+      }
+  }
+  ```
 
 ## Tugboat
 
