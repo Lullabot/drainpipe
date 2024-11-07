@@ -81,6 +81,10 @@ runs:
           fi
         fi
 
+        docker pull ghcr.io/lullabot/drainpipe/ddev-webserver:20241105_less_php_versions
+        # A hack because ddev always pulls the normal webserver image.
+        docker tag ghcr.io/lullabot/drainpipe/ddev-webserver:20241105_less_php_versions ddev/ddev-webserver:v1.23.5
+
         ddev start
         ddev describe
 
