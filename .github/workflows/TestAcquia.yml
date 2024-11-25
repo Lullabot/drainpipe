@@ -38,7 +38,7 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config extra.drainpipe.acquia --json '{"settings": true, "github": []}'
           ddev exec --raw composer config minimum-stability dev
-          ddev exec require lullabot/drainpipe --with-all-dependencies
+          ddev composer require lullabot/drainpipe --with-all-dependencies
 
       - name: Install Drupal
         run: |
