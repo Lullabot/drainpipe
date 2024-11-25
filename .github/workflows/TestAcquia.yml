@@ -82,10 +82,10 @@ jobs:
       - name: Deploy to dev
         uses: ./drainpipe/scaffold/github/actions/acquia/deploy
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          environment: lullabotsandbox.dev
-          environment-url: https://lullabotsandboxffi2ugpgwh.devcloud.acquia-sites.com
+          github-token: "test1"
+          environment: "test6"
+          environment-url: "tests5"
           run-installer: true
-          commit-message: ${{ github.sha }}
-          api-key: ${{ secrets.ACQUIA_API_KEY }}
-          api-secret: ${{ secrets.ACQUIA_API_SECRET }}
+          commit-message: "test2"
+          api-key: "test3"
+          api-secret: "test4"
