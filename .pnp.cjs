@@ -511,7 +511,7 @@ const RAW_RUNTIME_STATE =
           ["gulp-sourcemaps", "npm:3.0.0"],\
           ["modern-normalize", "npm:3.0.1"],\
           ["postcss", "npm:8.4.49"],\
-          ["sass", "npm:1.79.5"],\
+          ["sass", "npm:1.81.0"],\
           ["yargs", "npm:17.7.2"]\
         ],\
         "linkType": "SOFT"\
@@ -4640,10 +4640,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["immutable", [\
-      ["npm:4.0.0", {\
-        "packageLocation": "../../../../cache/others/berry/cache/immutable-npm-4.0.0-74b844f82e-10c0.zip/node_modules/immutable/",\
+      ["npm:5.0.3", {\
+        "packageLocation": "../../../../cache/others/berry/cache/immutable-npm-5.0.3-c4195fd7f3-10c0.zip/node_modules/immutable/",\
         "packageDependencies": [\
-          ["immutable", "npm:4.0.0"]\
+          ["immutable", "npm:5.0.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8378,13 +8378,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sass", [\
-      ["npm:1.79.5", {\
-        "packageLocation": "../../../../cache/others/berry/cache/sass-npm-1.79.5-9f4647a8cf-10c0.zip/node_modules/sass/",\
+      ["npm:1.81.0", {\
+        "packageLocation": "../../../../cache/others/berry/cache/sass-npm-1.81.0-42587b1ed8-10c0.zip/node_modules/sass/",\
         "packageDependencies": [\
-          ["sass", "npm:1.79.5"],\
+          ["sass", "npm:1.81.0"],\
           ["@parcel/watcher", "npm:2.4.1"],\
           ["chokidar", "npm:4.0.0"],\
-          ["immutable", "npm:4.0.0"],\
+          ["immutable", "npm:5.0.3"],\
           ["source-map-js", "npm:1.0.2"]\
         ],\
         "linkType": "HARD"\
