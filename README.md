@@ -554,6 +554,19 @@ include which will give you helpers that you can include and reference for tasks
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
 
+### Nightwatch
+Provides basic integration for Nightwatch Visual Regression Testing.
+
+```json
+"extra": {
+    "drainpipe": {
+        "gitlab": ["Nightwatch"]
+    }
+}
+```
+
+See [scaffold/gitlab/Nightwatch.gitlab-ci.yml](scaffold/gitlab/Nightwatch.gitlab-ci.yml).
+
 ## Tugboat
 
 Add the following to `composer.json` to add Tugboat configuration:
