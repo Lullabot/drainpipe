@@ -11,7 +11,7 @@
     "gulp-sass-glob": "^1.1.0",
     "gulp-sourcemaps": "^3.0.0",
     "modern-normalize": "^3.0.1",
-    "postcss": "^8.4.47",
+    "postcss": "^8.4.49",
     "sass": "^1.79.5",
     "yargs": "^17.7.2"
   },
