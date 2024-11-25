@@ -1,6 +1,6 @@
 {
   "name": "@lullabot/drainpipe-sass",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "bin": "./gulp.js",
   "dependencies": {
     "autoprefixer": "^10.4.20",
@@ -11,8 +11,8 @@
     "gulp-sass-glob": "^1.1.0",
     "gulp-sourcemaps": "^3.0.0",
     "modern-normalize": "^3.0.1",
-    "postcss": "^8.4.40",
-    "sass": "^1.79.3",
+    "postcss": "^8.4.49",
+    "sass": "^1.79.5",
     "yargs": "^17.7.2"
   },
   "repository": {

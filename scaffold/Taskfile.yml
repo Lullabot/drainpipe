@@ -14,6 +14,11 @@ includes:
 output: prefixed
 silent: true
 
+# Only allow tasks to be run once per task invocation. This ensures that
+# multiple dependencies on the same task are only run once.
+# @see https://github.com/go-task/task/issues/812
+run: once
+
 #vars:
 #  DRAINPIPE_SASS: |
 #    web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
@@ -42,6 +47,11 @@ tasks:
     cmds:
       # @see https://architecture.lullabot.com/adr/20211026-one-time-login-first-drupal-user-account/
       - ./vendor/bin/drush user:unblock --uid=1
+      - |
+          [ $(drush core:requirements --severity=2 --format=tsv | wc -l) -lt 1 ] \
+          && echo "🟢 Status Report page checked" \
+          || echo "🔴 Status Report page check failed"
+
       # Ignore the below modules in sites/default/settings.php e.g.
       # $settings['config_exclude_modules'] = ['stage_file_proxy', 'field_ui', 'views_ui'];
       # - ./vendor/bin/drush pm:enable stage_file_proxy views_ui field_ui -y
