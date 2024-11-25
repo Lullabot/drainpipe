@@ -10,8 +10,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./.github/actions/drainpipe/common/set-env
-
     - name: Create GitHub Deployment
       run: |
         echo "More debugging"
