@@ -19,6 +19,13 @@ runs:
     - name: Clone Environment
       run: |
 
+
+        echo "=========== -2"
+        pwd
+
+        echo "=========== -1"
+        ls -a
+
         echo "=========== 1"
         ls -a .github/
 
