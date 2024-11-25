@@ -80,7 +80,7 @@ jobs:
           api-secret: ${{ secrets.ACQUIA_API_SECRET }}
 
       - name: Deploy to dev
-        uses: ./drainpipe/scaffold/github/actions/acquia/debug
+        uses: ./drainpipe/scaffold/github/actions/acquia/deploy
         with:
           github-token: "test1"
           environment: "test6"
