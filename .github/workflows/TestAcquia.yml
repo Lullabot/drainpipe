@@ -28,7 +28,6 @@ jobs:
 
       - name: Setup Project
         run: |
-          yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
           ddev config --auto
           ddev start
           ddev exec --raw composer config extra.drupal-scaffold.gitignore true
@@ -40,6 +39,7 @@ jobs:
           ddev exec --raw composer config extra.drainpipe.github --json '{"acquia": []}'
           ddev exec --raw composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
+          yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
 
       - name: Install Drupal
         run: |
