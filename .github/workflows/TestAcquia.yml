@@ -28,6 +28,7 @@ jobs:
 
       - name: Setup Project
         run: |
+          yq -iy '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
           ddev config --auto
           ddev start
           ddev exec --raw composer config extra.drupal-scaffold.gitignore true
