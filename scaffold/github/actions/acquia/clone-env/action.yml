@@ -18,27 +18,6 @@ runs:
   steps:
     - name: Clone Environment
       run: |
-
-
-        echo "=========== -2"
-        pwd
-
-        echo "=========== -1"
-        ls -a
-
-        echo "=========== 1"
-        ls -a .github/
-
-        echo "=========== 2"
-        ls -a .github/actions/
-
-        echo "=========== 3"
-        ls -a .github/actions/drainpipe/
-
-        echo "=========== 4"
-        ls -a .github/actions/drainpipe/set-env/
-
-
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         drainpipe_exec "acli env:mirror --no-config --no-interaction ${{ inputs.source-environment }} ${{ inputs.target-environment }}"
