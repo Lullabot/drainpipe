@@ -71,13 +71,13 @@ jobs:
           echo "/drainpipe" >> .drainpipeignore
           ddev task snapshot:directory directory=/tmp/release
 
-      - name: Clone from production to dev
-        uses: ./drainpipe/scaffold/github/actions/acquia/clone-env
-        with:
-          source-environment: lullabotsandbox.prod
-          target-environment: lullabotsandbox.dev
-          api-key: ${{ secrets.ACQUIA_API_KEY }}
-          api-secret: ${{ secrets.ACQUIA_API_SECRET }}
+      # - name: Clone from production to dev
+      #   uses: ./drainpipe/scaffold/github/actions/acquia/clone-env
+      #   with:
+      #     source-environment: lullabotsandbox.prod
+      #     target-environment: lullabotsandbox.dev
+      #     api-key: ${{ secrets.ACQUIA_API_KEY }}
+      #     api-secret: ${{ secrets.ACQUIA_API_SECRET }}
 
       - name: Deploy to dev
         uses: ./drainpipe/scaffold/github/actions/acquia/deploy
