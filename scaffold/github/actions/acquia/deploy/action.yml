@@ -26,14 +26,14 @@ runs:
   using: "composite"
   steps:
     - name: Create GitHub Deployment
-      uses: .github/actions/drainpipe/common/deployment-create
+      uses: .github/actions/common/deployment-create
       with:
         github-token: ${{ inputs.github-token }}
         environment: ${{ inputs.environment }}
 
     - name: Put site in Maintenance Mode
       run: |
-        source .github/actions/drainpipe/common/set-env/bash_aliases
+        source .github/actions/common/set-env/bash_aliases
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
