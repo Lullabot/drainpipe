@@ -25,6 +25,17 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: debug
+      run: |
+        echo "==============="
+        ls -al
+
+        echo "==============="
+
+        ls -al .github/actions/drainpipe/common/deployment-create
+
+      shell: bash
+
     - name: Create GitHub Deployment
       uses: .github/actions/drainpipe/common/deployment-create
       with:
