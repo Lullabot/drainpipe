@@ -32,6 +32,22 @@ runs:
 
         echo "==============="
 
+        ls -al .github/
+
+        echo "==============="
+
+        ls -al .github/actions/
+
+        echo "==============="
+
+        ls -al .github/actions/drainpipe/
+
+        echo "==============="
+
+        ls -al .github/actions/drainpipe/common/
+
+        echo "==============="
+
         ls -al .github/actions/drainpipe/common/deployment-create
 
       shell: bash
