@@ -56,7 +56,7 @@ runs:
         run-installer: ${{ inputs.run-installer }}
 
     - name: Set Deployment Status
-      uses: .github/actions/drainpipe/deployment-status
+      uses: ./.github/actions/drainpipe/deployment-status
       with:
         github-token: ${{ inputs.github-token }}
         environment-url: ${{ inputs.environment-url }}
