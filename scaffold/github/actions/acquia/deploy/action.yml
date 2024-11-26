@@ -25,6 +25,19 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: debug
+      run: |
+
+        echo "==================="
+        ls .github
+
+        echo "==================="
+        ls .github/actions
+        echo "==================="
+        ls .github/action/common/
+
+      shell: bash
+
     - name: Create GitHub Deployment
       uses: .github/actions/common/deployment-create
       with:
