@@ -25,6 +25,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Create GitHub Deployment
+      uses: .github/actions/drainpipe/deployment-create
+      with:
+        github-token: ${{ inputs.github-token }}
+        environment: ${{ inputs.environment }}
 
     - name: Put site in Maintenance Mode
       run: |
@@ -51,7 +56,7 @@ runs:
         run-installer: ${{ inputs.run-installer }}
 
     - name: Set Deployment Status
-      uses: .github/actions/drainpipe/common/deployment-status
+      uses: .github/actions/drainpipe/deployment-status
       with:
         github-token: ${{ inputs.github-token }}
         environment-url: ${{ inputs.environment-url }}
