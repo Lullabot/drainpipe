@@ -36,9 +36,4 @@ runs:
 
       shell: bash
 
-    - name: Create GitHub Deployment
-      uses: .github/actions/drainpipe/common/deployment-create
-      with:
-        github-token: ${{ inputs.github-token }}
-        environment: ${{ inputs.environment }}
 
