@@ -34,7 +34,6 @@ runs:
         echo "==================="
         ls .github/actions
         echo "==================="
-        ls .github/actions/drainpipe/
+        ls .github/action/drainpipe/
 
       shell: bash
-
