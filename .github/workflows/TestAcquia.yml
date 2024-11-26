@@ -19,57 +19,57 @@ jobs:
 
       - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
-      - name: Install DDEV
-        uses: ./drainpipe/scaffold/github/actions/common/ddev
-        with:
-          git-name: Drainpipe Bot
-          git-email: no-reply@example.com
-          ssh-private-key: ${{ secrets.ACQUIA_SSH_PRIVATE_KEY }}
+      # - name: Install DDEV
+      #   uses: ./drainpipe/scaffold/github/actions/common/ddev
+      #   with:
+      #     git-name: Drainpipe Bot
+      #     git-email: no-reply@example.com
+      #     ssh-private-key: ${{ secrets.ACQUIA_SSH_PRIVATE_KEY }}
 
-      - name: Setup Project
-        run: |
-          ddev config --auto
-          ddev start
-          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
-          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
-          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
-          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev exec --raw composer config extra.drainpipe.github --json '{"acquia": []}'
-          ddev exec --raw composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe --with-all-dependencies
-          yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
+      # - name: Setup Project
+      #   run: |
+      #     ddev config --auto
+      #     ddev start
+      #     ddev exec --raw composer config extra.drupal-scaffold.gitignore true
+      #     ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+      #     ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
+      #     ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+      #     ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+      #     ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+      #     ddev exec --raw composer config extra.drainpipe.github --json '{"acquia": []}'
+      #     ddev exec --raw composer config minimum-stability dev
+      #     ddev composer require lullabot/drainpipe --with-all-dependencies
+      #     yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
 
-      - name: Install Drupal
-        run: |
-          ddev drush site:install minimal -y
-          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
-          ddev drush config:export -y
+      # - name: Install Drupal
+      #   run: |
+      #     ddev drush site:install minimal -y
+      #     echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+      #     ddev drush config:export -y
 
-      - name: Create .drainpipeignore
-        run: |
-          echo "/web/sites/default/files" >> .drainpipeignore
-          echo "/.ddev" >> .drainpipeignore
-          echo "settings.ddev.php" >> .drainpipeignore
-          echo "/drainpipe" >> .drainpipeignore
+      # - name: Create .drainpipeignore
+      #   run: |
+      #     echo "/web/sites/default/files" >> .drainpipeignore
+      #     echo "/.ddev" >> .drainpipeignore
+      #     echo "settings.ddev.php" >> .drainpipeignore
+      #     echo "/drainpipe" >> .drainpipeignore
 
-      - name: Create settings.php
-        run: |
-          echo '<?php' > web/sites/default/settings.php
-          echo "\$settings['container_yamls'][] = __DIR__ . '/services.yml';" >> web/sites/default/settings.php
-          echo "include __DIR__ . \"/settings.acquia.php\";" >> web/sites/default/settings.php
-          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+      # - name: Create settings.php
+      #   run: |
+      #     echo '<?php' > web/sites/default/settings.php
+      #     echo "\$settings['container_yamls'][] = __DIR__ . '/services.yml';" >> web/sites/default/settings.php
+      #     echo "include __DIR__ . \"/settings.acquia.php\";" >> web/sites/default/settings.php
+      #     echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
 
-      - name: Snapshot Project
-        env:
-          directory: /tmp/release
-          remote:
-          message:
-          site:
-        run: |
-          echo "/drainpipe" >> .drainpipeignore
-          ddev task snapshot:directory directory=/tmp/release
+      # - name: Snapshot Project
+      #   env:
+      #     directory: /tmp/release
+      #     remote:
+      #     message:
+      #     site:
+      #   run: |
+      #     echo "/drainpipe" >> .drainpipeignore
+      #     ddev task snapshot:directory directory=/tmp/release
 
       # - name: Clone from production to dev
       #   uses: ./drainpipe/scaffold/github/actions/acquia/clone-env
