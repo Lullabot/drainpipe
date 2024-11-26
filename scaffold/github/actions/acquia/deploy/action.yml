@@ -81,5 +81,9 @@ runs:
         echo "ls .github/actions/drainpipe"
         ls -al .github/actions/drainpipe
 
+        echo "-------------------------"
+        echo "ls .github/actions/drainpipe/deployment-create"
+        ls -al .github/actions/drainpipe/deployment-create
+
       shell: bash
 
