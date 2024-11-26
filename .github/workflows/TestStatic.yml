@@ -1,0 +1,105 @@
+name: Test Static Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-Static:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11 ]
+    steps:
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
+
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
+      - name: Setup drainpipe-dev
+        run: mv drainpipe/drainpipe-dev .
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
+          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
+          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
+          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev exec --raw composer config minimum-stability dev
+          ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
+          ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+          # Restart is required to enable the provided Selenium containers
+          ddev restart
+
+      - name: Verify files were created
+        run: |
+          test -f phpcs.xml.dist
+          test -f phpstan.neon.dist
+
+      - name: Create a git repository
+        run: |
+          git config --global user.email "no-reply@example.com"
+          git config --global user.name "Drainpipe Bot"
+          git init
+          echo "/drainpipe" >> .gitignore
+          echo "/drainpipe-dev" >> .gitignore
+          git add .
+          git commit -m "Initial commit"
+
+      - name: Fix settings.php
+        run: |
+          sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
+
+      - name: Test for untracked and modified files
+        id: test_untracked
+        continue-on-error: true
+        run: ddev task test:untracked
+
+      - name: Test for untracked and modified files
+        run: |
+          if [ "${{ steps.test_untracked.outcome }}" != "failure" ]; then
+            exit 1
+          fi
+          git add .
+          git commit -m "Second commit"
+          ddev task test:untracked
+
+      - name: Run Static Tests
+        run: ddev task test:static
+
+      - name: Confirm custom directories are scanned
+        run: |
+          set -x
+          mkdir -p custom-yaml-directory
+          echo 'key: value' >> custom-yaml-directory/test.yml
+          ddev task test:static YAML_DIRS="custom-yaml-directory/*.yml" | tee static.log
+          [[ $(grep '\[OK] All 1 YAML files contain valid syntax.' static.log | wc -l) -eq 1 ]]
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test_result-static
+          path: test_result
