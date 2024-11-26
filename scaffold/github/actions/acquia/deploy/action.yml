@@ -25,43 +25,60 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Create GitHub Deployment
-      uses: .github/actions/drainpipe/deployment-create
-      with:
-        github-token: ${{ inputs.github-token }}
-        environment: ${{ inputs.environment }}
+    # - name: Create GitHub Deployment
+    #   uses: .github/actions/drainpipe/deployment-create
+    #   with:
+    #     github-token: ${{ inputs.github-token }}
+    #     environment: ${{ inputs.environment }}
 
-    - name: Put site in Maintenance Mode
+    # - name: Put site in Maintenance Mode
+    #   run: |
+    #     source .github/actions/drainpipe/set-env/bash_aliases
+    #     drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+    #     ENVIRONMENT="${{ inputs.environment }}"
+    #     APPLICATION=${ENVIRONMENT%.*}
+    #     drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
+    #     drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabot8.dev"
+    #   shell: bash
+
+    # - name: Push to Acquia
+    #   uses: ./drainpipe/scaffold/github/actions/acquia/push
+    #   with:
+    #     environment: ${{ inputs.environment }}
+    #     commit-message: ${{ inputs.commit-message }}
+    #     api-key: ${{ inputs.api-key }}
+    #     api-secret: ${{ inputs.api-secret }}
+
+    # - name: Run updates
+    #   uses: ./drainpipe/scaffold/github/actions/acquia/update
+    #   with:
+    #     environment: ${{ inputs.environment }}
+    #     run-installer: ${{ inputs.run-installer }}
+
+    # - name: Set Deployment Status
+    #   uses: .github/actions/drainpipe/deployment-status
+    #   with:
+    #     github-token: ${{ inputs.github-token }}
+    #     environment-url: ${{ inputs.environment-url }}
+
+    # - name: Take site out of Maintenance Mode
+    #   run: |
+    #     drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@${{ inputs.environment }}"
+    #   shell: bash
+
+    - name: Debug
       run: |
-        source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
-        ENVIRONMENT="${{ inputs.environment }}"
-        APPLICATION=${ENVIRONMENT%.*}
-        drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
-        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabot8.dev"
-      shell: bash
 
-    - name: Push to Acquia
-      uses: ./drainpipe/scaffold/github/actions/acquia/push
-      with:
-        environment: ${{ inputs.environment }}
-        commit-message: ${{ inputs.commit-message }}
-        api-key: ${{ inputs.api-key }}
-        api-secret: ${{ inputs.api-secret }}
+        echo "-------------------------"
+        echo "ls .github"
+        ls -al .github
 
-    - name: Run updates
-      uses: ./drainpipe/scaffold/github/actions/acquia/update
-      with:
-        environment: ${{ inputs.environment }}
-        run-installer: ${{ inputs.run-installer }}
+        echo "-------------------------"
+        echo "ls .github/actions"
+        ls -al .github/actions
 
-    - name: Set Deployment Status
-      uses: .github/actions/drainpipe/deployment-status
-      with:
-        github-token: ${{ inputs.github-token }}
-        environment-url: ${{ inputs.environment-url }}
+        echo "-------------------------"
+        echo "ls .github/actions/drainpipe"
+        ls -al .github/actions/drainpipe
 
-    - name: Take site out of Maintenance Mode
-      run: |
-        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@${{ inputs.environment }}"
-      shell: bash
+
