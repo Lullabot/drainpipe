@@ -71,21 +71,21 @@ jobs:
           echo "/drainpipe" >> .drainpipeignore
           ddev task snapshot:directory directory=/tmp/release
 
-      # - name: Clone from production to dev
-      #   uses: ./drainpipe/scaffold/github/actions/acquia/clone-env
-      #   with:
-      #     source-environment: lullabotsandbox.prod
-      #     target-environment: lullabotsandbox.dev
-      #     api-key: ${{ secrets.ACQUIA_API_KEY }}
-      #     api-secret: ${{ secrets.ACQUIA_API_SECRET }}
+      - name: Clone from production to dev
+        uses: ./drainpipe/scaffold/github/actions/acquia/clone-env
+        with:
+          source-environment: lullabotsandbox.prod
+          target-environment: lullabotsandbox.dev
+          api-key: ${{ secrets.ACQUIA_API_KEY }}
+          api-secret: ${{ secrets.ACQUIA_API_SECRET }}
 
       - name: Deploy to dev
         uses: ./drainpipe/scaffold/github/actions/acquia/deploy
         with:
-          github-token: "test1"
-          environment: "test6"
-          environment-url: "tests5"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          environment: lullabotsandbox.dev
+          environment-url: https://lullabotsandboxffi2ugpgwh.devcloud.acquia-sites.com
           run-installer: true
-          commit-message: "test2"
-          api-key: "test3"
-          api-secret: "test4"
+          commit-message: ${{ github.sha }}
+          api-key: ${{ secrets.ACQUIA_API_KEY }}
+          api-secret: ${{ secrets.ACQUIA_API_SECRET }}
