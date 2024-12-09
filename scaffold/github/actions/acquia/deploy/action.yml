@@ -40,6 +40,8 @@ runs:
         APPLICATION=${ENVIRONMENT%.*}
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
 
+        ssh-keyscan -t rsa "${{ inputs.environment-url }}" >> ~/.ssh/known_hosts
+
         # debug site aliases
         drainpipe_exec "./vendor/bin/drush site:alias"
 
