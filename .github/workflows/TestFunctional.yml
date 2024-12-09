@@ -170,8 +170,9 @@ jobs:
       - name: Setup Nightwatch
         run: |
           ddev exec corepack disable
-          #ddev exec npm i -g yarn@1.22.1
-          #ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
+          ddev exec npm i -g yarn@1.22.1
+          ddev exec 'rm /usr/local/bin/yarn'
+          ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
           ddev yarn init -y
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev
 
