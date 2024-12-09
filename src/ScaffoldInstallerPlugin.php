@@ -82,6 +82,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
+        $this->installHostingProviderSupport();
         $this->installCICommands();
         $this->installEnvSupport();
     }
@@ -96,6 +97,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
+        $this->installHostingProviderSupport();
         $this->installCICommands();
         $this->installEnvSupport();
     }
@@ -227,6 +229,35 @@ EOT;
     }
 
     /**
+     * Install hosting provider support.
+     */
+    private function installHostingProviderSupport(): void
+    {
+        $fs = new Filesystem();
+        $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
+        if (isset($this->extra['drainpipe']['acquia'])) {
+            if (!file_exists('.drainpipeignore')) {
+                $fs->copy("$scaffoldPath/acquia/.drainpipeignore", '.drainpipeignore');
+            }
+            if (!empty($this->extra['drainpipe']['acquia']['settings'])) {
+                // settings.acquia.php
+                if (!file_exists('./web/sites/default/settings.acquia.php')) {
+                    $fs->copy("$scaffoldPath/acquia/settings.acquia.php", './web/sites/default/settings.acquia.php');
+                }
+                if (file_exists('./web/sites/default/settings.php')) {
+                    $settings = file_get_contents('./web/sites/default/settings.php');
+                    if (strpos($settings, 'settings.acquia.php') === false) {
+                        $include = <<<'EOT'
+include __DIR__ . "/settings.acquia.php";
+EOT;
+                        file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Install CI Commands.
      */
     private function installCICommands(): void
@@ -333,6 +364,11 @@ EOT;
                     $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                 }
             }
+            else if ($github === 'acquia') {
+                $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
+            }
             else if ($github === 'ComposerLockDiff') {
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
@@ -349,6 +385,9 @@ EOT;
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/TestFunctional.yml", './.github/workflows/TestFunctional.yml');
             }
+        }
+
+        if (isset($this->extra['drainpipe']['acquia'])) {
         }
     }
 
