@@ -41,7 +41,11 @@ runs:
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
         hostname="${{ inputs.environment-url }}"
         hostname="${hostname#*://}"
-        drainpipe_exec "ssh-keyscan -T 60 -t rsa,ecdsa,ed25519  "$hostname" >> ~/.ssh/known_hosts"
+
+        drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
+
+
+        # drainpipe_exec "ssh-keyscan -T 60 -t rsa,ecdsa,ed25519  "$hostname" >> ~/.ssh/known_hosts"
 
         # debug site aliases
         drainpipe_exec "./vendor/bin/drush site:alias"
