@@ -32,6 +32,9 @@ $ruleset = new TwigCsFixer\Ruleset\Ruleset();
 // default standard.
 $ruleset->addStandard(new TwigCsFixer\Standard\TwigCsFixer());
 
+// Remove the IncludeFunctionRule which breaks TwigJS.
+$ruleset->removeRule(TwigCsFixer\Rules\Function\includeFunctionRule::class);
+
 $config = new TwigCsFixer\Config\Config();
 $config->setRuleset($ruleset);
 $config->addTwigExtension(new TwigExtension($renderer, $urlGenerator, $themeManager, $dateFormatter, $fileUrlGenerator));
