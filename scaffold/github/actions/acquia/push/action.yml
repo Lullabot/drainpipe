@@ -22,11 +22,11 @@ runs:
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENV_INFO=$(drainpipe_exec "acli api:environments:find ${{ inputs.environment }}")
-        VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
-        if [ "$VCS_TYPE" != "git" ]; then
-          echo "Unrecognised VCS type"
-          exit 1
-        fi
+        # VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
+        # if [ "$VCS_TYPE" != "git" ]; then
+        #   echo "Unrecognised VCS type"
+        #   exit 1
+        # fi
         # BRANCH=$(echo $ENV_INFO | jq -r ".vcs.path")
         # REMOTE=$(echo $ENV_INFO | jq -r ".vcs.url")
         # drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=\"$BRANCH\" remote=\"$REMOTE\" message=\"${{ inputs.commit-message }}\""
