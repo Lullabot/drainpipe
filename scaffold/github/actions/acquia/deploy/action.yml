@@ -48,11 +48,11 @@ runs:
 
         # debug site aliases
         ddev drush site:alias
-        drainpipe_exec "./vendor/bin/drush site:alias"
+        # drainpipe_exec "./vendor/bin/drush site:alias"
 
         ddev task drupal:maintenance:on site=@lullabotsandbox.dev
 
-        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabotsandbox.dev"
+#        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabotsandbox.dev"
       shell: bash
 
     - name: Push to Acquia
