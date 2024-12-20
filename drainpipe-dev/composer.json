@@ -16,9 +16,9 @@
         "behat/mink": "^1.12.0",
         "behat/mink-browserkit-driver": "^2.2.0",
         "davidrjonas/composer-lock-diff": "^1.7",
-        "drupal/coder": "^8.3.25",
+        "drupal/coder": "^8.3.26",
         "lullabot/drainpipe": "*",
-        "mglaman/phpstan-drupal": "^1.3.1",
+        "mglaman/phpstan-drupal": "^1.3.2",
         "mikey179/vfsstream": "^1.6.12",
         "mockery/mockery": "^1.6.12",
         "phpspec/prophecy-phpunit": "^2",
@@ -27,7 +27,7 @@
         "symfony/phpunit-bridge": "^6|^7",
         "symfony/yaml": "^6|^7",
         "tijsverkoyen/convert-to-junit-xml": "^1.11.0",
-        "vincentlanglet/twig-cs-fixer": "^3.3.1"
+        "vincentlanglet/twig-cs-fixer": "^3.4.0"
     },
     "require-dev": {
         "composer/composer": "^2.8.3"
