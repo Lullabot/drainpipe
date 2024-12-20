@@ -46,6 +46,8 @@ runs:
 
         # drainpipe_exec "ssh-keyscan -T 60 -t rsa,ecdsa,ed25519  "$hostname" >> ~/.ssh/known_hosts"
 
+        ddev drush version
+
         # debug site aliases
         ddev drush site:alias
         # drainpipe_exec "./vendor/bin/drush site:alias"
