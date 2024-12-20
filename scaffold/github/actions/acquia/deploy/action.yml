@@ -41,6 +41,8 @@ runs:
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
 
         drainpipe_exec "ls -al /var/www/html/drush"
+        drainpipe_exec "ls -al /var/www/html/drush/sites"
+
 
         exit 0
 
