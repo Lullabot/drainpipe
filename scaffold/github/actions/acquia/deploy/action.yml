@@ -34,11 +34,11 @@ runs:
     - name: Put site in Maintenance Mode
       run: |
 
-        # source .github/actions/drainpipe/set-env/bash_aliases
-        # drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
-        # ENVIRONMENT="${{ inputs.environment }}"
-        # APPLICATION=${ENVIRONMENT%.*}
-        # drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+        ENVIRONMENT="${{ inputs.environment }}"
+        APPLICATION=${ENVIRONMENT%.*}
+        drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
 
         # echo "======================================"
         # drainpipe_exec "ls -al /var/www/html/drush"
