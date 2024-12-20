@@ -40,7 +40,9 @@ runs:
         APPLICATION=${ENVIRONMENT%.*}
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
 
-        drainpipe_exec "cat  ~/.drush/sites"
+        drainpipe_exec "ls -al /var/www/html/drush"
+
+        exit 0
 
         drainpipe_exec "sed -i.bak 's|drush9|drush|g' ~/.drush/sites"
 
