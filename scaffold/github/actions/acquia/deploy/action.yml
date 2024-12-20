@@ -45,9 +45,9 @@ runs:
         # echo "======================================"
         # drainpipe_exec "ls -al /var/www/html/drush/sites/lullabotsandbox.site.yml"
 
-        # drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
+        drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
 
-        # drainpipe_exec "cat  /var/www/html/drush/sites/lullabotsandbox.site.yml"
+        drainpipe_exec "cat  /var/www/html/drush/sites/lullabotsandbox.site.yml"
 
         # hostname="${{ inputs.environment-url }}"
         # hostname="${hostname#*://}"
