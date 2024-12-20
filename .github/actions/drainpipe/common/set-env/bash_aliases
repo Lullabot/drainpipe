@@ -1,9 +1,7 @@
 drainpipe_exec() {
   if [ "$DRAINPIPE_DDEV" == "true" ]; then
-    echo "DDEV EXEC:"
     ddev exec "$@"
   else
-    echo "EVAL:"
     eval "$@"
   fi
 }
