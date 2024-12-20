@@ -64,13 +64,6 @@ runs:
 
         # drainpipe_exec "./vendor/bin/drush site:alias"
 
-        # Set drush version
-        drainpipe_exec "acli drush:set-version @sitesandbox.test 13"
-
-
-        # Check drush version
-        drainpipe_exec "acli drush:set-version @sitesandbox.test"
-
         ddev task drupal:maintenance:on site=@lullabotsandbox.dev
 
 #        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabotsandbox.dev"
