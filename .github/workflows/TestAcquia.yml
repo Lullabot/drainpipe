@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project:10.4.0 . --ignore-platform-req=ext-gd
 
       - uses: actions/checkout@v4
         with:
@@ -74,7 +74,7 @@ jobs:
       - name: Clone from production to dev
         uses: ./drainpipe/scaffold/github/actions/acquia/clone-env
         with:
-          source-environment: lullabotsandbox.prod
+          source-environment: lullabotsandbox.stg
           target-environment: lullabotsandbox.dev
           api-key: ${{ secrets.ACQUIA_API_KEY }}
           api-secret: ${{ secrets.ACQUIA_API_SECRET }}
