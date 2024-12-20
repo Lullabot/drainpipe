@@ -49,10 +49,10 @@ runs:
 
         drainpipe_exec "cat  /var/www/html/drush/sites/lullabotsandbox.site.yml"
 
-        # hostname="${{ inputs.environment-url }}"
-        # hostname="${hostname#*://}"
+        hostname="${{ inputs.environment-url }}"
+        hostname="${hostname#*://}"
 
-        # drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
+        drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
 
 
         # # drainpipe_exec "ssh-keyscan -T 60 -t rsa,ecdsa,ed25519  "$hostname" >> ~/.ssh/known_hosts"
