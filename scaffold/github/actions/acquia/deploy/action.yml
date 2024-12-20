@@ -44,13 +44,23 @@ runs:
 
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
 
+
+
         # drainpipe_exec "ssh-keyscan -T 60 -t rsa,ecdsa,ed25519  "$hostname" >> ~/.ssh/known_hosts"
 
         ddev drush version
 
         # debug site aliases
         ddev drush site:alias
+
         # drainpipe_exec "./vendor/bin/drush site:alias"
+
+        # Set drush version
+        drainpipe_exec "acli drush:set-version @sitesandbox.test 13"
+
+
+        # Check drush version
+        drainpipe_exec "acli drush:set-version @sitesandbox.test"
 
         ddev task drupal:maintenance:on site=@lullabotsandbox.dev
 
