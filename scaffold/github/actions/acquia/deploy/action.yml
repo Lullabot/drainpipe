@@ -39,11 +39,17 @@ runs:
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
+
+        cat  ~/.drush/sites
+
+        sed -i.bak 's|drush9|drush|g' ~/.drush/sites
+
+        cat  ~/.drush/sites
+
         hostname="${{ inputs.environment-url }}"
         hostname="${hostname#*://}"
 
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
-
 
 
         # drainpipe_exec "ssh-keyscan -T 60 -t rsa,ecdsa,ed25519  "$hostname" >> ~/.ssh/known_hosts"
