@@ -72,13 +72,13 @@ runs:
 #        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabotsandbox.dev"
       shell: bash
 
-    # - name: Push to Acquia
-    #   uses: ./drainpipe/scaffold/github/actions/acquia/push
-    #   with:
-    #     environment: ${{ inputs.environment }}
-    #     commit-message: ${{ inputs.commit-message }}
-    #     api-key: ${{ inputs.api-key }}
-    #     api-secret: ${{ inputs.api-secret }}
+    - name: Push to Acquia
+      uses: ./drainpipe/scaffold/github/actions/acquia/push
+      with:
+        environment: ${{ inputs.environment }}
+        commit-message: ${{ inputs.commit-message }}
+        api-key: ${{ inputs.api-key }}
+        api-secret: ${{ inputs.api-secret }}
 
     # - name: Run updates
     #   uses: ./drainpipe/scaffold/github/actions/acquia/update
