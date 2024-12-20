@@ -64,7 +64,10 @@ runs:
 
         # drainpipe_exec "./vendor/bin/drush site:alias"
 
-        ddev task drupal:maintenance:on site=@lullabotsandbox.dev
+        # ddev task drupal:maintenance:on site=@lullabotsandbox.dev
+        drainpipe_exec "task drupal:maintenance:on site=@lullabotsandbox.dev"
+
+        # ddev task drupal:maintenance:on site=@lullabotsandbox.dev
 
 #        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabotsandbox.dev"
       shell: bash
