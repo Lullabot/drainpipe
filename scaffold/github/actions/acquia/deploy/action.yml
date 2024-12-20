@@ -31,3 +31,70 @@ runs:
         github-token: ${{ inputs.github-token }}
         environment: ${{ inputs.environment }}
 
+    - name: Put site in Maintenance Mode
+      run: |
+
+        # source .github/actions/drainpipe/set-env/bash_aliases
+        # drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+        # ENVIRONMENT="${{ inputs.environment }}"
+        # APPLICATION=${ENVIRONMENT%.*}
+        # drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
+
+        # echo "======================================"
+        # drainpipe_exec "ls -al /var/www/html/drush"
+        # echo "======================================"
+        # drainpipe_exec "ls -al /var/www/html/drush/sites/lullabotsandbox.site.yml"
+
+        # drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
+
+        # drainpipe_exec "cat  /var/www/html/drush/sites/lullabotsandbox.site.yml"
+
+        # hostname="${{ inputs.environment-url }}"
+        # hostname="${hostname#*://}"
+
+        # drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
+
+
+        # # drainpipe_exec "ssh-keyscan -T 60 -t rsa,ecdsa,ed25519  "$hostname" >> ~/.ssh/known_hosts"
+
+        # ddev drush version
+
+        # # debug site aliases
+        # ddev drush site:alias
+
+        # drainpipe_exec "./vendor/bin/drush site:alias"
+
+        # ddev task drupal:maintenance:on site=@lullabotsandbox.dev
+        # drainpipe_exec "task drupal:maintenance:on site=@lullabotsandbox.dev"
+
+        # ddev task drupal:maintenance:on site=@lullabotsandbox.dev
+
+#        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabotsandbox.dev"
+      shell: bash
+
+    # - name: Push to Acquia
+    #   uses: ./drainpipe/scaffold/github/actions/acquia/push
+    #   with:
+    #     environment: ${{ inputs.environment }}
+    #     commit-message: ${{ inputs.commit-message }}
+    #     api-key: ${{ inputs.api-key }}
+    #     api-secret: ${{ inputs.api-secret }}
+
+    # - name: Run updates
+    #   uses: ./drainpipe/scaffold/github/actions/acquia/update
+    #   with:
+    #     environment: ${{ inputs.environment }}
+    #     run-installer: ${{ inputs.run-installer }}
+
+    # - name: Set Deployment Status
+    #   uses: ./.github/actions/drainpipe/deployment-status
+    #   with:
+    #     github-token: ${{ inputs.github-token }}
+    #     environment-url: ${{ inputs.environment-url }}
+
+    # - name: Take site out of Maintenance Mode
+    #   run: |
+    #     drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@${{ inputs.environment }}"
+    #   shell: bash
+
+
