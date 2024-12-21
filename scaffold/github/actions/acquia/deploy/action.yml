@@ -80,21 +80,21 @@ runs:
         api-key: ${{ inputs.api-key }}
         api-secret: ${{ inputs.api-secret }}
 
-    # - name: Run updates
-    #   uses: ./drainpipe/scaffold/github/actions/acquia/update
-    #   with:
-    #     environment: ${{ inputs.environment }}
-    #     run-installer: ${{ inputs.run-installer }}
+    - name: Run updates
+      uses: ./drainpipe/scaffold/github/actions/acquia/update
+      with:
+        environment: ${{ inputs.environment }}
+        run-installer: ${{ inputs.run-installer }}
 
-    # - name: Set Deployment Status
-    #   uses: ./.github/actions/drainpipe/deployment-status
-    #   with:
-    #     github-token: ${{ inputs.github-token }}
-    #     environment-url: ${{ inputs.environment-url }}
+    - name: Set Deployment Status
+      uses: ./.github/actions/drainpipe/deployment-status
+      with:
+        github-token: ${{ inputs.github-token }}
+        environment-url: ${{ inputs.environment-url }}
 
-    # - name: Take site out of Maintenance Mode
-    #   run: |
-    #     drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@${{ inputs.environment }}"
-    #   shell: bash
+    - name: Take site out of Maintenance Mode
+      run: |
+        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@${{ inputs.environment }}"
+      shell: bash
 
 
