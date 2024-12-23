@@ -27,6 +27,8 @@ runs:
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENV_INFO=$(drainpipe_exec "acli api:environments:find ${{ inputs.environment }}")
 
+        echo $ENV_INFO
+
         # VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
         # if [ "$VCS_TYPE" != "git" ]; then
         #   echo "Unrecognised VCS type"
