@@ -18,11 +18,17 @@ runs:
   steps:
     - name: Update site on Acquia
       run: |
+
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
+
+        # Avoid using drush9
+        drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
+
+
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.environment }} --yes site:install --existing-config"
         elif drainpipe_exec "./vendor/bin/task -l | grep '* update: ')"; then
