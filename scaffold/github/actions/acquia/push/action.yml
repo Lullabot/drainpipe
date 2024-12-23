@@ -20,6 +20,10 @@ runs:
       run: |
 
         source .github/actions/drainpipe/set-env/bash_aliases
+
+        echo "API KEY"
+        echo ${{ inputs.api-key }}| cut -c 1-4
+
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENV_INFO=$(drainpipe_exec "acli api:environments:find ${{ inputs.environment }}")
         # VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
