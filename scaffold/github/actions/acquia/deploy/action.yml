@@ -89,6 +89,8 @@ runs:
       with:
         environment: ${{ inputs.environment }}
         run-installer: ${{ inputs.run-installer }}
+        api-key: ${{ inputs.api-key }}
+        api-secret: ${{ inputs.api-secret }}
 
     - name: Set Deployment Status
       uses: ./.github/actions/drainpipe/deployment-status

@@ -7,6 +7,12 @@ inputs:
   run-installer:
     description: "Whether or not to run the Drupal site installer. Defaults to false."
     required: false
+  api-key:
+    description: "Acquia API Key"
+    required: true
+  api-secret:
+    description: "Acquia API Secret"
+    required: true
 runs:
   using: "composite"
   steps:
