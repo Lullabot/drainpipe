@@ -29,7 +29,7 @@ runs:
 
 
         echo "========================="
-        echo ${{ inputs.environment }}")
+        echo ${{ inputs.environment }}
         echo "========================="
 
         echo $ENV_INFO
