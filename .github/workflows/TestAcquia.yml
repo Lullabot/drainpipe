@@ -35,6 +35,7 @@ jobs:
 
       - name: Setup Project
         run: |
+
           ddev config --auto
           ddev start
           ddev exec --raw composer config extra.drupal-scaffold.gitignore true
@@ -48,7 +49,30 @@ jobs:
           ddev exec --raw composer config extra.drainpipe.github --json '{"acquia": []}'
           ddev exec --raw composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
+
+          # Recommended settings for Acquia
+          ddev composer config --no-plugins allow-plugins.acquia/drupal-recommended-settings true
+          ddev composer require acquia/drupal-recommended-settings
+
           yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
+
+          # Move DDEV settings to the bottom again.
+          # When acquia/drupal-recommended-settings modifies the settings.php
+          # breaks DDEV database default connection. So, we move the DDEV
+          # settings to the bottom of the settings page again.
+          SETTINGS_PHP="web/sites/default/settings.php"
+          # Define the block of text to be deleted and appended
+          read -r -d '' TEXT << 'EOF'
+          // Automatically generated include for settings managed by ddev.
+          $ddev_settings = __DIR__ . '/settings.ddev.php';
+          if (getenv('IS_DDEV_PROJECT') == 'true' && is_readable($ddev_settings)) {
+            require $ddev_settings;
+          }
+          EOF
+          # Remove the DDEV code block.
+          sed -i "/$(echo "$ESCAPED_TEXT" | head -n 1)/,/\$(echo "$ESCAPED_TEXT" | tail -n 1)/d" "$SETTINGS_PHP"
+          # Reinstall DDEV code block.
+          ddev config --auto
 
       - name: Install Drupal
         run: |
