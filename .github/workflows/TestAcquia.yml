@@ -54,7 +54,9 @@ jobs:
           ddev composer config --no-plugins allow-plugins.acquia/drupal-recommended-settings false
           ddev composer require acquia/drupal-recommended-settings
           # Apply Acquia recommended settings manually, before DDEV settings.
-          sed -i '/\/\/ Automatically generated include for settings managed by ddev./i require DRUPAL_ROOT . "/../vendor/acquia/drupal-recommended-settings/settings/acquia-recommended.settings.php";' settings.php
+          sed -i '/\/\/ Automatically generated include for settings managed by ddev./i require DRUPAL_ROOT . \
+            "/../vendor/acquia/drupal-recommended-settings/settings/acquia-recommended.settings.php";' \
+            docroot/sites/default/settings.php
 
           yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
 
