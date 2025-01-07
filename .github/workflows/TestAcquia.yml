@@ -72,7 +72,7 @@ jobs:
           ddev config --auto
 
       - name: Debug
-        run: cat web/sites/default/settings.php
+        run: tail docroot/sites/default/settings.php
 
       - name: Install Drupal
         run: |
