@@ -11,7 +11,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project:10.4.0 . --ignore-platform-req=ext-gd
+        run: |
+
+          composer create-project drupal/recommended-project:10.4.0 . \
+            --ignore-platform-req=ext-gd
+
+          # Acquia needs "docroot" instead of "web"
+          mv web docroot
+          ln -s docroot web
 
       - uses: actions/checkout@v4
         with:
