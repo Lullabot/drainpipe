@@ -54,13 +54,13 @@ jobs:
           ddev composer config --no-plugins allow-plugins.acquia/drupal-recommended-settings true
           ddev composer require acquia/drupal-recommended-settings
 
-          yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml -y
+          yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
 
           # Move DDEV settings to the bottom again.
           # When acquia/drupal-recommended-settings modifies the settings.php
           # breaks DDEV database default connection. So, we move the DDEV
           # settings to the bottom of the settings page again.
-          SETTINGS_PHP="web/sites/default/settings.php"
+          SETTINGS_PHP="docroot/sites/default/settings.php"
           # Removing DDEV generated code.
           # Removes if close bracket below require $ddev_settings.
           sed -i '/require \$ddev_settings;/ {n;d}' "$SETTINGS_PHP"
