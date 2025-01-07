@@ -51,28 +51,15 @@ jobs:
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
           # Recommended settings for Acquia
-          ddev composer config --no-plugins allow-plugins.acquia/drupal-recommended-settings true
+          ddev composer config --no-plugins allow-plugins.acquia/drupal-recommended-settings false
           ddev composer require acquia/drupal-recommended-settings
+          # Apply Acquia recommended settings manually, before DDEV settings.
+          sed -i '/\/\/ Automatically generated include for settings managed by ddev./i require DRUPAL_ROOT . "/../vendor/acquia/drupal-recommended-settings/settings/acquia-recommended.settings.php";' settings.php
 
           yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
 
-          # Move DDEV settings to the bottom again.
-          # When acquia/drupal-recommended-settings modifies the settings.php
-          # breaks DDEV database default connection. So, we move the DDEV
-          # settings to the bottom of the settings page again.
-          SETTINGS_PHP="docroot/sites/default/settings.php"
-          # Removing DDEV generated code.
-          # Removes if close bracket below require $ddev_settings.
-          sed -i '/require \$ddev_settings;/ {n;d}' "$SETTINGS_PHP"
-          # Removes DDEV comment.
-          sed -i '/Automatically .* by ddev/d' "$SETTINGS_PHP"
-          # Removes all $ddev_settings instances.
-          sed -i '/\$ddev_settings/d' "$SETTINGS_PHP"
-          # Reinstall DDEV code block.
-          ddev config --auto
-
       - name: Debug
-        run: tail docroot/sites/default/settings.php
+        run: tail -n 50 docroot/sites/default/settings.php
 
       - name: Install Drupal
         run: |
