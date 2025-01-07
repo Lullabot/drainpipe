@@ -35,7 +35,9 @@ jobs:
           ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
           ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
           ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+
           ddev exec --raw composer config extra.drainpipe.github --json '{"acquia": []}'
           ddev exec --raw composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
@@ -54,13 +56,6 @@ jobs:
           echo "settings.ddev.php" >> .drainpipeignore
           echo "/drainpipe" >> .drainpipeignore
 
-      - name: Create settings.php
-        run: |
-          echo '<?php' > web/sites/default/settings.php
-          echo "\$settings['container_yamls'][] = __DIR__ . '/services.yml';" >> web/sites/default/settings.php
-          echo "include __DIR__ . \"/settings.acquia.php\";" >> web/sites/default/settings.php
-          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
-
       - name: Snapshot Project
         env:
           directory: /tmp/release
@@ -71,7 +66,7 @@ jobs:
           echo "/drainpipe" >> .drainpipeignore
           ddev task snapshot:directory directory=/tmp/release
 
-      - name: Clone from production to dev
+      - name: Clone from test to dev
         uses: ./drainpipe/scaffold/github/actions/acquia/clone-env
         with:
           source-environment: lullabotsandbox.test
