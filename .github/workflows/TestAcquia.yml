@@ -54,7 +54,7 @@ jobs:
           ddev composer config --no-plugins allow-plugins.acquia/drupal-recommended-settings true
           ddev composer require acquia/drupal-recommended-settings
 
-          yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
+          yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml -y
 
           # Move DDEV settings to the bottom again.
           # When acquia/drupal-recommended-settings modifies the settings.php
