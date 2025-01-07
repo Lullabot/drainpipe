@@ -71,6 +71,9 @@ jobs:
           # Reinstall DDEV code block.
           ddev config --auto
 
+      - name: Debug
+        run: cat web/sites/default/settings.php
+
       - name: Install Drupal
         run: |
           ddev drush site:install minimal -y
