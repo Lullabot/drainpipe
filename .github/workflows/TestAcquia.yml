@@ -63,7 +63,7 @@ jobs:
           SETTINGS_PHP="web/sites/default/settings.php"
           # Define the block of text to be deleted and appended
           read -r -d '' TEXT << 'EOF'
-          // Automatically generated include for settings managed by ddev.
+          # Automatically generated include for settings managed by ddev.
           $ddev_settings = __DIR__ . '/settings.ddev.php';
           if (getenv('IS_DDEV_PROJECT') == 'true' && is_readable($ddev_settings)) {
             require $ddev_settings;
