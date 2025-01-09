@@ -33,7 +33,7 @@ $ruleset = new TwigCsFixer\Ruleset\Ruleset();
 $ruleset->addStandard(new TwigCsFixer\Standard\TwigCsFixer());
 
 // Remove the IncludeFunctionRule which breaks TwigJS.
-$ruleset->removeRule(TwigCsFixer\Rules\Function\includeFunctionRule::class);
+$ruleset->removeRule(TwigCsFixer\Rules\Function\IncludeFunctionRule::class);
 
 $config = new TwigCsFixer\Config\Config();
 $config->setRuleset($ruleset);
