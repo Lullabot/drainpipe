@@ -58,7 +58,7 @@ tasks:
       - |
         DIRS_ARR=({{.YAML_DIRS}})
         for DIR in "${DIRS_ARR[@]}"; do
-          ./vendor/bin/yaml-lint $DIR
+          ./vendor/bin/yaml-lint --parse-tags $DIR
         done
       - |
         DIRS_ARR=({{.TWIG_DIRS}})
