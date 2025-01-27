@@ -65,9 +65,16 @@ jobs:
 
       - name: Install Drupal
         run: |
+
           ddev drush site:install minimal -y
           echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
           ddev drush config:export -y
+
+          # When config is move to ../config, the .htaccess to avoid execution
+          # is not create automatically. Running cron once does that for us.
+          ddev drush cron
+
+          cp config/default/.htaccess config/default
 
       - name: Create .drainpipeignore
         run: |
