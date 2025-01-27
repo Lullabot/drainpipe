@@ -70,9 +70,12 @@ jobs:
           echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
           ddev drush config:export -y
 
-          # When config is move to ../config, the .htaccess to avoid execution
+          # When config is moved to ../config, the .htaccess to avoid execution
           # is not create automatically. Running cron once does that for us.
           ddev drush cron
+
+      - name: Debug
+        run: cat config/.htaccess
 
       - name: Create .drainpipeignore
         run: |
