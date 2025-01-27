@@ -74,8 +74,6 @@ jobs:
           # is not create automatically. Running cron once does that for us.
           ddev drush cron
 
-          cp config/default/.htaccess config/default
-
       - name: Create .drainpipeignore
         run: |
           echo "/web/sites/default/files" >> .drainpipeignore
