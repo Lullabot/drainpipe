@@ -114,6 +114,8 @@ runs:
 
     - name: Take site out of Maintenance Mode
       run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
+
         drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@${{ inputs.environment }}"
       shell: bash
 
