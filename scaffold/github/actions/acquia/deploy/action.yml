@@ -34,22 +34,7 @@ runs:
     - name: Put site in Maintenance Mode
       run: |
 
-        # @TODO: restore
-        # source .github/actions/drainpipe/set-env/bash_aliases
-
-        # @TODO: remove
-        # Temporarily adding drainpipe_exec here.
-        drainpipe_exec() {
-          if [ "$DRAINPIPE_DDEV" == "true" ]; then
-            ddev exec "$@"
-          else
-            eval "$@"
-          fi
-        }
-
-
-        echo "API KEY"
-        echo ${{ inputs.api-key }}| cut -c 1-10
+        source .github/actions/drainpipe/set-env/bash_aliases
 
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
@@ -83,11 +68,11 @@ runs:
         # @TODO: restore, debug
         # ddev task drupal:maintenance:on site=@lullabotsandbox.dev
 
-        # drainpipe_exec "task drupal:maintenance:on site=@lullabotsandbox.dev"
+        drainpipe_exec "task drupal:maintenance:on site=@lullabotsandbox.dev"
 
         # ddev task drupal:maintenance:on site=@lullabotsandbox.dev
 
-#        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabotsandbox.dev"
+      #  drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabotsandbox.dev"
       shell: bash
 
     - name: Push to Acquia
@@ -116,7 +101,7 @@ runs:
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@${{ inputs.environment }}"
+        drainpipe_exec "./vendor/bin/task drupal:maintenance:off site=@${{ inputs.environment }}"
       shell: bash
 
 
