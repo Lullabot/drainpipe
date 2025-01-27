@@ -34,7 +34,19 @@ runs:
     - name: Put site in Maintenance Mode
       run: |
 
-        source .github/actions/drainpipe/common/set-env/bash_aliases
+        # @TODO: restore
+        # source .github/actions/drainpipe/set-env/bash_aliases
+
+        # @TODO: remove
+        # Temporarily adding drainpipe_exec here.
+        drainpipe_exec() {
+          if [ "$DRAINPIPE_DDEV" == "true" ]; then
+            ddev exec "$@"
+          else
+            eval "$@"
+          fi
+        }
+
 
         echo "API KEY"
         echo ${{ inputs.api-key }}| cut -c 1-10
