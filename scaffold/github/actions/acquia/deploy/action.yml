@@ -34,7 +34,7 @@ runs:
     - name: Put site in Maintenance Mode
       run: |
 
-        source .github/actions/drainpipe/set-env/bash_aliases
+        source .github/actions/drainpipe/common/set-env/bash_aliases
 
         echo "API KEY"
         echo ${{ inputs.api-key }}| cut -c 1-10
