@@ -59,7 +59,7 @@ runs:
 
         # Avoid using drush9
         # drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
-        drainpipe_exec "yq eval '.. | select(has(\"paths\")) | .paths' /var/www/html/drush/sites/lullabotsandbox.site.yml"
+        drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/lullabotsandbox.site.yml"
 
 
         echo "AFTER"
