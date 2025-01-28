@@ -85,4 +85,4 @@ tasks:
   maintenance:off:
     desc: Turn off Maintenance Mode
     cmds:
-      - ./vendor/bin/drush {{.site}}  --yes state:set system.maintenance_mode 0 --input-format=integer
+      - ./vendor/bin/drush {{.site}} --yes state:set system.maintenance_mode 0 --input-format=integer

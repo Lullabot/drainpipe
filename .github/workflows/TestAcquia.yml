@@ -53,7 +53,8 @@ jobs:
           # Recommended settings for Acquia
           ddev composer config --no-plugins allow-plugins.acquia/drupal-recommended-settings false
           ddev composer require acquia/drupal-recommended-settings
-          # Apply Acquia recommended settings manually, before DDEV settings.
+
+          # Acquia recommended settings before DDEV settings.
           sed -i '/\/\/ Automatically generated include for settings managed by ddev./i require DRUPAL_ROOT . \
             "/../vendor/acquia/drupal-recommended-settings/settings/acquia-recommended.settings.php";' \
             docroot/sites/default/settings.php
@@ -67,8 +68,9 @@ jobs:
           echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
           ddev drush config:export -y
 
-          # When config is moved to ../config, the .htaccess to avoid execution
-          # is not create automatically. Running cron once does that for us.
+          # When config is moved to ../config, the .htaccess to avoid code
+          # execution is not created automatically. Running cron once creates
+          # the needed .htaccess file which improves security.
           ddev drush cron
 
       - name: Create .drainpipeignore
