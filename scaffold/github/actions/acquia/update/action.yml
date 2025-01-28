@@ -17,6 +17,7 @@ runs:
   using: "composite"
   steps:
     - name: Update site on Acquia
+      shell: bash
       run: |
 
         source .github/actions/drainpipe/set-env/bash_aliases
@@ -33,11 +34,10 @@ runs:
           drainpipe_exec "./vendor/bin/drush @${{ inputs.environment }} --yes site:install --existing-config"
         fi
 
-        if drainpipe_exec "./vendor/bin/task -l | grep '* update: ')"; then
+        if drainpipe_exec "./vendor/bin/task -l | grep -q '* update: '"; then
           echo "Running task update"
           drainpipe_exec "./vendor/bin/task update site=@${{ inputs.environment }}"
         else
           echo "Running task drupal:update"
           drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.environment }}"
         fi
-      shell: bash
