@@ -27,18 +27,11 @@ runs:
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENV_INFO=$(drainpipe_exec "acli --no-interaction api:environments:find ${{ inputs.environment }}")
 
-
-        echo "========================="
-        echo ${{ inputs.environment }}
-        echo "========================="
-
-        echo $ENV_INFO
-
-        # VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
-        # if [ "$VCS_TYPE" != "git" ]; then
-        #   echo "Unrecognised VCS type"
-        #   exit 1
-        # fi
+        VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
+        if [ "$VCS_TYPE" != "git" ]; then
+          echo "Unrecognised VCS type"
+          exit 1
+        fi
 
         BRANCH=$(echo $ENV_INFO | jq -r ".vcs.path")
         REMOTE=$(echo $ENV_INFO | jq -r ".vcs.url")
