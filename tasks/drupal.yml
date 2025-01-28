@@ -68,7 +68,7 @@ tasks:
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - ./vendor/bin/drush {{.site}} --yes deploy:hook
       - |
-       # drush config:status --format=json is outputting notices in Pantheon even with the json format, 
+       # drush config:status --format=json is outputting notices in Pantheon even with the json format,
        # so we need to tail the last line.
         config_status_output=$(./vendor/bin/drush {{.site}} config:status --format=json --state=Different | tail -n1)
         if [[ $config_status_output != '[]' ]]; then
@@ -81,8 +81,8 @@ tasks:
   maintenance:on:
     desc: Turn on Maintenance Mode
     cmds:
-      - ./vendor/bin/drush {{.site}} --yes state:set system.maintenance_mode 1 --input-format=integer
+      - ./vendor/bin/drush {{.site}} --root=/mnt/gfs/lullabotsandbox.dev/livedev/docroot --yes state:set system.maintenance_mode 1 --input-format=integer
   maintenance:off:
     desc: Turn off Maintenance Mode
     cmds:
-      - ./vendor/bin/drush {{.site}} --yes state:set system.maintenance_mode 0 --input-format=integer
+      - ./vendor/bin/drush {{.site}} --root=/mnt/gfs/lullabotsandbox.dev/livedev/docroot  --yes state:set system.maintenance_mode 0 --input-format=integer
