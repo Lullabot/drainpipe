@@ -1,10 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
   "rangeStrategy": "bump",
-  "ignoreDeps": ["drainpipe"],
+  "ignoreDeps": [
+    "drainpipe"
+  ],
   "packageRules": [
     {
       "matchPackageNames": [
@@ -15,7 +17,9 @@
         "twig/twig",
         "vlucas/phpdotenv"
       ],
-      "addLabels": ["test only - do not merge"]
+      "addLabels": [
+        "test only - do not merge"
+      ]
     }
   ]
 }
