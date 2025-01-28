@@ -43,22 +43,22 @@ runs:
 
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
 
-    - name: debug lullabotsandbox.site.yml before
-      shell: bash
-      run: drainpipe_exec "cat /var/www/html/drush/sites/lullabotsandbox.site.yml"
+    # - name: debug lullabotsandbox.site.yml before
+    #   shell: bash
+    #   run: drainpipe_exec "cat /var/www/html/drush/sites/lullabotsandbox.site.yml"
 
     - name: continue
       shell: bash
       run: |
 
         # Avoid using drush9
-        drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
+        # drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
         drainpipe_exec "task drupal:maintenance:on site=@lullabotsandbox.dev"
 
-    - name: debug lullabotsandbox.site.yml after
-      shell: bash
-      run: drainpipe_exec "cat /var/www/html/drush/sites/lullabotsandbox.site.yml"
+    # - name: debug lullabotsandbox.site.yml after
+    #   shell: bash
+    #   run: drainpipe_exec "cat /var/www/html/drush/sites/lullabotsandbox.site.yml"
 
 
     - name: Push to Acquia
