@@ -26,14 +26,16 @@ runs:
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
 
         # Avoid using drush9
-        drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
-
+        drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/lullabotsandbox.site.yml"
 
         if [ "${{ inputs.run-installer }}" == "true" ]; then
+          echo "Running site install"
           drainpipe_exec "./vendor/bin/drush @${{ inputs.environment }} --yes site:install --existing-config"
         elif drainpipe_exec "./vendor/bin/task -l | grep '* update: ')"; then
+          echo "Running task update"
           drainpipe_exec "./vendor/bin/task update site=@${{ inputs.environment }}"
         else
+          echo "Running task drupal:update"
           drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.environment }}"
         fi
       shell: bash
