@@ -53,8 +53,18 @@ runs:
 
         source .github/actions/drainpipe/set-env/bash_aliases
 
+
+        echo "BEFORE"
+        drainpipe_exec "cat /var/www/html/drush/sites/lullabotsandbox.site.yml"
+
         # Avoid using drush9
-        # drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
+        drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
+
+
+        echo "AFTER"
+        drainpipe_exec "cat /var/www/html/drush/sites/lullabotsandbox.site.yml"
+
+
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
         drainpipe_exec "task drupal:maintenance:on site=@lullabotsandbox.dev"
 
