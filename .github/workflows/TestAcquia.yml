@@ -66,6 +66,9 @@ jobs:
 
           ddev drush site:install minimal -y
           echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+
+          # We need a consistent site ID.
+          ddev drush config-set "system.site" uuid "6b7eca14-f1b5-4059-901e-cbe5ffe59998"
           ddev drush config:export -y
 
           # When config is moved to ../config, the .htaccess to avoid code
@@ -90,10 +93,10 @@ jobs:
           echo "/drainpipe" >> .drainpipeignore
           ddev task snapshot:directory directory=/tmp/release
 
-      - name: Clone from test to dev
+      - name: Clone from production to dev
         uses: ./drainpipe/scaffold/github/actions/acquia/clone-env
         with:
-          source-environment: lullabotsandbox.test
+          source-environment: lullabotsandbox.prod
           target-environment: lullabotsandbox.dev
           api-key: ${{ secrets.ACQUIA_API_KEY }}
           api-secret: ${{ secrets.ACQUIA_API_SECRET }}
