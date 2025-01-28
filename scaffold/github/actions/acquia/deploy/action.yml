@@ -32,6 +32,7 @@ runs:
         environment: ${{ inputs.environment }}
 
     - name: Put site in Maintenance Mode
+      shell: bash
       run: |
 
         source .github/actions/drainpipe/set-env/bash_aliases
@@ -39,41 +40,26 @@ runs:
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
+
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
 
-        # echo "======================================"
-        # drainpipe_exec "ls -al /var/www/html/drush"
-        # echo "======================================"
-        # drainpipe_exec "ls -al /var/www/html/drush/sites/lullabotsandbox.site.yml"
+    - name: debug lullabotsandbox.site.yml before
+      shell: bash
+      run: cat lullabotsandbox.site.yml
 
+    - name: continue
+      shell: bash
+      run: |
+
+        # Avoid using drush9
         drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
-
-        drainpipe_exec "cat  /var/www/html/drush/sites/lullabotsandbox.site.yml"
-
-        hostname="${{ inputs.environment-url }}"
-        hostname="${hostname#*://}"
-
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
-
-
-        # # drainpipe_exec "ssh-keyscan -T 60 -t rsa,ecdsa,ed25519  "$hostname" >> ~/.ssh/known_hosts"
-
-        # ddev drush version
-
-        # # debug site aliases
-        # ddev drush site:alias
-
-        # drainpipe_exec "./vendor/bin/drush site:alias"
-
-        # @TODO: restore, debug
-        # ddev task drupal:maintenance:on site=@lullabotsandbox.dev
-
         drainpipe_exec "task drupal:maintenance:on site=@lullabotsandbox.dev"
 
-        # ddev task drupal:maintenance:on site=@lullabotsandbox.dev
-
-      #  drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabotsandbox.dev"
+    - name: debug lullabotsandbox.site.yml after
       shell: bash
+      run: cat lullabotsandbox.site.yml
+
 
     - name: Push to Acquia
       uses: ./drainpipe/scaffold/github/actions/acquia/push
