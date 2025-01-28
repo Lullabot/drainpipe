@@ -60,9 +60,6 @@ jobs:
 
           yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
 
-      - name: Debug
-        run: tail -n 50 docroot/sites/default/settings.php
-
       - name: Install Drupal
         run: |
 
@@ -73,9 +70,6 @@ jobs:
           # When config is moved to ../config, the .htaccess to avoid execution
           # is not create automatically. Running cron once does that for us.
           ddev drush cron
-
-      - name: Debug
-        run: cat config/.htaccess
 
       - name: Create .drainpipeignore
         run: |
