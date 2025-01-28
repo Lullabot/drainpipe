@@ -51,6 +51,8 @@ runs:
       shell: bash
       run: |
 
+        source .github/actions/drainpipe/set-env/bash_aliases
+
         # Avoid using drush9
         # drainpipe_exec "sed -i.bak 's|drush9|/var/www/html/lullabotsandbox.dev/vendor/bin/drush|g' /var/www/html/drush/sites/lullabotsandbox.site.yml"
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
