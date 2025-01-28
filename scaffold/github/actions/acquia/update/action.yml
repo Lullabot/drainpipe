@@ -31,7 +31,9 @@ runs:
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           echo "Running site install"
           drainpipe_exec "./vendor/bin/drush @${{ inputs.environment }} --yes site:install --existing-config"
-        elif drainpipe_exec "./vendor/bin/task -l | grep '* update: ')"; then
+        fi
+
+        if drainpipe_exec "./vendor/bin/task -l | grep '* update: ')"; then
           echo "Running task update"
           drainpipe_exec "./vendor/bin/task update site=@${{ inputs.environment }}"
         else
