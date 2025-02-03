@@ -44,7 +44,7 @@ tasks:
       - echo "🚮 Dropping existing database"
       - ./vendor/bin/drush {{ .site }} sql:drop --yes
       - echo "📰 Importing database"
-      - gunzip -k $DB_DIR/db.sql.gz
+      - gunzip --keep --force $DB_DIR/db.sql.gz
       - ./vendor/bin/drush {{ .site }} sql:query --file=$DB_DIR/db.sql
       - defer: rm -f $DB_DIR/db.sql
   export-db:
