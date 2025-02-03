@@ -37,7 +37,7 @@ runs:
         REMOTE=$(echo $ENV_INFO | jq -r ".vcs.url")
         drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=\"$BRANCH\" remote=\"$REMOTE\" message=\"${{ inputs.commit-message }}\""
         # Run code-switch to the same branch so we wait for everything to sync.
-        drainpipe_exec "acli api:environments:code-switch ${{ inputs.environment }} \"$BRANCH\""
+        drainpipe_exec "acli api:environments:code-switch --task-wait ${{ inputs.environment }} \"$BRANCH\""
 
       shell: bash
 
