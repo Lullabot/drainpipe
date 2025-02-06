@@ -12,7 +12,7 @@
     "gulp-sourcemaps": "^3.0.0",
     "modern-normalize": "^3.0.1",
     "postcss": "^8.5.1",
-    "sass": "^1.83.4",
+    "sass": "^1.84.0",
     "yargs": "^17.7.2"
   },
   "repository": {
