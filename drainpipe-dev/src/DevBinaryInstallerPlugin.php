@@ -31,5 +31,19 @@ class DevBinaryInstallerPlugin extends BinaryInstaller {
             'hashalgo' => 'sha256',
             'version' => '1.0.0',
         ],
+        'action-validator' => [
+            'releases' => [
+                'linux' => [
+                    'amd64' =>  ['url' => 'https://github.com/mpalmer/action-validator/releases/download/v0.6.0/action-validator_linux_amd64', 'sha' => 'fa61521913ee4cf5de7e4d5b803741b2c60ebde447ee38e2b71abbd213d3354a'],
+                    'arm64' =>  ['url' => 'https://github.com/mpalmer/action-validator/releases/download/v0.6.0/action-validator_linux_arm64', 'sha' => '38a582690ab7e64ba33b4c29eaf16979ed116d4daf40fde39ec18992c475c0b1'],
+                ],
+                'darwin' => [
+                    'amd64' => ['url' => 'https://github.com/mpalmer/action-validator/releases/download/v0.6.0/action-validator_darwin_amd64', 'sha' => '10f453ad4ed011eb3866bd35c25311bd2fe1fbf353cbe64793115de2348f8ddb'],
+                    'arm64' => ['url' => 'https://github.com/mpalmer/action-validator/releases/download/v0.6.0/action-validator_darwin_arm64', 'sha' => '68e09e0793cf958daf0aebe69fb2bf858232fb9c4f74f913dab02db67d32224d'],
+                ],
+            ],
+            'hashalgo' => 'sha256',
+            'version' => '0.6.0',
+        ],
     ];
 }

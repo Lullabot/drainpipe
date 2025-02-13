@@ -58,9 +58,33 @@ jobs:
           test -f phpcs.xml.dist
           test -f phpstan.neon.dist
 
+      - name: Create a git repository
+        run: |
+          git config --global user.email "no-reply@example.com"
+          git config --global user.name "Drainpipe Bot"
+          git init
+          echo "/drainpipe" >> .gitignore
+          echo "/drainpipe-dev" >> .gitignore
+          git add .
+          git commit -m "Initial commit"
+
       - name: Fix settings.php
         run: |
           sed -i '/^.*container_yamls.*$/i /** @phpstan-ignore-next-line */' web/sites/default/settings.php
+
+      - name: Test for untracked and modified files
+        id: test_untracked
+        continue-on-error: true
+        run: ddev task test:untracked
+
+      - name: Test for untracked and modified files
+        run: |
+          if [ "${{ steps.test_untracked.outcome }}" != "failure" ]; then
+            exit 1
+          fi
+          git add .
+          git commit -m "Second commit"
+          ddev task test:untracked
 
       - name: Run Static Tests
         run: ddev task test:static

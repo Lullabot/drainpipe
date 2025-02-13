@@ -402,6 +402,25 @@ They are composite actions which can be used in any of your workflows e.g.
 Tests can be run locally with [act](https://github.com/nektos/act):
 `act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
 
+### Tests
+Workflows for running static and functional tests can be added with the following
+configuration:
+```json
+"extra": {
+  "drainpipe": {
+    "github": ["TestStatic", "TestFunctional"]
+  }
+}
+```
+
+The build process for the functional tests will use `task build:ci:functional`,
+falling back to `task build:dev`, and then `task build`. The static tests
+should not require a build step.
+
+These workflow flies will continue to be managed by Drainpipe and cannot be
+overridden. If you wish to do so then it's recommended you maintain your own
+workflows for testing.
+
 ### Security
 ```json
 "extra": {
@@ -448,7 +467,7 @@ To enable deployment of Pantheon Review Apps:
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
-    - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
+    - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth local
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
 
@@ -494,7 +513,7 @@ Available variables are:
 | Variable                          |                                                                                                                                    |
 |-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
 | DRAINPIPE_DDEV_SSH_PRIVATE_KEY    | SSH private key used for e.g. committing to git                                                                                    |
-| DRAINPIPE_DDEV_SSH_KNOWN_HOSTS    | The result of running e.g. `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`                                              |
+| DRAINPIPE_DDEV_SSH_KNOWN_HOSTS    | The result of running e.g. `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`                                              |
 | DRAINPIPE_DDEV_GIT_EMAIL          | E-mail address to use for git commits                                                                                              |
 | DRAINPIPE_DDEV_GIT_NAME           | Name to use for git commits                                                                                                        |
 | DRAINPIPE_DDEV_COMPOSER_CACHE_DIR | Set to "false" to disable composer cache dir, or another value to override the default location of .ddev/.drainpipe-composer-cache |
@@ -537,7 +556,7 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 - Add the following [variables to your GitLab repository](https://docs.gitlab.com/ee/ci/variables/#for-a-project):
   - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
-  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`  (enable the _Mask variable_ checkbox)
+  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`  (enable the _Mask variable_ checkbox)
   - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See

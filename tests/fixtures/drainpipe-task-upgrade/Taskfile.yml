@@ -1,0 +1,65 @@
+version: '3'
+
+dotenv: ['.env', '.env.defaults']
+
+includes:
+  deploy: ./vendor/lullabot/drainpipe/tasks/deploy.yml
+  drupal: ./vendor/lullabot/drainpipe/tasks/drupal.yml
+  github: ./vendor/lullabot/drainpipe/tasks/github.yml
+  sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
+  snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
+  test: ./vendor/lullabot/drainpipe/tasks/test.yml
+  javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
+
+output: prefixed
+silent: true
+
+#vars:
+#  DRAINPIPE_SASS: |
+#    web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
+#  DRAINPIPE_JAVASCRIPT: |
+#    web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
+
+tasks:
+  sync:
+    desc: "Sync a database from production and import it"
+    cmds:
+      # Replace this with a command to fetch your database.
+      - ./vendor/bin/drush site:install -y
+      - echo "🧹 Sanitising database"
+      - ./vendor/bin/drush sql:sanitize --yes
+
+  build:
+    desc: "Builds the project for production"
+    deps: [drupal:composer:production]
+    cmds:
+      - echo "Nothing to do"
+      #- task: assets
+
+  build:dev:
+    desc: "Builds the project for development"
+    deps: [drupal:composer:development]
+    cmds:
+      # @see https://architecture.lullabot.com/adr/20211026-one-time-login-first-drupal-user-account/
+      - ./vendor/bin/drush user:unblock --uid=1
+      # Ignore the below modules in sites/default/settings.php e.g.
+      # $settings['config_exclude_modules'] = ['stage_file_proxy', 'field_ui', 'views_ui'];
+      # - ./vendor/bin/drush pm:enable stage_file_proxy views_ui field_ui -y
+
+  # Drush aliases will be passed through e.g. task update site=@staging
+  update:
+    desc: "Runs the Drupal update process"
+    cmds:
+      - task: drupal:update
+
+# assets:
+#   desc: "Builds assets such as CSS & JS"
+#   cmds:
+#     - yarn install
+#     - task: javascript:compile
+#     - task: sass:compile
+#
+# assets:watch:
+#   desc: "Builds assets such as CSS & JS, and watches them for changes"
+#   deps: [sass:watch, javascript:watch]
+

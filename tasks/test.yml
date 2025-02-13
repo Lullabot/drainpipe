@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   YAML_DIRS: '{{ default "web/**/*.yml" .YAML_DIRS }}'
-  TWIG_DIRS: '{{ default "web/modules web/profiles web/themes" .TWIG_DIRS }}'
+  TWIG_DIRS: '{{ default "web/modules/custom web/profiles web/themes/custom" .TWIG_DIRS }}'
   # These directories are configured in phpcs.xml. However, phpcs will fail if
   # those directories do not exist, so we create them with the assumption that
   # every Drupal site will eventually have these directories.
@@ -18,9 +18,13 @@ tasks:
   static:
     desc: Runs all static tests
     deps: [lint, phpstan, phpunit:static, phpcs]
+    cmds:
+      - task: untracked
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
     deps: [config, phpunit:functional, nightwatch]
+    cmds:
+      - task: untracked
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
@@ -60,7 +64,7 @@ tasks:
         DIRS_ARR=({{.TWIG_DIRS}})
         for DIR in "${DIRS_ARR[@]}"; do
           if [ "{{.format}}" == "junit" ]; then
-            ./vendor/bin/twig-cs-fixer lint $DIR --format junit
+            ./vendor/bin/twig-cs-fixer lint $DIR --report junit > test_result/twig-cs-fixer.xml
           else
             ./vendor/bin/twig-cs-fixer lint $DIR
           fi
@@ -178,6 +182,16 @@ tasks:
         for DIR in "${DIRS_ARR[@]}"; do
           ./vendor/bin/twig-cs-fixer lint --fix $DIR
         done
+  untracked:
+    desc: Checks for any untracked files in git
+    cmds:
+      - |
+        # Ignore the .ddev folder as changes are made to this in order to run tests e.g. adding environment variables.
+        if [ "$(git status -s --ignore-submodules=dirty -- ':!.ddev')" != "" ]; then
+          git status -s --ignore-submodules=dirty -- ':!.ddev'
+          echo "Untracked changes detected - please rectify or add the files to your .gitignore"
+          exit 1
+        fi
   nightwatch:check:
     #desc: Verifies Nightwatch is setup correctly
     cmds:
@@ -217,7 +231,7 @@ tasks:
     interactive: true
     cmds:
       - |
-        PACKAGES="nightwatch @lullabot/nightwatch-drupal-commands"
+        PACKAGES="nightwatch nightwatch-axe-verbose @nightwatch/vrt @lullabot/nightwatch-drupal-commands"
         if [ ! -f "package.json" ]; then
           echo -n "No package.json exists, would you like to use yarn1, npm, yarn3 (node <= 20), or yarn (node >= 21)? "
           read -r PACKAGE_MANAGER
@@ -239,6 +253,9 @@ tasks:
             echo '  "nightwatch@*":' >> .yarnrc.yml
             echo '    dependencies:' >> .yarnrc.yml
             echo '      ws: "*"' >> .yarnrc.yml
+            echo '  "@nightwatch/vrt@*":' >> .yarnrc.yml
+            echo '    dependencies:' >> .yarnrc.yml
+            echo '      open: "^8"' >> .yarnrc.yml
             yarn add $PACKAGES --dev
           elif [ "$PACKAGE_MANAGER" == "yarn" ]; then
             yarn set version berry
@@ -247,6 +264,9 @@ tasks:
             echo '  "nightwatch@*":' >> .yarnrc.yml
             echo '    dependencies:' >> .yarnrc.yml
             echo '      ws: "*"' >> .yarnrc.yml
+            echo '  "@nightwatch/vrt@*":' >> .yarnrc.yml
+            echo '    dependencies:' >> .yarnrc.yml
+            echo '      open: "^8"' >> .yarnrc.yml
             yarn cache clear
             yarn add $PACKAGES --dev
           else
@@ -280,6 +300,23 @@ tasks:
           echo "ddev config --additional-hostnames=\"*.$DDEV_SITENAME\""
           echo "ddev restart"
         fi
+  siteinstall:default:
+    desc: "Runs the site installer for the default site"
+    cmds:
+      - ./vendor/bin/drush --yes site:install --existing-config
+  siteinstall:firefox:
+    desc: "Runs the site installer for the Firefox container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
+  siteinstall:chrome:
+    desc: "Runs the site installer for the Chrome container"
+    cmds:
+      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
+  siteinstall:all:
+    desc: "Runs the site installer for the default site, Chrome, and Firefox container"
+    deps: [ siteinstall:default, siteinstall:firefox, siteinstall:chrome ]
+    cmds:
+      - echo "Default, Chrome, and Firefox installed"
   nightwatch:siteinstall:firefox:
     desc: "Runs the site installer for the Firefox container"
     cmds:
@@ -297,6 +334,8 @@ tasks:
     env:
       NIGHTWATCH_ENV: 'firefox,chrome'
     cmds:
+      - defer: { task: _nightwatch:vrt-report }
+      - rm -rf test_result/nightwatch*
       - |
         if [ -f "package-lock.json" ]; then
           npx nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
@@ -305,4 +344,17 @@ tasks:
         else
           echo "Unable to figure out which package manager is in use"
           exit 1;
+        fi
+  _nightwatch:vrt-report:
+    desc: "Moves the VRT report into the test_results folder"
+    cmds:
+      - |
+        if [ -d "vrt-report" ]; then
+          mkdir -p test_result
+          mv vrt-report test_result/nightwatch-vrt-report
+          cp -R test/nightwatch/vrt test_result/nightwatch-vrt-report
+          mkdir -p test_result/nightwatch-vrt-report/test/nightwatch
+          mv test_result/nightwatch-vrt-report/vrt test_result/nightwatch-vrt-report/test/nightwatch
+          sed -i 's/\/test\/nightwatch\/vrt\//test\/nightwatch\/vrt\//g' test_result/nightwatch-vrt-report/index.html
+          echo "Nightwatch VTR report moved to test_result/nightwatch-vrt-report"
         fi

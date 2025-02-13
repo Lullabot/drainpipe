@@ -51,33 +51,39 @@ jobs:
           COMPOSER_LOCK_DIFF="<!-- composer-lock-diff -->
           ## Composer Lock Diff
           $(cat composer-lock-diff.md)"
+          EMPTY=true
+          if [ "$(cat composer-lock-diff.md)" != "" ]; then
+            echo $COMPOSER_LOCK_DIFF >> $GITHUB_STEP_SUMMARY
+            EMPTY=false
+          fi
           COMPOSER_LOCK_DIFF=$(echo "$COMPOSER_LOCK_DIFF" | jq -Rsa .)
           FIRST=true
-          echo $COMPOSER_LOCK_DIFF >> $GITHUB_STEP_SUMMARY
-          curl -s -L -f -X GET \
+          for i in $(curl -s -L -f -X GET \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER/comments | jq -rc '.[]|select(.body | contains("<!-- composer-lock-diff -->")) | .id' | while read i; do
-            if [ "$FIRST" == "true" ]; then
-              FIRST=false
-              curl -L \
-                -X PATCH \
+            -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER/comments | jq -rc '.[]|select(.body | contains("<!-- composer-lock-diff -->")) | .id'); do
+            if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
+              curl -s -L -f -X PATCH \
+                --output /dev/null \
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 https://api.github.com/repos/${{ github.repository }}/pulls/comments/$i \
                 -d "{\"body\":$COMPOSER_LOCK_DIFF}"
-            fi
-              curl -L \
-                -X DELETE \
+            else
+              curl -s -L -f -X DELETE \
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 https://api.github.com/repos/${{ github.repository }}/pulls/comments/$i
+            fi
+            if [ "$FIRST" == "true" ]; then
+              FIRST=false
+            fi
           done
-          if [ "$FIRST" == "true" ]; then
-            curl -L -f \
-              -X POST \
+          if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
+            curl -s -L -f -X POST \
+              --output /dev/null \
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
