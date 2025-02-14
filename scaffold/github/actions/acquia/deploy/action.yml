@@ -45,9 +45,9 @@ runs:
         # Avoid using drush9, it seems to be an Acquia issue.
         # https://docs.acquia.com/acquia-cloud-platform/manage-apps/command-line/drush#section-specifying-a-version-of-drush-in-commands
         # Removes *.paths where drush9 is specified.
-        drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/lullabotsandbox.site.yml"
+        drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/${APPLICATION}.site.yml"
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
-        drainpipe_exec "task drupal:maintenance:on site=@lullabotsandbox.dev"
+        drainpipe_exec "task drupal:maintenance:on site=@${{ inputs.environment }}"
 
     - name: Push to Acquia
       uses: ./drainpipe/scaffold/github/actions/acquia/push

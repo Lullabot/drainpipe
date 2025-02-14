@@ -27,7 +27,7 @@ runs:
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
 
         # Avoid using drush9
-        drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/lullabotsandbox.site.yml"
+        drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/${APPLICATION}.site.yml"
 
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           echo "Running site install"
