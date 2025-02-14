@@ -43,3 +43,8 @@ $settings['file_private_path'] = 'sites/chrome/files/private';
 $config['environment_indicator.indicator']['name'] = 'Chrome';
 $config['environment_indicator.indicator']['bg_color'] = '#FFCD46';
 $config['environment_indicator.indicator']['fg_color'] = '#000000';
+
+/**
+ * Cache prefix.
+ */
+$settings['cache_prefix']['default'] = 'chrome-prefix';

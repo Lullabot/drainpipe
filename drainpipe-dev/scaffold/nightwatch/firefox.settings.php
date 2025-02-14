@@ -43,3 +43,8 @@ $settings['file_private_path'] = 'sites/firefox/files/private';
 $config['environment_indicator.indicator']['name'] = 'Firefox';
 $config['environment_indicator.indicator']['bg_color'] = '#E66000';
 $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
+
+/**
+ * Cache prefix.
+ */
+$settings['cache_prefix']['default'] = 'firefox-prefix';
