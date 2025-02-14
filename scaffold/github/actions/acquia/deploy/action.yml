@@ -49,7 +49,7 @@ runs:
         # Define variables
         aliases_yml="/var/www/html/drush/sites/${APPLICATION}.site.yml"
         # Extract the dev.uri value
-        echo "env_uri=$(yq e ".$env.uri" "$aliases_yml")" >> $GITHUB_ENV
+        echo "acquia_env_uri=$(yq e ".$env.uri" "$aliases_yml")" >> $GITHUB_ENV
 
     - name: Push to Acquia
       uses: ./drainpipe/scaffold/github/actions/acquia/push
@@ -71,7 +71,7 @@ runs:
       uses: ./.github/actions/drainpipe/deployment-status
       with:
         github-token: ${{ inputs.github-token }}
-        environment-url: ${{ env_uri }}
+        environment-url: ${{ env.acquia_env_uri }}
 
     - name: Take site out of Maintenance Mode
       run: |
