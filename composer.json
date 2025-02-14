@@ -47,6 +47,6 @@
         }
     },
     "archive": {
-        "exclude": ["/.github", "/.yarn", "/drainpipe-dev", "/metapackages"]
+        "exclude": ["/.github/workflows", "/.yarn", "/drainpipe-dev", "/metapackages"]
     }
 }
