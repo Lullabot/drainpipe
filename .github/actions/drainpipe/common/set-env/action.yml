@@ -14,4 +14,9 @@ runs:
         echo "Setting Drainpipe environment variables:"
         echo "DRAINPIPE_PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> $GITHUB_ENV
         echo "DRAINPIPE_SHA=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)" >> $GITHUB_ENV
+
+        if [ -z "$DRAINPIPE_SHA" ] || [ "$DRAINPIPE_SHA" = "null" ]; then
+          echo "DRAINPIPE_SHA=$DRAINPIPE_PR_NUMBER" >> $GITHUB_ENV
+        fi
+
       shell: bash
