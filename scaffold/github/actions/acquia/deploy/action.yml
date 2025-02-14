@@ -1,14 +1,11 @@
-name: 'Deploy a branch to Acquia'
-description: 'Deploys a review app to an Acquia Environment'
+name: "Deploy a branch to Acquia"
+description: "Deploys a review app to an Acquia Environment"
 inputs:
   github-token:
     description: "GitHub token as generated automatically in secrets.GITHUB_TOKEN"
     required: true
   environment:
     description: "The environment to push to, either uuid or alias"
-    required: true
-  environment-url:
-    description: "The environment URL"
     required: true
   run-installer:
     description: "Whether or not to run the Drupal site installer. Defaults to false."
@@ -47,7 +44,12 @@ runs:
         # Removes *.paths where drush9 is specified.
         drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/${APPLICATION}.site.yml"
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
-        drainpipe_exec "task drupal:maintenance:on site=@${{ inputs.environment }}"
+        drainpipe_exec "task drupal:maintenance:on site=@lullabotsandbox.dev"
+
+        # Define variables
+        aliases_yml="/var/www/html/drush/sites/${APPLICATION}.site.yml"
+        # Extract the dev.uri value
+        echo "env_uri=$(yq e ".$env.uri" "$aliases_yml")" >> $GITHUB_ENV
 
     - name: Push to Acquia
       uses: ./drainpipe/scaffold/github/actions/acquia/push
@@ -69,7 +71,7 @@ runs:
       uses: ./.github/actions/drainpipe/deployment-status
       with:
         github-token: ${{ inputs.github-token }}
-        environment-url: ${{ inputs.environment-url }}
+        environment-url: ${{ env_uri }}
 
     - name: Take site out of Maintenance Mode
       run: |
@@ -77,5 +79,3 @@ runs:
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "./vendor/bin/task drupal:maintenance:off site=@${{ inputs.environment }}"
       shell: bash
-
-
