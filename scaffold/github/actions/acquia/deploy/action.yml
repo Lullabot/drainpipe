@@ -44,7 +44,7 @@ runs:
         # Removes *.paths where drush9 is specified.
         drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/${APPLICATION}.site.yml"
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
-        drainpipe_exec "drush system.maintenance_mode 1 site=@lullabotsandbox.dev"
+        drainpipe_exec "drush state:set system.maintenance_mode 1 --site=@${{ inputs.environment }}"
 
         # Define variables
         aliases_yml="/var/www/html/drush/sites/${APPLICATION}.site.yml"
@@ -77,5 +77,5 @@ runs:
       run: |
 
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "drush system.maintenance_mode 0 site=@${{ inputs.environment }}"
+        drainpipe_exec "drush state:set system.maintenance_mode 0 --site=@${{ inputs.environment }}"
       shell: bash
