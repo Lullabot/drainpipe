@@ -22,6 +22,7 @@ runs:
         echo "DRAINPIPE_SHA: $DRAINPIPE_SHA"
         if [ -z "$DRAINPIPE_SHA" ] || [ "$DRAINPIPE_SHA" = "null" ]; then
           echo "Rewriting DRAINPIPE_SHA to PR number because SHA is null - debug2"
+          DRAINPIPE_SHA=$DRAINPIPE_PR_NUMBER
           echo "Drainpipe SHA: $DRAINPIPE_SHA"
           echo "Drainpipe PR Number: $DRAINPIPE_PR_NUMBER"
           echo "DRAINPIPE_SHA=$DRAINPIPE_PR_NUMBER" >> $GITHUB_ENV
