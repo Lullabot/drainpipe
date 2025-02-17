@@ -12,8 +12,11 @@ runs:
   steps:
     - run: |
         echo "Setting Drainpipe environment variables:"
-        echo "DRAINPIPE_PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> $GITHUB_ENV
-        echo "DRAINPIPE_SHA=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)" >> $GITHUB_ENV
+
+        DRAINPIPE_PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+        echo "DRAINPIPE_PR_NUMBER=$DRAINPIPE_PR_NUMBER" >> $GITHUB_ENV
+        DRAINPIPE_SHA=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)
+        echo "DRAINPIPE_SHA=$DRAINPIPE_SHA" >> $GITHUB_ENV
 
         echo "Debug :bug:"
         echo "GITHUB_REF: $GITHUB_REF"
