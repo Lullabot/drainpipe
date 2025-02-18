@@ -42,10 +42,11 @@ runs:
         BRANCH=$(echo $ENV_INFO | jq -r ".vcs.path")
         REMOTE_VCS=$(echo $ENV_INFO | jq -r ".vcs.url")
         REMOTE_HOST=$(echo "$REMOTE_VCS" | awk -F'[@:]' '{print $2}')
+        REMOTE_SSH_URL=$(echo $ENV_INFO | jq -r ".ssh_url" | awk -F'[@:]' '{print $2}')
 
         # Add Remote Hostf from VCS to known_hosts.
         drainpipe_exec "ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts" || true
-
+        drainpipe_exec "ssh-keyscan -H $REMOTE_SSH_URL >> ~/.ssh/known_hosts" || true
         drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=\"$BRANCH\" remote=\"$REMOTE\" message=\"${{ inputs.commit-message }}\""
         # Run code-switch to the same branch so we wait for everything to sync.
         drainpipe_exec "acli api:environments:code-switch --task-wait ${{ inputs.environment }} \"$BRANCH\""
