@@ -1,0 +1,63 @@
+name: 'Push code to Acquia'
+description: 'Pushes code to an Acquia environment'
+inputs:
+  environment:
+    description: "The environment to push to, either uuid or alias"
+    required: true
+  commit-message:
+    description: "The commit message to use when pushing to Acquia"
+    required: true
+  api-key:
+    description: "Acquia API Key"
+    required: true
+  api-secret:
+    description: "Acquia API Secret"
+    required: true
+  acquia-ssh-private-key:
+    description: "Acquia SSH Private Key"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Push to Acquia
+      run: |
+
+        source .github/actions/drainpipe/set-env/bash_aliases
+
+        echo "Debug: API KEY"
+        echo ${{ inputs.api-key }}| cut -c 1-4
+
+        echo "Debug: first ten chars of id_rsa"
+        echo ${{ inputs.acquia-ssh-private-key }}| cut -c 1-10
+
+        echo "Debug: last ten chars of id_rsa"
+        echo ${{ inputs.acquia-ssh-private-key }}| cut -c -10
+
+        drainpipe_exec "echo \"${{ inputs.acquia-ssh-private-key }}\" > ~/.ssh/id_rsa"
+        drainpipe_exec "chmod 600 ~/.ssh/id_rsa"
+
+        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+
+        echo "Debug: Getting environment info"
+        ENV_INFO=$(drainpipe_exec "acli --no-interaction api:environments:find ${{ inputs.environment }}")
+
+        VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
+        if [ "$VCS_TYPE" != "git" ]; then
+          echo "Unrecognised VCS type"
+          exit 1
+        fi
+
+        BRANCH=$(echo $ENV_INFO | jq -r ".vcs.path")
+        REMOTE_VCS=$(echo $ENV_INFO | jq -r ".vcs.url")
+        REMOTE_HOST=$(echo "$REMOTE_VCS" | awk -F'[@:]' '{print $2}')
+        REMOTE_SSH_URL=$(echo $ENV_INFO | jq -r ".ssh_url" | awk -F'[@:]' '{print $2}')
+
+        # Add Remote Hostf from VCS to known_hosts.
+        drainpipe_exec "ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts" || true
+        drainpipe_exec "ssh-keyscan -H $REMOTE_SSH_URL >> ~/.ssh/known_hosts" || true
+        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=\"$BRANCH\" remote=\"$REMOTE\" message=\"${{ inputs.commit-message }}\""
+        # Run code-switch to the same branch so we wait for everything to sync.
+        drainpipe_exec "acli api:environments:code-switch --task-wait ${{ inputs.environment }} \"$BRANCH\""
+
+      shell: bash
+

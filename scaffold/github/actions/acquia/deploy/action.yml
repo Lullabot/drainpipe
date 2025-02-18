@@ -1,14 +1,11 @@
-name: 'Deploy a branch to Acquia'
-description: 'Deploys a review app to an Acquia Environment'
+name: "Deploy a branch to Acquia"
+description: "Deploys a review app to an Acquia Environment"
 inputs:
   github-token:
     description: "GitHub token as generated automatically in secrets.GITHUB_TOKEN"
     required: true
   environment:
     description: "The environment to push to, either uuid or alias"
-    required: true
-  environment-url:
-    description: "The environment URL"
     required: true
   run-installer:
     description: "Whether or not to run the Drupal site installer. Defaults to false."
@@ -22,46 +19,68 @@ inputs:
   api-secret:
     description: "Acquia API Secret"
     required: true
+  acquia-ssh-private-key:
+    description: "Acquia SSH Private Key"
+    required: true
+
 runs:
   using: "composite"
   steps:
     - name: Create GitHub Deployment
-      uses: .github/actions/drainpipe/common/deployment-create
+      uses: ./.github/actions/drainpipe/deployment-create
       with:
         github-token: ${{ inputs.github-token }}
         environment: ${{ inputs.environment }}
 
     - name: Put site in Maintenance Mode
+      shell: bash
       run: |
-        source .github/actions/drainpipe/common/set-env/bash_aliases
+
+        source .github/actions/drainpipe/set-env/bash_aliases
+
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
-        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@lullabot8.dev"
-      shell: bash
+
+        # Avoid using drush9, it seems to be an Acquia issue.
+        # https://docs.acquia.com/acquia-cloud-platform/manage-apps/command-line/drush#section-specifying-a-version-of-drush-in-commands
+        # Removes *.paths where drush9 is specified.
+        drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/${APPLICATION}.site.yml"
+        drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
+        drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value TRUE --yes"
+
+        # Define variables
+        aliases_yml="/var/www/html/drush/sites/${APPLICATION}.site.yml"
+        # Extract the dev.uri value
+        echo "acquia_env_uri=$(yq e ".$env.uri" "$aliases_yml")" >> $GITHUB_ENV
 
     - name: Push to Acquia
-      uses: .github/actions/drainpipe/acquia/push
+      uses: ./drainpipe/scaffold/github/actions/acquia/push
       with:
         environment: ${{ inputs.environment }}
         commit-message: ${{ inputs.commit-message }}
         api-key: ${{ inputs.api-key }}
         api-secret: ${{ inputs.api-secret }}
+        acquia-ssh-private-key: ${{ inputs.acquia-ssh-private-key }}
 
     - name: Run updates
-      uses: .github/actions/drainpipe/acquia/update
+      uses: ./drainpipe/scaffold/github/actions/acquia/update
       with:
         environment: ${{ inputs.environment }}
         run-installer: ${{ inputs.run-installer }}
+        api-key: ${{ inputs.api-key }}
+        api-secret: ${{ inputs.api-secret }}
 
     - name: Set Deployment Status
-      uses: .github/actions/drainpipe/common/deployment-status
+      uses: ./.github/actions/drainpipe/deployment-status
       with:
         github-token: ${{ inputs.github-token }}
-        environment-url: ${{ inputs.environment-url }}
+        environment-url: ${{ env.acquia_env_uri }}
 
     - name: Take site out of Maintenance Mode
       run: |
-        drainpipe_exec "./vendor/bin/task drupal:maintenance:on site=@${{ inputs.environment }}"
+
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value FALSE --yes"
       shell: bash
