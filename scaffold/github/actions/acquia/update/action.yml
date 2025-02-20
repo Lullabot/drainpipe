@@ -24,6 +24,8 @@ runs:
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
+        drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
+
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
 
         # Avoid using drush9
