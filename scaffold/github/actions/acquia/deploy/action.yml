@@ -38,6 +38,13 @@ runs:
 
         source .github/actions/drainpipe/set-env/bash_aliases
 
+        # debug who is running the command
+        echo "Debugging who is running the command"
+        drainpipe_exec "whoami"
+        drainpipe_exec "pwd"
+        drainpipe_exec "ls -la"
+        echo "=== end of debug ==="
+
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
