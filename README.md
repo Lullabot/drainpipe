@@ -487,7 +487,7 @@ To add Acquia specific GitHub actions, add the following composer.json
   ```json
   "extra": {
       "drainpipe": {
-          "github": ["Acquia"]
+          "github": ["acquia"]
       }
   }
   ```
