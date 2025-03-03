@@ -545,7 +545,7 @@ const RAW_RUNTIME_STATE =
           ["cssnano", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:7.0.6"],\
           ["gulp", "npm:5.0.0"],\
           ["gulp-postcss", "virtual:a5bf324363859109c0e84c68c9289224c32ef54935f6131752442e657df4227141e06df7d8ddf79ae5fcfdf63614f36b97e9c1dfce6acce1057a4f76ebdccd88#npm:10.0.0"],\
-          ["gulp-sass", "npm:5.1.0"],\
+          ["gulp-sass", "npm:6.0.0"],\
           ["gulp-sass-glob", "npm:1.1.0"],\
           ["gulp-sourcemaps", "npm:3.0.0"],\
           ["modern-normalize", "npm:3.0.1"],\
@@ -4378,10 +4378,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["gulp-sass", [\
-      ["npm:5.1.0", {\
-        "packageLocation": "../../../../../../runner/cache/others/berry/cache/gulp-sass-npm-5.1.0-14f63a58ae-10c0.zip/node_modules/gulp-sass/",\
+      ["npm:6.0.0", {\
+        "packageLocation": "../../../../../../runner/cache/others/berry/cache/gulp-sass-npm-6.0.0-1635b0e9f2-10c0.zip/node_modules/gulp-sass/",\
         "packageDependencies": [\
-          ["gulp-sass", "npm:5.1.0"],\
+          ["gulp-sass", "npm:6.0.0"],\
           ["lodash.clonedeep", "npm:4.5.0"],\
           ["picocolors", "npm:1.0.0"],\
           ["plugin-error", "npm:1.0.1"],\
