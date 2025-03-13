@@ -64,10 +64,10 @@ runs:
         # Define variables
         aliases_yml="/var/www/html/drush/sites/${APPLICATION}.site.yml"
         # Extract the dev.uri value
-        echo "acquia_env_uri=$(yq e \".$env.uri\" "$aliases_yml")" >> $GITHUB_ENV
+        echo "acquia_env_uri=$(yq e \".${ENVIRONMENT}.uri\" "$aliases_yml")" >> $GITHUB_ENV
 
     - name: Push to Acquia
-      uses: ./github/actions/drainpipe/acquia/push
+      uses: ./.github/actions/drainpipe/acquia/push
       with:
         environment: ${{ inputs.environment }}
         commit-message: ${{ inputs.commit-message }}
@@ -76,7 +76,7 @@ runs:
         acquia-ssh-private-key: ${{ inputs.acquia-ssh-private-key }}
 
     - name: Run updates
-      uses: ./github/actions/drainpipe/acquia/update
+      uses: ./.github/actions/drainpipe/acquia/update
       with:
         environment: ${{ inputs.environment }}
         run-installer: ${{ inputs.run-installer }}
