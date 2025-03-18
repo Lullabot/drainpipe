@@ -1,0 +1,35 @@
+name: 'Push code to Acquia'
+description: 'Pushes code to an Acquia environment'
+inputs:
+  environment:
+    description: "The environment to push to, either uuid or alias"
+    required: true
+  commit-message:
+    description: "The commit message to use when pushing to Acquia"
+    required: true
+  api-key:
+    description: "Acquia API Key"
+    required: true
+  api-secret:
+    description: "Acquia API Secret"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Push to Acquia
+      run: |
+        source .github/actions/drainpipe/common/set-env/bash_aliases
+        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+        ENV_INFO=$(drainpipe_exec "acli api:environments:find ${{ inputs.environment }}")
+        VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
+        if [ "$VCS_TYPE" != "git" ]; then
+          echo "Unrecognised VCS type"
+          exit 1
+        fi
+        BRANCH=$(echo $ENV_INFO | jq -r ".vcs.path")
+        REMOTE=$(echo $ENV_INFO | jq -r ".vcs.url")
+        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=\"$BRANCH\" remote=\"$REMOTE\" message=\"${{ inputs.commit-message }}\""
+        # Run code-switch to the same branch so we wait for everything to sync.
+        drainpipe_exec "acli api:environments:code-switch ${{ inputs.environment }} \"$BRANCH\""
+      shell: bash
+
