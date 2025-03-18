@@ -373,6 +373,8 @@ includes:
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `task acquia:fetch-db` | Fetches a database from Acquia. Set `ACQUIA_ENVIRONMENT_ID` in Taskfile `vars`, along with `ACQUIA_API_KEY` and `ACQUIA_API_SECRET` as environment variables |
 
+> ⚠️ **Beta Notice**: The Acquia integration is currently in beta. While we strive to maintain stability, you may encounter unexpected issues. Please report any problems you encounter through our issue tracker.
+
 To enable auto configuration of Acquia Cloud settings:
 ```json
 "extra": {
