@@ -322,15 +322,17 @@ EOT;
         $fs->ensureDirectoryExists('./.github/actions');
         $fs->copy("$scaffoldPath/github/actions/common", './.github/actions/drainpipe');
         foreach ($this->extra['drainpipe']['github'] as $github) {
-            if ($github === 'PantheonReviewApps') {
+            if ($github === 'PantheonReviewApps' || $github === 'PantheonReviewAppsManual') {
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
+                $pantheon_review_apps = ($github === 'PantheonReviewApps') ? 'PantheonReviewApps' : 'PantheonReviewAppsManual';
                 if (file_exists('./.ddev/config.yaml')) {
-                    $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
+                    $pantheon_review_apps_ddev = $pantheon_review_apps . 'DDEV';
+                    $fs->copy("$scaffoldPath/github/workflows/$pantheon_review_apps_ddev.yml", './.github/workflows/PantheonReviewApps.yml');
                 }
                 else {
-                    $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
+                    $fs->copy("$scaffoldPath/github/workflows/$pantheon_review_apps.yml", './.github/workflows/PantheonReviewApps.yml');
                 }
             }
             else if ($github === 'ComposerLockDiff') {
