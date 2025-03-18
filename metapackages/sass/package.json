@@ -3,7 +3,7 @@
   "version": "0.1.4",
   "bin": "./gulp.js",
   "dependencies": {
-    "autoprefixer": "^10.4.20",
+    "autoprefixer": "^10.4.21",
     "cssnano": "^7.0.6",
     "gulp": "^5.0.0",
     "gulp-postcss": "^10.0.0",
