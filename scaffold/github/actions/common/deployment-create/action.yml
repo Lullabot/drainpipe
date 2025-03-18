@@ -1,5 +1,5 @@
-name: 'Create a GitHub deployment'
-description: 'Creates a GitHub deployment and echos the ID to the $GITHUB_ENV file'
+name: "Create a GitHub deployment"
+description: "Creates a GitHub deployment and echos the ID to the $GITHUB_ENV file"
 inputs:
   github-token:
     description: "GitHub token as generated automatically in secrets.GITHUB_TOKEN"
@@ -18,7 +18,7 @@ runs:
             https://api.github.com/repos/$GITHUB_REPOSITORY/deployments \
             -H 'Accept: application/vnd.github.v3+json' \
             -H "Authorization: token ${{ inputs.github-token }}" \
-            -d "{\"ref\": \"$DRAINPIPE_SHA\", \"auto_merge\": false, \"environment\": \"${{ inputs.environment }}\", \"transient_environment\": false, \"required_contexts\": [], \"description\": \"Acquia Cloud environment\"}" \
+            -d "{\"ref\": \"${{ env.DRAINPIPE_SHA }}\", \"auto_merge\": false, \"environment\": \"${{ inputs.environment }}\", \"transient_environment\": false, \"required_contexts\": [], \"description\": \"Acquia Cloud environment\"}" \
         )
         export GITHUB_DEPLOYMENT_ID=$(echo $GITHUB_DEPLOYMENT | jq '.id')
         echo "GITHUB_DEPLOYMENT_ID=$GITHUB_DEPLOYMENT_ID" >> $GITHUB_ENV
