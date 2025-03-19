@@ -6,5 +6,8 @@
 set -eux
 echo "Building..."
 
+touch "$TUGBOAT_ROOT/.env"
+echo "DRUSH_OPTIONS_URI=$TUGBOAT_DEFAULT_SERVICE_URL_PROTOCOL://$TUGBOAT_SERVICE_HOSTNAME" >> "$TUGBOAT_ROOT/.env"
+
 ./vendor/bin/task {{ build_command }}
 ./vendor/bin/task {{ update_command }}
