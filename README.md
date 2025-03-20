@@ -645,6 +645,63 @@ php:
   visualdiff:
 ```
 
+## Composer configuration checks
+
+To promote best practices within Drupal/Composer projects, we run a few checks after running Composer commmads.
+
+
+### Check: Configure Composer Patches to Use `-p2` as `patchLevel` for Drupal core
+
+> Drupal's git repository has a different directory structure than projects built on Drupal. Default Composer Patches settings can cause Drupal patches to be silently misapplied.
+
+See https://architecture.lullabot.com/adr/20220429-composer-patchlevel/
+
+
+You can disable this check by running:
+
+```console
+composer config extra.drainpipe.composer --json '{"disable-drupal-core-patches-level-check": true}'
+```
+
+### Check: Break composer install if patches don't apply
+
+> Drupal's git repository has a different directory structure than projects built on Drupal. Default Composer Patches settings can cause Drupal patches to be silently misapplied.
+
+See https://architecture.lullabot.com/adr/20220429-composer-exit-failure/
+
+
+You can disable this check by running:
+
+```console
+composer config extra.drainpipe.composer --json '{"disable-exit-on-patch-failure-check": true}
+```
+
+### Check: Store Composer Patches configuration in composer.json
+
+> Validating a complete Composer configuration is important to ensuring build issues are caught early.
+
+See https://architecture.lullabot.com/adr/20220429-composer-patches-inline/
+
+
+You can disable this check by running:
+
+```console
+composer config extra.drainpipe.composer --json '{"disable-exit-on-patch-failure-check": true}
+```
+
+### Check: Use local copies of patch files
+
+> When using [cweagans/composer-patches](https://github.com/cweagans/composer-patches), it is important that patch sources are consistent and do not change between builds.
+
+See https://architecture.lullabot.com/adr/20220429-composer-patch-files/
+
+
+You can disable this check by running:
+
+```console
+composer config extra.drainpipe.composer --json '{"disable-exit-on-patch-failure-check": true}
+```
+
 ## Contributor Docs
 
 This repo is public.
