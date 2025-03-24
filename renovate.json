@@ -20,6 +20,21 @@
       "addLabels": [
         "test only - do not merge"
       ]
+    },
+    {
+      "matchPackageNames": [
+        "lullabot/drainpipe",
+        "lullabot/drainpipe-dev"
+      ],
+      "enabled": false
+    },
+    {
+      "matchPackageNames": ["drush/drush"],
+      "allowedVersions": "^11 || ^12 || ^13"
+    },
+    {
+      "matchPackagePatterns": ["^symfony/"],
+      "allowedVersions": "^6 || ^7"
     }
   ]
 }
