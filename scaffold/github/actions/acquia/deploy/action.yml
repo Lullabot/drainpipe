@@ -53,18 +53,22 @@ runs:
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
-        drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
+        ALIAS_DIR_DESTINATION="/var/www/html/drush/sites"
+        drainpipe_exec "acli remote:aliases:download --destination-dir $ALIAS_DIR_DESTINATION --no-interaction $APPLICATION"
 
         # Avoid using drush9, it seems to be an Acquia issue.
         # https://docs.acquia.com/acquia-cloud-platform/manage-apps/command-line/drush#section-specifying-a-version-of-drush-in-commands
         # Removes *.paths where drush9 is specified.
-        drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/${APPLICATION}.site.yml"
+        drainpipe_exec "yq eval '(.** | .paths) = {}' -i $ALIAS_DIR_DESTINATION/${APPLICATION}.site.yml"
         drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value true --yes"
 
         # Define variables
-        aliases_yml="/var/www/html/drush/sites/${APPLICATION}.site.yml"
+        aliases_yml="${ALIAS_DIR_DESTINATION}/${APPLICATION}.site.yml"
+
+        ALIASES_YML_CONTENT=$(drainpipe_exec "cat $ALIASES_YML")
+
         # Extract the dev.uri value
-        echo "acquia_env_uri=$(yq e \".${ENVIRONMENT}.uri\" "$aliases_yml")" >> $GITHUB_ENV
+        echo "acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e ".${ENVIRONMENT}.uri" -)" >> $GITHUB_ENV
 
     - name: Push to Acquia
       uses: ./.github/actions/drainpipe/acquia/push
