@@ -53,13 +53,15 @@ runs:
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
-        ALIAS_DIR_DESTINATION="/var/www/html/drush/sites"
+        ALIAS_DIR_DESTINATION="$(drainpipe_exec \"pwd\")/drush/sites"
         drainpipe_exec "acli remote:aliases:download --destination-dir $ALIAS_DIR_DESTINATION --no-interaction $APPLICATION"
 
         # Avoid using drush9, it seems to be an Acquia issue.
         # https://docs.acquia.com/acquia-cloud-platform/manage-apps/command-line/drush#section-specifying-a-version-of-drush-in-commands
         # Removes *.paths where drush9 is specified.
         drainpipe_exec "yq eval '(.** | .paths) = {}' -i $ALIAS_DIR_DESTINATION/${APPLICATION}.site.yml"
+
+        echo "🪲 Setting maintenance mode to true on ${{ inputs.environment }}"
         drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value true --yes"
 
         # Define variables
