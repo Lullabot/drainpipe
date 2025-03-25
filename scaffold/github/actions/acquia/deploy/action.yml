@@ -54,9 +54,8 @@ runs:
         # Removes *.paths where drush9 is specified.
         drainpipe_exec "yq eval '(.** | .paths) = {}' -i $ALIAS_DIR_DESTINATION/${APPLICATION}.site.yml"
 
-
         # Check if drush is available withing drainpipe_exec.
-        if ! drainpipe_exec "drush --version"; then
+        if ! drainpipe_exec "drush @${{ inputs.environment }} --version"; then
           # TODO: First deployment configuration?
           echo "Drush is not available, skipping maintenance mode."
         else
