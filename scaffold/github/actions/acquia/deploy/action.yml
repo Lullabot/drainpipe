@@ -60,7 +60,7 @@ runs:
         # https://docs.acquia.com/acquia-cloud-platform/manage-apps/command-line/drush#section-specifying-a-version-of-drush-in-commands
         # Removes *.paths where drush9 is specified.
         drainpipe_exec "yq eval '(.** | .paths) = {}' -i $ALIAS_DIR_DESTINATION/${APPLICATION}.site.yml"
-        drainpipe_exec "./vendor/bin/drush @${{ inputs.environment }} config:set system.maintenance_mode value true --yes"
+        drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value true --yes"
 
         # Define variables
         aliases_yml="${ALIAS_DIR_DESTINATION}/${APPLICATION}.site.yml"
@@ -97,5 +97,5 @@ runs:
       run: |
 
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "./vendor/bin/drush @${{ inputs.environment }} config:set system.maintenance_mode value false --yes"
+        drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value false --yes"
       shell: bash
