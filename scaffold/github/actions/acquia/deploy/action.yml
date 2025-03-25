@@ -61,16 +61,21 @@ runs:
         # Removes *.paths where drush9 is specified.
         drainpipe_exec "yq eval '(.** | .paths) = {}' -i $ALIAS_DIR_DESTINATION/${APPLICATION}.site.yml"
 
-        echo "🪲 Setting maintenance mode to true on ${{ inputs.environment }}"
-        drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value true --yes"
 
-        # Define variables
-        aliases_yml="${ALIAS_DIR_DESTINATION}/${APPLICATION}.site.yml"
+        # Check if drush is available withing drainpipe_exec.
+        if ! drainpipe_exec "drush --version"; then
+          # TODO: First deployment configuration?
+          echo "Drush is not available, skipping maintenance mode."
+        else
+          drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value true --yes"
+          # Define variables
+          aliases_yml="${ALIAS_DIR_DESTINATION}/${APPLICATION}.site.yml"
 
-        ALIASES_YML_CONTENT=$(drainpipe_exec "cat $ALIASES_YML")
+          ALIASES_YML_CONTENT=$(drainpipe_exec "cat $ALIASES_YML")
 
-        # Extract the dev.uri value
-        echo "acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e ".${ENVIRONMENT}.uri" -)" >> $GITHUB_ENV
+          # Extract the dev.uri value
+          echo "acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e ".${ENVIRONMENT}.uri" -)" >> $GITHUB_ENV
+        fi
 
     - name: Push to Acquia
       uses: ./.github/actions/drainpipe/acquia/push
