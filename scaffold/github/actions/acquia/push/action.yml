@@ -64,7 +64,7 @@ runs:
         drainpipe_exec "ssh-keyscan -H $REMOTE_SSH_URL >> ~/.ssh/known_hosts" || true
 
         # Create a temporary directory for the release.
-        RELEASE_DIR=$(mktemp -d)
+        RELEASE_DIR=$(drainpipe_exec "mktemp -d")
 
         # Run the deploy task.
         drainpipe_exec "./vendor/bin/task deploy:git directory=\"$RELEASE_DIR\" branch=\"$BRANCH\" remote=\"$REMOTE_VCS\" message=\"${{ inputs.commit-message }}\""
