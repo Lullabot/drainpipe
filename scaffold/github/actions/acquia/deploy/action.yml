@@ -60,6 +60,7 @@ runs:
           echo "Drush is not available, skipping maintenance mode."
         else
           # TODO: Restore this before merge.
+          echo "Avoiding temporarily settings maintenance mode."
           # drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value true --yes"
         fi
 
