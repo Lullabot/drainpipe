@@ -66,6 +66,9 @@ runs:
         # Create a temporary directory for the release.
         RELEASE_DIR=$(drainpipe_exec "mktemp -d")
 
+        # Create a snapshot of the site.
+        drainpipe_exec "ddev task snapshot:directory directory=$RELEASE_DIR"
+
         # Run the deploy task.
         drainpipe_exec "./vendor/bin/task deploy:git directory=\"$RELEASE_DIR\" branch=\"$BRANCH\" remote=\"$REMOTE_VCS\" message=\"${{ inputs.commit-message }}\""
         # Run code-switch to the same branch so we wait for everything to sync.
