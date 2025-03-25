@@ -3,6 +3,12 @@
     "description": "An automated build tool to allow projects to have a set standardized operations scripts.",
     "license": "GPL-2.0-or-later",
     "type": "composer-plugin",
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/Lullabot/composer-checks.git"
+        }
+    ],
     "autoload": {
         "psr-4": {"Lullabot\\Drainpipe\\": "src/"}
     },
@@ -16,7 +22,8 @@
         "drush/drush": "^11|^12|^13",
         "symfony/yaml": "^6|^7",
         "twig/twig": "^3",
-        "vlucas/phpdotenv": "^4|^5"
+        "vlucas/phpdotenv": "^4|^5",
+        "lullabot/composer-checks": "@dev"
     },
     "require-dev": {
         "composer/composer": "^2.8.6",
@@ -44,7 +51,8 @@
             "composer/installers": true,
             "drupal/core-composer-scaffold": true,
             "drupal/core-project-message": true,
-            "lullabot/drainpipe": true
+            "lullabot/drainpipe": true,
+            "lullabot/composer-checks": true
         }
     },
     "archive": {
