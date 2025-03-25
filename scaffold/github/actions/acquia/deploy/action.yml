@@ -60,14 +60,13 @@ runs:
           echo "Drush is not available, skipping maintenance mode."
         else
           drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value true --yes"
-          # Define variables
-          aliases_yml="${ALIAS_DIR_DESTINATION}/${APPLICATION}.site.yml"
-
-          ALIASES_YML_CONTENT=$(drainpipe_exec "cat $ALIASES_YML")
-
-          # Extract the dev.uri value
-          echo "acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e ".${ENVIRONMENT}.uri" -)" >> $GITHUB_ENV
         fi
+
+        aliases_yml="${ALIAS_DIR_DESTINATION}/${APPLICATION}.site.yml"
+        ALIASES_YML_CONTENT=$(drainpipe_exec "cat $ALIASES_YML")
+
+        # Extract the environment.uri value
+        echo "acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e ".${ENVIRONMENT}.uri" -)" >> $GITHUB_ENV
 
     - name: Push to Acquia
       uses: ./.github/actions/drainpipe/acquia/push
