@@ -24,20 +24,6 @@ runs:
 
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        echo "Debug: API KEY"
-        echo ${{ inputs.api-key }}| cut -c 1-4
-
-        # debug
-        key="${{ inputs.acquia-ssh-private-key }}"
-        if [ -z "$key" ]; then
-          echo "❌ Key is empty"
-        else
-          echo "✅ Key is present. Length: ${#key}"
-          echo "Prefix (masked):"
-          echo "::add-mask::$(echo "$key" | cut -c -10)"
-          echo "$(echo "$key" | cut -c -10)"
-        fi
-
         drainpipe_exec "echo \"${{ inputs.acquia-ssh-private-key }}\" > ~/.ssh/id_rsa"
         drainpipe_exec "chmod 600 ~/.ssh/id_rsa"
 

@@ -1,9 +1,7 @@
 drainpipe_exec() {
   if [ "$DRAINPIPE_DDEV" == "true" ]; then
-    echo "💻️ Debug: DDEV exec $@"
     ddev exec "$@"
   else
-    echo "🏃🏽‍♂️ Debug: Eval $@"
     eval "$@"
   fi
 }

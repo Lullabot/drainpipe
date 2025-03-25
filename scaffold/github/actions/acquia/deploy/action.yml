@@ -38,13 +38,6 @@ runs:
 
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        # debug who is running the command
-        echo "Debugging who is running the command"
-        drainpipe_exec "whoami"
-        drainpipe_exec "pwd"
-        drainpipe_exec "ls -la"
-        echo "=== end of debug ==="
-
         # Add the Acquia SSH private key to DDEV.
         drainpipe_exec "echo \"${{ inputs.acquia-ssh-private-key }}\" > ~/.ssh/id_rsa"
         drainpipe_exec "chmod 600 ~/.ssh/id_rsa"
