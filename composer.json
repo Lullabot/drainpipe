@@ -33,7 +33,7 @@
         "class": [
             "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin",
             "\\Lullabot\\Drainpipe\\BinaryInstallerPlugin",
-            "\\Lullabot\\Drainpipe\\ComposerChecksPlugin"
+            "\\Lullabot\\ComposerChecksPlugin"
         ],
         "drupal-scaffold": {
             "gitignore": true,
