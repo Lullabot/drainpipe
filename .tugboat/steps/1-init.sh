@@ -82,6 +82,8 @@ composer config --no-plugins allow-plugins.composer/installers true
 composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
 composer config --no-plugins allow-plugins.lullabot/drainpipe true
 composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": true}}'
+composer config repositories.composer-checks --json '{"type": "git", "url": "https://github.com/Lullabot/composer-checks.git"}'
+composer config --no-plugins allow-plugins.lullabot/composer-checks true
 composer config extra.drainpipe --json '{"tugboat": {}}'
 composer config minimum-stability dev
 composer require lullabot/drainpipe --with-all-dependencies

@@ -40,6 +40,8 @@ jobs:
           ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
           ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
           ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev exec --raw composer config repositories.composer-checks --json '{"type": "git", "url": "https://github.com/Lullabot/composer-checks.git"}'
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/composer-checks true
           ddev exec --raw composer config repositories.drainpipe --json "{\"type\": \"path\", \"url\": \"drainpipe\", \"options\": {\"symlink\": false}}"
           ddev exec --raw composer config minimum-stability dev
           cat composer.json | jq --indent 4 '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/dotenv.php"]}' | tee composer.json > /dev/null
