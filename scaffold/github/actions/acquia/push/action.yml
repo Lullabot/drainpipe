@@ -49,8 +49,7 @@ runs:
         echo "Keyscanning $REMOTE_SSH_URL"
         drainpipe_exec "ssh-keyscan -H $REMOTE_SSH_URL >> ~/.ssh/known_hosts" || true
 
-        # Create a temporary directory for the release.
-        RELEASE_DIR=$(drainpipe_exec "mktemp -d")
+        RELEASE_DIR="/tmp/release-$(date +%s)"
 
         # Create a snapshot of the site.
         drainpipe_exec "./vendor/bin/task snapshot:directory directory=\"$RELEASE_DIR\""
