@@ -22,12 +22,14 @@ runs:
         echo "GITHUB_DEPLOYMENT_ID: $GITHUB_DEPLOYMENT_ID"
         echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
 
+        # Debug github token has a value showing first ten characters
+        echo "GITHUB_TOKEN: ${GITHUB_TOKEN:0:10}"
+
         curl -f -X POST \
-              -H "Authorization: Bearer ${{ inputs.github-token }}" \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses \
-              -d "$(jq -n --arg state success --arg url "${{ inputs.environment-url }}" '{state: $state, environment_url: $url}')"
+          -H "Authorization: token ${{ inputs.github-token }}"  \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses \
+          -d '{"state":"success"}'
 
       shell: bash
 
