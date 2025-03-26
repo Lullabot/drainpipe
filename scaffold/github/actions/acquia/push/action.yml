@@ -56,8 +56,19 @@ runs:
 
         # Run the deploy task.
         drainpipe_exec "./vendor/bin/task deploy:git directory=\"$RELEASE_DIR\" branch=\"$BRANCH\" remote=\"$REMOTE_VCS\" message=\"${{ inputs.commit-message }}\""
+
         # Run code-switch to the same branch so we wait for everything to sync.
-        drainpipe_exec "acli api:environments:code-switch --task-wait ${{ inputs.environment }} \"$BRANCH\""
+        # Avoids ACLI verbosity filling up the logs.
+        drainpipe_exec "acli api:environments:code-switch --task-wait --quiet ${{ inputs.environment }} \"$BRANCH\"" &
+        TASK_ID=$!
+        SECONDS_TO_WAIT=30
+
+        while kill -0 $TASK_ID 2>/dev/null; do
+          echo "🏃🏽 Code Switching running... Waiting $SECONDS_TO_WAIT seconds."
+          sleep $SECONDS_TO_WAIT
+        done
+
+        echo "✅ Acquia Code-switch complete."
 
       shell: bash
 
