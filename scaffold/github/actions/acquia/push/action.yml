@@ -24,8 +24,8 @@ runs:
 
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        drainpipe_exec "echo \"${{ inputs.acquia-ssh-private-key }}\" > ~/.ssh/id_rsa"
-        drainpipe_exec "chmod 600 ~/.ssh/id_rsa"
+        # drainpipe_exec "echo \"${{ inputs.acquia-ssh-private-key }}\" > ~/.ssh/id_rsa"
+        # drainpipe_exec "chmod 600 ~/.ssh/id_rsa"
 
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
 

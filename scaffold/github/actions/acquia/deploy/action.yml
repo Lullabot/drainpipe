@@ -39,8 +39,8 @@ runs:
         source .github/actions/drainpipe/set-env/bash_aliases
 
         # Add the Acquia SSH private key to DDEV.
-        drainpipe_exec "echo \"${{ inputs.acquia-ssh-private-key }}\" > ~/.ssh/id_rsa"
-        drainpipe_exec "chmod 600 ~/.ssh/id_rsa"
+        # drainpipe_exec "echo \"${{ inputs.acquia-ssh-private-key }}\" > ~/.ssh/id_rsa"
+        # drainpipe_exec "chmod 600 ~/.ssh/id_rsa"
 
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
         drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
@@ -86,6 +86,18 @@ runs:
         run-installer: ${{ inputs.run-installer }}
         api-key: ${{ inputs.api-key }}
         api-secret: ${{ inputs.api-secret }}
+
+    - name: Clear External Caches
+      shell: bash
+      with:
+        environment: ${{ inputs.environment }}
+        api-key: ${{ inputs.api-key }}
+        api-secret: ${{ inputs.api-secret }}
+      run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
+        DOMAINS=$(acli api:environments:domain-list "${{ inputs.environment }}" | jq -r '.[].hostname')
+        readarray -t DOMAINS_ARRAY <<< "$DOMAINS"
+        acli api:environments:clear-caches "${{ inputs.environment }}" "${DOMAINS_ARRAY[@]}"
 
     - name: Set Deployment Status
       uses: ./.github/actions/drainpipe/deployment-status
