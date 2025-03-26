@@ -87,9 +87,9 @@ runs:
       shell: bash
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        DOMAINS=$(acli api:environments:domain-list "${{ inputs.environment }}" | jq -r '.[].hostname')
+        DOMAINS=$(drainpipe_exec "acli api:environments:domain-list \"${{ inputs.environment }}\" | jq -r '.[].hostname'")
         readarray -t DOMAINS_ARRAY <<< "$DOMAINS"
-        acli api:environments:clear-caches "${{ inputs.environment }}" "${DOMAINS_ARRAY[@]}"
+        drainpipe_exec "acli api:environments:clear-caches \"${{ inputs.environment }}\" \"${DOMAINS_ARRAY[@]}\""
 
     - name: Set Deployment Status
       uses: ./.github/actions/drainpipe/deployment-status
