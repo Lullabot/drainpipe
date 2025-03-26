@@ -88,7 +88,6 @@ runs:
         api-secret: ${{ inputs.api-secret }}
 
     - name: Clear External Caches
-      shell: bash
       with:
         environment: ${{ inputs.environment }}
         api-key: ${{ inputs.api-key }}
@@ -98,6 +97,7 @@ runs:
         DOMAINS=$(acli api:environments:domain-list "${{ inputs.environment }}" | jq -r '.[].hostname')
         readarray -t DOMAINS_ARRAY <<< "$DOMAINS"
         acli api:environments:clear-caches "${{ inputs.environment }}" "${DOMAINS_ARRAY[@]}"
+      shell: bash
 
     - name: Set Deployment Status
       uses: ./.github/actions/drainpipe/deployment-status
