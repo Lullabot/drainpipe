@@ -67,19 +67,19 @@ runs:
 
         ddev config global --instrumentation-opt-in=false --omit-containers=ddev-ssh-agent
 
-        if [ "${{ inputs.composer-cache-dir }}" != "false" ]; then
-          # @todo Replace /var/www/html with an environment variable.
-          CACHE_DIR=".ddev/.drainpipe-composer-cache"
-          if [ "${{ inputs.composer-cache-dir }}" != "" ]; then
-            CACHE_DIR="${{ inputs.composer-cache-dir }}"
-          fi
-          # Workaround for https://github.com/ddev/ddev/issues/6044
-          if yq -re .type .ddev/config.yaml; then
-            ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR" --project-type="$(yq -re .type .ddev/config.yaml)"
-          else
-            ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
-          fi
-        fi
+        # if [ "${{ inputs.composer-cache-dir }}" != "false" ]; then
+        #   # @todo Replace /var/www/html with an environment variable.
+        #   CACHE_DIR=".ddev/.drainpipe-composer-cache"
+        #   if [ "${{ inputs.composer-cache-dir }}" != "" ]; then
+        #     CACHE_DIR="${{ inputs.composer-cache-dir }}"
+        #   fi
+        #   # Workaround for https://github.com/ddev/ddev/issues/6044
+        #   if yq -re .type .ddev/config.yaml; then
+        #     ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR" --project-type="$(yq -re .type .ddev/config.yaml)"
+        #   else
+        #     ddev config --web-environment-add="COMPOSER_CACHE_DIR=/var/www/html/$CACHE_DIR"
+        #   fi
+        # fi
 
         ddev start
         ddev describe
