@@ -86,9 +86,23 @@ runs:
     - name: Clear External Caches
       shell: bash
       run: |
+
         source .github/actions/drainpipe/set-env/bash_aliases
-        DOMAINS=$(drainpipe_exec "acli api:environments:domain-list \"${{ inputs.environment }}\" | jq -r '.[].hostname'")
-        readarray -t DOMAINS_ARRAY <<< "$DOMAINS"
+        # Get the domains on the environment as a JSON array.
+        DOMAINS_JSON=$(drainpipe_exec "acli api:environments:domain-list \"${{ inputs.environment }}\"")
+
+        # Debug DOMAINS_JSON.
+        echo "DOMAINS_JSON: $DOMAINS_JSON"
+
+        # Convert the JSON array into a bash array.
+        DOMAINS_HOSTNAMES=$(echo "$DOMAINS_JSON" | jq -r '.[].hostname')
+
+        # Debug DOMAINS_HOSTNAMES.
+        echo "DOMAINS_HOSTNAMES: $DOMAINS_HOSTNAMES"
+
+        # Convert the bash array into a comma-separated list.
+        readarray -t DOMAINS_ARRAY <<< "$DOMAINS_HOSTNAMES"
+        # Clear the external caches.
         drainpipe_exec "acli api:environments:clear-caches \"${{ inputs.environment }}\" \"${DOMAINS_ARRAY[@]}\""
 
     - name: Set Deployment Status
