@@ -103,7 +103,17 @@ runs:
         # Convert the bash array into a comma-separated list.
         readarray -t DOMAINS_ARRAY <<< "$DOMAINS_HOSTNAMES"
         # Clear the external caches.
-        drainpipe_exec "acli api:environments:clear-caches --no-interaction \"${{ inputs.environment }}\" \"${DOMAINS_ARRAY[@]}\""
+        cmd="acli api:environments:clear-caches --no-interaction ${inputs_environment}"
+
+        # Add the domains to the clear-caches command.
+        # Avoids DOMAINS_HOSTNAMES being evaluated incorrectly
+        # when using the drainpipe_exec function.
+        for domain in "${DOMAINS_ARRAY[@]}"; do
+            cmd+=" $(printf '%q' "$domain")"
+        done
+
+        # Run the command.
+        drainpipe_exec "$cmd"
 
     - name: Set Deployment Status
       uses: ./.github/actions/drainpipe/deployment-status
