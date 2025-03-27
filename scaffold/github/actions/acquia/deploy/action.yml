@@ -95,7 +95,7 @@ runs:
         DOMAINS_HOSTNAMES=$(echo "$DOMAINS_JSON" | jq -r '[.[].hostname] | join(" ")')
 
         # Clear the external caches.
-        drainpipe_exec "acli api:environments:clear-caches --no-interaction ${inputs_environment} $DOMAINS_HOSTNAMES"
+        drainpipe_exec "acli api:environments:clear-caches --no-interaction ${{ inputs.environment }} $DOMAINS_HOSTNAMES"
 
     - name: Set Deployment Status
       uses: ./.github/actions/drainpipe/deployment-status
