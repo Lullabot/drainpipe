@@ -91,29 +91,11 @@ runs:
         # Get the domains on the environment as a JSON array.
         DOMAINS_JSON=$(drainpipe_exec "acli api:environments:domain-list --no-interaction \"${{ inputs.environment }}\"")
 
-        # Debug DOMAINS_JSON.
-        echo "DOMAINS_JSON: $DOMAINS_JSON"
-
         # Convert the JSON array into a bash array.
-        DOMAINS_HOSTNAMES=$(echo "$DOMAINS_JSON" | jq -r '.[].hostname')
+        DOMAINS_HOSTNAMES=$(echo "$DOMAINS_JSON" | jq -r '[.[].hostname] | join(" ")')
 
-        # Debug DOMAINS_HOSTNAMES.
-        echo "DOMAINS_HOSTNAMES: $DOMAINS_HOSTNAMES"
-
-        # Convert the bash array into a comma-separated list.
-        readarray -t DOMAINS_ARRAY <<< "$DOMAINS_HOSTNAMES"
         # Clear the external caches.
-        cmd="acli api:environments:clear-caches --no-interaction ${inputs_environment}"
-
-        # Add the domains to the clear-caches command.
-        # Avoids DOMAINS_HOSTNAMES being evaluated incorrectly
-        # when using the drainpipe_exec function.
-        for domain in "${DOMAINS_ARRAY[@]}"; do
-            cmd+=" $(printf '%q' "$domain")"
-        done
-
-        # Run the command.
-        drainpipe_exec "$cmd"
+        drainpipe_exec "acli api:environments:clear-caches --no-interaction ${inputs_environment} $DOMAINS_HOSTNAMES"
 
     - name: Set Deployment Status
       uses: ./.github/actions/drainpipe/deployment-status
