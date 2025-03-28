@@ -29,12 +29,16 @@
       "enabled": false
     },
     {
-      "matchPackageNames": ["drush/drush"],
+      "matchPackageNames": [
+        "drush/drush"
+      ],
       "allowedVersions": "^11 || ^12 || ^13"
     },
     {
-      "matchPackagePatterns": ["^symfony/"],
-      "allowedVersions": "^6 || ^7"
+      "allowedVersions": "^6 || ^7",
+      "matchPackageNames": [
+        "/^symfony//"
+      ]
     }
   ]
 }
