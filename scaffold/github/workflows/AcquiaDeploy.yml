@@ -14,6 +14,12 @@ jobs:
   deploy-to-acquia:
     runs-on: ubuntu-latest
     steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.github-ref }}
+
     - name: Deploy
       uses: ./.github/actions/drainpipe/acquia/deploy
       with:
