@@ -3,16 +3,16 @@
   "version": "0.1.4",
   "bin": "./gulp.js",
   "dependencies": {
-    "autoprefixer": "^10.4.20",
+    "autoprefixer": "^10.4.21",
     "cssnano": "^7.0.6",
     "gulp": "^5.0.0",
     "gulp-postcss": "^10.0.0",
-    "gulp-sass": "^5.1.0",
+    "gulp-sass": "^6.0.1",
     "gulp-sass-glob": "^1.1.0",
     "gulp-sourcemaps": "^3.0.0",
     "modern-normalize": "^3.0.1",
-    "postcss": "^8.4.47",
-    "sass": "^1.79.4",
+    "postcss": "^8.5.3",
+    "sass": "^1.86.2",
     "yargs": "^17.7.2"
   },
   "repository": {
