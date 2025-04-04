@@ -370,6 +370,7 @@ EOT;
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
+                $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
             }
             else if ($github === 'ComposerLockDiff') {
                 $fs->ensureDirectoryExists('./.github/workflows');

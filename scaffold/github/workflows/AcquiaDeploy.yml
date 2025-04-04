@@ -1,0 +1,27 @@
+name: Deploy to Acquia
+run-name: Deploy to ${{ inputs.environment }} by @${{ github.actor }} | ${{ inputs.reference }}
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Enter environment to deploy (example: dev, stg, test, prod)'
+        required: true
+      reference:
+        description: 'Reference (a commit hash, a branch, or tag):'
+        required: true
+
+jobs:
+  deploy-to-acquia:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy
+      uses: ./.github/actions/drainpipe/acquia/deploy
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        environment: ${{ vars.ACQUIA_SITE_GROUP }}.${{ inputs.environment }}
+        run-installer: false
+        commit-message: ${{ github.sha }}
+        api-key: ${{ secrets.ACQUIA_API_KEY }}
+        api-secret: ${{ secrets.ACQUIA_API_SECRET }}
+        acquia-ssh-private-key: ${{ secrets.ACQUIA_SSH_PRIVATE_KEY }}
+        github-ref: ${{ github.ref }}
