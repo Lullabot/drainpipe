@@ -22,24 +22,67 @@ inputs:
   acquia-ssh-private-key:
     description: "Acquia SSH Private Key"
     required: true
+  github-ref:
+    description: "The GitHub reference to deploy"
+    required: true
 
 runs:
   using: "composite"
   steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.github-ref }}
+
+    - name: Install DDEV
+      uses: ./.github/actions/drainpipe/ddev
+      with:
+        git-name: Drainpipe Bot
+        git-email: no-reply@example.com
+        ssh-private-key: ${{ inputs.acquia-ssh-private-key }}
+
+    - name: Install and configure Acquia CLI
+      shell: bash
+      run: |
+
+        source .github/actions/drainpipe/set-env/bash_aliases
+
+        # Configure SSH.
+        drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
+
+        # Log in to Acquia Cloud.
+        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+
+    - name: Validate environment alias by running `drush status`
+      shell: bash
+      run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "./vendor/bin/task remote:drush ${{ inputs.environment }} -- status"
+
+    - name: Build
+      shell: bash
+      run: |
+
+        # To get most of all the binaries from the packages.
+        ddev composer install --no-plugins
+        # To get additional binaries such as vendor/bin/task.
+        ddev composer install
+        # Build the site.
+        ddev task acquia:deploy:local:build
+
     - name: Create GitHub Deployment
       uses: ./.github/actions/drainpipe/deployment-create
       with:
         github-token: ${{ inputs.github-token }}
         environment: ${{ inputs.environment }}
 
-    - name: Put site in Maintenance Mode
+    - name: Configure remote aliases
       shell: bash
       run: |
 
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
-        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
         ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
         ALIAS_DIR_DESTINATION="$(drainpipe_exec \"pwd\")/drush/sites"
@@ -51,15 +94,6 @@ runs:
         drainpipe_exec "yq eval '(.** | .paths) = {}' -i $ALIAS_DIR_DESTINATION/${APPLICATION}.site.yml"
 
         # Check if drush is available withing drainpipe_exec.
-        if ! drainpipe_exec "drush @${{ inputs.environment }} --version"; then
-          # TODO: First deployment configuration?
-          echo "Drush is not available, skipping maintenance mode."
-        else
-          # TODO: Restore this before merge.
-          echo "Avoiding temporarily settings maintenance mode."
-          # drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value true --yes"
-        fi
-
         aliases_yml="${ALIAS_DIR_DESTINATION}/${APPLICATION}.site.yml"
         ALIASES_YML_CONTENT=$(drainpipe_exec "cat $ALIASES_YML")
 
@@ -107,5 +141,7 @@ runs:
       run: |
 
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "drush @${{ inputs.environment }} config:set system.maintenance_mode value false --yes"
+
+        drainpipe_exec "./vendor/bin/task acquia:deploy:remote:finalize site=@${{ inputs.environment }}"
+
       shell: bash
