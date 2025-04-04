@@ -1,0 +1,33 @@
+version: '3'
+
+tasks:
+  auth:
+    cmds:
+      - if [ -z "$ACQUIA_API_KEY" ]; then echo "ACQUIA_API_KEY is empty, please add it to your .env file"; exit 1; fi
+      - if [ -z "$ACQUIA_API_SECRET" ]; then echo "ACQUIA_API_SECRET is empty, please add it to your .env file"; exit 1; fi
+      - echo "💧 Authorising with Acquia"
+      - acli auth:login --no-interaction --key=${ACQUIA_API_KEY} --secret=${ACQUIA_API_SECRET}
+  fetch-db:
+    desc: "Fetches a database from Acquia"
+    env:
+      DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
+      DB_NAME: '{{default "default" .DB_NAME}}'
+    cmds:
+      - mkdir -p $DB_DIR
+      - rm -f $DB_DIR/db.sql.gz $DB_DIR/db.sql
+      - task: auth
+      - echo "💧 Fetching database from Acquia"
+      - acli pull:database {{.ACQUIA_ENVIRONMENT_ID}} $DB_NAME --no-import --no-interaction
+      - |
+        DB=$(ls -t /tmp/*.sql.gz | head -1)
+        mv $DB $DB_DIR/db.sql.gz
+
+  deploy:github:build:
+    desc: "Builds the project on GitHub Actions runner to be deployed to Acquia"
+    cmds:
+      - task: build
+
+  deploy:remote:update:
+    desc: "After the code is deployed, run these commands on the Acquia environment"
+    cmds:
+      - task: drupal:update
