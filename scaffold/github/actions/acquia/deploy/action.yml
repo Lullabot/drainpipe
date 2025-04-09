@@ -95,6 +95,9 @@ runs:
         # Extract the environment.uri value
         echo "acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e ".${ENVIRONMENT}.uri" -)" >> $GITHUB_ENV
 
+        echo "::error::Debugging, not continuing"
+        exit 1;
+
     - name: Push to Acquia
       uses: ./.github/actions/drainpipe/acquia/push
       with:
