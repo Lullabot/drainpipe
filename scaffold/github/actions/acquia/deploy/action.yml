@@ -59,7 +59,7 @@ runs:
       shell: bash
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        ddev acli remote:drush ${{ inputs.environment }} -- status"
+        ddev acli remote:drush ${{ inputs.environment }} -- status
 
     - name: Build
       shell: bash
