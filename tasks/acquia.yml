@@ -25,7 +25,7 @@ tasks:
   deploy:github:build:
     desc: "Builds the project on GitHub Actions runner to be deployed to Acquia"
     cmds:
-      - task: build
+      - task: .build
 
   deploy:remote:update:
     desc: "After the code is deployed, run these commands on the Acquia environment"
