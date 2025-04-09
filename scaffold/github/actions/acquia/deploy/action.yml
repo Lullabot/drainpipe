@@ -37,6 +37,12 @@ runs:
         git-email: no-reply@example.com
         ssh-private-key: ${{ inputs.acquia-ssh-private-key }}
 
+    - name: Install packages from Composer
+      shell: bash
+      run: |
+        ddev composer install --no-plugins
+        ddev composer install
+
     - name: Install and configure Acquia CLI
       shell: bash
       run: |
@@ -59,10 +65,6 @@ runs:
       shell: bash
       run: |
 
-        # To get most of all the binaries from the packages.
-        ddev composer install --no-plugins
-        # To get additional binaries such as vendor/bin/task.
-        ddev composer install
         # Build the site.
         ddev task acquia:deploy:github:build
 
