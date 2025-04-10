@@ -1,0 +1,110 @@
+name: "Test GitHub Actions"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  Test-GitHub-Actions:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Create a Drupal project
+        run: composer create-project drupal/recommended-project . --ignore-platform-reqs
+
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Setup Project
+        run: |
+          ddev config --auto
+          ddev start
+          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
+          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
+          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe/drainpipe-dev", "options": {"symlink": false}}'
+          ddev exec --raw composer config minimum-stability dev
+          ddev composer require lullabot/drainpipe --with-all-dependencies
+          ddev composer require --dev lullabot/drainpipe-dev --with-all-dependencies
+
+      - name: Install Drupal
+        run: |
+          ddev drush site:install minimal -y
+          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+          ddev drush config:export -y
+
+      - name: Lint GitHub Actions and Workflows
+        run: ddev task "github:actions:lint directories='./drainpipe/scaffold/github/actions ./drainpipe/scaffold/github/workflows'"
+
+      - name: Run Database Updates
+        run: ddev task update
+
+      - name: Create pantheon.yml
+        run: |
+          echo "api_version: 1" >> pantheon.yml
+          echo "web_docroot: true" >> pantheon.yml
+          echo "php_version: 8.3" >> pantheon.yml
+          echo "database:" >> pantheon.yml
+          echo "  version: 10.6" >> pantheon.yml
+          echo "enforce_https: full+subdomains" >> pantheon.yml
+          echo "build_step: false" >> pantheon.yml
+
+      - name: Create .drainpipeignore
+        run: |
+          echo "/web/sites/default/files" >> .drainpipeignore
+          echo "/.ddev" >> .drainpipeignore
+          echo "settings.ddev.php" >> .drainpipeignore
+          echo "/drainpipe" >> .drainpipeignore
+
+      - name: Create settings.php
+        run: |
+          echo '<?php' > web/sites/default/settings.php
+          echo "\$settings['container_yamls'][] = __DIR__ . '/services.yml';" >> web/sites/default/settings.php
+          echo "include __DIR__ . \"/settings.pantheon.php\";" >> web/sites/default/settings.php
+          echo "\$settings['config_sync_directory'] = '../config';" >> web/sites/default/settings.php
+          curl -o web/sites/default/settings.pantheon.php https://raw.githubusercontent.com/pantheon-systems/drupal-integrations/11.x/assets/settings.pantheon.php
+
+      - name: Snapshot Project
+        env:
+          directory: /tmp/release
+          remote:
+          message:
+          site:
+        run: |
+          echo "/drainpipe" >> .drainpipeignore
+          ddev task snapshot:directory directory=/tmp/release
+
+      - name: Prepare Actions
+        run: |
+          mkdir -p .github/actions
+          cp -R ./drainpipe/scaffold/github/actions/common .github/actions/drainpipe
+
+      - name: Deploy Pantheon Review App
+        uses: ./drainpipe/scaffold/github/actions/pantheon/review
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          commit-message: ${{ github.sha }}
+          site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
+          lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
+          lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+          # set to "true" if you want to run the installer
+          run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}
