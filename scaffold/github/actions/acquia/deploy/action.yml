@@ -36,6 +36,7 @@ runs:
         git-name: Drainpipe Bot
         git-email: no-reply@example.com
         ssh-private-key: ${{ inputs.acquia-ssh-private-key }}
+        composer-cache-dir: false
 
     - name: Install packages from Composer
       shell: bash
