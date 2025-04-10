@@ -21,13 +21,3 @@ tasks:
       - |
         DB=$(ls -t /tmp/*.sql.gz | head -1)
         mv $DB $DB_DIR/db.sql.gz
-
-  deploy:github:build:
-    desc: "Builds the project on GitHub Actions runner to be deployed to Acquia"
-    cmds:
-      - task: ../build
-
-  deploy:remote:update:
-    desc: "After the code is deployed, run these commands on the Acquia environment"
-    cmds:
-      - task: drupal:update
