@@ -36,7 +36,7 @@ runs:
           drainpipe_exec "./vendor/bin/drush @${{ inputs.environment }} --yes site:install --existing-config"
         fi
 
-        drainpipe_exec "./vendor/bin/task acquia:deploy:remote:update site=@${{ inputs.environment }}"
+        drainpipe_exec "./vendor/bin/task acquia:deploy:after site=@${{ inputs.environment }}"
 
         if drainpipe_exec "./vendor/bin/task -l | grep -q '* update: '"; then
           echo "Running task update"
