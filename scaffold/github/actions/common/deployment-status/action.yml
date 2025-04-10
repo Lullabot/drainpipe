@@ -17,14 +17,6 @@ runs:
 
         if [ -z "$GITHUB_DEPLOYMENT_ID" ] || [ "$GITHUB_DEPLOYMENT_ID" = "null" ]; then echo $GITHUB_DEPLOYMENT && exit 1; fi
 
-        # Debug
-        echo "🐞🐞🐞 Debug 🐞🐞🐞"
-        echo "GITHUB_DEPLOYMENT_ID: $GITHUB_DEPLOYMENT_ID"
-        echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
-
-        # Debug github token has a value showing first ten characters
-        echo "GITHUB_TOKEN: ${GITHUB_TOKEN:0:10}"
-
         curl -f -X POST \
           -H "Authorization: token ${{ inputs.github-token }}"  \
           -H "Accept: application/vnd.github.v3+json" \
