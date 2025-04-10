@@ -1,7 +1,0 @@
-drainpipe_exec() {
-  if [ "$DRAINPIPE_DDEV" == "true" ]; then
-    ddev exec "$@"
-  else
-    eval "$@"
-  fi
-}
