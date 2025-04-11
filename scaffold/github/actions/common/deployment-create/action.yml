@@ -1,0 +1,28 @@
+name: "Create a GitHub deployment"
+description: "Creates a GitHub deployment and echos the ID to the $GITHUB_ENV file"
+inputs:
+  github-token:
+    description: "GitHub token as generated automatically in secrets.GITHUB_TOKEN"
+    required: true
+  environment:
+    description: "The environment name"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/drainpipe/set-env
+
+    - name: Create GitHub Deployment
+      run: |
+        export GITHUB_DEPLOYMENT=$(curl -f -X POST \
+            https://api.github.com/repos/$GITHUB_REPOSITORY/deployments \
+            -H 'Accept: application/vnd.github.v3+json' \
+            -H "Authorization: token ${{ inputs.github-token }}" \
+            -d "{\"ref\": \"${{ env.DRAINPIPE_SHA }}\", \"auto_merge\": false, \"environment\": \"${{ inputs.environment }}\", \"transient_environment\": false, \"required_contexts\": [], \"description\": \"Acquia Cloud environment\"}" \
+        )
+        export GITHUB_DEPLOYMENT_ID=$(echo $GITHUB_DEPLOYMENT | jq '.id')
+        echo "GITHUB_DEPLOYMENT_ID=$GITHUB_DEPLOYMENT_ID" >> $GITHUB_ENV
+        echo "Created GitHub Deployment ID $GITHUB_DEPLOYMENT_ID"
+        if [ -z "$GITHUB_DEPLOYMENT_ID" ] || [ "$GITHUB_DEPLOYMENT_ID" = "null" ]; then echo $GITHUB_DEPLOYMENT && exit 1; fi
+        curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d '{"state":"in_progress"}'
+      shell: bash

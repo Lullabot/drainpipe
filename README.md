@@ -362,6 +362,30 @@ ddev ssh
 terminus site:upstream:set [site_name] empty
 ```
 
+### Acquia
+Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
+Add the following to your `Taskfile.yml`'s `includes` section to use them:
+```yml
+includes:
+  acquia: ./vendor/lullabot/drainpipe/tasks/acquia.yml
+```
+|                        |                                                                                                                                                                |
+|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `task acquia:fetch-db` | Fetches a database from Acquia. Set `ACQUIA_ENVIRONMENT_ID` in Taskfile `vars`, along with `ACQUIA_API_KEY` and `ACQUIA_API_SECRET` as environment variables |
+
+> ⚠️ **Beta Notice**: The Acquia integration is currently in beta. While we strive to maintain stability, you may encounter unexpected issues. Please report any problems you encounter through our issue tracker.
+
+To enable auto configuration of Acquia Cloud settings:
+```json
+"extra": {
+    "drainpipe": {
+        "acquia": {
+            "settings": true
+        },
+    }
+}
+```
+
 
 ## GitHub Actions Integration
 
@@ -459,6 +483,16 @@ To enable deployment of Pantheon Review Apps:
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth local
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
+
+### Acquia
+To add Acquia specific GitHub actions, add the following composer.json
+  ```json
+  "extra": {
+      "drainpipe": {
+          "github": ["acquia"]
+      }
+  }
+  ```
 
 ## GitLab CI Integration
 
