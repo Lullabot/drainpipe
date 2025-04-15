@@ -60,14 +60,14 @@ runs:
       shell: bash
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        ddev acli remote:drush ${{ inputs.environment }} -- status
+        drainpipe_exec "vendor/bin/acli remote:drush ${{ inputs.environment }} -- status"
 
     - name: Build
       shell: bash
       run: |
 
         # Build the site.
-        ddev task acquia:deploy:before
+        drainpipe_exec "vendor/bin/task acquia:deploy:before"
 
     - name: Create GitHub Deployment
       uses: ./.github/actions/drainpipe/deployment-create
