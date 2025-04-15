@@ -48,14 +48,13 @@ jobs:
 
           ddev exec --raw composer config extra.drainpipe.github --json '{"acquia": []}'
           ddev exec --raw composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe --with-all-dependencies
 
           # Recommended settings for Acquia
           ddev composer config --no-plugins allow-plugins.acquia/drupal-recommended-settings false
           ddev composer require acquia/drupal-recommended-settings
 
-          # Install Acquia CLI.
-          ddev composer require acquia/cli
+          # Install ourselves.
+          ddev composer require lullabot/drainpipe --with-all-dependencies
 
           # Acquia recommended settings before DDEV settings.
           sed -i '/\/\/ Automatically generated include for settings managed by ddev./i require DRUPAL_ROOT . \
