@@ -48,6 +48,11 @@ runs:
       shell: bash
       run: |
 
+        # Install Acquia CLI.
+        drainpipe_exec "curl -OL https://github.com/acquia/cli/releases/latest/download/acli.phar"
+        drainpipe_exec "chmod +x acli.phar"
+        drainpipe_exec "mv acli.phar vendor/bin/acli"
+
         source .github/actions/drainpipe/set-env/bash_aliases
 
         # Configure SSH.
