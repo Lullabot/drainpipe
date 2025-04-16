@@ -91,6 +91,10 @@ runs:
         ALIAS_DIR_DESTINATION="$(drainpipe_exec \"pwd\")/drush/sites"
         drainpipe_exec "acli remote:aliases:download --destination-dir $ALIAS_DIR_DESTINATION --no-interaction $APPLICATION"
 
+        # Debug the aliases file
+        echo "ALIAS_DIR_DESTINATION: $ALIAS_DIR_DESTINATION"
+        ls -la $ALIAS_DIR_DESTINATION
+
         # Avoid using drush9, it seems to be an Acquia issue.
         # https://docs.acquia.com/acquia-cloud-platform/manage-apps/command-line/drush#section-specifying-a-version-of-drush-in-commands
         # Removes *.paths where drush9 is specified.
