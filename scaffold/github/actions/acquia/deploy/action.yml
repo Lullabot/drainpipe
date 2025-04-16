@@ -47,6 +47,7 @@ runs:
     - name: Install and configure Acquia CLI
       shell: bash
       run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
 
         # Install Acquia CLI.
         drainpipe_exec "curl -OL https://github.com/acquia/cli/releases/latest/download/acli.phar"
