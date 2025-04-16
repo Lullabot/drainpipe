@@ -45,8 +45,7 @@ jobs:
           ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
 
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-
-          ddev exec --raw composer config extra.drainpipe.github --json '{"acquia": []}'
+          ddev exec --raw composer config extra.drainpipe.github --json '["acquia"]'
           ddev exec --raw composer config minimum-stability dev
 
           # Recommended settings for Acquia
