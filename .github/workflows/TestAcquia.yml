@@ -61,7 +61,22 @@ jobs:
             "/../vendor/acquia/drupal-recommended-settings/settings/acquia-recommended.settings.php";' \
             docroot/sites/default/settings.php
 
+          # Add Acquia tasks to the Taskfile.
           yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
+
+          # Add Acquia deploy tasks
+          # this is not an automated process
+          # and it must be specified on the documentation.
+          {
+            echo ''
+            echo '  acquia:deploy:before:'
+            echo '    cmds:'
+            echo '      - task: build'
+
+            echo '  acquia:deploy:after:'
+            echo '    cmds:'
+            echo '      - task: drupal:update'
+          } >> Taskfile.yml
 
       - name: Install Drupal
         run: |
