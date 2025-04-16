@@ -22,9 +22,6 @@ inputs:
   acquia-ssh-private-key:
     description: "Acquia SSH Private Key"
     required: true
-  github-ref:
-    description: "The GitHub reference to deploy"
-    required: true
 
 runs:
   using: "composite"

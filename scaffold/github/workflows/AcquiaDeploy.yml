@@ -30,4 +30,3 @@ jobs:
         api-key: ${{ secrets.ACQUIA_API_KEY }}
         api-secret: ${{ secrets.ACQUIA_API_SECRET }}
         acquia-ssh-private-key: ${{ secrets.ACQUIA_SSH_PRIVATE_KEY }}
-        github-ref: ${{ github.ref }}
