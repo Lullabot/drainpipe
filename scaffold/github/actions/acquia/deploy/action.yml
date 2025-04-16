@@ -54,8 +54,6 @@ runs:
         drainpipe_exec "chmod +x acli.phar"
         drainpipe_exec "mv acli.phar vendor/bin/acli"
 
-        source .github/actions/drainpipe/set-env/bash_aliases
-
         # Configure SSH.
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
 
@@ -72,6 +70,7 @@ runs:
       shell: bash
       run: |
 
+        source .github/actions/drainpipe/set-env/bash_aliases
         # Build the site.
         drainpipe_exec "vendor/bin/task acquia:deploy:before"
 
