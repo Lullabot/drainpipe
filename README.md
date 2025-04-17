@@ -497,7 +497,7 @@ Then run `composer install`. A Deploy to Acquia workflow at `.github/workflows/A
 
 After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
 
-**Required configuration steps**
+**Github repository settings**
 
 In your Github repository settings you need to create the following:
 - Repository Variables
@@ -509,6 +509,33 @@ In your Github repository settings you need to create the following:
     - ACQUIA_API_SECRET
   - To push code to your Acquia repository
     - ACQUIA_SSH_PRIVATE_KEY
+
+**Task settings**
+
+When a deployment is made, you must run your own code _before_ and _after_ the deployment. To do so, define your in your `/Taskfile.yml` the following:
+
+- **acquia:deploy:before**
+
+  ```
+    acquia:deploy:before
+      desc: "Before the code is deployed to Acquia, run these commands on the GitHub Actions runner"
+      cmds:
+        # This task is run on the GitHub Actions runner
+        # It is a good moment to run tasks like build
+        # so we can later create the artifact for the Acquia environment.
+        - task: build
+  ```
+- **acquia:deploy:after**
+  ```
+    acquia:deploy:after:
+      desc: "After the code is switched on the Acquia environment, run these commands"
+      cmds:
+        # When using Drainpipe's deployment workflow,
+        # drupal:update runs on the Acquia environment because it sends
+        # a parameter that specifies the environment alias.
+        - task: drupal:update
+  ```
+
 
 ## GitLab CI Integration
 
