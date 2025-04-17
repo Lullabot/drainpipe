@@ -39,7 +39,7 @@ runs:
         REMOTE_HOST=$(echo "$REMOTE_VCS" | awk -F'[@:]' '{print $2}')
         REMOTE_SSH_URL=$(echo $ENV_INFO | jq -r ".ssh_url" | awk -F'[@:]' '{print $2}')
 
-        # Add Remote Hostf from VCS to known_hosts.
+        # Add Remote Host from VCS to known_hosts.
         echo "Keyscanning $REMOTE_HOST"
         drainpipe_exec "ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts" || true
         echo "Keyscanning $REMOTE_SSH_URL"
