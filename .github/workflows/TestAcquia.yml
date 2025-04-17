@@ -24,8 +24,7 @@ jobs:
         with:
           path: drainpipe
 
-      - uses: ./drainpipe/scaffold/github/actions/common/set-env
-
+      - uses: .github/actions/drainpipe/common/set-env
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
