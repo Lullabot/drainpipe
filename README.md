@@ -493,6 +493,22 @@ To add Acquia specific GitHub actions, add the following composer.json
       }
   }
   ```
+Then run `composer install`. A Deploy to Acquia workflow at `.github/workflows/AcquiaDeploy.yml` will be added (with its dependant actions).
+
+After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
+
+**Required configuration steps**
+
+In your Github repository settings you need to create the following:
+- Repository Variables
+  - To identify the project we are deploying (same value of the AH_SITE_GROUP environment value)
+    - ACQUIA_SITE_GROUP
+- Repository Secrets
+  - To use Acquia CLI (acli) to interact with [Acquia's Cloud Platform](https://docs.acquia.com/acquia-cloud-platform/add-ons/acquia-cli/start)
+    - ACQUIA_API_KEY
+    - ACQUIA_API_SECRET
+  - To push code to your Acquia repository
+    - ACQUIA_SSH_PRIVATE_KEY
 
 ## GitLab CI Integration
 
