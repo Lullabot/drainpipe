@@ -1,0 +1,47 @@
+name: "Update or Install Acquia Site"
+description: "Runs the Drupal updater or the site installer in an Acquia environment"
+inputs:
+  environment:
+    description: "The environment to run the updates or install in, either uuid or alias e.g. 'test'"
+    required: true
+  run-installer:
+    description: "Whether or not to run the Drupal site installer. Defaults to false."
+    required: false
+  api-key:
+    description: "Acquia API Key"
+    required: true
+  api-secret:
+    description: "Acquia API Secret"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Update site on Acquia
+      shell: bash
+      run: |
+
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
+        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+        ENVIRONMENT="${{ inputs.environment }}"
+        APPLICATION=${ENVIRONMENT%.*}
+
+        drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
+
+        # Avoid using drush9
+        drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/${APPLICATION}.site.yml"
+
+        if [ "${{ inputs.run-installer }}" == "true" ]; then
+          echo "Running site install"
+          drainpipe_exec "./vendor/bin/drush @${{ inputs.environment }} --yes site:install --existing-config"
+        fi
+
+        drainpipe_exec "./vendor/bin/task acquia:deploy:after site=@${{ inputs.environment }}"
+
+        if drainpipe_exec "./vendor/bin/task -l | grep -q '* update: '"; then
+          echo "Running task update"
+          drainpipe_exec "./vendor/bin/task update site=@${{ inputs.environment }}"
+        else
+          echo "Running task drupal:update"
+          drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.environment }}"
+        fi
