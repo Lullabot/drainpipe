@@ -18,7 +18,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        ref: ${{ inputs.github-ref }}
+        ref: ${{ inputs.reference }}
 
     - name: Deploy
       uses: ./.github/actions/drainpipe/acquia/deploy
