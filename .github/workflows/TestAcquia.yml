@@ -8,7 +8,7 @@ concurrency: development
 
 jobs:
   Test-Acquia:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Create a Drupal project
         run: |
