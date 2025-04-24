@@ -84,13 +84,13 @@ jobs:
             exit 1
           fi
 
-      - name: Add an online:tugboat step
+      - name: Add an tugboat:online step
         run: |
-          echo "  online:tugboat:" >> Taskfile.yml
+          echo "  tugboat:online:" >> Taskfile.yml
           echo "    cmds:" >> Taskfile.yml
           echo "      - echo \"Tugboat online\"" >> Taskfile.yml
           ddev composer install
-          if ! grep -q './vendor/bin/task online:tugboat' .tugboat/steps/4-online.sh; then
+          if ! grep -q './vendor/bin/task tugboat:online' .tugboat/steps/4-online.sh; then
             exit 1
           fi
 

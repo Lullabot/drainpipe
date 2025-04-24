@@ -675,7 +675,7 @@ includes:
 ```
 |                          |                                                                             |
 |--------------------------|-----------------------------------------------------------------------------|
-| `task online:tugboat`    | Configures Drush with the Tugboat service URL for the environment          |
+| `task tugboat:online`    | Configures Drush with the Tugboat service URL for the environment          |
 
 It is assumed the following tasks exist:
 - `sync`
@@ -684,7 +684,7 @@ It is assumed the following tasks exist:
 - `online`
 
 The `build`, `sync`, and `update` tasks can be overridden with `sync:tugboat`,
-`build:tugboat`,`update:tugboat`, and `online:tugboat` tasks if required (you will need to re-run
+`build:tugboat`,`update:tugboat`, and `tugboat:online` tasks if required (you will need to re-run
 `composer install` to regenerate the Tugboat scripts if you  are adding this
 task to your `Taskfile.yml` for the first time).
 
@@ -721,7 +721,7 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-You can additionally add an `online` step by adding a task named `online:tugboat`
+You can additionally add an `online` step by adding a task named `tugboat:online`
 and re-running `composer install`.
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit

@@ -499,8 +499,8 @@ EOT;
             if (isset($taskfile['tasks']['update:tugboat'])) {
                 $tugboatConfig['update_command'] = 'update:tugboat';
             }
-            if (isset($taskfile['tasks']['online:tugboat'])) {
-                $tugboatConfig['online_command'] = 'online:tugboat';
+            if (isset($taskfile['tasks']['tugboat:online'])) {
+                $tugboatConfig['online_command'] = 'tugboat:online';
             }
             if (isset($taskfile['tasks']['tugboat:php:init'])) {
                 $tugboatConfig['init']['php'] = TRUE;
