@@ -58,6 +58,8 @@ jobs:
           ddev exec --raw composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+          # Ensure scaffold files are properly copied
+          ddev exec --raw composer dump-autoload
 
       - name: Simulate failure
         run: |
