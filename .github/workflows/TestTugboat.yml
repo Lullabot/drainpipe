@@ -77,10 +77,12 @@ jobs:
           ddev composer install
 
           if ! grep -q './vendor/bin/task tugboat:online' .tugboat/steps/4-online.sh; then
+            echo "tugboat:online not found in .tugboat/steps/4-online.sh"
             exit 1
           fi
 
-          if ! grep -q './vendor/bin/task build:tugboat' .tugboat/steps/3-build.sh; then
+          if ! grep -q './vendor/bin/task tugboat:build' .tugboat/steps/3-build.sh; then
+            echo "tugboat:build not found in .tugboat/steps/3-build.sh"
             exit 1
           fi
 
