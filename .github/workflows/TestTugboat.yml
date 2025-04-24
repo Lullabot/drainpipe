@@ -60,13 +60,6 @@ jobs:
           echo "    fullPage: false" >> .tugboat/config.drainpipe-override.yml
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
-      - name: Add an online step
-        run: |
-          echo "  online:tugboat:" >> Taskfile.yml
-          echo "    cmds:" >> Taskfile.yml
-          echo "      - echo \"Tugboat online\"" >> Taskfile.yml
-          ddev composer install
-
       # Compare the generated files to the ones used to build this repository
       # preview - they should be the same.
       - name: Test Generated Files
@@ -88,6 +81,16 @@ jobs:
           echo "      - echo \"Tugboat build\"" >> Taskfile.yml
           ddev composer install
           if ! grep -q './vendor/bin/task build:tugboat' .tugboat/steps/3-build.sh; then
+            exit 1
+          fi
+
+      - name: Add an online:tugboat step
+        run: |
+          echo "  online:tugboat:" >> Taskfile.yml
+          echo "    cmds:" >> Taskfile.yml
+          echo "      - echo \"Tugboat online\"" >> Taskfile.yml
+          ddev composer install
+          if ! grep -q './vendor/bin/task online:tugboat' .tugboat/steps/4-online.sh; then
             exit 1
           fi
 
