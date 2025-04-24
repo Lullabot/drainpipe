@@ -62,9 +62,17 @@ jobs:
 
       - name: Add a build:tugboat step
         run: |
+
           echo "  build:tugboat:" >> Taskfile.yml
           echo "    cmds:" >> Taskfile.yml
           echo "      - echo \"Tugboat build\"" >> Taskfile.yml
+
+          echo "debug Taskfile.yml"
+          cat Taskfile.yml
+
+          echo "debug .tugboat/steps/3-build.sh"
+          cat .tugboat/steps/3-build.sh
+
           if ! grep -q './vendor/bin/task build:tugboat' .tugboat/steps/3-build.sh; then
             exit 1
           fi
