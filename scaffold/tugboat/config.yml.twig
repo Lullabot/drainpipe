@@ -25,7 +25,6 @@ services:
       update: ./.tugboat/steps/2-update.sh
       build: ./.tugboat/steps/3-build.sh
       online: ./.tugboat/steps/4-online.sh
-
 {% if overrides.php|length > 0 %}
 
 {{ overrides.php|raw }}
