@@ -491,7 +491,7 @@ EOT;
                 $tugboatConfig['sync_command'] = 'sync:tugboat';
             }
             if (isset($taskfile['tasks']['build:tugboat'])) {
-                $tugboatConfig['build_command'] = 'build:tugboat';
+                $tugboatConfig['build_command'] = 'tugboat:build';
             }
             if (isset($taskfile['tasks']['update'])) {
                 $tugboatConfig['update_command'] = 'update';
@@ -538,7 +538,7 @@ EOT;
             chmod('./.tugboat/steps/2-update.sh', 0755);
             chmod('./.tugboat/steps/3-build.sh', 0755);
             chmod('./.tugboat/steps/4-online.sh', 0755);
- 
+
 
             if ($tugboatConfig['database_type'] === 'mysql') {
                 $fs->ensureDirectoryExists('./.tugboat/scripts');
