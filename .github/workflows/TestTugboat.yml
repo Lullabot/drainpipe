@@ -58,6 +58,7 @@ jobs:
           echo "    timeout: 45" >> .tugboat/config.drainpipe-override.yml
           echo "  visualdiff:" >> .tugboat/config.drainpipe-override.yml
           echo "    fullPage: false" >> .tugboat/config.drainpipe-override.yml
+          ddev composer require lullabot/drainpipe --with-all-dependencies
 
       - name: Add a build:tugboat step
         run: |
@@ -77,7 +78,7 @@ jobs:
             exit 1
           fi
 
-      - name: Install Drainpipe
+      - name: Install Drainpipe, again, now with Taskfile updated
         run: |
          ddev composer require lullabot/drainpipe --with-all-dependencies
 
