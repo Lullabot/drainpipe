@@ -1,6 +1,13 @@
 version: '3'
 
 tasks:
+  build:
+    desc: "Build the project"
+    cmds:
+      - |
+        echo "Building the project"
+        ./vendor/bin/task build
+
   online:
     desc: "Configure Drush with the Tugboat service URL"
     cmds:
