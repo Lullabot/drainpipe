@@ -1,0 +1,10 @@
+version: '3'
+
+tasks:
+  online:tugboat:
+    desc: "Configure Drush with the Tugboat service URL"
+    cmds:
+      - mkdir -p drush
+      - touch drush/drush.yml
+      - echo "options:" > drush/drush.yml
+      - echo "  uri: $TUGBOAT_DEFAULT_SERVICE_URL" >> drush/drush.yml 

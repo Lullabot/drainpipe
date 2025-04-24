@@ -10,6 +10,7 @@ includes:
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
   test: ./vendor/lullabot/drainpipe/tasks/test.yml
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
+  tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
 
 output: prefixed
 silent: true

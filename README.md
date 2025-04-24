@@ -665,13 +665,26 @@ Additionally, Pantheon Terminus can be added:
 }
 ```
 
+### Tasks
+
+Tugboat specific tasks are contained in [`tasks/tugboat.yml`](tasks/tugboat.yml).
+Add the following to your `Taskfile.yml`'s `includes` section to use them:
+```yml
+includes:
+  tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+```
+|                          |                                                                             |
+|--------------------------|-----------------------------------------------------------------------------|
+| `task online:tugboat`    | Configures Drush with the Tugboat service URL for the environment          |
+
 It is assumed the following tasks exist:
 - `sync`
 - `build`
 - `update`
+- `online`
 
 The `build`, `sync`, and `update` tasks can be overridden with `sync:tugboat`,
-`build:tugboat`, and `update:tugboat` tasks if required (you will need to re-run
+`build:tugboat`,`update:tugboat`, and `online:tugboat` tasks if required (you will need to re-run
 `composer install` to regenerate the Tugboat scripts if you  are adding this
 task to your `Taskfile.yml` for the first time).
 
