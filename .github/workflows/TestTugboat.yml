@@ -64,7 +64,6 @@ jobs:
           echo "  build:tugboat:" >> Taskfile.yml
           echo "    cmds:" >> Taskfile.yml
           echo "      - echo \"Tugboat build\"" >> Taskfile.yml
-          ddev composer install
           if ! grep -q './vendor/bin/task build:tugboat' .tugboat/steps/3-build.sh; then
             exit 1
           fi
@@ -74,15 +73,15 @@ jobs:
           echo "  tugboat:online:" >> Taskfile.yml
           echo "    cmds:" >> Taskfile.yml
           echo "      - echo \"Tugboat online\"" >> Taskfile.yml
-          ddev composer install
           if ! grep -q './vendor/bin/task tugboat:online' .tugboat/steps/4-online.sh; then
             exit 1
           fi
 
       - name: Install Drainpipe
-        run: ddev composer require lullabot/drainpipe --with-all-dependencies
+        run: |
+         ddev composer require lullabot/drainpipe --with-all-dependencies
 
- # Compare the generated files to the ones used to build this repository
+      # Compare the generated files to the ones used to build this repository
       # preview - they should be the same.
       - name: Test Generated Files
         run: |
