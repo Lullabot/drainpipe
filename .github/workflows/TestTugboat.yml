@@ -58,21 +58,6 @@ jobs:
           echo "    timeout: 45" >> .tugboat/config.drainpipe-override.yml
           echo "  visualdiff:" >> .tugboat/config.drainpipe-override.yml
           echo "    fullPage: false" >> .tugboat/config.drainpipe-override.yml
-          ddev composer require lullabot/drainpipe --with-all-dependencies
-
-      # Compare the generated files to the ones used to build this repository
-      # preview - they should be the same.
-      - name: Test Generated Files
-        run: |
-          diff -up drainpipe/.tugboat/config.yml .tugboat/config.yml
-          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/1-init.sh
-          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/2-update.sh
-          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/3-build.sh
-          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/4-online.sh
-          diff -up drainpipe/.tugboat/steps/1-init.sh .tugboat/steps/1-init.sh
-          diff -up drainpipe/.tugboat/steps/2-update.sh .tugboat/steps/2-update.sh
-          diff -up drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
-          diff -up drainpipe/.tugboat/steps/4-online.sh .tugboat/steps/4-online.sh
 
       - name: Add a build:tugboat step
         run: |
@@ -93,6 +78,23 @@ jobs:
           if ! grep -q './vendor/bin/task tugboat:online' .tugboat/steps/4-online.sh; then
             exit 1
           fi
+
+      - name: Install Drainpipe
+        run: ddev composer require lullabot/drainpipe --with-all-dependencies
+
+ # Compare the generated files to the ones used to build this repository
+      # preview - they should be the same.
+      - name: Test Generated Files
+        run: |
+          diff -up drainpipe/.tugboat/config.yml .tugboat/config.yml
+          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/1-init.sh
+          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/2-update.sh
+          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/3-build.sh
+          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/4-online.sh
+          diff -up drainpipe/.tugboat/steps/1-init.sh .tugboat/steps/1-init.sh
+          diff -up drainpipe/.tugboat/steps/2-update.sh .tugboat/steps/2-update.sh
+          diff -up drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
+          diff -up drainpipe/.tugboat/steps/4-online.sh .tugboat/steps/4-online.sh
 
       - name: Upload test artifacts
         if: ${{ always() }}
