@@ -683,8 +683,8 @@ It is assumed the following tasks exist:
 - `update`
 - `online`
 
-The `build`, `sync`, and `update` tasks can be overridden with `sync:tugboat`,
-`build:tugboat`,`update:tugboat`, and `tugboat:online` tasks if required (you will need to re-run
+The `build`, `sync`, and `update` tasks can be overridden with `tugboat:sync`,
+`tugboat:build`,`tugboat:update`, and `tugboat:online` tasks if required (you will need to re-run
 `composer install` to regenerate the Tugboat scripts if you  are adding this
 task to your `Taskfile.yml` for the first time).
 
@@ -694,7 +694,7 @@ task to your `Taskfile.yml` for the first time).
     cmds:
       - task: pantheon:fetch-db
       - task: drupal:import-db
-  sync:tugboat:
+  tugboat:sync:
     desc: "Fetches a database from Pantheon and imports it in Tugboat"
     cmds:
       - task: pantheon:fetch-db

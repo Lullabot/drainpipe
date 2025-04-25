@@ -487,17 +487,14 @@ EOT;
         if (file_exists('Taskfile.yml')) {
             // Get steps out of the Taskfile.
             $taskfile = Yaml::parseFile('./Taskfile.yml');
-            if (isset($taskfile['tasks']['sync:tugboat'])) {
-                $tugboatConfig['sync_command'] = 'sync:tugboat';
+            if (isset($taskfile['tasks']['tugboat:sync'])) {
+                $tugboatConfig['sync_command'] = 'tugboat:sync';
             }
-            if (isset($taskfile['tasks']['build:tugboat'])) {
+            if (isset($taskfile['tasks']['tugboat:build'])) {
                 $tugboatConfig['build_command'] = 'tugboat:build';
             }
-            if (isset($taskfile['tasks']['update'])) {
-                $tugboatConfig['update_command'] = 'update';
-            }
-            if (isset($taskfile['tasks']['update:tugboat'])) {
-                $tugboatConfig['update_command'] = 'update:tugboat';
+            if (isset($taskfile['tasks']['tugboat:update'])) {
+                $tugboatConfig['update_command'] = 'tugboat:update';
             }
             if (isset($taskfile['tasks']['tugboat:online'])) {
                 $tugboatConfig['online_command'] = 'tugboat:online';
