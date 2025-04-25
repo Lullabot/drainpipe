@@ -66,15 +66,15 @@ jobs:
           # After the Taskfile is created,
           # we can add the build:tugboat and tugboat:online steps.
 
-          echo "  tugboat:update" >> Taskfile.yml
+          echo "  tugboat:update:" >> Taskfile.yml
           echo "    cmds:" >> Taskfile.yml
           echo "      - echo \"Tugboat update\"" >> Taskfile.yml
 
-          echo "  tugboat:build" >> Taskfile.yml
+          echo "  tugboat:build:" >> Taskfile.yml
           echo "    cmds:" >> Taskfile.yml
           echo "      - echo \"Tugboat build\"" >> Taskfile.yml
 
-          echo "  tugboat:online" >> Taskfile.yml
+          echo "  tugboat:online:" >> Taskfile.yml
           echo "    cmds:" >> Taskfile.yml
           echo "      - echo \"Tugboat online\"" >> Taskfile.yml
 
