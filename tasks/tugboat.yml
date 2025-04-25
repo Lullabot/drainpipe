@@ -1,12 +1,26 @@
 version: '3'
 
 tasks:
+  sync:
+    desc: "Sync the project"
+    cmds:
+      - |
+        echo "Syncing the project"
+        ./vendor/bin/task sync
+
   build:
     desc: "Build the project"
     cmds:
       - |
         echo "Building the project"
         ./vendor/bin/task build
+
+  update:
+    desc: "Update the project"
+    cmds:
+      - |
+        echo "Updating the project"
+        ./vendor/bin/task update
 
   online:
     desc: "Configure Drush with the Tugboat service URL"
