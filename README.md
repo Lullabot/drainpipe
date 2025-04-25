@@ -721,7 +721,7 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-You can additionally add an `online` step by adding a task named `tugboat:online`
+You can also add an `online` step by adding a task named `tugboat:online`
 and re-running `composer install`.
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
