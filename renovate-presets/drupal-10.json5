@@ -1,0 +1,90 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "baseBranches": ["renovate-updates"],
+  "extends": [
+    ":automergeDisabled",
+    ":renovatePrefix",
+    ":timezone(America/New_York)",
+    "config:base",
+    "group:symfony",
+    "schedule:automergeWeekends"
+  ],
+  "labels": ["renovate"],
+  "packageRules": [
+    {
+      "matchManagers": ["composer"],
+      "enabled": true
+    },
+    {
+      "matchPackagePatterns": "^.*",
+      "matchCurrentValue": "!/^\\^.*/",
+      "dependencyDashboardApproval": true,
+      "addLabels": ["pinned-package"]
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "addLabels": ["major"]
+    },
+    {
+      "matchUpdateTypes": ["patch", "minor"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true,
+      "addLabels": ["patch/minor"]
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "matchPackagePatterns": ["^drupal/core-.*"],
+      "matchPackageNames": ["drupal/core"],
+      "groupName": "Drupal Core Major",
+      "automerge": false,
+      "addLabels": ["drupal-core"]
+    },
+    {
+      "matchUpdateTypes": ["patch", "minor"],
+      "matchPackagePatterns": ["^drupal/core-.*"],
+      "matchPackageNames": ["drupal/core"],
+      "groupName": "Drupal Core",
+      "automerge": true,
+      "addLabels": ["drupal-core"]
+    },
+    {
+      "matchPackagePrefixes": ["jquery"],
+      "groupName": "jQuery packages",
+      "addLabels": ["jquery"]
+    },
+    {
+      "groupName": "Location modules",
+      "matchPackagePrefixes": ["drupal/geo"],
+      "matchManagers": ["composer"]
+    },
+    {
+      "groupName": "Drupal Migrate",
+      "addLabels": [
+        "drupal-migrate"
+      ],
+      "matchPackageNames": [
+        "/^drupal/migrate-.*/"
+      ]
+    },
+    {
+      "groupName": "Metatag modules",
+      "matchPackageNames": [
+        "drupal/metatag",
+        "drupal/schema_metatag"
+      ]
+    },
+
+    {
+      "groupName": "File media",
+      "matchPackageNames": [
+        "drupal/file_mdm",
+        "drupal/imagemagick"
+      ]
+    },
+  ],
+  "platform": "github",
+  "prConcurrentLimit": 3,
+  "rangeStrategy": "bump",
+  "rebaseWhen": "auto"
+}

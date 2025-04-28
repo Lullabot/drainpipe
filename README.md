@@ -61,6 +61,20 @@ upstream dependencies e.g. https://github.com/go-task/task/releases
 
 ---
 
+## Renovate Presets
+
+If you are using [Renovate](https://docs.renovatebot.com/) (for automated dependency updates) you can use/extend our Drupal presets by doing the following:
+
+```
+{
+  "extends": [
+    "github>Lullabot/drainpipe//renovate-presets/presets/drupal-10.json5"
+ ]
+}
+```
+
+---
+
 ## Database Updates
 
 The `drupal:update` command follows the same procedure as the
@@ -815,3 +829,4 @@ To generate new NPM package releases:
 2. Run `yarn install && yarn lerna publish`
 3. Create a pull request with the changes
 4. Once merged, locally switch to the main branch and run `yarn lerna exec -- npm publish`
+
