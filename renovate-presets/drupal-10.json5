@@ -1,5 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  // The `renovate-updates` branch is a dedicated branch for Renovate's update
+  // pull requests. This setup isolates automated updates from the main
+  // codebase, ensuring safer and easier review. For more details, refer to the
+  //"Renovate Presets" section in the README.md.
   "baseBranches": ["renovate-updates"],
   "extends": [
     ":automergeDisabled",
