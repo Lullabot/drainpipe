@@ -52,35 +52,6 @@
       "groupName": "jQuery packages",
       "addLabels": ["jquery"]
     },
-    {
-      "groupName": "Location modules",
-      "matchPackagePrefixes": ["drupal/geo"],
-      "matchManagers": ["composer"]
-    },
-    {
-      "groupName": "Drupal Migrate",
-      "addLabels": [
-        "drupal-migrate"
-      ],
-      "matchPackageNames": [
-        "/^drupal/migrate-.*/"
-      ]
-    },
-    {
-      "groupName": "Metatag modules",
-      "matchPackageNames": [
-        "drupal/metatag",
-        "drupal/schema_metatag"
-      ]
-    },
-
-    {
-      "groupName": "File media",
-      "matchPackageNames": [
-        "drupal/file_mdm",
-        "drupal/imagemagick"
-      ]
-    },
   ],
   "platform": "github",
   "prConcurrentLimit": 3,
