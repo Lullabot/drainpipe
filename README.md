@@ -76,8 +76,6 @@ If you are using [Renovate](https://docs.renovatebot.com/) (for automated depend
 This preset offers safe automation with flexibility and control for teams maintaining Drupal applications.
 It minimizes risk by requiring approval for major changes, speeds up security patches through automerging minor updates, and organizes updates for easier review and management.
 
-The `renovate-updates` branch is a dedicated branch where Renovate creates all its update pull requests instead of directly targeting the main development branch (like `main` or `develop`). This setup helps keep automated dependency updates isolated from the main codebase, making it safer and easier for teams to review, test, and merge updates without risking unintended changes to production or active development. It also provides a controlled environment where update PRs can be grouped, rebased, and tested before being manually promoted to the primary branches.
-
 ---
 
 ## Database Updates
