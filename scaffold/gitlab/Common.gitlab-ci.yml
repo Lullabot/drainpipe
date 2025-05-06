@@ -17,5 +17,6 @@
 
 .drainpipe_setup_node:
   script:
+    - apk upgrade
     - apk add --update nodejs npm
     - npm install -g yarn
