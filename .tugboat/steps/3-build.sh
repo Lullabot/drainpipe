@@ -6,5 +6,16 @@
 set -eux
 echo "Building..."
 
-./vendor/bin/task tugboat:build
-./vendor/bin/task tugboat:update
+# Backwards compatibility for old build command
+# If build_command doesnt exists, run build
+if ! ./vendor/bin/task tugboat:build; then
+  echo "tugboat:build does not exist, running build"
+  ./vendor/bin/task build
+fi
+
+# Backwards compatibility for old update command
+# If update_command doesnt exists, run update
+if ! ./vendor/bin/task tugboat:update; then
+  echo "tugboat:update does not exist, running update"
+  ./vendor/bin/task update
+fi
