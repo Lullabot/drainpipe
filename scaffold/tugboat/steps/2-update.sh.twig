@@ -7,7 +7,13 @@ set -eux
 echo "Updating..."
 
 composer install
-./vendor/bin/task {{ sync_command }}
+
+# Backwards compatibility for old sync command
+# If sync_command doesnt exists, run sync
+if ! ./vendor/bin/task {{ sync_command }}; then
+  echo "{{ sync_command }} does not exist, running sync"
+  ./vendor/bin/task sync
+fi
 
 # Set file permissions such that Drupal will not complain.
 chgrp -R www-data "${DOCROOT}/sites/default/files"

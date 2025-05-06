@@ -6,5 +6,16 @@
 set -eux
 echo "Building..."
 
-./vendor/bin/task {{ build_command }}
-./vendor/bin/task {{ update_command }}
+# Backwards compatibility for old build command
+# If build_command doesnt exists, run build
+if ! ./vendor/bin/task {{ build_command }}; then
+  echo "{{ build_command }} does not exist, running build"
+  ./vendor/bin/task build
+fi
+
+# Backwards compatibility for old update command
+# If update_command doesnt exists, run update
+if ! ./vendor/bin/task {{ update_command }}; then
+  echo "{{ update_command }} does not exist, running update"
+  ./vendor/bin/task update
+fi
