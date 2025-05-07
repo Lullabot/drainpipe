@@ -468,10 +468,10 @@ EOT;
         // Add Redis service.
         if (file_exists('./.ddev/docker-compose.redis.yaml')) {
             $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
-            $redisImage = explode(':',
-                $redisConfig['services']['redis']['image']);
+            $image = $redisConfig['services']['redis']['image'] ?? '';
+            preg_match('/:(\d+)/', $image, $matches);
+            $tugboatConfig['memory_cache_version'] = $matches[1] ?? 'unknown';
             $tugboatConfig['memory_cache_type'] = 'redis';
-            $tugboatConfig['memory_cache_version'] = array_pop($redisImage);
         }
 
         // Add Elasticsearch service.
