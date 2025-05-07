@@ -468,26 +468,26 @@ EOT;
         // Add Redis service.
         if (file_exists('./.ddev/docker-compose.redis.yaml')) {
             $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
-            $imageRaw = $redisConfig['services']['redis']['image'] ?? '';
-
+            $image = $redisConfig['services']['redis']['image'] ?? '';
+        
             // Normalize image from possible environment syntax.
-            if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $imageRaw, $matches)) {
+            // Example: $image = '${REDIS_DOCKER_IMAGE:-redis:7}'.
+            if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
                 $image = $matches[1];
-            } elseif (preg_match('/^([^:]+):\$\{[^:}]+:-(.+)\}$/', $imageRaw, $matches)) {
+            }
+            // Example: $image = 'redis:${REDIS_TAG:-6-bullseye}'.
+            elseif (preg_match('/^([^:]+):\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
                 $image = "{$matches[1]}:{$matches[2]}";
-            } else {
-                $image = $imageRaw;
             }
-
+        
             // Extract the version/tag from the image string.
-            if (preg_match('/:([a-zA-Z0-9._-]+)$/', $image, $versionMatch)) {
-                $version = $versionMatch[1];
-            } else {
-                $version = 'unknown';
+            // Example: $image = 'redis:6-bullseye' → $version = '6-bullseye'.
+            if (!preg_match('/:([a-zA-Z0-9._-]+)$/', $image, $versionMatch)) {
+                throw new \RuntimeException("Unable to extract Redis version from image: {$image}");
             }
-
+        
             $tugboatConfig['memory_cache_type'] = 'redis';
-            $tugboatConfig['memory_cache_version'] = $version;
+            $tugboatConfig['memory_cache_version'] = $versionMatch[1];
         }
 
         // Add Elasticsearch service.
@@ -579,6 +579,39 @@ EOT;
                 }
             }
         }
+    }
+
+    /**
+     * Extracts the Redis version tag from a Docker image string.
+     *
+     * Supports formats using environment variable fallbacks such as:
+     *   - ${REDIS_DOCKER_IMAGE:-redis:7}
+     *   - redis:${REDIS_TAG:-6-bullseye}
+     * As well as direct image values like:
+     *   - redis:7-alpine
+     *   - tugboatqa/redis:bookworm
+     *
+     * @param string $image The raw or interpolated image string from docker-compose.redis.yaml.
+     *
+     * @return string The extracted Redis version/tag (e.g. "7", "6-bullseye", "bookworm").
+     *
+     * @throws \RuntimeException If the version tag cannot be extracted.
+     */
+    public static function extractRedisImageVersion(string $image): string
+    {
+        // Normalize image from possible environment syntax.
+        if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
+            $image = $matches[1];
+        } elseif (preg_match('/^([^:]+):\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
+            $image = "{$matches[1]}:{$matches[2]}";
+        }
+
+        // Extract the tag (the part after the last colon).
+        if (preg_match('/:([a-zA-Z0-9._-]+)$/', $image, $versionMatch)) {
+            return $versionMatch[1];
+        }
+
+        throw new \RuntimeException("Unable to extract Redis version from image: {$image}");
     }
 
 }
