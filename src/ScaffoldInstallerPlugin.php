@@ -468,10 +468,26 @@ EOT;
         // Add Redis service.
         if (file_exists('./.ddev/docker-compose.redis.yaml')) {
             $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
-            $image = $redisConfig['services']['redis']['image'] ?? '';
-            preg_match('/:(\d+)/', $image, $matches);
-            $tugboatConfig['memory_cache_version'] = $matches[1] ?? 'unknown';
+            $imageRaw = $redisConfig['services']['redis']['image'] ?? '';
+
+            // Normalize image from possible environment syntax.
+            if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $imageRaw, $matches)) {
+                $image = $matches[1];
+            } elseif (preg_match('/^([^:]+):\$\{[^:}]+:-(.+)\}$/', $imageRaw, $matches)) {
+                $image = "{$matches[1]}:{$matches[2]}";
+            } else {
+                $image = $imageRaw;
+            }
+
+            // Extract the version/tag from the image string.
+            if (preg_match('/:([a-zA-Z0-9._-]+)$/', $image, $versionMatch)) {
+                $version = $versionMatch[1];
+            } else {
+                $version = 'unknown';
+            }
+
             $tugboatConfig['memory_cache_type'] = 'redis';
+            $tugboatConfig['memory_cache_version'] = $version;
         }
 
         // Add Elasticsearch service.
