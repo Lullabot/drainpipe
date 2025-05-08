@@ -470,24 +470,9 @@ EOT;
             $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
             $image = $redisConfig['services']['redis']['image'] ?? '';
         
-            // Normalize image from possible environment syntax.
-            // Example: $image = '${REDIS_DOCKER_IMAGE:-redis:7}'.
-            if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
-                $image = $matches[1];
-            }
-            // Example: $image = 'redis:${REDIS_TAG:-6-bullseye}'.
-            elseif (preg_match('/^([^:]+):\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
-                $image = "{$matches[1]}:{$matches[2]}";
-            }
-        
-            // Extract the version/tag from the image string.
-            // Example: $image = 'redis:6-bullseye' → $version = '6-bullseye'.
-            if (!preg_match('/:([a-zA-Z0-9._-]+)$/', $image, $versionMatch)) {
-                throw new \RuntimeException("Unable to extract Redis version from image: {$image}");
-            }
-        
+            $version = self::extractRedisImageVersion($image);
             $tugboatConfig['memory_cache_type'] = 'redis';
-            $tugboatConfig['memory_cache_version'] = $versionMatch[1];
+            $tugboatConfig['memory_cache_version'] = $version;
         }
 
         // Add Elasticsearch service.
@@ -600,18 +585,21 @@ EOT;
     public static function extractRedisImageVersion(string $image): string
     {
         // Normalize image from possible environment syntax.
+        // Example: $image = '${REDIS_DOCKER_IMAGE:-redis:7}'.
         if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
             $image = $matches[1];
+        // Example: $image = 'redis:${REDIS_TAG:-6-bullseye}'.
         } elseif (preg_match('/^([^:]+):\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
             $image = "{$matches[1]}:{$matches[2]}";
         }
 
-        // Extract the tag (the part after the last colon).
-        if (preg_match('/:([a-zA-Z0-9._-]+)$/', $image, $versionMatch)) {
-            return $versionMatch[1];
+        // Extract the version/tag from the image string.
+        // Example: $image = 'redis:6-bullseye' → $version = '6-bullseye'
+        if (!preg_match('/:([a-zA-Z0-9._-]+)$/', $image, $versionMatch)) {
+            throw new \RuntimeException("Unable to extract Redis version from image: {$image}");
         }
 
-        throw new \RuntimeException("Unable to extract Redis version from image: {$image}");
+        return $versionMatch[1];
     }
 
 }
