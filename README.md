@@ -73,9 +73,7 @@ If you are using [Renovate](https://docs.renovatebot.com/) (for automated depend
 }
 ```
 
-This preset offers safe automation with flexibility and control for teams maintaining Drupal applications.
-It minimizes risk by requiring approval for major changes, speeds up security patches through automerging minor updates, and organizes updates for easier review and management.
-
+This preset provides safe automation with flexibility and control for teams maintaining Drupal applications, minimizing risk by requiring approval for major changes while accelerating security patches through the automerging of minor updates.
 ---
 
 ## Database Updates
