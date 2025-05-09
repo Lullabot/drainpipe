@@ -16,11 +16,6 @@
       "automerge": true,
       "addLabels": ["drupal-core"]
     },
-    {
-      "matchPackagePrefixes": ["jquery"],
-      "groupName": "jQuery packages",
-      "addLabels": ["jquery"]
-    },
   ],
   "prConcurrentLimit": 3,
   "rangeStrategy": "bump",
