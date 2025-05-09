@@ -8,17 +8,11 @@
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
-      "matchPackagePatterns": ["^drupal/core-.*"],
-      "matchPackageNames": ["drupal/core"],
-      "groupName": "Drupal Core Major",
       "automerge": false,
       "addLabels": ["drupal-core"]
     },
     {
       "matchUpdateTypes": ["patch", "minor"],
-      "matchPackagePatterns": ["^drupal/core-.*"],
-      "matchPackageNames": ["drupal/core"],
-      "groupName": "Drupal Core",
       "automerge": true,
       "addLabels": ["drupal-core"]
     },
@@ -28,7 +22,6 @@
       "addLabels": ["jquery"]
     },
   ],
-  "platform": "github",
   "prConcurrentLimit": 3,
   "rangeStrategy": "bump",
   "rebaseWhen": "auto"
