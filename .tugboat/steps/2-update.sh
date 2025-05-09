@@ -11,8 +11,6 @@ mv .tugboat .tugboat-tmp
 #drainpipe-end
 composer install
 
-# Backwards compatibility for old sync command
-# If sync_command doesnt exists, run sync
 ./vendor/bin/task tugboat:sync
 
 # Set file permissions such that Drupal will not complain.
