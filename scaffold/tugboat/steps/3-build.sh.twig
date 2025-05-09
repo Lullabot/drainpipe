@@ -7,4 +7,5 @@ set -eux
 echo "Building..."
 
 ./vendor/bin/task {{ build_command }}
+
 ./vendor/bin/task {{ update_command }}
