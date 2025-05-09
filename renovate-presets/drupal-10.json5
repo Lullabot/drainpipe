@@ -1,36 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    ":automergeDisabled",
     ":renovatePrefix",
-    ":timezone(America/New_York)",
     "config:base",
     "group:symfony",
-    "schedule:automergeWeekends"
   ],
-  "labels": ["renovate"],
   "packageRules": [
-    {
-      "matchManagers": ["composer"],
-      "enabled": true
-    },
-    {
-      "matchPackagePatterns": "^.*",
-      "matchCurrentValue": "!/^\\^.*/",
-      "dependencyDashboardApproval": true,
-      "addLabels": ["pinned-package"]
-    },
-    {
-      "matchUpdateTypes": ["major"],
-      "automerge": false,
-      "addLabels": ["major"]
-    },
-    {
-      "matchUpdateTypes": ["patch", "minor"],
-      "matchCurrentVersion": "!/^0/",
-      "automerge": true,
-      "addLabels": ["patch/minor"]
-    },
     {
       "matchUpdateTypes": ["major"],
       "matchPackagePatterns": ["^drupal/core-.*"],
