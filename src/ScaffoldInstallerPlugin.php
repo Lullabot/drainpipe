@@ -489,15 +489,23 @@ EOT;
             $taskfile = Yaml::parseFile('./Taskfile.yml');
             if (isset($taskfile['tasks']['tugboat:sync'])) {
                 $tugboatConfig['sync_command'] = 'tugboat:sync';
+            } else if (isset($taskfile['tasks']['sync:tugboat'])) {
+                $tugboatConfig['sync_command'] = 'sync:tugboat';
             }
             if (isset($taskfile['tasks']['tugboat:build'])) {
                 $tugboatConfig['build_command'] = 'tugboat:build';
+            } else if (isset($taskfile['tasks']['build:tugboat'])) {
+                $tugboatConfig['build_command'] = 'build:tugboat';
             }
             if (isset($taskfile['tasks']['tugboat:update'])) {
                 $tugboatConfig['update_command'] = 'tugboat:update';
+            } else if (isset($taskfile['tasks']['update:tugboat'])) {
+                $tugboatConfig['update_command'] = 'update:tugboat';
             }
             if (isset($taskfile['tasks']['tugboat:online'])) {
                 $tugboatConfig['online_command'] = 'tugboat:online';
+            } else if (isset($taskfile['tasks']['online:tugboat'])) {
+                $tugboatConfig['online_command'] = 'online:tugboat';
             }
             if (isset($taskfile['tasks']['tugboat:php:init'])) {
                 $tugboatConfig['init']['php'] = TRUE;

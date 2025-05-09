@@ -13,10 +13,7 @@ composer install
 
 # Backwards compatibility for old sync command
 # If sync_command doesnt exists, run sync
-if ! ./vendor/bin/task tugboat:sync; then
-  echo "tugboat:sync does not exist, running sync"
-  ./vendor/bin/task sync
-fi
+./vendor/bin/task tugboat:sync
 
 # Set file permissions such that Drupal will not complain.
 chgrp -R www-data "${DOCROOT}/sites/default/files"
