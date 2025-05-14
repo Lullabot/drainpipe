@@ -22,7 +22,7 @@
         "mikey179/vfsstream": "^1.6.12",
         "mockery/mockery": "^1.6.12",
         "phpspec/prophecy-phpunit": "^2",
-        "phpstan/phpstan-deprecation-rules": "^2.0.2",
+        "phpstan/phpstan-deprecation-rules": "^2.0.3",
         "phpunit/phpunit": "^9|^10",
         "symfony/phpunit-bridge": "^6|^7",
         "symfony/yaml": "^6|^7",
@@ -30,7 +30,7 @@
         "vincentlanglet/twig-cs-fixer": "^3.6.0"
     },
     "require-dev": {
-        "composer/composer": "^2.8.8"
+        "composer/composer": "^2.8.9"
     },
     "bin": [
         "bin/drainpipe-convert-to-junit-xml"
