@@ -27,7 +27,7 @@
         "symfony/phpunit-bridge": "^6|^7",
         "symfony/yaml": "^6|^7",
         "tijsverkoyen/convert-to-junit-xml": "^1.11.0",
-        "vincentlanglet/twig-cs-fixer": "^3.6.0"
+        "vincentlanglet/twig-cs-fixer": "^3.6.1"
     },
     "require-dev": {
         "composer/composer": "^2.8.9"
