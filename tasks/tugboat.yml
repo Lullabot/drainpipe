@@ -1,0 +1,38 @@
+version: '3'
+
+tasks:
+  sync:
+    desc: "Sync the project"
+    cmds:
+      - |
+        echo "Syncing the project"
+        ./vendor/bin/task sync
+
+  build:
+    desc: "Build the project"
+    cmds:
+      - |
+        echo "Building the project"
+        ./vendor/bin/task build
+
+  update:
+    desc: "Update the project"
+    cmds:
+      - |
+        echo "Updating the project"
+        ./vendor/bin/task update
+
+  online:
+    desc: "Configure Drush with the Tugboat service URL"
+    cmds:
+      # Setting base url for Drush.
+      - |
+        mkdir -p drush
+
+        # Check if drush/drush.yml does not exist, if not, create it
+        if [ ! -f drush/drush.yml ]; then
+          echo "drush/drush.yml does not exist, creating it"
+          touch drush/drush.yml
+          echo "options:" > drush/drush.yml
+          echo "  uri: $TUGBOAT_DEFAULT_SERVICE_URL" >> drush/drush.yml
+        fi
