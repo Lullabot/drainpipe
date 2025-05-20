@@ -683,9 +683,10 @@ It is assumed the following tasks exist:
 - `update`
 - `online`
 
-For Tugboat, you must define `tugboat:sync`, `tugboat:build`,`tugboat:update`,
-and `tugboat:online`. Then run `composer install` to regenerate (if needed)
-the Tugboat scripts.
+The `build`, `sync`, and `update` tasks can be overridden with `sync:tugboat`,
+`build:tugboat`, and `update:tugboat` tasks if required (you will need to re-run
+`composer install` to regenerate the Tugboat scripts if you  are adding this
+task to your `Taskfile.yml` for the first time).
 
 ```
   sync:
