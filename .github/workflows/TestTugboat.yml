@@ -64,8 +64,7 @@ jobs:
         run: |
 
           # After the Taskfile is created,
-          # we can add the build:tugboat and tugboat:online steps.
-
+          # we add all the Tugboat tasks.
           echo "  tugboat:sync:" >> Taskfile.yml
           echo "    cmds:" >> Taskfile.yml
           echo "      - echo \"Tugboat sync\"" >> Taskfile.yml
@@ -80,7 +79,7 @@ jobs:
 
           echo "  tugboat:online:" >> Taskfile.yml
           echo "    cmds:" >> Taskfile.yml
-          echo "      - echo \"Tugboat online\"" >> Taskfile.yml
+          echo "      - task: tugboat:drush-uli-ready" >> Taskfile.yml
 
           ddev composer install
 
@@ -112,6 +111,7 @@ jobs:
       # preview - they should be the same.
       - name: Test Generated Files
         run: |
+
           diff -up drainpipe/.tugboat/config.yml .tugboat/config.yml
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/1-init.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/2-update.sh
@@ -121,6 +121,13 @@ jobs:
           diff -up drainpipe/.tugboat/steps/2-update.sh .tugboat/steps/2-update.sh
           diff -up drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
           diff -up drainpipe/.tugboat/steps/4-online.sh .tugboat/steps/4-online.sh
+
+          # Check drush/drush.yml exists.
+          if [ ! -f drush/drush.yml ]; then
+            echo "drush/drush.yml does not exist"
+            exit 1
+          fi
+
 
       - name: Upload test artifacts
         if: ${{ always() }}
