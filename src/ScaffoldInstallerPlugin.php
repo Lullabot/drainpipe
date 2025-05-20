@@ -488,24 +488,19 @@ EOT;
         if (file_exists('Taskfile.yml')) {
             // Get steps out of the Taskfile.
             $taskfile = Yaml::parseFile('./Taskfile.yml');
-            if (isset($taskfile['tasks']['tugboat:sync'])) {
-                $tugboatConfig['sync_command'] = 'tugboat:sync';
-            } else if (isset($taskfile['tasks']['sync:tugboat'])) {
+            if (isset($taskfile['tasks']['sync:tugboat'])) {
                 $tugboatConfig['sync_command'] = 'sync:tugboat';
             }
-            if (isset($taskfile['tasks']['tugboat:build'])) {
-                $tugboatConfig['build_command'] = 'tugboat:build';
-            } else if (isset($taskfile['tasks']['build:tugboat'])) {
+            if (isset($taskfile['tasks']['build:tugboat'])) {
                 $tugboatConfig['build_command'] = 'build:tugboat';
             }
-            if (isset($taskfile['tasks']['tugboat:update'])) {
-                $tugboatConfig['update_command'] = 'tugboat:update';
-            } else if (isset($taskfile['tasks']['update:tugboat'])) {
+            if (isset($taskfile['tasks']['update'])) {
+                $tugboatConfig['update_command'] = 'update';
+            }
+            if (isset($taskfile['tasks']['update:tugboat'])) {
                 $tugboatConfig['update_command'] = 'update:tugboat';
             }
-            if (isset($taskfile['tasks']['tugboat:online'])) {
-                $tugboatConfig['online_command'] = 'tugboat:online';
-            } else if (isset($taskfile['tasks']['online:tugboat'])) {
+            if (isset($taskfile['tasks']['online:tugboat'])) {
                 $tugboatConfig['online_command'] = 'online:tugboat';
             }
             if (isset($taskfile['tasks']['tugboat:php:init'])) {
@@ -538,13 +533,15 @@ EOT;
                 $twig->render('steps/2-update.sh.twig', $tugboatConfig));
             file_put_contents('./.tugboat/steps/3-build.sh',
                 $twig->render('steps/3-build.sh.twig', $tugboatConfig));
-            file_put_contents('./.tugboat/steps/4-online.sh',
-                $twig->render('steps/4-online.sh.twig', $tugboatConfig));
             chmod('./.tugboat/steps/1-init.sh', 0755);
             chmod('./.tugboat/steps/2-update.sh', 0755);
             chmod('./.tugboat/steps/3-build.sh', 0755);
-            chmod('./.tugboat/steps/4-online.sh', 0755);
-
+            if (!empty($tugboatConfig['online_command'])) {
+                file_put_contents('./.tugboat/steps/4-online.sh',
+                    $twig->render('steps/4-online.sh.twig',
+                        $tugboatConfig));
+                chmod('./.tugboat/steps/4-online.sh', 0755);
+            }
 
             if ($tugboatConfig['database_type'] === 'mysql') {
                 $fs->ensureDirectoryExists('./.tugboat/scripts');
