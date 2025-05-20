@@ -80,7 +80,7 @@ jobs:
           diff -up drainpipe/.tugboat/steps/4-online.sh .tugboat/steps/4-online.sh
 
           # Run the online task to generate drush/drush.yml.
-          ddev task tugboat:online
+          ddev task tugboat:drush-uli-ready
 
           # Check drush/drush.yml exists.
           if [ ! -f drush/drush.yml ]; then
