@@ -61,7 +61,7 @@ tasks:
   update:
     desc: "Runs the Drupal update process"
     cmds:
-      - task: update
+      - task: drupal:update
 
   tugboat:sync:
     desc: "Syncs the database from production"
