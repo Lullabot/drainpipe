@@ -7,7 +7,6 @@ set -eux
 echo "Updating..."
 
 composer install
-
 ./vendor/bin/task {{ sync_command }}
 
 # Set file permissions such that Drupal will not complain.
