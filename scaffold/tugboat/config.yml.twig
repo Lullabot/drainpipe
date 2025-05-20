@@ -25,7 +25,7 @@ services:
       update: ./.tugboat/steps/2-update.sh
       build: ./.tugboat/steps/3-build.sh
 {% if overrides.php|length > 0 %}
-  {{ overrides.php|raw }}
+{{ overrides.php|raw }}
 {% endif %}
 
   {{ database_type }}:
