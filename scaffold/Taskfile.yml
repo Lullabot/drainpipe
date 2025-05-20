@@ -63,6 +63,10 @@ tasks:
     cmds:
       - task: drupal:update
 
+  online:tugboat:
+    cmds:
+      - task: tugboat:drush-uli-ready
+
 # assets:
 #   desc: "Builds assets such as CSS & JS"
 #   cmds:

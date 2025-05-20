@@ -63,9 +63,6 @@ jobs:
       - name: Install Drainpipe, again, now with Taskfile updated
         run: |
 
-          echo '  online:tugboat:' >> Taskfile.yml
-          echo '    cmds:' >> Taskfile.yml
-          echo '      - task: tugboat:drush-uli-ready' >> Taskfile.yml
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
       # Compare the generated files to the ones used to build this repository
