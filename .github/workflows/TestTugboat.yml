@@ -122,6 +122,9 @@ jobs:
           diff -up drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
           diff -up drainpipe/.tugboat/steps/4-online.sh .tugboat/steps/4-online.sh
 
+          # Run the online task to generate drush/drush.yml.
+          ddev task tugboat:online
+
           # Check drush/drush.yml exists.
           if [ ! -f drush/drush.yml ]; then
             echo "drush/drush.yml does not exist"
