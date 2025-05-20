@@ -675,7 +675,7 @@ includes:
 ```
 |                          |                                                                             |
 |--------------------------|-----------------------------------------------------------------------------|
-| `task tugboat:online`    | Configures Drush with the Tugboat service URL for the environment          |
+| `task tugboat:drush:uli-ready`    | Configures Drush with the Tugboat service URL for the environment           |
 
 It is assumed the following tasks exist:
 - `sync`
@@ -683,10 +683,9 @@ It is assumed the following tasks exist:
 - `update`
 - `online`
 
-The `build`, `sync`, and `update` tasks can be overridden with `tugboat:sync`,
-`tugboat:build`,`tugboat:update`, and `tugboat:online` tasks if required (you will need to re-run
-`composer install` to regenerate the Tugboat scripts if you  are adding this
-task to your `Taskfile.yml` for the first time).
+For Tugboat, you must define `tugboat:sync`, `tugboat:build`,`tugboat:update`,
+and `tugboat:online`. Then run `composer install` to regenerate (if needed)
+the Tugboat scripts.
 
 ```
   sync:
