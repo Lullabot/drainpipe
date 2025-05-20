@@ -8,4 +8,4 @@ echo "Building..."
 
 ./vendor/bin/task build
 ./vendor/bin/task update
-./vendor/bin/drush tugboat:drush-uli-ready
+./vendor/bin/task tugboat:drush-uli-ready
