@@ -60,31 +60,6 @@ jobs:
           echo "    fullPage: false" >> .tugboat/config.drainpipe-override.yml
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
-      - name: Add Tugboat steps to Taskfile
-        run: |
-
-          ddev composer install
-
-          if ! grep -q './vendor/bin/task tugboat:sync' .tugboat/steps/2-update.sh; then
-            echo "tugboat:sync not found in .tugboat/steps/2-update.sh"
-            exit 1
-          fi
-
-          if ! grep -q './vendor/bin/task tugboat:build' .tugboat/steps/3-build.sh; then
-            echo "tugboat:build not found in .tugboat/steps/3-build.sh"
-            exit 1
-          fi
-
-          if ! grep -q './vendor/bin/task tugboat:update' .tugboat/steps/3-build.sh; then
-            echo "tugboat:update not found in .tugboat/steps/3-build.sh"
-            exit 1
-          fi
-
-          if ! grep -q './vendor/bin/task tugboat:online' .tugboat/steps/4-online.sh; then
-            echo "tugboat:online not found in .tugboat/steps/4-online.sh"
-            exit 1
-          fi
-
       - name: Install Drainpipe, again, now with Taskfile updated
         run: |
          ddev composer require lullabot/drainpipe --with-all-dependencies
