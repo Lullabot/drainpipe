@@ -63,6 +63,25 @@ tasks:
     cmds:
       - task: drupal:update
 
+  tugboat:sync:
+    desc: "Syncs the database from production"
+    cmds:
+      - task: tugboat:sync
+
+  tugboat:build:
+    desc: "Builds the project for Tugboat"
+    cmds:
+      - task: tugboat:build
+
+  tugboat:update:
+    desc: "Updates the project for Tugboat"
+    cmds:
+      - task: tugboat:update
+
+  tugboat:online:
+    desc: "Sets up the project for Tugboat"
+    cmds:
+      - task: tugboat:online
 # assets:
 #   desc: "Builds assets such as CSS & JS"
 #   cmds:
