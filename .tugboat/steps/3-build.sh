@@ -6,6 +6,5 @@
 set -eux
 echo "Building..."
 
-./vendor/bin/task tugboat:build
-
-./vendor/bin/task tugboat:update
+./vendor/bin/task build
+./vendor/bin/task update

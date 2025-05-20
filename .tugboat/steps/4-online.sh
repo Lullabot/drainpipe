@@ -6,4 +6,4 @@
 set -eux
 echo "Online..."
 
-./vendor/bin/task tugboat:online
+./vendor/bin/task online:tugboat

@@ -10,8 +10,7 @@ echo "Updating..."
 mv .tugboat .tugboat-tmp
 #drainpipe-end
 composer install
-
-./vendor/bin/task tugboat:sync
+./vendor/bin/task sync
 
 # Set file permissions such that Drupal will not complain.
 chgrp -R www-data "${DOCROOT}/sites/default/files"
