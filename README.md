@@ -675,7 +675,8 @@ includes:
 ```
 |                          |                                                                             |
 |--------------------------|-----------------------------------------------------------------------------|
-| `task tugboat:drush:uli-ready`    | Configures Drush with the Tugboat service URL for the environment           |
+| `task tugboat:drush-uli-ready`    | Configures Drush with the Tugboat service URL for the environment. Remember to run it as part of your Tugboat _build_ or _online_ commands defined at `.tugboat/config.yml`             |
+
 
 It is assumed the following tasks exist:
 - `sync`
