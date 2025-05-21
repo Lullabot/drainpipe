@@ -673,9 +673,9 @@ Add the following to your `Taskfile.yml`'s `includes` section to use them:
 includes:
   tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
 ```
-|                          |                                                                             |
-|--------------------------|-----------------------------------------------------------------------------|
-| `task tugboat:drush-uli-ready`    | Configures Drush with the Tugboat service URL for the environment. Remember to run it as part of your Tugboat _build_ or _online_ commands defined at `.tugboat/config.yml`             |
+| Task | Action | Usage |
+|---|---|---|
+| `task tugboat:drush-uli-ready` | Configures Drush with the Tugboat service URL for the environment. | Run it once as part of your Tugboat _build_ or _online_ commands defined at `.tugboat/config.yml`
 
 
 It is assumed the following tasks exist:
