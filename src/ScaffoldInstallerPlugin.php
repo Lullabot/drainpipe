@@ -83,7 +83,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installGitignore();
         $this->installDdevCommand();
         $this->installHostingProviderSupport();
-        $this->installCICommands();
+        $this->installCICommands($event->getComposer());
         $this->installEnvSupport();
     }
 
@@ -98,7 +98,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installGitignore();
         $this->installDdevCommand();
         $this->installHostingProviderSupport();
-        $this->installCICommands();
+        $this->installCICommands($event->getComposer());
         $this->installEnvSupport();
     }
 
@@ -260,11 +260,11 @@ EOT;
     /**
      * Install CI Commands.
      */
-    private function installCICommands(): void
+    private function installCICommands(Composer $composer): void
     {
         $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
-        $this->installGitlabCI($scaffoldPath);
-        $this->installGitHubActions($scaffoldPath);
+        $this->installGitlabCI($scaffoldPath, $composer);
+        $this->installGitHubActions($scaffoldPath, $composer);
         $this->installTugboat($scaffoldPath);
     }
 
@@ -273,7 +273,7 @@ EOT;
      *
      * @param string $scaffoldPath The path to the scaffold files to copy from.
      */
-    private function installGitlabCI(string $scaffoldPath): void {
+    private function installGitlabCI(string $scaffoldPath, Composer $composer): void {
         $fs = new Filesystem();
         $fs->removeDirectory('./.drainpipe/gitlab');
 
@@ -326,10 +326,8 @@ EOT;
                 if (!file_exists('./pantheon.yml')) {
                     $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
                 }
-                // settings.pantheon.php
-                if (!file_exists('./web/sites/default/settings.pantheon.php')) {
-                    $fs->copy("$scaffoldPath/pantheon/settings.pantheon.php", './web/sites/default/settings.pantheon.php');
-                }
+
+                $this->checkPantheonSystemDrupalIntegrations($composer);
             }
         }
         if (!file_exists('./.gitlab-ci.yml')) {
@@ -338,11 +336,32 @@ EOT;
     }
 
     /**
+     * Check if package pantheon-systems/drupal-integrations is installed.
+     * If not installed, recommend the user to install it.
+     *
+     * @param \Composer\Composer $composer
+     *   The Composer instance.
+     *
+     * @return void
+     *   No return value.
+     */
+    private function checkPantheonSystemDrupalIntegrations(Composer $composer): void {
+        $packages = $composer->getRepositoryManager()->getLocalRepository()->getPackages();
+        foreach ($packages as $package) {
+            if ($package->getName() === 'pantheon-systems/drupal-integrations') {
+                return;
+            }
+        }
+
+        $this->io->warning("🪠 [Drainpipe] For Pantheon sites, we recommend installing the pantheon-systems/drupal-integrations package.");
+    }
+
+    /**
      * Install GitLab CI configuration if defined in composer.json
      *
      * @param string $scaffoldPath The path to the scaffold files to copy from.
      */
-    private function installGitHubActions(string $scaffoldPath): void {
+    private function installGitHubActions(string $scaffoldPath, Composer $composer): void {
         $fs = new Filesystem();
         $fs->removeDirectory('./.github/actions/drainpipe');
 
@@ -365,6 +384,7 @@ EOT;
                 else {
                     $fs->copy("$scaffoldPath/github/workflows/$pantheon_review_apps.yml", './.github/workflows/PantheonReviewApps.yml');
                 }
+                $this->checkPantheonSystemDrupalIntegrations($composer);
             }
             else if ($github === 'acquia') {
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
@@ -469,7 +489,7 @@ EOT;
         if (file_exists('./.ddev/docker-compose.redis.yaml')) {
             $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
             $image = $redisConfig['services']['redis']['image'] ?? '';
-        
+
             $version = self::extractRedisImageVersion($image);
             $tugboatConfig['memory_cache_type'] = 'redis';
             $tugboatConfig['memory_cache_version'] = $version;
