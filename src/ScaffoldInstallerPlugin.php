@@ -353,7 +353,7 @@ EOT;
             }
         }
 
-        $this->io->warning("🪠 [Drainpipe] For Pantheon sites, we recommend installing the pantheon-systems/drupal-integrations package.");
+        $this->io->warning("🪠 [Drainpipe] For Pantheon sites, we strongly recommend installing the pantheon-systems/drupal-integrations package. Essential Pantheon functionality depends on this package.");
     }
 
     /**
