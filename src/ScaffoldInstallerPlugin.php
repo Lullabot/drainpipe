@@ -85,6 +85,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installHostingProviderSupport();
         $this->installCICommands($event->getComposer());
         $this->installEnvSupport();
+        if ($this->hasPantheonConfigurationFiles()) {
+            $this->pantheonSystemDrupalIntegrationsWarning();
+        }
     }
 
     /**
@@ -352,6 +355,26 @@ EOT;
         if ($package) {
             return; // Found the package, no warning needed.
         }
+        $this->pantheonSystemDrupalIntegrationsWarning();
+    }
+
+    /**
+     * Check for common Pantheon configuration files.
+     *
+     * @return bool
+     *   True if the site uses Pantheon, false otherwise.
+     */
+    private function hasPantheonConfigurationFiles(): bool
+    {
+        return file_exists('./.pantheon.yml')
+            || file_exists('./pantheon.upstream.yml')
+            || file_exists('./.pantheon');
+    }
+
+    /**
+     * Display a warning about the pantheon-systems/drupal-integrations package.
+     */
+    private function pantheonSystemDrupalIntegrationsWarning(): void {
         $this->io->warning("🪠 [Drainpipe] For Pantheon sites, we strongly recommend installing the pantheon-systems/drupal-integrations package. Essential Pantheon functionality depends on this package.");
     }
 
