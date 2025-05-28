@@ -362,6 +362,25 @@ ddev ssh
 terminus site:upstream:set [site_name] empty
 ```
 
+#### Pantheon Systems: Drupal Integrations
+
+`pantheon-systems/drupal-integrations` is a package that provides essential Pantheon functionality. It is strongly recommended to install it.
+
+```
+composer require pantheon-systems/drupal-integrations
+```
+
+#### Environment Indicator settings
+
+We recommend using the `environment_indicator` module to help differentiate between `dev`, `test`, `Multidev`, and `live` environments.
+
+To use our preferred color settings, add the following to your `settings.php`:
+```
+if (isset($_ENV['PANTHEON_ENVIRONMENT'])) {
+  include __DIR__ . '/vendor/lullabot/drainpipe/scaffold/pantheon/environment_indicator.settings.php';
+}
+```
+
 ### Acquia
 Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
