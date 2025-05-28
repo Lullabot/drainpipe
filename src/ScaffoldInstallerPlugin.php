@@ -346,13 +346,12 @@ EOT;
      *   No return value.
      */
     private function checkPantheonSystemDrupalIntegrations(Composer $composer): void {
-        $packages = $composer->getRepositoryManager()->getLocalRepository()->getPackages();
-        foreach ($packages as $package) {
-            if ($package->getName() === 'pantheon-systems/drupal-integrations') {
-                return;
-            }
+        $repositoryManager = $composer->getRepositoryManager();
+        $localRepository = $repositoryManager->getLocalRepository();
+        $package = $localRepository->findPackage('pantheon-systems/drupal-integrations', '*');
+        if ($package) {
+            return; // Found the package, no warning needed.
         }
-
         $this->io->warning("🪠 [Drainpipe] For Pantheon sites, we strongly recommend installing the pantheon-systems/drupal-integrations package. Essential Pantheon functionality depends on this package.");
     }
 
