@@ -377,7 +377,7 @@ We recommend using the `environment_indicator` module to help differentiate betw
 To use our preferred color settings, add the following to your `settings.php`:
 ```
 if (isset($_ENV['PANTHEON_ENVIRONMENT'])) {
-  include __DIR__ . '/vendor/lullabot/drainpipe/scaffold/pantheon/environment_indicator.settings.php';
+  include dirname(__DIR__, 2) . '/vendor/lullabot/drainpipe/scaffold/pantheon/environment_indicator.settings.php';
 }
 ```
 
