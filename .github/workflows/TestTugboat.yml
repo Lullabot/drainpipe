@@ -60,17 +60,16 @@ jobs:
           echo "    fullPage: false" >> .tugboat/config.drainpipe-override.yml
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
-      - name: Add an online step
+      - name: Install Drainpipe, again, now with Taskfile updated
         run: |
-          echo "  online:tugboat:" >> Taskfile.yml
-          echo "    cmds:" >> Taskfile.yml
-          echo "      - echo \"Tugboat online\"" >> Taskfile.yml
-          ddev composer install
+
+          ddev composer require lullabot/drainpipe --with-all-dependencies
 
       # Compare the generated files to the ones used to build this repository
       # preview - they should be the same.
       - name: Test Generated Files
         run: |
+
           diff -up drainpipe/.tugboat/config.yml .tugboat/config.yml
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/1-init.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/2-update.sh
@@ -81,13 +80,12 @@ jobs:
           diff -up drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
           diff -up drainpipe/.tugboat/steps/4-online.sh .tugboat/steps/4-online.sh
 
-      - name: Add a build:tugboat step
-        run: |
-          echo "  build:tugboat:" >> Taskfile.yml
-          echo "    cmds:" >> Taskfile.yml
-          echo "      - echo \"Tugboat build\"" >> Taskfile.yml
-          ddev composer install
-          if ! grep -q './vendor/bin/task build:tugboat' .tugboat/steps/3-build.sh; then
+          # Run the online task to generate drush/drush.yml.
+          ddev task tugboat:drush-uli-ready
+
+          # Check drush/drush.yml exists.
+          if [ ! -f drush/drush.yml ]; then
+            echo "drush/drush.yml does not exist"
             exit 1
           fi
 
