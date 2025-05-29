@@ -695,7 +695,7 @@ task to your `Taskfile.yml` for the first time).
     cmds:
       - task: pantheon:fetch-db
       - task: drupal:import-db
-  tugboat:sync:
+  sync:tugboat:
     desc: "Fetches a database from Pantheon and imports it in Tugboat"
     cmds:
       - task: pantheon:fetch-db
@@ -722,7 +722,7 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-You can also add an `online` step by adding a task named `tugboat:online`
+You can also add an `online` step by adding a task named `online:tugboat`
 and re-running `composer install`.
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
