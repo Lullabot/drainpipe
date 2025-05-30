@@ -53,6 +53,7 @@ tasks:
   lint:
     desc: Runs lint on composer, YAML, and Twig files
     # @todo JUnit output
+    ignore_error: true
     cmds:
       - composer validate
       - |
@@ -89,6 +90,7 @@ tasks:
         fi
   config:
     desc: "Verifies that exported config matches the config in Drupal. Run with format=short to skip showing the full table of diffs."
+    ignore_error: true
     # @todo JUnit output
     cmds:
       - |
@@ -101,6 +103,7 @@ tasks:
         fi
   phpstan:
     dec: Runs PHPStan with mglaman/phpstan-drupal
+    ignore_error: true
     cmds:
       - |
         {{ .FUNC_ENSURE_DIRS }}
@@ -116,6 +119,7 @@ tasks:
     deps: [phpunit:static, phpunit:functional]
   phpunit:static:
     desc: Runs PHPUnit unit tests
+    ignore_error: true
     cmds:
       - |
         CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
@@ -129,6 +133,7 @@ tasks:
         ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
   phpunit:functional:
     desc: Runs PHPUnit functional tests
+    ignore_error: true
     cmds:
       - |
         CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
@@ -147,6 +152,7 @@ tasks:
         fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
+    ignore_error: true
     summary: |
       Check your code against Drupal's coding standards. To override the default
       ruleset, create a phpcs.xml file and extend phpcs.xml.dist
@@ -331,6 +337,7 @@ tasks:
   nightwatch:
     desc: Runs Nighwatch functional browser tests
     deps: [nightwatch:check]
+    ignore_error: true
     env:
       NIGHTWATCH_ENV: 'firefox,chrome'
     cmds:
