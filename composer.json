@@ -16,7 +16,7 @@
         "drush/drush": "^11|^12|^13",
         "symfony/yaml": "^6|^7",
         "twig/twig": "^3",
-        "vlucas/phpdotenv": "^4|^5"
+        "vlucas/phpdotenv": "4.3.0"
     },
     "require-dev": {
         "composer/composer": "^2.8.9",
