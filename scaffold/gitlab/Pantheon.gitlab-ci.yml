@@ -4,7 +4,7 @@
     - !reference [.drainpipe_setup_git, script]
     - echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >> ~/.ssh/config
     - mkdir ~/terminus
-    - curl -L https://github.com/pantheon-systems/terminus/releases/download/3.2.1/terminus.phar --output ~/terminus/terminus
+    - curl -L https://github.com/pantheon-systems/terminus/releases/download/4.0.1/terminus.phar --output ~/terminus/terminus
     - chmod +x ~/terminus/terminus
     - ln -s ~/terminus/terminus /usr/local/bin/terminus
     - echo "$TERMINUS_PLUGINS" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
