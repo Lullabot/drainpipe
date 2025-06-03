@@ -460,7 +460,10 @@ EOT;
         }
 
         // Wipe the Tugboat directory and define base config.
-        $fs->removeDirectory('./.tugboat');
+        $fs->removeDirectory('./.tugboat/steps');
+        $fs->removeDirectory('./.tugboat/scripts');
+        $fs->remove('./.tugboat/config.drainpipe-override.yml');
+        $fs->remove('./.tugboat/config.yml');
         $binaryInstallerPlugin = new BinaryInstallerPlugin();
         $tugboatConfig = [
             'nodejs_version' => '18',
