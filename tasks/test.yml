@@ -17,13 +17,37 @@ vars:
 tasks:
   static:
     desc: Runs all static tests
-    deps: [lint, phpstan, phpunit:static, phpcs]
     cmds:
+      - |
+        set +e
+        task test:lint
+        STATUS_LINT=$?
+        task test:phpstan
+        STATUS_PHPSTAN=$?
+        task test:phpunit:static
+        STATUS_PHPUNITSTATIC=$?
+        task test:phpcs
+        STATUS_PHPCS=$?
+
+        if [ $STATUS_LINT -ne 0 ] || [ $STATUS_PHPSTAN -ne 0 ] || [ $STATUS_PHPUNITSTATIC -ne 0 ] || [ $STATUS_PHPCS -ne 0 ]; then
+          exit 1
+        fi
       - task: untracked
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
-    deps: [config, phpunit:functional, nightwatch]
     cmds:
+      - |
+        set +e
+        task test:config
+        STATUS_CONFIG=$?
+        task test:phpunit:functional
+        STATUS_PHPUNITFUNCTIONAL=$?
+        task test:nightwatch
+        STATUS_NIGHTWATCH=$?
+
+        if [ $STATUS_CONFIG -ne 0 ] || [ $STATUS_PHPUNITFUNCTIONAL -ne 0 ] || [ $STATUS_NIGHTWATCH -ne 0 ]; then
+          exit 1
+        fi
       - task: untracked
   security:
     desc: Runs security checks for composer packages and Drupal contrib
@@ -33,7 +57,6 @@ tasks:
             mkdir -p test_result
             ./vendor/bin/local-php-security-checker --format=json > test_result/local-php-security-checker.json
           fi
-        ignore_error: true
       - |
         if [ "{{.format}}" == "junit" ]; then
           RESULT=$(cat test_result/local-php-security-checker.json)
@@ -53,7 +76,6 @@ tasks:
   lint:
     desc: Runs lint on composer, YAML, and Twig files
     # @todo JUnit output
-    ignore_error: true
     cmds:
       - composer validate
       - |
@@ -90,7 +112,6 @@ tasks:
         fi
   config:
     desc: "Verifies that exported config matches the config in Drupal. Run with format=short to skip showing the full table of diffs."
-    ignore_error: true
     # @todo JUnit output
     cmds:
       - |
@@ -103,7 +124,6 @@ tasks:
         fi
   phpstan:
     dec: Runs PHPStan with mglaman/phpstan-drupal
-    ignore_error: true
     cmds:
       - |
         {{ .FUNC_ENSURE_DIRS }}
@@ -119,7 +139,6 @@ tasks:
     deps: [phpunit:static, phpunit:functional]
   phpunit:static:
     desc: Runs PHPUnit unit tests
-    ignore_error: true
     cmds:
       - |
         CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
@@ -133,7 +152,6 @@ tasks:
         ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
   phpunit:functional:
     desc: Runs PHPUnit functional tests
-    ignore_error: true
     cmds:
       - |
         CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
@@ -152,7 +170,6 @@ tasks:
         fi
   phpcs:
     desc: Runs PHPCS with Drupal Coding Standards
-    ignore_error: true
     summary: |
       Check your code against Drupal's coding standards. To override the default
       ruleset, create a phpcs.xml file and extend phpcs.xml.dist
@@ -337,7 +354,6 @@ tasks:
   nightwatch:
     desc: Runs Nighwatch functional browser tests
     deps: [nightwatch:check]
-    ignore_error: true
     env:
       NIGHTWATCH_ENV: 'firefox,chrome'
     cmds:
