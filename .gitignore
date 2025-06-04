@@ -15,7 +15,7 @@ tests/fixtures/drainpipe-test-project/*
 .npmrc
 lerna-debug.log
 node_modules
-/drainpipe-dev/
+
 ################
 # Editors / OS #
 ################
