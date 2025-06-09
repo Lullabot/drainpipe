@@ -33,6 +33,6 @@ if (getenv('TUGBOAT_REPO')) {
   $config['environment_indicator.indicator']['bg_color'] = '#990055';
   $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
 
-  // Prevent Drupal from making the sites/default directory unwritable.
+  // Keep the sites/default directory writable.
   $settings['skip_permissions_hardening'] = TRUE;
 }
