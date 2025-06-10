@@ -17,13 +17,37 @@ vars:
 tasks:
   static:
     desc: Runs all static tests
-    deps: [lint, phpstan, phpunit:static, phpcs]
     cmds:
+      - |
+        set +e
+        task test:lint
+        STATUS_LINT=$?
+        task test:phpstan
+        STATUS_PHPSTAN=$?
+        task test:phpunit:static
+        STATUS_PHPUNITSTATIC=$?
+        task test:phpcs
+        STATUS_PHPCS=$?
+
+        if [ $STATUS_LINT -ne 0 ] || [ $STATUS_PHPSTAN -ne 0 ] || [ $STATUS_PHPUNITSTATIC -ne 0 ] || [ $STATUS_PHPCS -ne 0 ]; then
+          exit 1
+        fi
       - task: untracked
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
-    deps: [config, phpunit:functional, nightwatch]
     cmds:
+      - |
+        set +e
+        task test:config
+        STATUS_CONFIG=$?
+        task test:phpunit:functional
+        STATUS_PHPUNITFUNCTIONAL=$?
+        task test:nightwatch
+        STATUS_NIGHTWATCH=$?
+
+        if [ $STATUS_CONFIG -ne 0 ] || [ $STATUS_PHPUNITFUNCTIONAL -ne 0 ] || [ $STATUS_NIGHTWATCH -ne 0 ]; then
+          exit 1
+        fi
       - task: untracked
   security:
     desc: Runs security checks for composer packages and Drupal contrib
@@ -33,7 +57,6 @@ tasks:
             mkdir -p test_result
             ./vendor/bin/local-php-security-checker --format=json > test_result/local-php-security-checker.json
           fi
-        ignore_error: true
       - |
         if [ "{{.format}}" == "junit" ]; then
           RESULT=$(cat test_result/local-php-security-checker.json)
