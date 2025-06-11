@@ -16,24 +16,24 @@ class BinaryInstallerPlugin extends BinaryInstaller
         'task' => [
             'releases' => [
                 'linux' => [
-                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.38.0/task_linux_amd64.tar.gz', 'sha' => 'a6241c9fbcc49bdffef907e4d6325adb074295fd094f2bfa6a2e32282c2ed06e'],
-                    'arm' => ['url' => 'https://github.com/go-task/task/releases/download/v3.38.0/task_linux_arm.tar.gz', 'sha' => '623d0fdf13b2940495c177f4dce83ec9f2db26645011052280a812a8ba1f146a'],
-                    '386' => ['url' => 'https://github.com/go-task/task/releases/download/v3.38.0/task_linux_386.tar.gz', 'sha' => '4ae95300c51d53f894cce9bc45f22b2347492772b21c3a6ddf3d47304c7bbefa'],
-                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.38.0/task_linux_arm64.tar.gz', 'sha' => '30d3c727a434ee3bf69fb69e5d1aa84c3ab401fc2343a2760b4c7808acc689b8'],
+                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.44.0/task_linux_amd64.tar.gz', 'sha' => 'd6c9c0a14793659766ee0c06f9843452942ae6982a3151c6bbd78959c1682b82'],
+                    'arm' => ['url' => 'https://github.com/go-task/task/releases/download/v3.44.0/task_linux_arm.tar.gz', 'sha' => '659c3a55654c9438dbb399f33b955c834162ce99b43275df66e3b8f17559107c'],
+                    '386' => ['url' => 'https://github.com/go-task/task/releases/download/v3.44.0/task_linux_386.tar.gz', 'sha' => '83efddb7f0683e7da3709fa8cf634e6decc7cc2946ff3c03fb6f9409c6d385b5'],
+                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.44.0/task_linux_arm64.tar.gz', 'sha' => '3b2a79a5372e3806c4b345bdfb4a1a1a93a287a58804986bb57b16665db5db22'],
                 ],
                 'darwin' => [
-                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.38.0/task_darwin_amd64.tar.gz', 'sha' => 'a2aefff4f3cb2851ce133c13a20502f1dfa8a6bc34d3f4e01c67cf3278f4f73d'],
-                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.38.0/task_darwin_arm64.tar.gz', 'sha' => 'a575c9e10591bb35d1bb678bdde2fa221330d207a787b0a5979d4287ee7f4c0f'],
+                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.44.0/task_darwin_amd64.tar.gz', 'sha' => '7bb354c0ceb01d9256373749cc7155d33de7234587fbbab4d985ee77c0414274'],
+                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.44.0/task_darwin_arm64.tar.gz', 'sha' => 'cfbfe894ae1987a378af50230c9b60ec62a072093e96d217c1e5dd9f4b108fbe'],
                 ],
                 'windows' => [
-                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.38.0/task_windows_amd64.zip', 'sha' => '6586105949b4359b37f770b7604542c23f064e055c6521791cd8d5916ec287fb'],
-		            'arm' => ['url' => 'https://github.com/go-task/task/releases/download/v3.38.0/task_windows_arm.zip', 'sha' => 'cda87056d8289f55d040e413171357ad7b1efaa75ae3c9433106f13a9057053e'],
-                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.38.0/task_windows_arm64.zip', 'sha' => '955e88bb22b3396bd95c9d8d25e8fd71a323364549e012d863287fd069d51ee7'],
-                    '386' => ['url' => 'https://github.com/go-task/task/releases/download/v3.38.0/task_windows_386.zip', 'sha' => '72962ea63388db41750e60cd0184e8c68ffd008ce277ba7502e974e40ee36bf2'],
+                    'amd64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.44.0/task_windows_amd64.zip', 'sha' => 'db39c209f677c8f1513bec1b22c0997131d56e252db0a2d57208414c96ad9056'],
+		            'arm' => ['url' => 'https://github.com/go-task/task/releases/download/v3.44.0/task_windows_arm.zip', 'sha' => '30bfdaee1eb1bd91f4e063c8fcdf383cdf64329b3eedae440f4ac3c96e7966f1'],
+                    'arm64' => ['url' => 'https://github.com/go-task/task/releases/download/v3.44.0/task_windows_arm64.zip', 'sha' => 'e2cf946b4352626b4635e87ec8f2d65734b7f08a4eef2187e02f1d99cb2f1012'],
+                    '386' => ['url' => 'https://github.com/go-task/task/releases/download/v3.44.0/task_windows_386.zip', 'sha' => '94190fcb14463c03d0f0e3785eee7db6b942532ef81b7fbdb6cc838c0717d460'],
                 ],
             ],
             'hashalgo' => 'sha256',
-            'version' => '3.38.0',
+            'version' => '3.44.0',
         ],
     ];
 
