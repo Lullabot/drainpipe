@@ -369,8 +369,8 @@ EOT;
      */
     private function hasPantheonConfigurationFiles(): bool
     {
-        return file_exists('./pantheon.yml')
-            || file_exists('./pantheon.upstream.yml')
+        return is_file('./pantheon.yml')
+            || is_file('./pantheon.upstream.yml')
             || file_exists('./.pantheon');
     }
 
