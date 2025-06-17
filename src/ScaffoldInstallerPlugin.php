@@ -86,7 +86,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installCICommands($event->getComposer());
         $this->installEnvSupport();
         if ($this->hasPantheonConfigurationFiles()) {
-            $this->pantheonSystemDrupalIntegrationsWarning();
+            $this->checkPantheonSystemDrupalIntegrations($event->getComposer());
         }
     }
 
