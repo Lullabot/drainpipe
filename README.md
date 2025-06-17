@@ -370,17 +370,6 @@ terminus site:upstream:set [site_name] empty
 composer require pantheon-systems/drupal-integrations
 ```
 
-#### Environment Indicator settings
-
-We recommend using the `environment_indicator` module to help differentiate between `dev`, `test`, `Multidev`, and `live` environments.
-
-To use our preferred color settings, add the following to your `settings.php`:
-```
-if (isset($_ENV['PANTHEON_ENVIRONMENT'])) {
-  include dirname(__DIR__, 2) . '/vendor/lullabot/drainpipe/scaffold/pantheon/environment_indicator.settings.php';
-}
-```
-
 ### Acquia
 Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
