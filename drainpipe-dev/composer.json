@@ -24,8 +24,8 @@
         "phpspec/prophecy-phpunit": "^2",
         "phpstan/phpstan-deprecation-rules": "^2.0.3",
         "phpunit/phpunit": "^9|^10",
-        "symfony/phpunit-bridge": "^6|^7",
-        "symfony/yaml": "^6|^7",
+        "symfony/phpunit-bridge": "7.3.0",
+        "symfony/yaml": "7.3.0",
         "tijsverkoyen/convert-to-junit-xml": "^1.11.0",
         "vincentlanglet/twig-cs-fixer": "^3.8.1"
     },
