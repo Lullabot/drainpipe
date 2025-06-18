@@ -49,3 +49,4 @@ jobs:
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
           # set to "true" if you want to run the installer
           run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}
+          clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
