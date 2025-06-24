@@ -362,6 +362,14 @@ ddev ssh
 terminus site:upstream:set [site_name] empty
 ```
 
+#### Pantheon Systems: Drupal Integrations
+
+`pantheon-systems/drupal-integrations` is a package that provides essential Pantheon functionality. It is strongly recommended to install it.
+
+```
+composer require pantheon-systems/drupal-integrations
+```
+
 ### Acquia
 Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
