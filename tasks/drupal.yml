@@ -58,17 +58,17 @@ tasks:
     desc: Run Drupal update tasks after deploying new code
     cmds:
       # See https://www.drush.org/12.x/deploycommand/
-      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
-      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
+      - ./vendor/bin/drush {{.site}} -vvv --yes updatedb --no-cache-clear
+      - ./vendor/bin/drush {{.site}} -vvv --yes cache:rebuild
       # Run config:import twice to make sure we catch any config that didn't declare
       # a dependency correctly. This is also useful when importing large config sets
       # as it can sometimes hit an out of memory error.
-      - ./vendor/bin/drush {{.site}} --yes config:import || true
-      - ./vendor/bin/drush {{.site}} --yes config:import
-      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
-      - ./vendor/bin/drush {{.site}} --yes deploy:hook
+      - ./vendor/bin/drush {{.site}} -vvv --yes config:import || true
+      - ./vendor/bin/drush {{.site}} -vvv --yes config:import
+      - ./vendor/bin/drush {{.site}} -vvv --yes cache:rebuild
+      - ./vendor/bin/drush {{.site}} -vvv --yes deploy:hook
       - |
-       # drush config:status --format=json is outputting notices in Pantheon even with the json format, 
+       # drush config:status --format=json is outputting notices in Pantheon even with the json format,
        # so we need to tail the last line.
         config_status_output=$(./vendor/bin/drush {{.site}} config:status --format=json --state=Different | tail -n1)
         if [[ $config_status_output != '[]' ]]; then
