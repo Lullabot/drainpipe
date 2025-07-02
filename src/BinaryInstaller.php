@@ -238,7 +238,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             $archive->open(substr($cacheDestination, 0, -4));
             $archive->extractTo($cacheFolder, $binary);
         } else {
-            $fs->rename($cacheDestination, $cacheExtractedBinary);
+            $fs->copy($cacheDestination, $cacheExtractedBinary);
         }
 
         // Check the vendor/bin directory first, otherwise we could hit a
