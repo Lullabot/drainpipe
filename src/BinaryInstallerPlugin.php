@@ -16,24 +16,24 @@ class BinaryInstallerPlugin extends BinaryInstaller
         'task' => [
             'releases' => [
                 'linux' => [
-                    'amd64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-no-cancel/task_linux_amd64.tar.gz', 'sha' => '787f53c8c6972ded23150d32a695dd76eb2d2f31f5cb373a77f46abd8cff2887'],
-                    'arm' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-no-cancel/task_linux_arm.tar.gz', 'sha' => '8fd7492dc2ad7122e02a8845068d7d8a7c9221f8698d260b1dc30cc53dd8d666'],
-                    '386' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-no-cancel/task_linux_386.tar.gz', 'sha' => '2253a54c13fe0f8d96e97c7d27ccf8c6e1f8e2dff2c749ba301361657edc31c7'],
-                    'arm64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-no-cancel/task_linux_arm64.tar.gz', 'sha' => '8219998ad8b14b6294304bb2337009b886d199731bc4afbd900fd5b419287ee4'],
+                    'amd64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-failfast/task_linux_amd64.tar.gz', 'sha' => '694e5ed1ca242adbde843c55af18e544e073d4db767805fb1ca635f813691a28'],
+                    'arm' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-failfast/task_linux_arm.tar.gz', 'sha' => '10b527faef89d89fac3c3bf3ee644ec5a7f21d1615659b4d17430b676913c7e2'],
+                    '386' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-failfast/task_linux_386.tar.gz', 'sha' => '1e68a6cfe1c11c9bc842838948fb10659da52627828bc69218421b09c28b8eb8'],
+                    'arm64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-failfast/task_linux_arm64.tar.gz', 'sha' => '73a7a1ce60f1da4656af4fa2921d65f140182e3df3d9c8431ffcc127e36f597d'],
                 ],
                 'darwin' => [
-                    'amd64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-no-cancel/task_darwin_amd64.tar.gz', 'sha' => 'f091bcd7c1556f9c538b84fc3a33b526299c3af20d3f9c6fae8473d774d6e5c2'],
-                    'arm64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-no-cancel/task_darwin_arm64.tar.gz', 'sha' => '8ca6db50a0151f2ec4eed2d07a0a194b6b2eb92fce505be08c458b8acc10d79f'],
+                    'amd64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-failfast/task_darwin_amd64.tar.gz', 'sha' => '94569a43e00449c9f339795663ae4f011ae4ced98d79724c12cefcb8adde6ea2'],
+                    'arm64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-failfast/task_darwin_arm64.tar.gz', 'sha' => 'e1210203a71f1b5e7175008ec2479497670c94aa04bd284a11c1e763c51c4c80'],
                 ],
                 'windows' => [
-                    'amd64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-no-cancel/task_windows_amd64.zip', 'sha' => '9768d2de8a429d330b155a0398022e7970a72c3e62b69906cac195f6534a87db'],
-		            'arm' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-no-cancel/task_windows_arm.zip', 'sha' => '11f4d7f06e4d241cd69b79d510931667d1d55907d2d5245395b8bfc0b813ad0c'],
-                    'arm64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-no-cancel/task_windows_arm64.zip', 'sha' => '9768d2de8a429d330b155a0398022e7970a72c3e62b69906cac195f6534a87db'],
-                    '386' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-no-cancel/task_windows_386.zip', 'sha' => '3a87c6483e587ab68f98c15b324b42370d260a50a747871e69e9eba6ad122c42'],
+                    'amd64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-failfast/task_windows_amd64.zip', 'sha' => '4bb2f57d004e273098543945916d5e1ab159c6d4e8e7711d2151608f05673716'],
+		            'arm' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-failfast/task_windows_arm.zip', 'sha' => '7b78f9d5518167473c24331e879ad59f8ab196f84229e252f2db299533c2e334'],
+                    'arm64' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-failfast/task_windows_arm64.zip', 'sha' => '5a10f20eb40cf9af7fa500ec104a90c382422f8af6ec32135f2907a8e8d3fbe1'],
+                    '386' => ['url' => 'https://github.com/elvism-lullabot/task/releases/download/v3.44.0-failfast/task_windows_386.zip', 'sha' => '8e36bd9bbac2c677d1c9fa5e3133ab0093829097cfa035263721273b1781bdbe'],
                 ],
             ],
             'hashalgo' => 'sha256',
-            'version' => '3.44.0-no-cancel',
+            'version' => '3.44.0-failfast',
         ],
     ];
 
