@@ -57,4 +57,4 @@ jobs:
           git reset --mixed origin/${{ github.ref_name }} || git reset --mixed origin/main
           git add -A
           git commit -m "${{ github.event.head_commit.message }}" --allow-empty
-          git push origin ${{ github.ref_name }}
+          git push origin refs/heads/${{ github.ref_name }}
