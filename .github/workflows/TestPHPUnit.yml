@@ -40,6 +40,7 @@ jobs:
 
       - name: Setup Project
         run: |
+          php -r '$json = json_decode(file_get_contents ("composer.json"), true);$json["autoload-dev"]["files"][] = "vendor/lullabot/drainpipe/scaffold/env/dotenv.php";file_put_contents("composer.json", json_encode($json, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));'
           ddev config --auto
           ddev start
           ddev exec --raw composer config extra.drupal-scaffold.gitignore true
