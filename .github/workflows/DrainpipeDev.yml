@@ -27,7 +27,7 @@ jobs:
           git-email: no-reply@example.com
 
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
           log-public-key: false
@@ -40,40 +40,21 @@ jobs:
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
 
-      - name: Commit changes (Tag)
+      - name: Commit and push changes (Tag)
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         working-directory: drainpipe-dev
         run: |
           git reset --mixed origin/main
           git add -A
           git commit -m "${{ github.ref_name }}" --allow-empty
+          git tag ${{ github.ref_name }}
+          git push origin refs/tags/${{ github.ref_name }}
 
-      - name: Commit changes (Branch)
+      - name: Commit and push changes (Branch)
         if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         working-directory: drainpipe-dev
         run: |
           git reset --mixed origin/${{ github.ref_name }} || git reset --mixed origin/main
           git add -A
           git commit -m "${{ github.event.head_commit.message }}" --allow-empty
-
-      - name: Tag release
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        working-directory: drainpipe-dev
-        run: |
-          git tag ${{ github.ref_name }}
-
-      - name: Push to drainpipe-dev
-        working-directory: drainpipe-dev
-        run: |
-          git push origin ${{ github.ref_name }}
-
-      - name: Create release
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        run: |
-          curl -L \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.DRAINPIPE_DEV_RELEASE_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/lullabot/drainpipe-dev/releases \
-            -d '{"tag_name":"${{ github.ref_name }}","name":"${{ github.ref_name }}","body":"See <a href=\"https://github.com/Lullabot/drainpipe/releases/tag/${{ github.ref_name }}\">https://github.com/Lullabot/drainpipe/releases/tag/${{ github.ref_name }}</a>","draft":false,"prerelease":false,"generate_release_notes":false}'
+          git push origin refs/heads/${{ github.ref_name }}
