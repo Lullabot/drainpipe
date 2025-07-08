@@ -362,6 +362,38 @@ ddev ssh
 terminus site:upstream:set [site_name] empty
 ```
 
+#### Pantheon Systems: Drupal Integrations
+
+`pantheon-systems/drupal-integrations` is a package that provides essential Pantheon functionality. It is strongly recommended to install it.
+
+```
+composer require pantheon-systems/drupal-integrations
+```
+
+### Acquia
+Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
+Add the following to your `Taskfile.yml`'s `includes` section to use them:
+```yml
+includes:
+  acquia: ./vendor/lullabot/drainpipe/tasks/acquia.yml
+```
+|                        |                                                                                                                                                                |
+|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `task acquia:fetch-db` | Fetches a database from Acquia. Set `ACQUIA_ENVIRONMENT_ID` in Taskfile `vars`, along with `ACQUIA_API_KEY` and `ACQUIA_API_SECRET` as environment variables |
+
+> ⚠️ **Beta Notice**: The Acquia integration is currently in beta. While we strive to maintain stability, you may encounter unexpected issues. Please report any problems you encounter through our issue tracker.
+
+To enable auto configuration of Acquia Cloud settings:
+```json
+"extra": {
+    "drainpipe": {
+        "acquia": {
+            "settings": true
+        },
+    }
+}
+```
+
 
 ## GitHub Actions Integration
 
@@ -459,6 +491,59 @@ To enable deployment of Pantheon Review Apps:
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth local
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
+
+### Acquia
+To add Acquia specific GitHub actions, add the following composer.json
+  ```json
+  "extra": {
+      "drainpipe": {
+          "github": ["acquia"]
+      }
+  }
+  ```
+Then run `composer install`. A Deploy to Acquia workflow at `.github/workflows/AcquiaDeploy.yml` will be added (with its dependant actions).
+
+After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
+
+**Github repository settings**
+
+In your Github repository settings you need to create the following:
+- Repository Variables
+  - To identify the project we are deploying (same value of the AH_SITE_GROUP environment value)
+    - ACQUIA_SITE_GROUP
+- Repository Secrets
+  - To use Acquia CLI (acli) to interact with [Acquia's Cloud Platform](https://docs.acquia.com/acquia-cloud-platform/add-ons/acquia-cli/start)
+    - ACQUIA_API_KEY
+    - ACQUIA_API_SECRET
+  - To push code to your Acquia repository
+    - ACQUIA_SSH_PRIVATE_KEY
+
+**Task settings**
+
+When a deployment is made, you must run your own code _before_ and _after_ the deployment. To do so, define your in your `/Taskfile.yml` the following:
+
+- **acquia:deploy:before**
+
+  ```
+    acquia:deploy:before
+      desc: "Before the code is deployed to Acquia, run these commands on the GitHub Actions runner"
+      cmds:
+        # This task is run on the GitHub Actions runner
+        # It is a good moment to run tasks like build
+        # so we can later create the artifact for the Acquia environment.
+        - task: build
+  ```
+- **acquia:deploy:after**
+  ```
+    acquia:deploy:after:
+      desc: "After the code is switched on the Acquia environment, run these commands"
+      cmds:
+        # When using Drainpipe's deployment workflow,
+        # drupal:update runs on the Acquia environment because it sends
+        # a parameter that specifies the environment alias.
+        - task: drupal:update
+  ```
+
 
 ## GitLab CI Integration
 
@@ -601,10 +686,24 @@ Additionally, Pantheon Terminus can be added:
 }
 ```
 
+### Tasks
+
+Tugboat specific tasks are contained in [`tasks/tugboat.yml`](tasks/tugboat.yml).
+Add the following to your `Taskfile.yml`'s `includes` section to use them:
+```yml
+includes:
+  tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+```
+| Task | Action | Usage |
+|---|---|---|
+| `task tugboat:drush-uli-ready` | Configures Drush with the Tugboat service URL for the environment. | Run it once as part of your Tugboat _build_ or _online_ commands defined at `.tugboat/config.yml`
+
+
 It is assumed the following tasks exist:
 - `sync`
 - `build`
 - `update`
+- `online`
 
 The `build`, `sync`, and `update` tasks can be overridden with `sync:tugboat`,
 `build:tugboat`, and `update:tugboat` tasks if required (you will need to re-run
@@ -644,7 +743,7 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-You can additionally add an `online` step by adding a task named `online:tugboat`
+You can also add an `online` step by adding a task named `online:tugboat`
 and re-running `composer install`.
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit

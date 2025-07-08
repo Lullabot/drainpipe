@@ -1,0 +1,138 @@
+name: "Deploy a branch to Acquia"
+description: "Deploys a review app to an Acquia Environment"
+inputs:
+  github-token:
+    description: "GitHub token as generated automatically in secrets.GITHUB_TOKEN"
+    required: true
+  environment:
+    description: "The environment to push to, either uuid or alias"
+    required: true
+  run-installer:
+    description: "Whether or not to run the Drupal site installer. Defaults to false."
+    required: false
+  commit-message:
+    description: "The commit message to use when pushing to Acquia"
+    required: true
+  api-key:
+    description: "Acquia API Key"
+    required: true
+  api-secret:
+    description: "Acquia API Secret"
+    required: true
+  acquia-ssh-private-key:
+    description: "Acquia SSH Private Key"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Install DDEV
+      uses: ./.github/actions/drainpipe/ddev
+      with:
+        git-name: Drainpipe Bot
+        git-email: no-reply@example.com
+        ssh-private-key: ${{ inputs.acquia-ssh-private-key }}
+        composer-cache-dir: false
+
+    - name: Install packages from Composer
+      shell: bash
+      run: |
+        ddev composer install --no-plugins
+        ddev composer install
+
+    - name: Install and configure Acquia CLI
+      shell: bash
+      run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
+
+        # Install Acquia CLI.
+        drainpipe_exec "curl -OL https://github.com/acquia/cli/releases/latest/download/acli.phar"
+        drainpipe_exec "chmod +x acli.phar"
+        drainpipe_exec "mv acli.phar vendor/bin/acli"
+
+        # Configure SSH.
+        drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
+
+        # Log in to Acquia Cloud.
+        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+
+    - name: Validate environment alias by running `drush status`
+      shell: bash
+      run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "vendor/bin/acli remote:drush ${{ inputs.environment }} -- status"
+
+    - name: Build
+      shell: bash
+      run: |
+
+        source .github/actions/drainpipe/set-env/bash_aliases
+        # Build the site.
+        drainpipe_exec "vendor/bin/task acquia:deploy:before"
+
+    - name: Create GitHub Deployment
+      uses: ./.github/actions/drainpipe/deployment-create
+      with:
+        github-token: ${{ inputs.github-token }}
+        environment: ${{ inputs.environment }}
+
+    - name: Configure remote aliases
+      shell: bash
+      run: |
+
+        source .github/actions/drainpipe/set-env/bash_aliases
+
+        ENVIRONMENT="${{ inputs.environment }}"
+        APPLICATION=${ENVIRONMENT%.*}
+        ALIAS_DIR_DESTINATION="$(drainpipe_exec \"pwd\")/drush/sites"
+        drainpipe_exec "vendor/bin/acli remote:aliases:download --no-interaction $APPLICATION"
+
+        # Avoid using drush9, it seems to be an Acquia issue.
+        # https://docs.acquia.com/acquia-cloud-platform/manage-apps/command-line/drush#section-specifying-a-version-of-drush-in-commands
+        # Removes *.paths where drush9 is specified.
+        drainpipe_exec "yq eval '(.** | .paths) = {}' -i $ALIAS_DIR_DESTINATION/${APPLICATION}.site.yml"
+
+        # Check if drush is available withing drainpipe_exec.
+        aliases_yml="${ALIAS_DIR_DESTINATION}/${APPLICATION}.site.yml"
+        ALIASES_YML_CONTENT=$(drainpipe_exec "cat $ALIASES_YML")
+
+        # Extract the environment.uri value
+        echo "acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e '.${ENVIRONMENT}.uri' -)" >> $GITHUB_ENV
+
+    - name: Push to Acquia
+      uses: ./.github/actions/drainpipe/acquia/push
+      with:
+        environment: ${{ inputs.environment }}
+        commit-message: ${{ inputs.commit-message }}
+        api-key: ${{ inputs.api-key }}
+        api-secret: ${{ inputs.api-secret }}
+        acquia-ssh-private-key: ${{ inputs.acquia-ssh-private-key }}
+
+    - name: Run updates
+      uses: ./.github/actions/drainpipe/acquia/update
+      with:
+        environment: ${{ inputs.environment }}
+        run-installer: ${{ inputs.run-installer }}
+        api-key: ${{ inputs.api-key }}
+        api-secret: ${{ inputs.api-secret }}
+
+    - name: Clear External Caches
+      shell: bash
+      run: |
+
+        source .github/actions/drainpipe/set-env/bash_aliases
+        # Get the domains on the environment as a JSON array.
+        DOMAINS_JSON=$(drainpipe_exec "acli api:environments:domain-list --no-interaction \"${{ inputs.environment }}\"")
+
+        # Convert the JSON array into a bash array.
+        DOMAINS_HOSTNAMES=$(echo "$DOMAINS_JSON" | jq -r '[.[].hostname] | join(" ")')
+
+        # Clear the external caches.
+        drainpipe_exec "acli api:environments:clear-caches --no-interaction ${{ inputs.environment }} $DOMAINS_HOSTNAMES"
+
+    - name: Set Deployment Status
+      uses: ./.github/actions/drainpipe/deployment-status
+      with:
+        github-token: ${{ inputs.github-token }}
+        environment-url: ${{ env.acquia_env_uri }}

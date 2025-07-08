@@ -12,6 +12,9 @@ mv .tugboat .tugboat-tmp
 composer install
 ./vendor/bin/task sync
 
+# Ensure the sites/default directory is writable.
+chmod 755 ${DOCROOT}/sites/default
+
 # Set file permissions such that Drupal will not complain.
 chgrp -R www-data "${DOCROOT}/sites/default/files"
 find "${DOCROOT}/sites/default/files" -type d -exec chmod 2775 {} \;

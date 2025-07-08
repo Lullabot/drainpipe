@@ -19,7 +19,7 @@
         "vlucas/phpdotenv": "^4|^5"
     },
     "require-dev": {
-        "composer/composer": "^2.8.3",
+        "composer/composer": "^2.8.9",
         "phpunit/phpunit": "^9.6.21"
     },
     "extra": {
@@ -47,6 +47,6 @@
         }
     },
     "archive": {
-        "exclude": ["/.github", "/.yarn", "/drainpipe-dev", "/metapackages"]
+        "exclude": ["/.github/workflows", "/.yarn", "/drainpipe-dev", "/metapackages"]
     }
 }

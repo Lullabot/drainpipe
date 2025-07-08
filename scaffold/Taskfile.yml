@@ -10,6 +10,7 @@ includes:
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
   test: ./vendor/lullabot/drainpipe/tasks/test.yml
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
+  tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
 
 output: prefixed
 silent: true
@@ -61,6 +62,10 @@ tasks:
     desc: "Runs the Drupal update process"
     cmds:
       - task: drupal:update
+
+  online:tugboat:
+    cmds:
+      - task: tugboat:drush-uli-ready
 
 # assets:
 #   desc: "Builds assets such as CSS & JS"
