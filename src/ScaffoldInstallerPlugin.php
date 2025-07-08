@@ -82,8 +82,12 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
-        $this->installCICommands();
+        $this->installHostingProviderSupport();
+        $this->installCICommands($event->getComposer());
         $this->installEnvSupport();
+        if ($this->hasPantheonConfigurationFiles()) {
+            $this->checkPantheonSystemDrupalIntegrations($event->getComposer());
+        }
     }
 
     /**
@@ -96,8 +100,12 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
-        $this->installCICommands();
+        $this->installHostingProviderSupport();
+        $this->installCICommands($event->getComposer());
         $this->installEnvSupport();
+        if ($this->hasPantheonConfigurationFiles()) {
+            $this->pantheonSystemDrupalIntegrationsWarning();
+        }
     }
 
     /**
@@ -227,13 +235,42 @@ EOT;
     }
 
     /**
+     * Install hosting provider support.
+     */
+    private function installHostingProviderSupport(): void
+    {
+        $fs = new Filesystem();
+        $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
+        if (isset($this->extra['drainpipe']['acquia'])) {
+            if (!file_exists('.drainpipeignore')) {
+                $fs->copy("$scaffoldPath/acquia/.drainpipeignore", '.drainpipeignore');
+            }
+            if (!empty($this->extra['drainpipe']['acquia']['settings'])) {
+                // settings.acquia.php
+                if (!file_exists('./web/sites/default/settings.acquia.php')) {
+                    $fs->copy("$scaffoldPath/acquia/settings.acquia.php", './web/sites/default/settings.acquia.php');
+                }
+                if (file_exists('./web/sites/default/settings.php')) {
+                    $settings = file_get_contents('./web/sites/default/settings.php');
+                    if (strpos($settings, 'settings.acquia.php') === false) {
+                        $include = <<<'EOT'
+include __DIR__ . "/settings.acquia.php";
+EOT;
+                        file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Install CI Commands.
      */
-    private function installCICommands(): void
+    private function installCICommands(Composer $composer): void
     {
         $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
-        $this->installGitlabCI($scaffoldPath);
-        $this->installGitHubActions($scaffoldPath);
+        $this->installGitlabCI($scaffoldPath, $composer);
+        $this->installGitHubActions($scaffoldPath, $composer);
         $this->installTugboat($scaffoldPath);
     }
 
@@ -242,7 +279,7 @@ EOT;
      *
      * @param string $scaffoldPath The path to the scaffold files to copy from.
      */
-    private function installGitlabCI(string $scaffoldPath): void {
+    private function installGitlabCI(string $scaffoldPath, Composer $composer): void {
         $fs = new Filesystem();
         $fs->removeDirectory('./.drainpipe/gitlab');
 
@@ -250,13 +287,13 @@ EOT;
             return;
         }
 
+        $fs->ensureDirectoryExists('./.drainpipe/gitlab');
         if (file_exists('./.ddev/config.yaml')) {
             $fs->ensureDirectoryExists('.gitlab/drainpipe');
             $fs->copy("$scaffoldPath/gitlab/DDEV.gitlab-ci.yml", ".gitlab/drainpipe/DDEV.gitlab-ci.yml");
             $this->io->write("🪠 [Drainpipe] .gitlab/drainpipe/DDEV.gitlab-ci.yml installed");
         }
         else {
-            $fs->ensureDirectoryExists('./.drainpipe/gitlab');
             $fs->copy("$scaffoldPath/gitlab/Common.gitlab-ci.yml", ".drainpipe/gitlab/Common.gitlab-ci.yml");
             $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
         }
@@ -266,7 +303,7 @@ EOT;
 
         foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
             $file = "gitlab/$gitlab.gitlab-ci.yml";
-            if (file_exists("$scaffoldPath/$file")) {$fs->ensureDirectoryExists('./.drainpipe/gitlab');
+            if (file_exists("$scaffoldPath/$file")) {
                 $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
                 $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
             }
@@ -295,10 +332,8 @@ EOT;
                 if (!file_exists('./pantheon.yml')) {
                     $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
                 }
-                // settings.pantheon.php
-                if (!file_exists('./web/sites/default/settings.pantheon.php')) {
-                    $fs->copy("$scaffoldPath/pantheon/settings.pantheon.php", './web/sites/default/settings.pantheon.php');
-                }
+
+                $this->checkPantheonSystemDrupalIntegrations($composer);
             }
         }
         if (!file_exists('./.gitlab-ci.yml')) {
@@ -307,11 +342,50 @@ EOT;
     }
 
     /**
+     * Check if package pantheon-systems/drupal-integrations is installed.
+     * If not installed, recommend the user to install it.
+     *
+     * @param \Composer\Composer $composer
+     *   The Composer instance.
+     *
+     * @return void
+     *   No return value.
+     */
+    private function checkPantheonSystemDrupalIntegrations(Composer $composer): void {
+        $repositoryManager = $composer->getRepositoryManager();
+        $localRepository = $repositoryManager->getLocalRepository();
+        $package = $localRepository->findPackage('pantheon-systems/drupal-integrations', '*');
+        if ($package) {
+            return; // Found the package, no warning needed.
+        }
+        $this->pantheonSystemDrupalIntegrationsWarning();
+    }
+
+    /**
+     * Check for common Pantheon configuration files.
+     *
+     * @return bool
+     *   True if the site uses Pantheon, false otherwise.
+     */
+    private function hasPantheonConfigurationFiles(): bool
+    {
+        return is_file('./pantheon.yml')
+            || is_file('./pantheon.upstream.yml');
+    }
+
+    /**
+     * Display a warning about the pantheon-systems/drupal-integrations package.
+     */
+    private function pantheonSystemDrupalIntegrationsWarning(): void {
+        $this->io->warning("🪠 [Drainpipe] For Pantheon sites, we strongly recommend installing the pantheon-systems/drupal-integrations package. Essential Pantheon functionality depends on this package.");
+    }
+
+    /**
      * Install GitLab CI configuration if defined in composer.json
      *
      * @param string $scaffoldPath The path to the scaffold files to copy from.
      */
-    private function installGitHubActions(string $scaffoldPath): void {
+    private function installGitHubActions(string $scaffoldPath, Composer $composer): void {
         $fs = new Filesystem();
         $fs->removeDirectory('./.github/actions/drainpipe');
 
@@ -334,6 +408,13 @@ EOT;
                 else {
                     $fs->copy("$scaffoldPath/github/workflows/$pantheon_review_apps.yml", './.github/workflows/PantheonReviewApps.yml');
                 }
+                $this->checkPantheonSystemDrupalIntegrations($composer);
+            }
+            else if ($github === 'acquia') {
+                $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
+                $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
             }
             else if ($github === 'ComposerLockDiff') {
                 $fs->ensureDirectoryExists('./.github/workflows');
@@ -351,6 +432,10 @@ EOT;
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/TestFunctional.yml", './.github/workflows/TestFunctional.yml');
             }
+        }
+
+        if (isset($this->extra['drainpipe']['acquia'])) {
+            // TODO: Add Acquia related GitHub Actions.
         }
     }
 
@@ -427,10 +512,11 @@ EOT;
         // Add Redis service.
         if (file_exists('./.ddev/docker-compose.redis.yaml')) {
             $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
-            $redisImage = explode(':',
-                $redisConfig['services']['redis']['image']);
+            $image = $redisConfig['services']['redis']['image'] ?? '';
+
+            $version = self::extractRedisImageVersion($image);
             $tugboatConfig['memory_cache_type'] = 'redis';
-            $tugboatConfig['memory_cache_version'] = array_pop($redisImage);
+            $tugboatConfig['memory_cache_version'] = $version;
         }
 
         // Add Elasticsearch service.
@@ -522,6 +608,42 @@ EOT;
                 }
             }
         }
+    }
+
+    /**
+     * Extracts the Redis version tag from a Docker image string.
+     *
+     * Supports formats using environment variable fallbacks such as:
+     *   - ${REDIS_DOCKER_IMAGE:-redis:7}
+     *   - redis:${REDIS_TAG:-6-bullseye}
+     * As well as direct image values like:
+     *   - redis:7-alpine
+     *   - tugboatqa/redis:bookworm
+     *
+     * @param string $image The raw or interpolated image string from docker-compose.redis.yaml.
+     *
+     * @return string The extracted Redis version/tag (e.g. "7", "6-bullseye", "bookworm").
+     *
+     * @throws \RuntimeException If the version tag cannot be extracted.
+     */
+    public static function extractRedisImageVersion(string $image): string
+    {
+        // Normalize image from possible environment syntax.
+        // Example: $image = '${REDIS_DOCKER_IMAGE:-redis:7}'.
+        if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
+            $image = $matches[1];
+        // Example: $image = 'redis:${REDIS_TAG:-6-bullseye}'.
+        } elseif (preg_match('/^([^:]+):\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
+            $image = "{$matches[1]}:{$matches[2]}";
+        }
+
+        // Extract the version/tag from the image string.
+        // Example: $image = 'redis:6-bullseye' → $version = '6-bullseye'
+        if (!preg_match('/:([a-zA-Z0-9._-]+)$/', $image, $versionMatch)) {
+            throw new \RuntimeException("Unable to extract Redis version from image: {$image}");
+        }
+
+        return $versionMatch[1];
     }
 
 }
