@@ -23,7 +23,7 @@
         "mockery/mockery": "^1.6.12",
         "phpspec/prophecy-phpunit": "^2",
         "phpstan/phpstan-deprecation-rules": "^2.0.3",
-        "phpunit/phpunit": "^9|^10",
+        "phpunit/phpunit": "^9|^10|^11",
         "symfony/phpunit-bridge": "^6|^7",
         "symfony/yaml": "^6|^7",
         "tijsverkoyen/convert-to-junit-xml": "^1.11.0",
