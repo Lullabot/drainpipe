@@ -48,6 +48,7 @@ jobs:
           composer create-project drupal/recommended-project${{ matrix.drupal-version }} drupal --ignore-platform-reqs
           cd drupal
           cp ${GITHUB_WORKSPACE}/tests/fixtures.drainpipe-test-build/Taskfile.yml .
+          php -r '$json = json_decode(file_get_contents ("composer.json"), true);$json["autoload-dev"]["files"][] = "vendor/lullabot/drainpipe/scaffold/env/dotenv.php";file_put_contents("composer.json", json_encode($json, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));'
           composer config extra.drupal-scaffold.gitignore true
           composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe"]'
           composer config --no-plugins allow-plugins.composer/installers true
