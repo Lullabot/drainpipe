@@ -12,7 +12,6 @@ jobs:
     steps:
       - name: Create a Drupal project
         run: |
-
           composer create-project drupal/recommended-project:10.4.0 . \
             --ignore-platform-req=ext-gd
 
@@ -24,7 +23,8 @@ jobs:
         with:
           path: drainpipe
 
-      - uses: .github/actions/drainpipe/common/set-env
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
       - name: Install DDEV
         uses: ./drainpipe/scaffold/github/actions/common/ddev
         with:
