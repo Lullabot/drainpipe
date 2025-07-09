@@ -77,8 +77,12 @@ jobs:
   Test-Non-Default-Nodejs:
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
       - name: Setup build
-        uses: ./.github/actions/setup-build
+        uses: ./drainpipe/.github/actions/setup-build
         with:
           nodejs-version: 16
 
