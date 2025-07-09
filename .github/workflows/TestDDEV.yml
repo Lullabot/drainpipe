@@ -17,8 +17,12 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
       - name: Setup build
-        uses: ./.github/actions/setup-build
+        uses: ./drainpipe/.github/actions/setup-build
         with:
           composer-project: drupal/recommended-project:^${{ matrix.drupal-version }}
 

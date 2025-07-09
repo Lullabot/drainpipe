@@ -12,8 +12,12 @@ jobs:
   Test-Acquia:
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
       - name: Setup build
-        uses: lullabot/drainpipe/.github/actions/setup-build/action.yml@${{ github.ref }}
+        uses: ./drainpipe/.github/actions/setup-build
         with:
           composer-project: drupal/recommended-project:10.4.0
           php-version: ${{ matrix.php-version }}

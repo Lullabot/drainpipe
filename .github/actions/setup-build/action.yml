@@ -16,6 +16,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Ensure drainpipe directory is checked out
+      run: |
+        if [ ! -d "./drainpipe/.git" ]; then
+          echo "The drainpipe project has not been checked out yet into the drainpipe folder in $PWD"
+        fi
+      shell: bash
+
     - uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ inputs.php-version || '8.3' }}

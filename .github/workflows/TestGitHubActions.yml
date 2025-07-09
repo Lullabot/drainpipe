@@ -12,8 +12,12 @@ jobs:
   Test-GitHub-Actions:
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
+        with:
+          path: drainpipe
+
       - name: Setup build
-        uses: ./.github/actions/setup-build
+        uses: ./drainpipe/.github/actions/setup-build
 
       - name: Install Drupal
         run: |
