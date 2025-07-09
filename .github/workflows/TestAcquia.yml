@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Setup build
-        uses: lullabot/drainpipe/.github/actions/setup-build
+        uses: lullabot/drainpipe/.github/actions/setup-build/action.yml@${{ github.ref }}
         with:
           composer-project: drupal/recommended-project:10.4.0
           php-version: ${{ matrix.php-version }}
