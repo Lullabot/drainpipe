@@ -15,35 +15,14 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
-
       - uses: actions/checkout@v4
         with:
           path: drainpipe
 
-      - uses: ./drainpipe/scaffold/github/actions/common/set-env
-
-      - name: Install DDEV
-        uses: ./drainpipe/scaffold/github/actions/common/ddev
+      - name: Setup build
+        uses: ./drainpipe/.github/actions/setup-build
         with:
-          git-name: Drainpipe Bot
-          git-email: no-reply@example.com
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-
-      - name: Setup Project
-        run: |
-          ddev config --auto
-          ddev start
-          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
-          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
-          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
-          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev exec --raw composer config minimum-stability dev
-          ddev composer require lullabot/drainpipe --with-all-dependencies
+          composer-project: drupal/recommended-project:^${{ matrix.drupal-version }}
 
       - name: Commit current state
         run: |
@@ -58,7 +37,7 @@ jobs:
         run : ddev composer global require davidrjonas/composer-lock-diff:^1.0
 
       - name: Add a new package
-        run: ddev composer require sebastian/version:4.0.1
+        run: ddev composer require empty/empty:1.0
 
       - name: Run Composer Lock Diff on a Renovate PR
         run: |
