@@ -50,6 +50,8 @@ jobs:
           ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev exec --raw composer config repositories.composer-checks --json '{"type": "git", "url": "https://github.com/Lullabot/composer-checks.git"}'
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/composer-checks true
           ddev exec --raw composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
@@ -122,6 +124,8 @@ jobs:
           ddev exec --raw composer config --no-plugins allow-plugins.weitzman/drupal-test-traits true
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev exec --raw composer config repositories.composer-checks --json '{"type": "git", "url": "https://github.com/Lullabot/composer-checks.git"}'
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/composer-checks true
           ddev exec --raw composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" weitzman/drupal-test-traits lullabot/mink-selenium2-driver --dev --with-all-dependencies
@@ -195,6 +199,8 @@ jobs:
           ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev exec --raw composer config repositories.composer-checks --json '{"type": "git", "url": "https://github.com/Lullabot/composer-checks.git"}'
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/composer-checks true
           ddev exec --raw composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
