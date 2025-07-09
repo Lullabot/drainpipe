@@ -17,43 +17,20 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
-
-      - uses: actions/checkout@v4
+      - name: Setup build
+        uses: ./.github/actions/setup-build
         with:
-          path: drainpipe
+          composer-project: drupal/recommended-project:^${{ matrix.drupal-version }}
+          nodejs-version: 22
 
-      - name: Setup drainpipe-dev
-        run: mv drainpipe/drainpipe-dev .
-
-      - uses: ./drainpipe/scaffold/github/actions/common/set-env
-
-      - name: Install DDEV
-        uses: ./drainpipe/scaffold/github/actions/common/ddev
+      - name: Setup Git
+        uses: ./drainpipe/scaffold/github/actions/common/setup-git
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
 
       - name: Setup Project
         run: |
-          ddev config --auto
-          ddev config --nodejs-version "22"
-          ddev config --corepack-enable
-          ddev start
-          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
-          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
-          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
-          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
-          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
-          ddev exec --raw composer config minimum-stability dev
-          ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
-          ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
-          git config --global user.email "no-reply@example.com"
-          git config --global user.name "Drainpipe Bot"
           git init
           echo "/drainpipe" >> .gitignore
           echo "/drainpipe-dev" >> .gitignore
