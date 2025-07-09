@@ -29,12 +29,14 @@ runs:
         tools: composer:v2
 
     - name: Create a Drupal project
-      run: composer create-project ${{ inputs.composer-project || 'drupal/recommended-project' }} . --ignore-platform-reqs
+      run: composer create-project ${{ inputs.composer-project || 'drupal/recommended-project' }} composer-temp --ignore-platform-reqs
       shell: bash
 
-    - uses: actions/checkout@v4
-      with:
-        path: drainpipe
+    - name: Move composer checkout to root directory
+      run: |
+        mv composer-temp/* composer-temp/.* .
+        rm -rf composer-temp/
+      shell: bash
 
     - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
