@@ -37,7 +37,7 @@ jobs:
         run : ddev composer global require davidrjonas/composer-lock-diff:^1.0
 
       - name: Add a new package
-        run: ddev composer require sebastian/version:4.0.1
+        run: ddev composer require empty/empty:1.0
 
       - name: Run Composer Lock Diff on a Renovate PR
         run: |
