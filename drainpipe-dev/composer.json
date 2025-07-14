@@ -30,7 +30,7 @@
         "vincentlanglet/twig-cs-fixer": "^3.8.1"
     },
     "require-dev": {
-        "composer/composer": "^2.8.9"
+        "composer/composer": "^2.8.10"
     },
     "bin": [
         "bin/drainpipe-convert-to-junit-xml"
