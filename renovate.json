@@ -36,6 +36,7 @@
     },
     {
       "allowedVersions": "^6 || ^7",
+      "rangeStrategy": "update-lockfile",
       "matchPackageNames": [
         "/^symfony//"
       ]
