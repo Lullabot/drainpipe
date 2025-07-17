@@ -32,14 +32,15 @@
       "matchPackageNames": [
         "drush/drush"
       ],
-      "allowedVersions": "^11 || ^12 || ^13"
+      "allowedVersions": "^11 || ^12 || ^13",
+      "rangeStrategy": "widen"
     },
     {
-      "allowedVersions": "^6 || ^7",
-      "rangeStrategy": "update-lockfile",
       "matchPackageNames": [
         "/^symfony//"
-      ]
+      ],
+      "allowedVersions": "^6 || ^7",
+      "rangeStrategy": "widen"
     }
   ]
 }
