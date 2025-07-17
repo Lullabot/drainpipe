@@ -29,17 +29,18 @@
       "enabled": false
     },
     {
+      "allowedVersions": "^11 || ^12 || ^13",
       "matchPackageNames": [
         "drush/drush"
       ],
-      "allowedVersions": "^11 || ^12 || ^13"
+      "rangeStrategy": "widen"
     },
     {
       "allowedVersions": "^6 || ^7",
-      "rangeStrategy": "update-lockfile",
       "matchPackageNames": [
         "/^symfony//"
-      ]
+      ],
+      "rangeStrategy": "widen"
     }
   ]
 }
