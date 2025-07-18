@@ -1,0 +1,81 @@
+name: Setup build
+description: Sets up a build of Drainpipe in GitHub actions
+
+inputs:
+  composer-project:
+    description: The composer project to start with
+    required: false
+  php-version:
+    description: The PHP version to use with DDEV.
+    required: false
+  nodejs-version:
+    description: The Node JS version to use with DDEV.
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure drainpipe directory is checked out
+      run: |
+        if [ ! -d "./drainpipe/.git" ]; then
+          echo "The drainpipe project has not been checked out yet into the drainpipe folder in $PWD"
+        fi
+      shell: bash
+
+    - uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php-version || '8.3' }}
+        tools: composer:v2
+
+    - name: Create a Drupal project
+      run: composer create-project ${{ inputs.composer-project || 'drupal/recommended-project' }} composer-temp --ignore-platform-reqs
+      shell: bash
+
+    - name: Move composer checkout to root directory
+      run: |
+        mv composer-temp/* composer-temp/.* .
+        rm -rf composer-temp/
+      shell: bash
+
+    - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+    - name: Install DDEV
+      uses: ./drainpipe/scaffold/github/actions/common/ddev
+      with:
+        composer-cache-dir: composer-cache
+        git-name: Drainpipe Bot
+        git-email: no-reply@example.com
+
+    - name: Configure DDEV
+      run: |
+        ddev config --auto
+        ddev config --php-version ${{ inputs.php-version || '8.3' }}
+      shell: bash
+
+    - name: Configure NodeJS
+      if: ${{ inputs.nodejs-version }}
+      run: |
+        ddev config --nodejs-version ${{ inputs.nodejs-version }}
+        ddev config --corepack-enable
+      shell: bash
+
+    - name: Configure Composer
+      run: |
+        composer config extra.drupal-scaffold.gitignore true
+        composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
+        composer config --no-plugins allow-plugins.lullabot/drainpipe true
+        composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+        composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": true}}'
+        composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe/drainpipe-dev", "options": {"symlink": true}}'
+        composer config minimum-stability dev
+        composer config platform.php ${{ inputs.php-version || '8.3' }}
+        php -r '$json = json_decode(file_get_contents ("composer.json"), true);$json["autoload-dev"]["files"][] = "vendor/lullabot/drainpipe/scaffold/env/dotenv.php";file_put_contents("composer.json", json_encode($json, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));'
+        composer update --lock
+        composer validate
+        composer require "lullabot/drainpipe @dev" --with-all-dependencies
+        composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+      shell: bash
+
+    - name: Restart DDEV
+      run: ddev restart
+      shell: bash
