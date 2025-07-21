@@ -22,6 +22,10 @@ inputs:
   lock-password:
     description: "The password if locking this environment with Basic Auth"
     required: false
+  clone-from:
+    description: "The environment to clone from. Defaults to live."
+    required: false
+    default: "live"
 runs:
   using: "composite"
   steps:
@@ -89,10 +93,10 @@ runs:
         if [ "$ENVIRONMENT_EXISTS" == "pr-$DRAINPIPE_PR_NUMBER" ]; then
           drainpipe_exec "terminus env:wipe ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes"
         else
-          drainpipe_exec "terminus multidev:create ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --no-db --no-files --yes"
+          drainpipe_exec "terminus multidev:create ${{ inputs.site-name }}.${{ inputs.clone-from }} pr-$DRAINPIPE_PR_NUMBER --no-db --no-files --yes"
         fi
         if [ "${{ inputs.run-installer }}" != "true" ]; then
-            drainpipe_exec "terminus env:clone-content ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --yes"
+            drainpipe_exec "terminus env:clone-content ${{ inputs.site-name }}.${{ inputs.clone-from }} pr-$DRAINPIPE_PR_NUMBER --yes"
         fi
       shell: bash
 
