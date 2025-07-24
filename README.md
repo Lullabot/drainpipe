@@ -68,7 +68,7 @@ If you are using [Renovate](https://docs.renovatebot.com/) (for automated depend
 ```
 {
   "extends": [
-    "github>Lullabot/drainpipe//renovate-presets/presets/drupal-10.json5"
+    "group:drupal-core"
  ]
 }
 ```
