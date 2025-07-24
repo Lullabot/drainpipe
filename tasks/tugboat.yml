@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+
+  drush-uli-ready:
+    desc: "Configure Drush with the Tugboat service URL"
+    cmds:
+      # Setting base url for Drush.
+      - |
+        mkdir -p drush
+
+        # Check if drush/drush.yml does not exist, if not, create it
+        if [ ! -f drush/drush.yml ]; then
+          echo "drush/drush.yml does not exist, creating it"
+          touch drush/drush.yml
+          echo "options:" > drush/drush.yml
+          echo "  uri: $TUGBOAT_DEFAULT_SERVICE_URL" >> drush/drush.yml
+        fi

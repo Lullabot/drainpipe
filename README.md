@@ -377,6 +377,14 @@ ddev ssh
 terminus site:upstream:set [site_name] empty
 ```
 
+#### Pantheon Systems: Drupal Integrations
+
+`pantheon-systems/drupal-integrations` is a package that provides essential Pantheon functionality. It is strongly recommended to install it.
+
+```
+composer require pantheon-systems/drupal-integrations
+```
+
 ### Acquia
 Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
@@ -680,10 +688,24 @@ Additionally, Pantheon Terminus can be added:
 }
 ```
 
+### Tasks
+
+Tugboat specific tasks are contained in [`tasks/tugboat.yml`](tasks/tugboat.yml).
+Add the following to your `Taskfile.yml`'s `includes` section to use them:
+```yml
+includes:
+  tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+```
+| Task | Action | Usage |
+|---|---|---|
+| `task tugboat:drush-uli-ready` | Configures Drush with the Tugboat service URL for the environment. | Run it once as part of your Tugboat _build_ or _online_ commands defined at `.tugboat/config.yml`
+
+
 It is assumed the following tasks exist:
 - `sync`
 - `build`
 - `update`
+- `online`
 
 The `build`, `sync`, and `update` tasks can be overridden with `sync:tugboat`,
 `build:tugboat`, and `update:tugboat` tasks if required (you will need to re-run
@@ -723,7 +745,7 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-You can additionally add an `online` step by adding a task named `online:tugboat`
+You can also add an `online` step by adding a task named `online:tugboat`
 and re-running `composer install`.
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit

@@ -27,8 +27,8 @@ services:
 {% if online_command|length > 0 %}
       online: ./.tugboat/steps/4-online.sh
 {% endif %}
-{% if overrides.php|length > 0 %}
 
+{% if overrides.php|length > 0 %}
 {{ overrides.php|raw }}
 {% endif %}
 
