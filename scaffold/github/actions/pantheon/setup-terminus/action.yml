@@ -16,6 +16,9 @@ runs:
         curl -L https://github.com/pantheon-systems/terminus/releases/download/3.2.1/terminus.phar --output ~/terminus/terminus
         chmod +x ~/terminus/terminus
         ln -s ~/terminus/terminus /usr/local/bin/terminus
-        echo "${{ inputs.terminus-plugins }}" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
-        terminus auth:login --machine-token="${{ inputs.pantheon-token }}"
+        echo "${TERMINUS_PLUGINS}" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
+        terminus auth:login --machine-token="${PANTHEON_TOKEN}"
       shell: bash
+      env:
+        PANTHEON_TOKEN: ${{ inputs.pantheon-token }}
+        TERMINUS_PLUGINS: ${{ inputs.terminus-plugins }}
