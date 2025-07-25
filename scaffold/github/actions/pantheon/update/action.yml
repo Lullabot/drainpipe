@@ -17,13 +17,17 @@ runs:
       run: |
         # Wait for Pantheon to sync.
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "terminus workflow:wait ${{ inputs.site-name }}.${{ inputs.environment }}"
-        drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
-        if [ "${{ inputs.run-installer }}" == "true" ]; then
-          drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.${{ inputs.environment }} --yes site:install --existing-config"
+        drainpipe_exec "terminus workflow:wait ${SITE_NAME}.${ENVIRONMENT}""
+        drainpipe_exec "terminus aliases --only ${SITE_NAME} --yes"
+        if [ "${RUN_INSTALLER}" == "true" ]; then
+          drainpipe_exec "./vendor/bin/drush @${SITE_NAME}.$${ENVIRONMENT}" --yes site:install --existing-config"
         elif drainpipe_exec "./vendor/bin/task -l | grep '* update: '"; then
-          drainpipe_exec "./vendor/bin/task update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
+          drainpipe_exec "./vendor/bin/task update site=@${SITE_NAME}.${ENVIRONMENT}""
         else
-          drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.${{ inputs.environment }}"
+          drainpipe_exec "./vendor/bin/task drupal:update site=@${SITE_NAME}.${ENVIRONMENT}"
         fi
       shell: bash
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+        SITE_NAME: ${{ inputs.site-name }}
+        RUN_INSTALLER: ${{ inputs.run-installer }}

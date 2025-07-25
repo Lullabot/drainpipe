@@ -39,95 +39,116 @@ runs:
         export GITHUB_DEPLOYMENT=$(curl -f -X POST \
             https://api.github.com/repos/$GITHUB_REPOSITORY/deployments \
             -H 'Accept: application/vnd.github.v3+json' \
-            -H "Authorization: token ${{ inputs.github-token }}" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
             -d "{\"ref\": \"$DRAINPIPE_SHA\", \"auto_merge\": false, \"environment\": \"pantheon-pr-$DRAINPIPE_PR_NUMBER\", \"transient_environment\": true, \"required_contexts\": [], \"description\": \"Pantheon Multidev for Pull Request #$DRAINPIPE_PR_NUMBER\"}" \
         )
         export GITHUB_DEPLOYMENT_ID=$(echo $GITHUB_DEPLOYMENT | jq '.id')
         echo "GITHUB_DEPLOYMENT_ID=$GITHUB_DEPLOYMENT_ID" >> $GITHUB_ENV
         echo "Created GitHub Deployment ID $GITHUB_DEPLOYMENT_ID"
         if [ -z "$GITHUB_DEPLOYMENT_ID" ] || [ "$GITHUB_DEPLOYMENT_ID" = "null" ]; then echo $GITHUB_DEPLOYMENT && exit 1; fi
-        curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d '{"state":"in_progress"}'
+        curl -f -H "Authorization: token ${GITHUB_TOKEN}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d '{"state":"in_progress"}'
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
 
     - name: Clean Stale Environments
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
         echo "Cleaning stale Multidev environments"
-        drainpipe_exec "terminus auth:login --machine-token=\"${{ inputs.terminus-token }}\""
+        drainpipe_exec "terminus auth:login --machine-token=\"${TERMINUS_TOKEN}\""
         PULLS=$(curl -f \
             https://api.github.com/repos/$GITHUB_REPOSITORY/pulls?state=open \
             -H 'Accept: application/vnd.github.v3+json' \
-            -H "Authorization: token ${{ inputs.github-token }}" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
         )
         PULL_NUMBERS=$(echo $PULLS | jq '.[] | "pr-" + (.number|tostring)')
-        MULTIDEVS=$(drainpipe_exec "terminus multidev:list --format json ${{ inputs.site-name }} | jq --raw-output 'keys | .[]'")
+        MULTIDEVS=$(drainpipe_exec "terminus multidev:list --format json ${SITE_NAME} | jq --raw-output 'keys | .[]'")
         for MULTIDEV in $MULTIDEVS; do
           if [[ "$PULL_NUMBERS[*]" =~ "$MULTIDEV" ]]; then
             echo "Found open PR for $MULTIDEV"
           # if $MULTIDEV starts with "pr-"
           elif [[ $MULTIDEV == pr-* ]]; then
             echo "No PR for $MULTIDEV, shutting down..."
-            DEPLOYMENTS=$(curl -s -f -H "Authorization: token ${{ inputs.github-token }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments?environment=pantheon-$MULTIDEV | jq '.[] | .id')
+            DEPLOYMENTS=$(curl -s -f -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments?environment=pantheon-$MULTIDEV | jq '.[] | .id')
             for DEPLOYMENT_ID in $DEPLOYMENTS; do
               echo "Marking GitHub Deployment $DEPLOYMENT_ID as inactive"
-              curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses -d "{\"state\":\"inactive\"}"
-              curl -H "Authorization: token ${{ inputs.github-token }}" -X DELETE -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/environments/pantheon-$MULTIDEV
+              curl -f -H "Authorization: token ${GITHUB_TOKEN}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses -d "{\"state\":\"inactive\"}"
+              curl -H "Authorization: token ${GITHUB_TOKEN}" -X DELETE -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/environments/pantheon-$MULTIDEV
             done
-            drainpipe_exec "terminus multidev:delete ${{ inputs.site-name }}.$MULTIDEV --delete-branch --yes"
+            drainpipe_exec "terminus multidev:delete ${SITE_NAME}.$MULTIDEV --delete-branch --yes"
           else
             echo "Dangling Multidev environment $MULTIDEV found, no action taken."
           fi
         done
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        TERMINUS_TOKEN: ${{ inputs.terminus-token }}
+        SITE_NAME: ${{ inputs.site-name }}
 
     - name: Create Multidev or Wipe existing Multidev
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "terminus auth:login --machine-token=\"${{ inputs.terminus-token }}\""
+        drainpipe_exec "terminus auth:login --machine-token=\"${TERMINUS_TOKEN}\""
         JQ_COMMAND="'.[] | select(.id == \"pr-$DRAINPIPE_PR_NUMBER\") | .id'"
-        ENVIRONMENT_EXISTS=$(drainpipe_exec "terminus multidev:list --format json ${{ inputs.site-name }} | jq --raw-output $JQ_COMMAND")
+        ENVIRONMENT_EXISTS=$(drainpipe_exec "terminus multidev:list --format json ${SITE_NAME} | jq --raw-output $JQ_COMMAND")
         if [ "$ENVIRONMENT_EXISTS" == "pr-$DRAINPIPE_PR_NUMBER" ]; then
-          drainpipe_exec "terminus env:wipe ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes"
+          drainpipe_exec "terminus env:wipe ${SITE_NAME}.pr-$DRAINPIPE_PR_NUMBER --yes"
         else
-          drainpipe_exec "terminus multidev:create ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --no-db --no-files --yes"
+          drainpipe_exec "terminus multidev:create ${SITE_NAME}.live pr-$DRAINPIPE_PR_NUMBER --no-db --no-files --yes"
         fi
-        if [ "${{ inputs.run-installer }}" != "true" ]; then
-            drainpipe_exec "terminus env:clone-content ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --yes"
+        if [ "${RUN_INSTALLER}" != "true" ]; then
+            drainpipe_exec "terminus env:clone-content ${SITE_NAME}.live pr-$DRAINPIPE_PR_NUMBER --yes"
         fi
       shell: bash
+      env:
+        TERMINUS_TOKEN: ${{ inputs.terminus-token }}
+        SITE_NAME: ${{ inputs.site-name }}
+        RUN_INSTALLER: ${{ inputs.run-installer }}
 
     - name: Push to Pantheon
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        SITE_ID=$(drainpipe_exec "terminus site:lookup ${{ inputs.site-name }}")
-        drainpipe_exec "terminus connection:set  ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER git --yes"
-        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=pr-$DRAINPIPE_PR_NUMBER remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\" site=${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+        SITE_ID=$(drainpipe_exec "terminus site:lookup ${SITE_NAME}")
+        drainpipe_exec "terminus connection:set  ${SITE_NAME}.pr-$DRAINPIPE_PR_NUMBER git --yes"
+        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=pr-$DRAINPIPE_PR_NUMBER remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${COMMIT_MESSAGE}\" site=${SITE_NAME}.pr-$DRAINPIPE_PR_NUMBER"
       shell: bash
+      env:
+        SITE_NAME: ${{ inputs.site-name }}
+        COMMIT_MESSAGE: ${{ inputs.commit-message }}
 
     - name: Deploy to Pantheon
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "terminus workflow:wait ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+        drainpipe_exec "terminus workflow:wait ${SITE_NAME}.pr-$DRAINPIPE_PR_NUMBER"
 
-        drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
-        if [ "${{ inputs.run-installer }}" == "true" ]; then
-          drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
+        drainpipe_exec "terminus aliases --only ${SITE_NAME} --yes"
+        if [ "${RUN_INSTALLER}" == "true" ]; then
+          drainpipe_exec "./vendor/bin/drush @${SITE_NAME}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
         elif drainpipe_exec "./vendor/bin/task -l | grep '* update: '"; then
-          drainpipe_exec "./vendor/bin/task update site=@${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+          drainpipe_exec "./vendor/bin/task update site=@${SITE_NAME}.pr-$DRAINPIPE_PR_NUMBER"
         else
-          drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+          drainpipe_exec "./vendor/bin/task drupal:update site=@${SITE_NAME}.pr-$DRAINPIPE_PR_NUMBER"
         fi
-        ENVIRONMENT_URL="https://pr-$DRAINPIPE_PR_NUMBER-${{ inputs.site-name }}.pantheonsite.io"
+        ENVIRONMENT_URL="https://pr-$DRAINPIPE_PR_NUMBER-${SITE_NAME}.pantheonsite.io"
         # Lock Environment.
-        if [ "${{ inputs.lock-username }}" != "" ] && [ "${{ inputs.lock-password }}" != "" ]; then
-          drainpipe_exec "terminus lock:enable ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER ${{ inputs.lock-username }} ${{ inputs.lock-password }}"
-          ENVIRONMENT_URL="https://${{ inputs.lock-username }}:${{ inputs.lock-password }}@pr-$DRAINPIPE_PR_NUMBER-${{ inputs.site-name }}.pantheonsite.io"
+        if [ "${LOCK_USERNAME}" != "" ] && [ "${LOCK_PASSWORD}" != "" ]; then
+          drainpipe_exec "terminus lock:enable ${SITE_NAME}.pr-$DRAINPIPE_PR_NUMBER ${LOCK_USERNAME} ${LOCK_PASSWORD}"
+          ENVIRONMENT_URL="https://${LOCK_USERNAME}:${LOCK_PASSWORD}@pr-$DRAINPIPE_PR_NUMBER-${SITE_NAME}.pantheonsite.io"
         fi
-        curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"success\", \"environment_url\": \"$ENVIRONMENT_URL\"}"
+        curl -f -H "Authorization: token ${GITHUB_TOKEN}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"success\", \"environment_url\": \"$ENVIRONMENT_URL\"}"
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        SITE_NAME: ${{ inputs.site-name }}
+        RUN_INSTALLER: ${{ inputs.run-installer }}
+        LOCK_USERNAME: ${{ inputs.lock-username }}
+        LOCK_PASSWORD: ${{ inputs.lock-password }}
 
     - name: Set Deployment Failure Status
       run: |
-        curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"failure\"}"
+        curl -f -H "Authorization: token ${GITHUB_TOKEN}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"failure\"}"
       if: ${{ failure() }}
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
