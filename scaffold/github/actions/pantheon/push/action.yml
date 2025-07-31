@@ -25,12 +25,17 @@ runs:
     - name: Push to Pantheon
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec terminus auth:login --machine-token="${{ inputs.terminus-token }}"
-        SITE_ID=$(drainpipe_exec "terminus site:lookup ${{ inputs.site-name }}")
-        if [ "${{ inputs.branch }}" == "master" ]; then
-          drainpipe_exec "terminus connection:set ${{ inputs.site-name }}.dev git --yes"
+        drainpipe_exec terminus auth:login --machine-token="${TERMINUS_TOKEN}"
+        SITE_ID=$(drainpipe_exec "terminus site:lookup ${SITE_NAME}")
+        if [ "${BRANCH}" == "master" ]; then
+          drainpipe_exec "terminus connection:set ${SITE_NAME}.dev git --yes"
         else
-          drainpipe_exec "terminus connection:set ${{ inputs.site-name }}.${{ inputs.branch }} git --yes"
+          drainpipe_exec "terminus connection:set ${SITE_NAME}.${BRANCH} git --yes"
         fi
-        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=${{ inputs.branch }} remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\""
+        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=${BRANCH} remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${COMMIT_MESSAGE}\""
       shell: bash
+      env:
+        BRANCH: ${{ inputs.branch }}
+        COMMIT_MESSAGE: ${{ inputs.commit-message }}
+        SITE_NAME: ${{ inputs.site-name }}
+        TERMINUS_TOKEN: ${{ inputs.terminus-token }}
