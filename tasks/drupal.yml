@@ -58,8 +58,8 @@ tasks:
     desc: Run Drupal update tasks after deploying new code
     cmds:
       # See https://www.drush.org/12.x/deploycommand/
-      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
+      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
       # Run config:import twice to make sure we catch any config that didn't declare
       # a dependency correctly. This is also useful when importing large config sets
       # as it can sometimes hit an out of memory error.
