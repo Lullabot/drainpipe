@@ -36,6 +36,6 @@ runs:
         echo "DRAINPIPE_PR_NUMBER: $DRAINPIPE_PR_NUMBER"
         echo "DRAINPIPE_SHA: $DRAINPIPE_SHA"
 
-      shell: bash
+      shell: bash -eo pipefail
       env:
         GH_TOKEN: ${{ github.token }}
