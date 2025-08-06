@@ -97,7 +97,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -145,7 +145,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -197,7 +197,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -248,7 +248,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -300,7 +300,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -357,7 +357,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
