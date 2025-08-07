@@ -20,9 +20,9 @@ jobs:
 
       - name: Create release
         run: |
-          gh release create ${{ GH_REF_NAME }} \
-            --title "${{ GH_REF_NAME }}" \
-            --notes "See https://github.com/Lullabot/drainpipe/releases/tag/${{ GH_REF_NAME }}"
+          gh release create ${GH_REF_NAME} \
+            --title "${GH_REF_NAME}" \
+            --notes "See https://github.com/Lullabot/drainpipe/releases/tag/${GH_REF_NAME}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REF_NAME: ${{ github.ref_name }}

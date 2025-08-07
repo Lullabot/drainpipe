@@ -36,7 +36,7 @@ jobs:
         working-directory: drainpipe-dev
         run: |
           git init
-          git branch -m ${{ GH_REF_NAME }}
+          git branch -m ${GH_REF_NAME}
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
         env:
@@ -48,9 +48,9 @@ jobs:
         run: |
           git reset --mixed origin/main
           git add -A
-          git commit -m "${{ GH_REF_NAME }}" --allow-empty
-          git tag ${{ GH_REF_NAME }}
-          git push origin refs/tags/${{ GH_REF_NAME }}
+          git commit -m "${GH_REF_NAME}" --allow-empty
+          git tag ${GH_REF_NAME}
+          git push origin refs/tags/${GH_REF_NAME}
         env:
           GH_REF_NAME: ${{ github.ref_name }}
 
@@ -58,10 +58,10 @@ jobs:
         if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         working-directory: drainpipe-dev
         run: |
-          git reset --mixed origin/${{ GH_REF_NAME }} || git reset --mixed origin/main
+          git reset --mixed origin/${GH_REF_NAME} || git reset --mixed origin/main
           git add -A
-          git commit -m "${{ GH_MESSAGE }}" --allow-empty
-          git push origin refs/heads/${{ GH_REF_NAME }}
+          git commit -m "${GH_MESSAGE}" --allow-empty
+          git push origin refs/heads/${GH_REF_NAME}
         env:
           GH_REF_NAME: ${{ github.ref_name }}
           GH_MESSAGE: ${{ github.event.head_commit.message }}
