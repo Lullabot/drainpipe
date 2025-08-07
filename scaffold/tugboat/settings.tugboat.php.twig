@@ -35,4 +35,14 @@ if (getenv('TUGBOAT_REPO')) {
 
   // Keep the sites/default directory writable.
   $settings['skip_permissions_hardening'] = TRUE;
+
+  // Enable mail to be captured by Tugboat.
+  $config['system.mail']['interface']['default'] = 'php_mail';
+  $config['mailsystem.settings']['defaults']['sender'] = 'php_mail';
+  $config['symfony_mailer.settings']['default_transport'] = 'sendmail';
+  $config['symfony_mailer.mailer_transport.sendmail']['plugin'] = 'smtp';
+  $config['symfony_mailer.mailer_transport.sendmail']['configuration']['user'] = '';
+  $config['symfony_mailer.mailer_transport.sendmail']['configuration']['pass'] = '';
+  $config['symfony_mailer.mailer_transport.sendmail']['configuration']['host'] = getenv('TUGBOAT_SMTP');
+  $config['symfony_mailer.mailer_transport.sendmail']['configuration']['port'] = '25';
 }
