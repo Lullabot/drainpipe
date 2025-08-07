@@ -14,13 +14,13 @@ runs:
         echo "Setting Drainpipe environment variables:"
 
         DRAINPIPE_PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
-        echo "DRAINPIPE_PR_NUMBER=$DRAINPIPE_PR_NUMBER" >> $GITHUB_ENV
+        printf "DRAINPIPE_PR_NUMBER=%s\n" "$DRAINPIPE_PR_NUMBER" >> "$GITHUB_ENV"
         DRAINPIPE_SHA=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)
-        echo "DRAINPIPE_SHA=$DRAINPIPE_SHA" >> $GITHUB_ENV
+        printf "DRAINPIPE_SHA=%s\n" "$DRAINPIPE_SHA" >> "$GITHUB_ENV"
 
         if [ -z "$DRAINPIPE_SHA" ] || [ "$DRAINPIPE_SHA" = "null" ]; then
           DRAINPIPE_SHA=$DRAINPIPE_PR_NUMBER
-          echo "DRAINPIPE_SHA=$DRAINPIPE_PR_NUMBER" >> $GITHUB_ENV
+          printf "DRAINPIPE_SHA=%s\n" "$DRAINPIPE_PR_NUMBER" >> "$GITHUB_ENV"
         fi
 
       shell: bash

@@ -102,7 +102,8 @@ runs:
         ALIASES_YML_CONTENT=$(drainpipe_exec "cat $ALIASES_YML")
 
         # Extract the environment.uri value
-        echo "acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e '.${ENVIRONMENT}.uri' -)" >> $GITHUB_ENV
+        acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e ".${ENVIRONMENT}.uri" -)
+        printf "acquia_env_uri=%s\n" "$acquia_env_uri" >> "$GITHUB_ENV"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
 
