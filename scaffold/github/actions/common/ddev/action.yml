@@ -31,13 +31,13 @@ runs:
 
         mkdir -p .ddev/homeadditions/.ssh
         # Copy private key
-        if [ "${{ inputs.ssh-private-key }}" != "" ]; then
-          echo "${{ inputs.ssh-private-key }}" > .ddev/homeadditions/.ssh/id_rsa
+        if [ "${SSH_PRIVATE_KEY}" != "" ]; then
+          echo "${SSH_PRIVATE_KEY}" > .ddev/homeadditions/.ssh/id_rsa
           chmod 600 .ddev/homeadditions/.ssh/id_rsa
         fi
         # Copy known hosts
-        if [ "${{ inputs.ssh-known-hosts }}" != "" ]; then
-          echo "${{ inputs.ssh-known-hosts}}" > .ddev/homeadditions/.ssh/known_hosts
+        if [ "${SSH_KNOWN_HOSTS}" != "" ]; then
+          echo "${SSH_KNOWN_HOSTS}" > .ddev/homeadditions/.ssh/known_hosts
           chmod 644 .ddev/homeadditions/.ssh/known_hosts
         fi
         # SSH config file
@@ -54,8 +54,8 @@ runs:
         chmod 700 .ddev/homeadditions/.ssh
 
         # Download and run the DDEV installer
-        if [ "${{ inputs.version }}" != "" ]; then
-          sudo apt install -y ddev=${{inputs.version}}
+        if [ "${VERSION}" != "" ]; then
+          sudo apt install -y ddev=${VERSION}
         else
           sudo apt install -y ddev
         fi
@@ -67,11 +67,11 @@ runs:
 
         ddev config global --instrumentation-opt-in=false --omit-containers=ddev-ssh-agent
 
-        if [ "${{ inputs.composer-cache-dir }}" != "false" ]; then
+        if [ "${COMPOSER_CACHE_DIR}" != "false" ]; then
           # @todo Replace /var/www/html with an environment variable.
           CACHE_DIR=".ddev/.drainpipe-composer-cache"
-          if [ "${{ inputs.composer-cache-dir }}" != "" ]; then
-            CACHE_DIR="${{ inputs.composer-cache-dir }}"
+          if [ "${COMPOSER_CACHE_DIR}" != "" ]; then
+            CACHE_DIR="${COMPOSER_CACHE_DIR}"
           fi
           # Workaround for https://github.com/ddev/ddev/issues/6044
           if yq -re .type .ddev/config.yaml; then
@@ -85,8 +85,15 @@ runs:
         ddev describe
 
         # Copy git credentials
-        ddev exec "git config --global user.name \"${{ inputs.git-name }}\""
-        ddev exec "git config --global user.email \"${{ inputs.git-email }}\""
+        ddev exec "git config --global user.name \"${GIT_NAME}\""
+        ddev exec "git config --global user.email \"${GIT_EMAIL}\""
 
         echo "DRAINPIPE_DDEV=true" >> $GITHUB_ENV
       shell: bash
+      env:
+        SSH_PRIVATE_KEY: ${{ inputs.ssh-private-key }}
+        SSH_KNOWN_HOSTS: ${{ inputs.ssh-known-hosts }}
+        GIT_EMAIL: ${{ inputs.git-email }}
+        GIT_NAME: ${{ inputs.git-name }}
+        COMPOSER_CACHE_DIR: ${{ inputs.composer-cache-dir }}
+        VERSION: ${{ inputs.version }}

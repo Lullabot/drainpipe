@@ -24,9 +24,9 @@ runs:
 
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+        drainpipe_exec "ACQUIA_API_KEY=${ACQUIA_API_KEY} ACQUIA_API_SECRET=${ACQUIA_API_SECRET} ./vendor/bin/task acquia:auth"
 
-        ENV_INFO=$(drainpipe_exec "acli --no-interaction api:environments:find ${{ inputs.environment }}")
+        ENV_INFO=$(drainpipe_exec "acli --no-interaction api:environments:find ${ENVIRONMENT}")
 
         VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
         if [ "$VCS_TYPE" != "git" ]; then
@@ -51,14 +51,14 @@ runs:
         drainpipe_exec "./vendor/bin/task snapshot:directory directory=\"$RELEASE_DIR\""
 
         # Run the deploy task.
-        drainpipe_exec "./vendor/bin/task deploy:git directory=\"$RELEASE_DIR\" branch=\"$BRANCH\" remote=\"$REMOTE_VCS\" message=\"${{ inputs.commit-message }}\""
+        drainpipe_exec "./vendor/bin/task deploy:git directory=\"$RELEASE_DIR\" branch=\"$BRANCH\" remote=\"$REMOTE_VCS\" message=\"${COMMIT_MESSAGE}\""
 
-        echo "We are about to code-switch to $BRANCH on ${{ inputs.environment }}."
+        echo "We are about to code-switch to $BRANCH on ${ENVIRONMENT}."
         echo "This may take a while... 🕒"
 
         # Run code-switch to the same branch so we wait for everything to sync.
         # Running in background avoids ACLI verbosity filling up the logs.
-        drainpipe_exec "acli api:environments:code-switch --task-wait --quiet ${{ inputs.environment }} \"$BRANCH\"" &
+        drainpipe_exec "acli api:environments:code-switch --task-wait --quiet ${ENVIRONMENT} \"$BRANCH\"" &
         TASK_ID=$!
         SECONDS_TO_WAIT=30
 
@@ -70,4 +70,8 @@ runs:
         echo "✅ Acquia Code-switch complete."
 
       shell: bash
+      env:
+        ACQUIA_API_KEY: ${{ inputs.api-key }}
+        ACQUIA_API_SECRET: ${{ inputs.api-secret }}
+        ENVIRONMENT: ${{ inputs.environment }}
 

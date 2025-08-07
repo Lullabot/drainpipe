@@ -31,12 +31,16 @@ jobs:
         working-directory: drainpipe-dev
         run: |
           git init
-          git branch -m ${{ github.event.ref }}
+          git branch -m ${{ GH_EVENT_REF }}
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
-          git reset --mixed origin/${{ github.event.ref }}
+          git reset --mixed origin/${{ GH_EVENT_REF }}
+        env:
+          GH_EVENT_REF: ${{ github.event.ref }}
 
       - name: Delete ref from drainpipe-dev
         working-directory: drainpipe-dev
         run: |
-          git push origin --delete ${{ github.event.ref }}
+          git push origin --delete ${{ GH_EVENT_REF }}
+        env:
+          GH_EVENT_REF: ${{ github.event.ref }}
