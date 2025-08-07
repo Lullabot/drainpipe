@@ -61,6 +61,21 @@ upstream dependencies e.g. https://github.com/go-task/task/releases
 
 ---
 
+## Renovate Presets
+
+If you are using [Renovate](https://docs.renovatebot.com/) (for automated dependency updates) you can use/extend our Drupal presets by doing the following:
+
+```
+{
+  "extends": [
+    "group:drupal-core"
+ ]
+}
+```
+
+This preset provides safe automation with flexibility and control for teams maintaining Drupal applications, minimizing risk by requiring approval for major changes while accelerating security patches through the automerging of minor updates.
+---
+
 ## Database Updates
 
 The `drupal:update` command follows the same procedure as the
