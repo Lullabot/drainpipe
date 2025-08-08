@@ -22,8 +22,7 @@ runs:
 
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
-        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
-        ENVIRONMENT="${{ inputs.environment }}"
+        drainpipe_exec "ACQUIA_API_KEY=${ACQUIA_API_KEY} ACQUIA_API_SECRET=${ACQUIA_API_SECRET} ./vendor/bin/task acquia:auth"
         APPLICATION=${ENVIRONMENT%.*}
 
         drainpipe_exec "acli remote:aliases:download --no-interaction $APPLICATION"
@@ -31,17 +30,22 @@ runs:
         # Avoid using drush9
         drainpipe_exec "yq eval '(.** | .paths) = {}' -i /var/www/html/drush/sites/${APPLICATION}.site.yml"
 
-        if [ "${{ inputs.run-installer }}" == "true" ]; then
+        if [ "${RUN_INSTALLER}" == "true" ]; then
           echo "Running site install"
-          drainpipe_exec "./vendor/bin/drush @${{ inputs.environment }} --yes site:install --existing-config"
+          drainpipe_exec "./vendor/bin/drush @${ENVIRONMENT} --yes site:install --existing-config"
         fi
 
-        drainpipe_exec "./vendor/bin/task acquia:deploy:after site=@${{ inputs.environment }}"
+        drainpipe_exec "./vendor/bin/task acquia:deploy:after site=@${ENVIRONMENT}"
 
         if drainpipe_exec "./vendor/bin/task -l | grep -q '* update: '"; then
           echo "Running task update"
-          drainpipe_exec "./vendor/bin/task update site=@${{ inputs.environment }}"
+          drainpipe_exec "./vendor/bin/task update site=@${ENVIRONMENT}"
         else
           echo "Running task drupal:update"
-          drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.environment }}"
+          drainpipe_exec "./vendor/bin/task drupal:update site=@${ENVIRONMENT}"
         fi
+      env:
+        ACQUIA_API_KEY: ${{ inputs.api-key }}
+        ACQUIA_API_SECRET: ${{ inputs.api-secret }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        RUN_INSTALLER: ${{ inputs.run-installer }}

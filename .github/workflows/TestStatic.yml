@@ -79,12 +79,14 @@ jobs:
 
       - name: Test for untracked and modified files
         run: |
-          if [ "${{ steps.test_untracked.outcome }}" != "failure" ]; then
+          if [ "${TEST_UNTRACKED_OUTCOME}" != "failure" ]; then
             exit 1
           fi
           git add .
           git commit -m "Second commit"
           ddev task test:untracked
+        env:
+          TEST_UNTRACKED_OUTCOME: ${{ steps.test_untracked.outcome }}
 
       - name: Run Static Tests
         run: ddev task test:static

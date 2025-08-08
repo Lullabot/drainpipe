@@ -28,7 +28,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - uses: ./.github/actions/drainpipe/set-env
+      - id: set-env
+        uses: ./.github/actions/drainpipe/set-env
 
       - name: Install and Start DDEV
         uses: ./.github/actions/drainpipe/ddev
@@ -54,11 +55,11 @@ jobs:
           curl -f \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer  ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER | jq '. | {body}' > pull_request.json
+            https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.set-env.outputs.pr_number }} | jq '. | {body}' > pull_request.json
           ddev task "github:composer-lock-diff pull_request='pull_request.json' json_file='processed.json'"
           curl -f \
             -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${{ steps.set-env.outputs.pr_number }} \
             -d @processed.json

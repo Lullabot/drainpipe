@@ -11,6 +11,9 @@ runs:
   using: "composite"
   steps:
     - run: |
-        git config --global user.email ${{ inputs.git-email }}
-        git config --global user.name ${{ inputs.git-name }}
+        git config --global user.email ${GIT_EMAIL}
+        git config --global user.name ${GIT_NAME}
       shell: bash
+      env:
+        GIT_EMAIL: ${{ inputs.git-email }}
+        GIT_NAME: ${{ inputs.git-name }}

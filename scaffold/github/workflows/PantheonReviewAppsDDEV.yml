@@ -20,9 +20,11 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
-      - uses: ./.github/actions/drainpipe/set-env
+      - id: set-env
+        uses: ./.github/actions/drainpipe/set-env
 
       - name: Install and Start DDEV
+        id: ddev
         uses: ./.github/actions/drainpipe/ddev
         with:
           git-name: Drainpipe Bot
@@ -33,6 +35,7 @@ jobs:
       - name: Build Project
         env:
           directory: /tmp/release
+          DRAINPIPE_DDEV: ${{ steps.ddev.outputs.drainpipe_ddev }}
         run: |
           ddev composer install
           ddev task build
