@@ -7,20 +7,28 @@ inputs:
   github-api-token-username:
     description: "GitHub API token username"
     required: true
+outputs:
+  pr_number:
+    description: "Pull Request number extracted from GITHUB_REF"
+    value: ${{ steps.compute.outputs.pr_number }}
+  sha:
+    description: "Pull Request head SHA or PR number fallback"
+    value: ${{ steps.compute.outputs.sha }}
 runs:
   using: "composite"
   steps:
-    - run: |
+    - id: compute
+      run: |
         echo "Setting Drainpipe environment variables:"
 
         DRAINPIPE_PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
-        printf "DRAINPIPE_PR_NUMBER=%s\n" "$DRAINPIPE_PR_NUMBER" >> "$GITHUB_ENV"
         DRAINPIPE_SHA=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)
-        printf "DRAINPIPE_SHA=%s\n" "$DRAINPIPE_SHA" >> "$GITHUB_ENV"
 
         if [ -z "$DRAINPIPE_SHA" ] || [ "$DRAINPIPE_SHA" = "null" ]; then
           DRAINPIPE_SHA=$DRAINPIPE_PR_NUMBER
-          printf "DRAINPIPE_SHA=%s\n" "$DRAINPIPE_PR_NUMBER" >> "$GITHUB_ENV"
         fi
+
+        echo "pr_number=$DRAINPIPE_PR_NUMBER" >> "$GITHUB_OUTPUT"
+        echo "sha=$DRAINPIPE_SHA" >> "$GITHUB_OUTPUT"
 
       shell: bash

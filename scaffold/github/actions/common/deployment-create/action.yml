@@ -1,5 +1,5 @@
 name: "Create a GitHub deployment"
-description: "Creates a GitHub deployment and echos the ID to the $GITHUB_ENV file"
+description: "Creates a GitHub deployment and exposes the deployment ID as a step output"
 inputs:
   github-token:
     description: "GitHub token as generated automatically in secrets.GITHUB_TOKEN"
@@ -7,12 +7,18 @@ inputs:
   environment:
     description: "The environment name"
     required: true
+outputs:
+  deployment_id:
+    description: "The created GitHub Deployment ID"
+    value: ${{ steps.create.outputs.deployment_id }}
 runs:
   using: "composite"
   steps:
-    - uses: ./.github/actions/drainpipe/set-env
+    - id: set-env
+      uses: ./.github/actions/drainpipe/set-env
 
     - name: Create GitHub Deployment
+      id: create
       run: |
         export GITHUB_DEPLOYMENT=$(curl -f -X POST \
             https://api.github.com/repos/$GITHUB_REPOSITORY/deployments \
@@ -22,10 +28,11 @@ runs:
         )
         export GITHUB_DEPLOYMENT_ID=$(echo $GITHUB_DEPLOYMENT | jq -r '.id')
         if [ -z "$GITHUB_DEPLOYMENT_ID" ] || [ "$GITHUB_DEPLOYMENT_ID" = "null" ]; then echo $GITHUB_DEPLOYMENT && exit 1; fi
-        printf "GITHUB_DEPLOYMENT_ID=%s\n" "$GITHUB_DEPLOYMENT_ID" >> "$GITHUB_ENV"
+        echo "deployment_id=$GITHUB_DEPLOYMENT_ID" >> "$GITHUB_OUTPUT"
         echo "Created GitHub Deployment ID $GITHUB_DEPLOYMENT_ID"
         curl -f -H "Authorization: token ${GITHUB_TOKEN}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d '{"state":"in_progress"}'
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         ENVIRONMENT: ${{ inputs.environment }}
+        DRAINPIPE_SHA: ${{ steps.set-env.outputs.sha }}

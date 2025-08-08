@@ -28,6 +28,7 @@ runs:
   steps:
 
     - name: Install DDEV
+      id: ddev
       uses: ./.github/actions/drainpipe/ddev
       with:
         git-name: Drainpipe Bot
@@ -59,6 +60,7 @@ runs:
       env:
         ACQUIA_API_KEY: ${{ inputs.api-key }}
         ACQUIA_API_SECRET: ${{ inputs.api-secret }}
+        DRAINPIPE_DDEV: ${{ steps.ddev.outputs.drainpipe_ddev }}
 
     - name: Validate environment alias by running `drush status`
       shell: bash
@@ -67,6 +69,7 @@ runs:
         drainpipe_exec "vendor/bin/acli remote:drush ${ENVIRONMENT} -- status"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
+        DRAINPIPE_DDEV: ${{ steps.ddev.outputs.drainpipe_ddev }}
 
     - name: Build
       shell: bash
@@ -75,14 +78,18 @@ runs:
         source .github/actions/drainpipe/set-env/bash_aliases
         # Build the site.
         drainpipe_exec "vendor/bin/task acquia:deploy:before"
+      env:
+        DRAINPIPE_DDEV: ${{ steps.ddev.outputs.drainpipe_ddev }}
 
     - name: Create GitHub Deployment
+      id: create-deployment
       uses: ./.github/actions/drainpipe/deployment-create
       with:
         github-token: ${{ inputs.github-token }}
         environment: ${{ inputs.environment }}
 
     - name: Configure remote aliases
+      id: configure-aliases
       shell: bash
       run: |
 
@@ -103,9 +110,10 @@ runs:
 
         # Extract the environment.uri value
         acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e ".${ENVIRONMENT}.uri" -)
-        printf "acquia_env_uri=%s\n" "$acquia_env_uri" >> "$GITHUB_ENV"
+        echo "acquia_env_uri=$acquia_env_uri" >> "$GITHUB_OUTPUT"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
+        DRAINPIPE_DDEV: ${{ steps.ddev.outputs.drainpipe_ddev }}
 
     - name: Push to Acquia
       uses: ./.github/actions/drainpipe/acquia/push
@@ -139,9 +147,12 @@ runs:
         drainpipe_exec "acli api:environments:clear-caches --no-interaction ${ENVIRONMENT} $DOMAINS_HOSTNAMES"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
+        DRAINPIPE_DDEV: ${{ steps.ddev.outputs.drainpipe_ddev }}
 
     - name: Set Deployment Status
       uses: ./.github/actions/drainpipe/deployment-status
       with:
         github-token: ${{ inputs.github-token }}
-        environment-url: ${{ env.acquia_env_uri }}
+        environment-url: ${{ steps.configure-aliases.outputs.acquia_env_uri }}
+      env:
+        GITHUB_DEPLOYMENT_ID: ${{ steps.create-deployment.outputs.deployment_id }}

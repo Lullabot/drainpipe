@@ -10,7 +10,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./.github/actions/drainpipe/set-env
+    - id: set-env
+      uses: ./.github/actions/drainpipe/set-env
 
     - name: Set deployment to success
       run: |

@@ -1,5 +1,5 @@
 drainpipe_exec() {
-  if [ "$DRAINPIPE_DDEV" == "true" ]; then
+  if [ "$DRAINPIPE_DDEV" == "true" ] || [ "$drainpipe_ddev" == "true" ]; then
     ddev exec "$@"
   else
     eval "$@"

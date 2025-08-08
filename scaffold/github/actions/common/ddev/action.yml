@@ -19,10 +19,15 @@ inputs:
   version:
     description: "Override the DDEV version .e.g. '1.19.0'"
     required: false
+outputs:
+  drainpipe_ddev:
+    description: "Flag indicating that DDEV is installed and should be used by drainpipe_exec"
+    value: ${{ steps.flag.outputs.drainpipe_ddev }}
 runs:
   using: "composite"
   steps:
     - name: Install and Start DDEV
+      id: flag
       run: |
         curl https://apt.fury.io/drud/gpg.key | sudo apt-key add -
         echo "deb https://apt.fury.io/drud/ * *" | sudo tee -a /etc/apt/sources.list.d/ddev.list
@@ -88,7 +93,7 @@ runs:
         ddev exec "git config --global user.name \"${GIT_NAME}\""
         ddev exec "git config --global user.email \"${GIT_EMAIL}\""
 
-        echo "DRAINPIPE_DDEV=true" >> $GITHUB_ENV
+        echo "drainpipe_ddev=true" >> $GITHUB_OUTPUT
       shell: bash
       env:
         SSH_PRIVATE_KEY: ${{ inputs.ssh-private-key }}
@@ -97,3 +102,4 @@ runs:
         GIT_NAME: ${{ inputs.git-name }}
         COMPOSER_CACHE_DIR: ${{ inputs.composer-cache-dir }}
         VERSION: ${{ inputs.version }}
+
