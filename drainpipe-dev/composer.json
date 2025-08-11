@@ -38,7 +38,7 @@
     "extra": {
         "class": [
             "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin",
-            "\\Lullabot\\DrainpipeDev\\Composer\\Plugin\\ConditionalScaffoldPlugin"
+            "\\Lullabot\\DrainpipeDev\\NightwatchScaffoldPlugin"
         ],
         "drupal-scaffold": {
             "gitignore": true,
