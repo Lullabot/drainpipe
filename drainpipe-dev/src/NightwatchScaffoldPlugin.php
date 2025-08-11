@@ -9,10 +9,6 @@ use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
-use Composer\Util\Filesystem;
-use Symfony\Component\Yaml\Yaml;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
 
 class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterface
 {
@@ -23,6 +19,13 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
     protected $composer;
 
     /**
+     * Composer instance configuration.
+     *
+     * @var Config
+     */
+    protected $config;
+
+    /**
      * @var IOInterface
      */
     protected $io;
@@ -30,6 +33,7 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
     public function activate(Composer $composer, IOInterface $io)
     {
         $this->composer = $composer;
+        $this->config = $composer->getConfig();
         $this->io = $io;
     }
 
@@ -44,17 +48,17 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
     public static function getSubscribedEvents()
     {
         return [
-            ScriptEvents::POST_INSTALL_CMD => 'onPostInstallCmd',
-            ScriptEvents::POST_UPDATE_CMD => 'onPostUpdateCmd',
+            ScriptEvents::PRE_INSTALL_CMD => 'onPreInstallCmd',
+            ScriptEvents::PRE_UPDATE_CMD => 'onPreUpdateCmd',
         ];
     }
 
-    public function onPostInstallCmd(Event $event)
+    public function onPreInstallCmd(Event $event)
     {
         $this->installNightwatch();
     }
 
-    public function onPostUpdateCmd(Event $event)
+    public function onPreUpdateCmd(Event $event)
     {
         $this->installNightwatch();
     }
