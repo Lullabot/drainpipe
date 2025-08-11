@@ -3,29 +3,19 @@
 namespace Lullabot\DrainpipeDev;
 
 use Composer\Composer;
-use Composer\Config;
 use Composer\EventDispatcher\EventSubscriberInterface;
-use Composer\Factory;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
-use Composer\Util\Filesystem;
+use Composer\Package\PackageInterface;
 
 class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterface
 {
-
     /**
      * @var Composer
      */
     protected $composer;
-
-    /**
-     * Composer instance configuration.
-     *
-     * @var Config
-     */
-    protected $config;
 
     /**
      * @var IOInterface
@@ -35,7 +25,6 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
     public function activate(Composer $composer, IOInterface $io)
     {
         $this->composer = $composer;
-        $this->config = $composer->getConfig();
         $this->io = $io;
     }
 
@@ -50,17 +39,11 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
     public static function getSubscribedEvents()
     {
         return [
-            ScriptEvents::POST_INSTALL_CMD => 'onPostInstallCmd',
-            ScriptEvents::POST_UPDATE_CMD => 'onPostUpdateCmd',
+            ScriptEvents::PRE_AUTOLOAD_DUMP => 'onPreAutoloadDump',
         ];
     }
 
-    public function onPostInstallCmd(Event $event)
-    {
-        $this->installNightwatch();
-    }
-
-    public function onPostUpdateCmd(Event $event)
+    public function onPreAutoloadDump(Event $event)
     {
         $this->installNightwatch();
     }
@@ -77,40 +60,52 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
             return;
         }
 
-        // Identify some relevant paths
-        $fs = new Filesystem();
-        $vendor = $this->config->get('vendor-dir');
-        $placeholders = [
-            '[project-root]' => dirname(Factory::getComposerFile()),
-            '[web-root]' => $this->getWebRoot($rootExtra),
-        ];
+        // Get drainpipe-dev Composer package
+        $drainpipeDevPackage = $this->findDrainpipeDevPackage();
+        if (!$drainpipeDevPackage) {
+            $this->io->warning('🪠 [Drainpipe] Could not find drainpipe-dev package');
+            return;
+        }
+
+        // Get current scaffold configuration from drainpipe-dev
+        $drainpipeDevExtra = $drainpipeDevPackage->getExtra();
+        $scaffoldConfig = $drainpipeDevExtra['drupal-scaffold'] ?? [];
+        $fileMapping = $scaffoldConfig['file-mapping'] ?? [];
 
         // Define Nightwatch scaffold files
         $nightwatchFiles = $this->getNightwatchScaffoldFiles();
 
-        // Copy Nightwatch scaffold files their location
-        foreach ($nightwatchFiles as $dest => $source) {
-            $target = str_replace(array_keys($placeholders), array_values($placeholders), $dest);
-            $fs->ensureDirectoryExists(dirname($target));
-            $fs->copy("$vendor/lullabot/drainpipe-dev/$source", $target);
+        foreach ($nightwatchFiles as $dest => $src) {
+            $fileMapping[$dest] = $src;
         }
 
-        $this->io->write('<info>🪠 [Drainpipe] Nightwatch files scaffolded</info>');
+        // Add Nightwatch scaffold files to drainpipe-dev settings
+        $scaffoldConfig['file-mapping'] = $fileMapping;
+        $drainpipeDevExtra['drupal-scaffold'] = $scaffoldConfig;
+        $drainpipeDevPackage->setExtra($drainpipeDevExtra);
     }
 
-    /**
-     * Determine the value for web-root placeholder.
-     *
-     * @param array $projectExtra
-     * @return string
-     */
-    protected function getWebRoot(array $projectExtra): string {
-        $drupalScaffoldConfig = $projectExtra['drupal-scaffold'] ?? [];
-        $locations = $drupalScaffoldConfig['locations'] ?? [];
-        if (is_array($locations) && isset($locations['web-root'])) {
-          return $locations['web-root'];
+    protected function findDrainpipeDevPackage(): ?PackageInterface
+    {
+        $repositoryManager = $this->composer->getRepositoryManager();
+        $localRepository = $repositoryManager->getLocalRepository();
+
+        // Look for drainpipe-dev package in installed packages
+        foreach ($localRepository->getPackages() as $package) {
+            if ($package->getName() === 'lullabot/drainpipe-dev') {
+                return $package;
+            }
         }
-        return './web';
+
+        // If not found in local repository, try to find it in the installed packages
+        $installedRepository = $this->composer->getRepositoryManager()->getLocalRepository();
+        $packages = $installedRepository->findPackages('lullabot/drainpipe-dev');
+
+        if (!empty($packages)) {
+            return $packages[0];
+        }
+
+        return null;
     }
 
     /**
