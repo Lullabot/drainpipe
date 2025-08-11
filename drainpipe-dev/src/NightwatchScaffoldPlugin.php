@@ -5,10 +5,12 @@ namespace Lullabot\DrainpipeDev;
 use Composer\Composer;
 use Composer\Config;
 use Composer\EventDispatcher\EventSubscriberInterface;
+use Composer\Factory;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
+use Composer\Util\Filesystem;
 
 class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterface
 {
@@ -48,17 +50,17 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
     public static function getSubscribedEvents()
     {
         return [
-            ScriptEvents::PRE_INSTALL_CMD => 'onPreInstallCmd',
-            ScriptEvents::PRE_UPDATE_CMD => 'onPreUpdateCmd',
+            ScriptEvents::POST_INSTALL_CMD => 'onPostInstallCmd',
+            ScriptEvents::POST_UPDATE_CMD => 'onPostUpdateCmd',
         ];
     }
 
-    public function onPreInstallCmd(Event $event)
+    public function onPostInstallCmd(Event $event)
     {
         $this->installNightwatch();
     }
 
-    public function onPreUpdateCmd(Event $event)
+    public function onPostUpdateCmd(Event $event)
     {
         $this->installNightwatch();
     }
@@ -75,28 +77,25 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
             return;
         }
 
-        // Get current scaffold configuration from root package
-        $scaffoldConfig = $rootExtra['drupal-scaffold'] ?? [];
-        $fileMapping = $scaffoldConfig['file-mapping'] ?? [];
+        // Identify some relevant paths
+        $fs = new Filesystem();
+        $vendor = $this->config->get('vendor-dir');
+        $placeholders = [
+            '[project-root]' => dirname(Factory::getComposerFile()),
+            '[web-root]' => sprintf('%s/web', dirname(Factory::getComposerFile())),
+        ];
 
         // Define Nightwatch scaffold files
         $nightwatchFiles = $this->getNightwatchScaffoldFiles();
 
-        // Add Nightwatch scaffold files to root package's file mapping
-        $vendor = $this->config->get('vendor-dir');
+        // Copy Nightwatch scaffold files their location
         foreach ($nightwatchFiles as $dest => $source) {
-            $fileMapping[$dest] = sprintf('%s/lullabot/drainpipe-dev/%s', $vendor, $source);
+            $target = str_replace(array_keys($placeholders), array_values($placeholders), $dest);
+            $fs->ensureDirectoryExists(dirname($target));
+            $fs->copy("$vendor/lullabot/drainpipe-dev/$source", $target);
         }
 
-        // Update the root package's scaffold configuration
-        $scaffoldConfig['file-mapping'] = $fileMapping;
-        $rootExtra['drupal-scaffold'] = $scaffoldConfig;
-        $rootPackage->setExtra($rootExtra);
-
-        $this->io->write('🪠 [Drainpipe] Nightwatch files scaffolded');
-
-        $output = print_r($scaffoldConfig['file-mapping'], true);
-        $this->io->write('🪠 [Drainpipe] ' . $output);
+        $this->io->write('<info>🪠 [Drainpipe] Nightwatch files scaffolded</info>');
     }
 
     /**
@@ -119,8 +118,8 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
     protected function getNightwatchScaffoldFiles(): array {
         return [
             '[project-root]/nightwatch.conf.js' => 'scaffold/nightwatch/nightwatch.conf.js',
-            '[project-root]/.ddev/docker-compose.selenium.yaml' => 'scaffold/nightwatch/.ddev/docker-compose.selenium.yaml',
-            '[project-root]/test/nightwatch/example.nightwatch.js' => 'scaffold/nightwatch/test/nightwatch/example.nightwatch.js',
+            '[project-root]/.ddev/docker-compose.selenium.yaml' => 'scaffold/nightwatch/docker-compose.selenium.yaml',
+            '[project-root]/test/nightwatch/example.nightwatch.js' => 'scaffold/nightwatch/example.nightwatch.js',
             '[project-root]/test/nightwatch/vrt/.gitignore' => 'scaffold/nightwatch/vrt.gitignore',
             '[web-root]/sites/chrome/settings.php' => 'scaffold/nightwatch/chrome.settings.php',
             '[web-root]/sites/firefox/settings.php' => 'scaffold/nightwatch/firefox.settings.php',
