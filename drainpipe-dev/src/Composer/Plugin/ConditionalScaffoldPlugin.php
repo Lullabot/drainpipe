@@ -8,6 +8,7 @@ use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
 use Composer\Script\Event;
+use Composer\Package\PackageInterface;
 
 class ConditionalScaffoldPlugin implements PluginInterface, EventSubscriberInterface {
 
@@ -43,31 +44,123 @@ class ConditionalScaffoldPlugin implements PluginInterface, EventSubscriberInter
     }
 
     protected function conditionallyConfigureScaffolding() {
+        // Get the root package to read configuration
         $rootPackage = $this->composer->getPackage();
-        $extra = $rootPackage->getExtra();
+        $rootExtra = $rootPackage->getExtra();
 
-        // Get current scaffold configuration
-        $scaffoldConfig = $extra['drupal-scaffold'] ?? [];
+        // Check if Nightwatch is enabled in testing configuration
+        $nightwatchEnabled = $this->isNightwatchEnabled($rootExtra);
+
+        // Find the drainpipe-dev package in the repository
+        $drainpipeDevPackage = $this->findDrainpipeDevPackage();
+
+        if (!$drainpipeDevPackage) {
+            $this->io->writeError('<warning>Could not find drainpipe-dev package</warning>');
+            return;
+        }
+
+        // Get current scaffold configuration from drainpipe-dev
+        $drainpipeDevExtra = $drainpipeDevPackage->getExtra();
+        $scaffoldConfig = $drainpipeDevExtra['drupal-scaffold'] ?? [];
         $fileMapping = $scaffoldConfig['file-mapping'] ?? [];
 
         // Define Nightwatch scaffold files
-        $nightwatchFiles = ScaffoldHandler::getNightwatchScaffoldFiles();
+        $nightwatchFiles = $this->getNightwatchScaffoldFiles();
 
-        if (ScaffoldHandler::isNightwatchEnabled($extra)) {
+        if ($nightwatchEnabled) {
             // Add Nightwatch files to scaffolding
             foreach ($nightwatchFiles as $dest => $src) {
                 $fileMapping[$dest] = $src;
             }
+            $this->io->write('<info>Nightwatch scaffolding enabled</info>');
         } else {
             // Remove Nightwatch files from scaffolding or skip them
             foreach ($nightwatchFiles as $dest => $src) {
                 $fileMapping[$dest] = ['mode' => 'skip'];
             }
+            $this->io->write('<info>Nightwatch scaffolding disabled</info>');
         }
 
-        // Update the scaffold configuration
+        // Update the drainpipe-dev package's scaffold configuration
         $scaffoldConfig['file-mapping'] = $fileMapping;
-        $extra['drupal-scaffold'] = $scaffoldConfig;
-        $rootPackage->setExtra($extra);
+        $drainpipeDevExtra['drupal-scaffold'] = $scaffoldConfig;
+        $drainpipeDevPackage->setExtra($drainpipeDevExtra);
+    }
+
+    /**
+     * Find the drainpipe-dev package in the composer repository.
+     *
+     * @return PackageInterface|null
+     */
+    protected function findDrainpipeDevPackage(): ?PackageInterface {
+        $repositoryManager = $this->composer->getRepositoryManager();
+        $localRepository = $repositoryManager->getLocalRepository();
+
+        // Look for drainpipe-dev package in installed packages
+        foreach ($localRepository->getPackages() as $package) {
+            if ($package->getName() === 'lullabot/drainpipe-dev') {
+                return $package;
+            }
+        }
+
+        // If not found in local repository, try to find it in the installed packages
+        $installedRepository = $this->composer->getRepositoryManager()->getLocalRepository();
+        $packages = $installedRepository->findPackages('lullabot/drainpipe-dev');
+
+        if (!empty($packages)) {
+            return $packages[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if Nightwatch testing is enabled in project configuration.
+     *
+     * @param array $projectExtra
+     * @return bool
+     */
+    protected function isNightwatchEnabled(array $projectExtra): bool {
+        $drainpipeConfig = $projectExtra['drainpipe'] ?? [];
+        $testingConfig = $drainpipeConfig['testing'] ?? [];
+        return is_array($testingConfig) && in_array('Nightwatch', $testingConfig);
+    }
+
+    /**
+     * Get all Nightwatch-related scaffold files.
+     *
+     * @return array
+     */
+    protected function getNightwatchScaffoldFiles(): array {
+        return [
+            '[project-root]/nightwatch.conf.js' => [
+                'source' => 'vendor/lullabot/drainpipe-dev/scaffold/nightwatch/nightwatch.conf.js',
+                'overwrite' => false,
+            ],
+            '[project-root]/.ddev/docker-compose.selenium.yaml' => [
+                'source' => 'vendor/lullabot/drainpipe-dev/scaffold/nightwatch/.ddev/docker-compose.selenium.yaml',
+                'overwrite' => false,
+            ],
+            '[project-root]/test/nightwatch/example.nightwatch.js' => [
+                'source' => 'vendor/lullabot/drainpipe-dev/scaffold/nightwatch/test/nightwatch/example.nightwatch.js',
+                'overwrite' => false,
+            ],
+            '[project-root]/test/nightwatch/vrt/.gitignore' => [
+                'source' => 'vendor/lullabot/drainpipe-dev/scaffold/nightwatch/vrt.gitignore',
+                'overwrite' => false,
+            ],
+            '[web-root]/sites/chrome/settings.php' => [
+                'source' => 'vendor/lullabot/drainpipe-dev/scaffold/nightwatch/chrome.settings.php',
+                'overwrite' => false,
+            ],
+            '[web-root]/sites/firefox/settings.php' => [
+                'source' => 'vendor/lullabot/drainpipe-dev/scaffold/nightwatch/firefox.settings.php',
+                'overwrite' => false,
+            ],
+            '[web-root]/sites/sites.php' => [
+                'source' => 'vendor/lullabot/drainpipe-dev/scaffold/nightwatch/sites.php',
+                'overwrite' => false,
+            ],
+        ];
     }
 }
