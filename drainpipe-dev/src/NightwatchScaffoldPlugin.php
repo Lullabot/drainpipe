@@ -82,7 +82,7 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
         $vendor = $this->config->get('vendor-dir');
         $placeholders = [
             '[project-root]' => dirname(Factory::getComposerFile()),
-            '[web-root]' => sprintf('%s/web', dirname(Factory::getComposerFile())),
+            '[web-root]' => $this->getWebRoot($rootExtra),
         ];
 
         // Define Nightwatch scaffold files
@@ -96,6 +96,21 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
         }
 
         $this->io->write('<info>🪠 [Drainpipe] Nightwatch files scaffolded</info>');
+    }
+
+    /**
+     * Determine the value for web-root placeholder.
+     *
+     * @param array $projectExtra
+     * @return string
+     */
+    protected function getWebRoot(array $projectExtra): string {
+        $drupalScaffoldConfig = $projectExtra['drupal-scaffold'] ?? [];
+        $locations = $drupalScaffoldConfig['locations'] ?? [];
+        if (is_array($locations) && isset($locations['web-root'])) {
+          return $locations['web-root'];
+        }
+        return './web';
     }
 
     /**
