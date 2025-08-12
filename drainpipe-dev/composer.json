@@ -18,7 +18,7 @@
         "davidrjonas/composer-lock-diff": "^1.7.1",
         "drupal/coder": "^8.3.30",
         "lullabot/drainpipe": "*",
-        "mglaman/phpstan-drupal": "^2.0.7",
+        "mglaman/phpstan-drupal": "^2.0.9",
         "mikey179/vfsstream": "^1.6.12",
         "mockery/mockery": "^1.6.12",
         "phpspec/prophecy-phpunit": "^2",
@@ -27,7 +27,7 @@
         "symfony/phpunit-bridge": "^6|^7",
         "symfony/yaml": "^6|^7",
         "tijsverkoyen/convert-to-junit-xml": "^1.11.0",
-        "vincentlanglet/twig-cs-fixer": "^3.8.1"
+        "vincentlanglet/twig-cs-fixer": "^3.9.0"
     },
     "require-dev": {
         "composer/composer": "^2.8.10"
