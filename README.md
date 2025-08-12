@@ -639,6 +639,15 @@ include which will give you helpers that you can include and reference for tasks
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
 
+### Nightwatch
+```json
+"extra": {
+    "drainpipe": {
+        "gitlab": ["Nightwatch"]
+    }
+}
+```
+
 ## Tugboat
 
 Add the following to `composer.json` to add Tugboat configuration:
