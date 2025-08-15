@@ -67,6 +67,7 @@ tasks:
       - ./vendor/bin/drush {{.site}} --yes config:import
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - ./vendor/bin/drush {{.site}} --yes deploy:hook
+      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - |
        # drush config:status --format=json is outputting notices in Pantheon even with the json format, 
        # so we need to tail the last line.
@@ -86,3 +87,4 @@ tasks:
     desc: Turn off Maintenance Mode
     cmds:
       - ./vendor/bin/drush {{.site}} --yes state:set system.maintenance_mode 0 --input-format=integer
+      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
