@@ -26,7 +26,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: drainpipe
 
