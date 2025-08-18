@@ -97,14 +97,6 @@ class NightwatchScaffoldPlugin implements PluginInterface, EventSubscriberInterf
             }
         }
 
-        // If not found in local repository, try to find it in the installed packages
-        $installedRepository = $this->composer->getRepositoryManager()->getLocalRepository();
-        $packages = $installedRepository->findPackages('lullabot/drainpipe-dev');
-
-        if (!empty($packages)) {
-            return $packages[0];
-        }
-
         return null;
     }
 
