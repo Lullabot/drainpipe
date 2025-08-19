@@ -23,7 +23,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: drainpipe
 
@@ -96,7 +96,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: drainpipe
 
@@ -123,6 +123,7 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
+          ddev exec --raw composer config --json extra.drainpipe.testing '["Nightwatch"]'
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" weitzman/drupal-test-traits lullabot/mink-selenium2-driver --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
@@ -168,7 +169,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: drainpipe
 

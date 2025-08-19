@@ -37,18 +37,12 @@
     ],
     "extra": {
         "class": [
-            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin"
+            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin",
+            "\\Lullabot\\DrainpipeDev\\NightwatchScaffoldPlugin"
         ],
         "drupal-scaffold": {
             "gitignore": true,
             "file-mapping": {
-                "[project-root]/nightwatch.conf.js": "scaffold/nightwatch/nightwatch.conf.js",
-                "[web-root]/sites/chrome/settings.php": "scaffold/nightwatch/chrome.settings.php",
-                "[web-root]/sites/firefox/settings.php": "scaffold/nightwatch/firefox.settings.php",
-                "[web-root]/sites/sites.php": "scaffold/nightwatch/sites.php",
-                "[project-root]/.ddev/docker-compose.selenium.yaml": "scaffold/nightwatch/docker-compose.selenium.yaml",
-                "[project-root]/test/nightwatch/example.nightwatch.js": "scaffold/nightwatch/example.nightwatch.js",
-                "[project-root]/test/nightwatch/vrt/.gitignore": "scaffold/nightwatch/vrt.gitignore",
                 "[project-root]/phpcs.xml.dist": "scaffold/phpcs.xml.dist",
                 "[project-root]/phpstan.neon.dist": "scaffold/phpstan.neon.dist",
                 "[project-root]/.twig-cs-fixer.dist.php": "scaffold/.twig-cs-fixer.dist.php"
