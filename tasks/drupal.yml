@@ -58,15 +58,16 @@ tasks:
     desc: Run Drupal update tasks after deploying new code
     cmds:
       # See https://www.drush.org/12.x/deploycommand/
-      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
+      # See https://architecture.lullabot.com/adr/20230929-drupal-build-steps/
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
+      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
       # Run config:import twice to make sure we catch any config that didn't declare
       # a dependency correctly. This is also useful when importing large config sets
       # as it can sometimes hit an out of memory error.
       - ./vendor/bin/drush {{.site}} --yes config:import || true
       - ./vendor/bin/drush {{.site}} --yes config:import
-      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - ./vendor/bin/drush {{.site}} --yes deploy:hook
+      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - |
        # drush config:status --format=json is outputting notices in Pantheon even with the json format, 
        # so we need to tail the last line.
@@ -86,3 +87,4 @@ tasks:
     desc: Turn off Maintenance Mode
     cmds:
       - ./vendor/bin/drush {{.site}} --yes state:set system.maintenance_mode 0 --input-format=integer
+      - ./vendor/bin/drush {{.site}} --yes cache:rebuild

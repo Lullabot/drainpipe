@@ -20,7 +20,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: drainpipe
 
@@ -51,6 +51,7 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
+          ddev exec --raw composer config --json extra.drainpipe.testing '["Nightwatch"]'
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
           git config --global user.email "no-reply@example.com"
@@ -98,7 +99,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -146,7 +147,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -198,7 +199,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -249,7 +250,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -301,7 +302,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -358,7 +359,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 

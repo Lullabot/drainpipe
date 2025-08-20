@@ -298,8 +298,12 @@ EOT;
             $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
         }
 
-        $fs->copy("$scaffoldPath/gitlab/Nightwatch.gitlab-ci.yml", ".drainpipe/gitlab/Nightwatch.gitlab-ci.yml");
-        $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Nightwatch.gitlab-ci.yml installed");
+        if (isset($this->extra['drainpipe']['testing']) && is_array($this->extra['drainpipe']['testing'])) {
+            foreach ($this->extra['drainpipe']['testing'] as $framework) {
+                $fs->copy("$scaffoldPath/testing/$framework.gitlab-ci.yml", ".drainpipe/gitlab/$framework.gitlab-ci.yml");
+                $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/$framework.gitlab-ci.yml installed");
+            }
+        }
 
         foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
             $file = "gitlab/$gitlab.gitlab-ci.yml";
@@ -460,7 +464,20 @@ EOT;
         }
 
         // Wipe the Tugboat directory and define base config.
-        $fs->removeDirectory('./.tugboat');
+        $filesToRemove = [
+            './.tugboat/config.drainpipe-override.yml',
+            './.tugboat/config.yml',
+            './.tugboat/steps/1-init.sh',
+            './.tugboat/steps/2-update.sh',
+            './.tugboat/steps/3-build.sh',
+            './.tugboat/steps/4-online.sh',
+            './.tugboat/scripts/install-mysql-client.sh',
+        ];
+        foreach ($filesToRemove as $file) {
+            if (file_exists($file)) {
+                $fs->remove($file);
+            }
+        }
         $binaryInstallerPlugin = new BinaryInstallerPlugin();
         $tugboatConfig = [
             'nodejs_version' => '18',
