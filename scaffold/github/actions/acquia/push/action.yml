@@ -74,4 +74,4 @@ runs:
         ACQUIA_API_KEY: ${{ inputs.api-key }}
         ACQUIA_API_SECRET: ${{ inputs.api-secret }}
         ENVIRONMENT: ${{ inputs.environment }}
-
+        COMMIT_MESSAGE: ${{ inputs.commit-message }}
