@@ -25,8 +25,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - id: set-env
-      uses: ./.github/actions/drainpipe/set-env
+    - uses: ./.github/actions/drainpipe/set-env
 
     - name: Trust all drush.in hosts
       run: |
@@ -34,10 +33,8 @@ runs:
         drainpipe_exec "echo -e \"Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedKeyTypes +ssh-rsa\" >> ~/.ssh/config"
         drainpipe_exec "cat ~/.ssh/config"
       shell: bash
-      
 
     - name: Create GitHub Deployment
-      id: create-deployment
       run: |
         export GITHUB_DEPLOYMENT=$(curl -f -X POST \
             https://api.github.com/repos/$GITHUB_REPOSITORY/deployments \
@@ -45,16 +42,14 @@ runs:
             -H "Authorization: token ${GITHUB_TOKEN}" \
             -d "{\"ref\": \"$DRAINPIPE_SHA\", \"auto_merge\": false, \"environment\": \"pantheon-pr-$DRAINPIPE_PR_NUMBER\", \"transient_environment\": true, \"required_contexts\": [], \"description\": \"Pantheon Multidev for Pull Request #$DRAINPIPE_PR_NUMBER\"}" \
         )
-        export GITHUB_DEPLOYMENT_ID=$(echo $GITHUB_DEPLOYMENT | jq -r '.id')
-        if [ -z "$GITHUB_DEPLOYMENT_ID" ] || [ "$GITHUB_DEPLOYMENT_ID" = "null" ]; then echo $GITHUB_DEPLOYMENT && exit 1; fi
-        echo "deployment_id=$GITHUB_DEPLOYMENT_ID" >> "$GITHUB_OUTPUT"
+        export GITHUB_DEPLOYMENT_ID=$(echo $GITHUB_DEPLOYMENT | jq '.id')
+        echo "GITHUB_DEPLOYMENT_ID=$GITHUB_DEPLOYMENT_ID" >> $GITHUB_ENV
         echo "Created GitHub Deployment ID $GITHUB_DEPLOYMENT_ID"
+        if [ -z "$GITHUB_DEPLOYMENT_ID" ] || [ "$GITHUB_DEPLOYMENT_ID" = "null" ]; then echo $GITHUB_DEPLOYMENT && exit 1; fi
         curl -f -H "Authorization: token ${GITHUB_TOKEN}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d '{"state":"in_progress"}'
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
-        DRAINPIPE_PR_NUMBER: ${{ steps.set-env.outputs.pr_number }}
-        DRAINPIPE_SHA: ${{ steps.set-env.outputs.sha }}
 
     - name: Clean Stale Environments
       run: |
@@ -110,7 +105,6 @@ runs:
         TERMINUS_TOKEN: ${{ inputs.terminus-token }}
         SITE_NAME: ${{ inputs.site-name }}
         RUN_INSTALLER: ${{ inputs.run-installer }}
-        DRAINPIPE_PR_NUMBER: ${{ steps.set-env.outputs.pr_number }}
 
     - name: Push to Pantheon
       run: |
@@ -122,7 +116,6 @@ runs:
       env:
         SITE_NAME: ${{ inputs.site-name }}
         COMMIT_MESSAGE: ${{ inputs.commit-message }}
-        DRAINPIPE_PR_NUMBER: ${{ steps.set-env.outputs.pr_number }}
 
     - name: Deploy to Pantheon
       run: |
@@ -151,8 +144,6 @@ runs:
         RUN_INSTALLER: ${{ inputs.run-installer }}
         LOCK_USERNAME: ${{ inputs.lock-username }}
         LOCK_PASSWORD: ${{ inputs.lock-password }}
-        DRAINPIPE_PR_NUMBER: ${{ steps.set-env.outputs.pr_number }}
-        GITHUB_DEPLOYMENT_ID: ${{ steps.create-deployment.outputs.deployment_id }}
 
     - name: Set Deployment Failure Status
       run: |
@@ -161,4 +152,3 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
-        GITHUB_DEPLOYMENT_ID: ${{ steps.create-deployment.outputs.deployment_id }}

@@ -24,8 +24,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - id: set-env
-        uses: ./.github/actions/drainpipe/set-env
+      - uses: ./.github/actions/drainpipe/set-env
 
       - name: Install and Start DDEV
         uses: ./.github/actions/drainpipe/ddev
