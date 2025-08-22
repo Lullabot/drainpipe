@@ -16,7 +16,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install Zizmor
-        uses: fabasoad/setup-zizmor-action@v0
+        uses: fabasoad/setup-zizmor-action@29d6175083400e068d436300a3560365c94e230b # v0.1.0
       - name: Run Zizmor
         run: zizmor --format sarif . > results.sarif
         env:
