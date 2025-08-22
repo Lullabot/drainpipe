@@ -427,6 +427,12 @@ EOT;
             else if ($github === 'Security') {
                 $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
+            } 
+            else if ($github === 'Security:Zizmor') {
+                $fs->ensureDirectoryExists('./.github/workflows');
+                $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
+                $fs->copy("$scaffoldPath/github/workflows/TestZizmor.yml", './.github/workflows/TestZizmor.yml');
+                $fs->copy("$scaffoldPath/zizmor.yml", './zizmor.yml');
             }
             else if ($github === 'TestStatic') {
                 $fs->ensureDirectoryExists('./.github/workflows');
