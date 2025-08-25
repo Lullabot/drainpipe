@@ -25,7 +25,7 @@ ddev restart
 
 ### Overriding files provided by drainpipe
 
-Drupal scaffolds are core files automatically placed and updated in the project root by drupal/core-composer-scaffold, review the [documentation](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4.)
+Drupal scaffolds are core files automatically placed and updated in the project root by drupal/core-composer-scaffold. Review the [documentation](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4).
 
 For this project, the Drupal scaffold files are located [here](https://github.com/Lullabot/drainpipe/tree/main/scaffold).
 
