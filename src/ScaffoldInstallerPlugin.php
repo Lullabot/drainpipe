@@ -509,22 +509,12 @@ EOT;
             }
         }
 
-        // Filter out unsupported config overrides.
-        if (!empty($tugboatConfigOverride['php']) && is_array($tugboatConfigOverride['php'])) {
-            $tugboatConfigOverride['php'] = array_filter($tugboatConfigOverride['php'],
-                function($key) {
-                    return in_array($key,
-                        ['aliases', 'urls', 'visualdiff', 'screenshot']);
-                },
-                ARRAY_FILTER_USE_KEY);
-            $overrideOutput = [];
-            foreach (explode(PHP_EOL,
-                Yaml::dump($tugboatConfigOverride['php'], 2, 2)) as $line) {
-                $overrideOutput[] = str_repeat(' ', 4) . $line;
-            }
-            $tugboatConfig['overrides']['php'] = rtrim(implode("\n",
-                $overrideOutput));
-        }
+        // Process PHP config overrides.
+        $tugboatConfig['overrides']['php'] = $this->processTugboatOverride(
+            $tugboatConfigOverride,
+            'php',
+            ['aliases', 'urls', 'visualdiff', 'screenshot']
+        );
 
         // Extract Solr image configuration before filtering for service detection
         $solrOverrideImage = null;
@@ -532,22 +522,12 @@ EOT;
             $solrOverrideImage = $tugboatConfigOverride['solr']['image'] ?? null;
         }
 
-        // Handle Solr config overrides.
-        if (!empty($tugboatConfigOverride['solr']) && is_array($tugboatConfigOverride['solr'])) {
-            $tugboatConfigOverride['solr'] = array_filter($tugboatConfigOverride['solr'],
-                function($key) {
-                    return in_array($key,
-                        ['commands', 'depends', 'aliases', 'urls', 'volumes', 'environment']);
-                },
-                ARRAY_FILTER_USE_KEY);
-            $overrideOutput = [];
-            foreach (explode(PHP_EOL,
-                Yaml::dump($tugboatConfigOverride['solr'], 2, 2)) as $line) {
-                $overrideOutput[] = str_repeat(' ', 4) . $line;
-            }
-            $tugboatConfig['overrides']['solr'] = rtrim(implode("\n",
-                $overrideOutput));
-        }
+        // Process Solr config overrides.
+        $tugboatConfig['overrides']['solr'] = $this->processTugboatOverride(
+            $tugboatConfigOverride,
+            'solr',
+            ['commands', 'depends', 'aliases', 'urls', 'volumes', 'environment']
+        );
 
         // Add Redis service.
         if (file_exists('./.ddev/docker-compose.redis.yaml')) {
@@ -559,17 +539,8 @@ EOT;
             $tugboatConfig['memory_cache_version'] = $version;
         }
 
-        // Add Elasticsearch service.
-        if (file_exists('./.ddev/docker-compose.elasticsearch.yaml')) {
-            $esConfig = Yaml::parseFile('.ddev/docker-compose.elasticsearch.yaml');
-            $esImage = explode(':',
-                $esConfig['services']['elasticsearch']['image']);
-            $tugboatConfig['search_type'] = 'elasticsearch';
-            $tugboatConfig['search_version'] = array_pop($esImage);
-        }
-
-        // Add Solr service.
-        // First check for Solr configuration in the override file
+        // Add search service (mutually exclusive).
+        // Priority: Solr override -> Solr DDEV -> Elasticsearch DDEV
         if (!empty($solrOverrideImage)) {
             $solrImage = explode(':', $solrOverrideImage);
             $tugboatConfig['search_type'] = 'solr';
@@ -582,6 +553,13 @@ EOT;
                 $solrConfig['services']['solr']['image']);
             $tugboatConfig['search_type'] = 'solr';
             $tugboatConfig['search_version'] = array_pop($solrImage);
+        }
+        elseif (file_exists('./.ddev/docker-compose.elasticsearch.yaml')) {
+            $esConfig = Yaml::parseFile('.ddev/docker-compose.elasticsearch.yaml');
+            $esImage = explode(':',
+                $esConfig['services']['elasticsearch']['image']);
+            $tugboatConfig['search_type'] = 'elasticsearch';
+            $tugboatConfig['search_version'] = array_pop($esImage);
         }
 
         // Add commands to Task.
@@ -667,6 +645,34 @@ EOT;
                 }
             }
         }
+    }
+
+    /**
+     * Processes Tugboat service configuration overrides.
+     *
+     * @param array $configOverride The configuration override array.
+     * @param string $service The service name (e.g., 'php', 'solr').
+     * @param array $allowedKeys The keys allowed for this service override.
+     * @return string The formatted YAML string for the overrides.
+     */
+    private function processTugboatOverride(array $configOverride, string $service, array $allowedKeys): string
+    {
+        if (empty($configOverride[$service]) || !is_array($configOverride[$service])) {
+            return '';
+        }
+
+        $filteredOverride = array_filter($configOverride[$service],
+            function($key) use ($allowedKeys) {
+                return in_array($key, $allowedKeys);
+            },
+            ARRAY_FILTER_USE_KEY);
+
+        $overrideOutput = [];
+        foreach (explode(PHP_EOL, Yaml::dump($filteredOverride, 2, 2)) as $line) {
+            $overrideOutput[] = str_repeat(' ', 4) . $line;
+        }
+
+        return rtrim(implode("\n", $overrideOutput));
     }
 
     /**
