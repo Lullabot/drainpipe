@@ -491,7 +491,7 @@ EOT;
             'init' => [],
             'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
             'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
-            'overrides' => ['php' => ''],
+            'overrides' => ['php' => '', 'solr' => ''],
         ];
 
         // Read DDEV config.
@@ -526,6 +526,23 @@ EOT;
                 $overrideOutput));
         }
 
+        // Handle Solr config overrides.
+        if (!empty($tugboatConfigOverride['solr']) && is_array($tugboatConfigOverride['solr'])) {
+            $tugboatConfigOverride['solr'] = array_filter($tugboatConfigOverride['solr'],
+                function($key) {
+                    return in_array($key,
+                        ['commands', 'depends', 'aliases', 'urls', 'volumes', 'environment']);
+                },
+                ARRAY_FILTER_USE_KEY);
+            $overrideOutput = [];
+            foreach (explode(PHP_EOL,
+                Yaml::dump($tugboatConfigOverride['solr'], 2, 2)) as $line) {
+                $overrideOutput[] = str_repeat(' ', 4) . $line;
+            }
+            $tugboatConfig['overrides']['solr'] = rtrim(implode("\n",
+                $overrideOutput));
+        }
+
         // Add Redis service.
         if (file_exists('./.ddev/docker-compose.redis.yaml')) {
             $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
@@ -543,6 +560,15 @@ EOT;
                 $esConfig['services']['elasticsearch']['image']);
             $tugboatConfig['search_type'] = 'elasticsearch';
             $tugboatConfig['search_version'] = array_pop($esImage);
+        }
+
+        // Add Solr service.
+        if (file_exists('./.ddev/docker-compose.solr.yaml')) {
+            $solrConfig = Yaml::parseFile('.ddev/docker-compose.solr.yaml');
+            $solrImage = explode(':',
+                $solrConfig['services']['solr']['image']);
+            $tugboatConfig['search_type'] = 'solr';
+            $tugboatConfig['search_version'] = array_pop($solrImage);
         }
 
         // Add commands to Task.
@@ -572,6 +598,9 @@ EOT;
             }
             if (isset($taskfile['tasks']['tugboat:redis:init'])) {
                 $tugboatConfig['init']['redis'] = TRUE;
+            }
+            if (isset($taskfile['tasks']['tugboat:solr:init'])) {
+                $tugboatConfig['init']['solr'] = TRUE;
             }
         }
 
