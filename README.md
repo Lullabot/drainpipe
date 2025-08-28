@@ -753,6 +753,7 @@ php:
   visualdiff:
 solr:
   commands:
+  checkout:
   depends:
   aliases:
   urls:
