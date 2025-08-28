@@ -526,6 +526,12 @@ EOT;
                 $overrideOutput));
         }
 
+        // Extract Solr image configuration before filtering for service detection
+        $solrOverrideImage = null;
+        if (!empty($tugboatConfigOverride['solr']) && is_array($tugboatConfigOverride['solr'])) {
+            $solrOverrideImage = $tugboatConfigOverride['solr']['image'] ?? null;
+        }
+
         // Handle Solr config overrides.
         if (!empty($tugboatConfigOverride['solr']) && is_array($tugboatConfigOverride['solr'])) {
             $tugboatConfigOverride['solr'] = array_filter($tugboatConfigOverride['solr'],
@@ -563,7 +569,14 @@ EOT;
         }
 
         // Add Solr service.
-        if (file_exists('./.ddev/docker-compose.solr.yaml')) {
+        // First check for Solr configuration in the override file
+        if (!empty($solrOverrideImage)) {
+            $solrImage = explode(':', $solrOverrideImage);
+            $tugboatConfig['search_type'] = 'solr';
+            $tugboatConfig['search_version'] = array_pop($solrImage);
+        }
+        // Fall back to DDEV docker-compose configuration if not specified in override
+        elseif (file_exists('./.ddev/docker-compose.solr.yaml')) {
             $solrConfig = Yaml::parseFile('.ddev/docker-compose.solr.yaml');
             $solrImage = explode(':',
                 $solrConfig['services']['solr']['image']);
