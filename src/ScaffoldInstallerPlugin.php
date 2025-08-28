@@ -526,7 +526,7 @@ EOT;
         $tugboatConfig['overrides']['solr'] = $this->processTugboatOverride(
             $tugboatConfigOverride,
             'solr',
-            ['commands', 'depends', 'aliases', 'urls', 'volumes', 'environment']
+            ['commands', 'depends', 'aliases', 'urls', 'volumes', 'environment', 'checkout']
         );
 
         // Add Redis service.
