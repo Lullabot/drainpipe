@@ -8,6 +8,12 @@
 #   urls:
 #   screenshot:
 #   visualdiff:
+# solr:
+#   commands:
+#   checkout:
+#   depends:
+#   volumes:
+#   environment:
 services:
   php:
     http: false

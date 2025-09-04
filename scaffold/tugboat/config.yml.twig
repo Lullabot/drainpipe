@@ -76,7 +76,6 @@ services:
         - yq -i 'del(."includes")' Taskfile.yml
         - task tugboat:solr:init
 {% endif %}
-
 {% if search_type == 'solr' and overrides.solr|length > 0 %}
 {{ overrides.solr|raw }}
 {% endif %}
