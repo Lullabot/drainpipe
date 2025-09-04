@@ -744,13 +744,21 @@ and re-running `composer install`.
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
 it. The following keys can be added to your `config.yml` via a
-`.tugboat/config.drainppipe-override.yml` file:
+`.tugboat/config.drainpipe-override.yml` file:
 ```
 php:
   aliases:
   urls:
   screenshot:
   visualdiff:
+solr:
+  commands:
+  checkout:
+  depends:
+  aliases:
+  urls:
+  volumes:
+  environment:
 ```
 
 ## Contributor Docs
