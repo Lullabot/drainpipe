@@ -481,7 +481,7 @@ EOT;
         $binaryInstallerPlugin = new BinaryInstallerPlugin();
         $tugboatConfig = [
             'nodejs_version' => '18',
-            'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm',
+            'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm-bookworm',
             'database_type' => 'mariadb',
             'database_version' => '10.11',
             'php_version' => '8.1',
@@ -499,13 +499,13 @@ EOT;
             $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
             $tugboatConfig['database_type'] = $ddevConfig['database']['type'];
             $tugboatConfig['database_version'] = $ddevConfig['database']['version'];
-            $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm';
+            $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm-bookworm';
 
             if (!empty($ddevConfig['nodejs_version'])) {
                 $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
             }
             if (!empty($ddevConfig['webserver_type']) && $ddevConfig['webserver_type'] === 'apache-fpm') {
-                $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache';
+                $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache-bookworm';
             }
         }
 
