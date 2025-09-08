@@ -59,7 +59,6 @@ and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `wind
 and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
 upstream dependencies e.g. https://github.com/go-task/task/releases
 
----
 
 ## Renovate Presets
 
@@ -253,6 +252,16 @@ installing a new instance in isolation_
 `task test:nightwatch`
 
 Runs functional browser tests with [Nightwatch](https://nightwatchjs.org/).
+
+To enable Nightwatch support, add the following to your `composer.json`, then
+run `composer install` to ensure required files are scaffolded:
+```
+"extra": {
+    "drainpipe": {
+        "testing": ["Nightwatch"]
+    },
+},
+```
 
 Run `test:nightwatch:setup` to help you setup your project to run Nightwatch
 tests by installing the necessary node packages and DDEV configurations.
@@ -750,13 +759,21 @@ and re-running `composer install`.
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
 it. The following keys can be added to your `config.yml` via a
-`.tugboat/config.drainppipe-override.yml` file:
+`.tugboat/config.drainpipe-override.yml` file:
 ```
 php:
   aliases:
   urls:
   screenshot:
   visualdiff:
+solr:
+  commands:
+  checkout:
+  depends:
+  aliases:
+  urls:
+  volumes:
+  environment:
 ```
 
 ## Contributor Docs
