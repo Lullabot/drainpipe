@@ -445,7 +445,11 @@ They are composite actions which can be used in any of your workflows e.g.
 ```
 
 Tests can be run locally with [act](https://github.com/nektos/act):
-`act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
+```
+act --container-options "--group-add $(stat -c %g /var/run/docker.sock)" \
+  -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+```
 
 ### Tests
 Workflows for running static and functional tests can be added with the following
