@@ -71,9 +71,9 @@ nodejs -v | grep -q v$NODE_MAJOR
 
 #drainpipe-start
 # This is necessary for testing as this repository doesn't hold a Drupal site.
-shopt -s dotglob
+shopt -s dotglob extglob
 mkdir ../drainpipe-tmp
-mv * ../drainpipe-tmp/
+mv -- !(.git) ../drainpipe-tmp/
 composer create-project drupal/recommended-project .
 mv ../drainpipe-tmp drainpipe
 composer config extra.drupal-scaffold.gitignore true
