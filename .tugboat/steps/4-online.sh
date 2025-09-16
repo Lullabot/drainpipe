@@ -6,4 +6,5 @@
 set -eux
 echo "Online..."
 
+cd ${DOCROOT}/..
 ./vendor/bin/task online:tugboat

@@ -6,6 +6,7 @@
 set -eux
 echo "Building..."
 
+cd ${DOCROOT}/..
 ./vendor/bin/task build
 ./vendor/bin/task update
 ./vendor/bin/task tugboat:drush-uli-ready

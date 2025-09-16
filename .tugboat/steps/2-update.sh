@@ -7,6 +7,7 @@ set -eux
 echo "Updating..."
 
 #drainpipe-start
+cd /var/www/html
 mv .tugboat .tugboat-tmp
 #drainpipe-end
 composer install
