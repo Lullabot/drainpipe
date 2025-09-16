@@ -20,6 +20,7 @@ services:
     image: tugboatqa/php-nginx:8.3-fpm-bookworm
     commands:
       init:
+        - docker-php-ext-install zip
         - mkdir -p /var/www/html
         - ln -snf /var/www/html /usr/share/nginx/html
         - cp .tugboat/repository-server.php /var/www/html/index.php

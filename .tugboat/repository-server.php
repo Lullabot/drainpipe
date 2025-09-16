@@ -41,7 +41,7 @@ function servePackagesJson() {
                     'version_normalized' => '9999999-dev',
                     'dist' => [
                         'type' => 'zip',
-                        'url' => 'http://drainpipe:8080/drainpipe.zip',
+                        'url' => 'http://drainpipe/drainpipe.zip',
                         'reference' => 'main'
                     ],
                     'type' => 'composer-plugin',
