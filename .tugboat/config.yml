@@ -23,7 +23,6 @@ services:
     depends:
       - mariadb
       - redis
-      - drainpipe
 
     commands:
       init: ./.tugboat/steps/1-init.sh
