@@ -67,6 +67,7 @@ nodejs -v | grep -q v$NODE_MAJOR
 # This is necessary for testing as this repository doesn't hold a Drupal site.
 shopt -s dotglob
 mkdir -p /var/www/html
+rm -rf /var/www/html/*
 composer create-project drupal/recommended-project /var/www/html
 ln -snf "/var/www/html/web" "${DOCROOT}"
 alias composer="composer --working-dir=/var/www/html"
