@@ -298,8 +298,12 @@ EOT;
             $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Common.gitlab-ci.yml installed");
         }
 
-        $fs->copy("$scaffoldPath/gitlab/Nightwatch.gitlab-ci.yml", ".drainpipe/gitlab/Nightwatch.gitlab-ci.yml");
-        $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/Nightwatch.gitlab-ci.yml installed");
+        if (isset($this->extra['drainpipe']['testing']) && is_array($this->extra['drainpipe']['testing'])) {
+            foreach ($this->extra['drainpipe']['testing'] as $framework) {
+                $fs->copy("$scaffoldPath/testing/$framework.gitlab-ci.yml", ".drainpipe/gitlab/$framework.gitlab-ci.yml");
+                $this->io->write("🪠 [Drainpipe] .drainpipe/gitlab/$framework.gitlab-ci.yml installed");
+            }
+        }
 
         foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
             $file = "gitlab/$gitlab.gitlab-ci.yml";
@@ -460,11 +464,24 @@ EOT;
         }
 
         // Wipe the Tugboat directory and define base config.
-        $fs->removeDirectory('./.tugboat');
+        $filesToRemove = [
+            './.tugboat/config.drainpipe-override.yml',
+            './.tugboat/config.yml',
+            './.tugboat/steps/1-init.sh',
+            './.tugboat/steps/2-update.sh',
+            './.tugboat/steps/3-build.sh',
+            './.tugboat/steps/4-online.sh',
+            './.tugboat/scripts/install-mysql-client.sh',
+        ];
+        foreach ($filesToRemove as $file) {
+            if (file_exists($file)) {
+                $fs->remove($file);
+            }
+        }
         $binaryInstallerPlugin = new BinaryInstallerPlugin();
         $tugboatConfig = [
             'nodejs_version' => '18',
-            'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm',
+            'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm-bookworm',
             'database_type' => 'mariadb',
             'database_version' => '10.11',
             'php_version' => '8.1',
@@ -474,7 +491,7 @@ EOT;
             'init' => [],
             'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
             'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
-            'overrides' => ['php' => ''],
+            'overrides' => ['php' => '', 'solr' => ''],
         ];
 
         // Read DDEV config.
@@ -482,32 +499,35 @@ EOT;
             $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
             $tugboatConfig['database_type'] = $ddevConfig['database']['type'];
             $tugboatConfig['database_version'] = $ddevConfig['database']['version'];
-            $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm';
+            $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm-bookworm';
 
             if (!empty($ddevConfig['nodejs_version'])) {
                 $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
             }
             if (!empty($ddevConfig['webserver_type']) && $ddevConfig['webserver_type'] === 'apache-fpm') {
-                $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache';
+                $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache-bookworm';
             }
         }
 
-        // Filter out unsupported config overrides.
-        if (!empty($tugboatConfigOverride['php']) && is_array($tugboatConfigOverride['php'])) {
-            $tugboatConfigOverride['php'] = array_filter($tugboatConfigOverride['php'],
-                function($key) {
-                    return in_array($key,
-                        ['aliases', 'urls', 'visualdiff', 'screenshot']);
-                },
-                ARRAY_FILTER_USE_KEY);
-            $overrideOutput = [];
-            foreach (explode(PHP_EOL,
-                Yaml::dump($tugboatConfigOverride['php'], 2, 2)) as $line) {
-                $overrideOutput[] = str_repeat(' ', 4) . $line;
-            }
-            $tugboatConfig['overrides']['php'] = rtrim(implode("\n",
-                $overrideOutput));
+        // Process PHP config overrides.
+        $tugboatConfig['overrides']['php'] = $this->processTugboatOverride(
+            $tugboatConfigOverride,
+            'php',
+            ['aliases', 'urls', 'visualdiff', 'screenshot']
+        );
+
+        // Extract Solr image configuration before filtering for service detection
+        $solrOverrideImage = null;
+        if (!empty($tugboatConfigOverride['solr']) && is_array($tugboatConfigOverride['solr'])) {
+            $solrOverrideImage = $tugboatConfigOverride['solr']['image'] ?? null;
         }
+
+        // Process Solr config overrides.
+        $tugboatConfig['overrides']['solr'] = $this->processTugboatOverride(
+            $tugboatConfigOverride,
+            'solr',
+            ['commands', 'depends', 'aliases', 'urls', 'volumes', 'environment', 'checkout']
+        );
 
         // Add Redis service.
         if (file_exists('./.ddev/docker-compose.redis.yaml')) {
@@ -519,8 +539,22 @@ EOT;
             $tugboatConfig['memory_cache_version'] = $version;
         }
 
-        // Add Elasticsearch service.
-        if (file_exists('./.ddev/docker-compose.elasticsearch.yaml')) {
+        // Add search service (mutually exclusive).
+        // Priority: Solr override -> Solr DDEV -> Elasticsearch DDEV
+        if (!empty($solrOverrideImage)) {
+            $solrImage = explode(':', $solrOverrideImage);
+            $tugboatConfig['search_type'] = 'solr';
+            $tugboatConfig['search_version'] = array_pop($solrImage);
+        }
+        // Fall back to DDEV docker-compose configuration if not specified in override
+        elseif (file_exists('./.ddev/docker-compose.solr.yaml')) {
+            $solrConfig = Yaml::parseFile('.ddev/docker-compose.solr.yaml');
+            $solrImage = explode(':',
+                $solrConfig['services']['solr']['image']);
+            $tugboatConfig['search_type'] = 'solr';
+            $tugboatConfig['search_version'] = array_pop($solrImage);
+        }
+        elseif (file_exists('./.ddev/docker-compose.elasticsearch.yaml')) {
             $esConfig = Yaml::parseFile('.ddev/docker-compose.elasticsearch.yaml');
             $esImage = explode(':',
                 $esConfig['services']['elasticsearch']['image']);
@@ -555,6 +589,9 @@ EOT;
             }
             if (isset($taskfile['tasks']['tugboat:redis:init'])) {
                 $tugboatConfig['init']['redis'] = TRUE;
+            }
+            if (isset($taskfile['tasks']['tugboat:solr:init'])) {
+                $tugboatConfig['init']['solr'] = TRUE;
             }
         }
 
@@ -608,6 +645,34 @@ EOT;
                 }
             }
         }
+    }
+
+    /**
+     * Processes Tugboat service configuration overrides.
+     *
+     * @param array $configOverride The configuration override array.
+     * @param string $service The service name (e.g., 'php', 'solr').
+     * @param array $allowedKeys The keys allowed for this service override.
+     * @return string The formatted YAML string for the overrides.
+     */
+    private function processTugboatOverride(array $configOverride, string $service, array $allowedKeys): string
+    {
+        if (empty($configOverride[$service]) || !is_array($configOverride[$service])) {
+            return '';
+        }
+
+        $filteredOverride = array_filter($configOverride[$service],
+            function($key) use ($allowedKeys) {
+                return in_array($key, $allowedKeys);
+            },
+            ARRAY_FILTER_USE_KEY);
+
+        $overrideOutput = [];
+        foreach (explode(PHP_EOL, Yaml::dump($filteredOverride, 2, 2)) as $line) {
+            $overrideOutput[] = str_repeat(' ', 4) . $line;
+        }
+
+        return rtrim(implode("\n", $overrideOutput));
     }
 
     /**
