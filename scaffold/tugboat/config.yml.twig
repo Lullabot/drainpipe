@@ -8,6 +8,12 @@
 #   urls:
 #   screenshot:
 #   visualdiff:
+# solr:
+#   commands:
+#   checkout:
+#   depends:
+#   volumes:
+#   environment:
 services:
   php:
     http: false
@@ -61,4 +67,16 @@ services:
 
   {{ search_type }}:
     image: tugboatqa/{{ search_type }}:{{ search_version }}
+{% if search_type == 'solr' and init.solr %}
+    checkout: true
+    commands:
+      init:
+        - sh -c "$(curl --location https://raw.githubusercontent.com/go-task/task/v{{ task_version }}/install-task.sh)" -- -d -b /usr/local/bin
+        - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+        - yq -i 'del(."includes")' Taskfile.yml
+        - task tugboat:solr:init
+{% endif %}
+{% if search_type == 'solr' and overrides.solr|length > 0 %}
+{{ overrides.solr|raw }}
+{% endif %}
 {% endif %}
