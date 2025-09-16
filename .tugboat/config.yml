@@ -20,7 +20,7 @@ services:
     image: tugboatqa/php-nginx:8.3-fpm-bookworm
     commands:
       init:
-        - apt update && apt install libzip-dev && apt clean
+        - apt-get update && apt-get install libzip-dev && apt-get clean
         - docker-php-ext-install zip
         - mkdir -p /var/www/html
         - ln -snf /var/www/html /usr/share/nginx/html
