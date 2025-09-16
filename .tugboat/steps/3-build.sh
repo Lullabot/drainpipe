@@ -8,6 +8,7 @@ echo "Building..."
 
 #drainpipe-start
 cd /var/www/html
+composer install
 #drainpipe-end
 ./vendor/bin/task build
 ./vendor/bin/task update
