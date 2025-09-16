@@ -115,6 +115,9 @@ runs:
         echo "::notice::Waiting 600 seconds for Pantheon to sync..."
         drainpipe_exec "terminus workflow:wait -vv --max 600 -- ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
 
+        echo "::notice::Setting aliases..."
+        drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes --print"
+
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
