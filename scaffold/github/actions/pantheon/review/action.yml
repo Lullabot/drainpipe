@@ -111,7 +111,7 @@ runs:
     - name: Deploy to Pantheon
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "terminus workflow:wait ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+        drainpipe_exec "terminus workflow:wait --max 600 ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
 
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
