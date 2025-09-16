@@ -6,7 +6,9 @@
 set -eux
 echo "Building..."
 
-cd ${DOCROOT}/..
+#drainpipe-start
+cd /var/www/html
+#drainpipe-end
 ./vendor/bin/task build
 ./vendor/bin/task update
 ./vendor/bin/task tugboat:drush-uli-ready

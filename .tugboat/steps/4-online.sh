@@ -6,5 +6,7 @@
 set -eux
 echo "Online..."
 
-cd ${DOCROOT}/..
+#drainpipe-start
+cd /var/www/html
+#drainpipe-end
 ./vendor/bin/task online:tugboat

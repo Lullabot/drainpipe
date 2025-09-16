@@ -8,7 +8,6 @@ echo "Updating..."
 
 #drainpipe-start
 cd /var/www/html
-mv .tugboat .tugboat-tmp
 #drainpipe-end
 composer install
 ./vendor/bin/task sync
@@ -22,6 +21,4 @@ find "${DOCROOT}/sites/default/files" -type d -exec chmod 2775 {} \;
 find "${DOCROOT}/sites/default/files" -type f -exec chmod 0664 {} \;
 #drainpipe-start
 ./vendor/bin/drush config:export --yes
-rm -rf .tugboat
-mv .tugboat-tmp .tugboat
 #drainpipe-end
