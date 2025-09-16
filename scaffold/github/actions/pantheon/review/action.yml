@@ -115,6 +115,9 @@ runs:
         echo "::notice::Waiting 600 seconds for Pantheon to sync..."
         drainpipe_exec "terminus workflow:wait -vv --max 600 -- ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
 
+        echo "::notice::Debugging available environments for Pantheon Review Apps"
+        terminus env:list $SITE --field=ID | grep pr-
+
         echo "::notice::Setting aliases..."
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes --print"
 
