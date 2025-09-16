@@ -5,6 +5,6 @@
     "metapackages/*"
   ],
   "devDependencies": {
-    "lerna": "^8.2.3"
+    "lerna": "^8.2.4"
   }
 }
