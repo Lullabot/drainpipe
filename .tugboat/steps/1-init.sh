@@ -66,11 +66,10 @@ nodejs -v | grep -q v$NODE_MAJOR
 #drainpipe-start
 # This is necessary for testing as this repository doesn't hold a Drupal site.
 shopt -s dotglob
-mkdir -p /var/www/html
 rm -rf /var/www/html/*
 composer create-project drupal/recommended-project /var/www/html
 ln -snf "/var/www/html/web" "${DOCROOT}"
-alias composer="composer --working-dir=/var/www/html"
+cd /var/www/html
 composer config extra.drupal-scaffold.gitignore true
 composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
 composer config --no-plugins allow-plugins.composer/installers true
@@ -90,7 +89,3 @@ chmod 777 "${DOCROOT}/sites/default/files"
 chgrp -R www-data "${DOCROOT}/sites/default/files"
 
 composer install
-#drainpipe-start
-rm -rf .tugboat
-mv drainpipe/.tugboat .tugboat
-#drainpipe-end
