@@ -15,6 +15,15 @@
 #   volumes:
 #   environment:
 services:
+  drainpipe:
+    checkout: true
+    image: tugboatqa/php-nginx:8.3-fpm-bookworm
+    commands:
+      init:
+        - mkdir -p /var/www/html
+        - ln -snf /var/www/html /usr/share/nginx/html
+        - cp .tugboat/repository-server.php /var/www/html/index.php
+
   php:
     http: false
     image: tugboatqa/php-nginx:8.3-fpm-bookworm
@@ -23,6 +32,7 @@ services:
     depends:
       - mariadb
       - redis
+      - drainpipe
 
     commands:
       init: ./.tugboat/steps/1-init.sh
