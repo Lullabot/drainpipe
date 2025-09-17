@@ -6,4 +6,7 @@
 set -eux
 echo "Online..."
 
+#drainpipe-start
+cd /var/www/html
+#drainpipe-end
 ./vendor/bin/task online:tugboat
