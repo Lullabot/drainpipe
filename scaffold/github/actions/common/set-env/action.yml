@@ -16,7 +16,7 @@ runs:
         echo "GITHUB_REF: $GITHUB_REF"
         echo "GITHUB_REF_NAME: $GITHUB_REF_NAME"
 
-        if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+        if [[ "$GITHUB_EVENT_NAME" = "workflow_dispatch" && "$GITHUB_REF" == refs/heads/* ]]; then
           # Get PR number for the current branch using gh
           DRAINPIPE_PR_NUMBER=$(gh pr list --state open --head "$GITHUB_REF_NAME" --json number --jq '.[0].number')
           DRAINPIPE_SHA=$(gh pr view "$DRAINPIPE_PR_NUMBER" --json headRefOid --jq '.headRefOid')
