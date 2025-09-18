@@ -16,15 +16,22 @@ runs:
         echo "GITHUB_REF: $GITHUB_REF"
         echo "GITHUB_REF_NAME: $GITHUB_REF_NAME"
 
-        if [[ "$GITHUB_EVENT_NAME" = "workflow_dispatch" && "$GITHUB_REF" == refs/heads/* ]]; then
+        if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$GITHUB_REF" == refs/heads/* ]]; then
           # Get PR number for the current branch using gh
           DRAINPIPE_PR_NUMBER=$(gh pr list --state open --head "$GITHUB_REF_NAME" --json number --jq '.[0].number')
-          DRAINPIPE_SHA=$(gh pr view "$DRAINPIPE_PR_NUMBER" --json headRefOid --jq '.headRefOid')
+          if [ -n "$DRAINPIPE_PR_NUMBER" ]; then
+            DRAINPIPE_SHA=$(gh pr view "$DRAINPIPE_PR_NUMBER" --json headRefOid --jq '.headRefOid')
+          else
+            # Fallback to else logic if no PR found
+            DRAINPIPE_PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+            DRAINPIPE_SHA=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)
+          fi
         else
           # Extract PR number from GITHUB_REF (for PR events)
           DRAINPIPE_PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
           DRAINPIPE_SHA=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)
         fi
+
         echo "DRAINPIPE_PR_NUMBER=$DRAINPIPE_PR_NUMBER" >> $GITHUB_ENV
 
         if [ -z "$DRAINPIPE_SHA" ] || [ "$DRAINPIPE_SHA" = "null" ]; then
