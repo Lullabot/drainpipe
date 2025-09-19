@@ -40,7 +40,7 @@ curl -O https://taskfile.dev/schema.json
 npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
 ```
 
-See [.github/workflows/validate-taskfile.yml](`.github/workflows/validate-taskfile.yml`)
+See [`.github/workflows/validate-taskfile.yml`](.github/workflows/ValidateTaskfile.yml)
 for an example of this in use.
 
 ```
@@ -87,8 +87,8 @@ drush updatedb --no-cache-clear
 drush cache:rebuild
 drush config:import || true
 drush config:import
-drush cache:rebuild
 drush deploy:hook
+drush cache:rebuild
 ```
 
 ## .env support
