@@ -70,3 +70,4 @@ jobs:
           site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
           lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+          clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
