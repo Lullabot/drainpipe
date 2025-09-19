@@ -78,7 +78,7 @@ jobs:
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@v2.4
+        uses: GuillaumeFalourd/assert-command-line-output@63ad23408d758ee7f09b4557cc0901d6ae4f3f76 # v2.4
         with:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
           contains: 6
@@ -151,7 +151,7 @@ jobs:
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@v2
+        uses: GuillaumeFalourd/assert-command-line-output@63ad23408d758ee7f09b4557cc0901d6ae4f3f76 # v2.4
         with:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
           contains: 9
@@ -219,7 +219,7 @@ jobs:
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@v2
+        uses: GuillaumeFalourd/assert-command-line-output@63ad23408d758ee7f09b4557cc0901d6ae4f3f76 # v2.4
         with:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
           contains: 12

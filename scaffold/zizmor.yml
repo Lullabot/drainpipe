@@ -1,0 +1,8 @@
+rules:
+#   # Rule name
+#   excessive-permissions:
+#     ignore:
+#       # ignore line 100 in ci.yml, any column
+#       - ci.yml:100
+#       # ignore all lines and columns in tests.yml
+#       - tests.yml
