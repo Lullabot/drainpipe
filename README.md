@@ -40,7 +40,7 @@ curl -O https://taskfile.dev/schema.json
 npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
 ```
 
-See [`.github/workflows/validate-taskfile.yml`](.github/workflows/ValidateTaskfile.yml)
+See [`.github/workflows/ValidateTaskfile.yml`](.github/workflows/ValidateTaskfile.yml)
 for an example of this in use.
 
 ```
