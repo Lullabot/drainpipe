@@ -560,7 +560,7 @@ const RAW_RUNTIME_STATE =
           ["gulp-sourcemaps", "npm:3.0.0"],\
           ["modern-normalize", "npm:3.0.1"],\
           ["postcss", "npm:8.5.6"],\
-          ["sass", "npm:1.92.1"],\
+          ["sass", "npm:1.93.0"],\
           ["yargs", "npm:18.0.0"]\
         ],\
         "linkType": "SOFT"\
@@ -8357,13 +8357,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sass", [\
-      ["npm:1.92.1", {\
-        "packageLocation": "../../../../../../runner/cache/others/berry/cache/sass-npm-1.92.1-a62a885e34-10c0.zip/node_modules/sass/",\
+      ["npm:1.93.0", {\
+        "packageLocation": "../../../../../../runner/cache/others/berry/cache/sass-npm-1.93.0-6b8878c54b-10c0.zip/node_modules/sass/",\
         "packageDependencies": [\
           ["@parcel/watcher", "npm:2.4.1"],\
           ["chokidar", "npm:4.0.0"],\
           ["immutable", "npm:5.0.3"],\
-          ["sass", "npm:1.92.1"],\
+          ["sass", "npm:1.93.0"],\
           ["source-map-js", "npm:1.0.2"]\
         ],\
         "linkType": "HARD"\
@@ -15155,7 +15155,8 @@ class ZipFS extends BasePortableFakeFS {
         const entries = Array.from(directoryListing, (name) => {
           return Object.assign(this.statImpl(`lstat`, ppath.join(p, name)), {
             name,
-            path: PortablePath.dot
+            path: PortablePath.dot,
+            parentPath: PortablePath.dot
           });
         });
         for (const entry of entries) {
@@ -15166,7 +15167,8 @@ class ZipFS extends BasePortableFakeFS {
           for (const child of subListing) {
             entries.push(Object.assign(this.statImpl(`lstat`, ppath.join(p, subPath, child)), {
               name: child,
-              path: subPath
+              path: subPath,
+              parentPath: subPath
             }));
           }
         }
@@ -15187,7 +15189,8 @@ class ZipFS extends BasePortableFakeFS {
       return Array.from(directoryListing, (name) => {
         return Object.assign(this.statImpl(`lstat`, ppath.join(p, name)), {
           name,
-          path: void 0
+          path: void 0,
+          parentPath: void 0
         });
       });
     } else {
