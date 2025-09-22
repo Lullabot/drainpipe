@@ -215,13 +215,15 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     {
         if (file_exists('./.ddev/config.yaml')) {
             $vendor = $this->config->get('vendor-dir');
-            $ddevCommandPath = $vendor . '/lullabot/drainpipe/scaffold/ddev/task-command.sh';
+            $ddevScaffoldDir = $vendor . '/lullabot/drainpipe/scaffold/ddev/';
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
-            $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
+            $fs->copy($ddevScaffoldDir . 'task-command.sh', './.ddev/commands/web/task');
+            $fs->ensureDirectoryExists('./.ddev/web-build');
+            $fs->copy($ddevScaffoldDir . 'drainpipe.Dockerfile', './.ddev/web-build/Dockerfile.drainpipe');
             if (file_exists('./web/sites/default/settings.ddev.php')) {
                 $settings = file_get_contents('./web/sites/default/settings.ddev.php');
-                if (strpos($settings, 'environment-indicator') === false) {
+                if (str_contains($settings, 'environment_indicator.indicator')) {
                     $include = <<<'EOT'
 // See https://architecture.lullabot.com/adr/20210609-environment-indicator/
 $config['environment_indicator.indicator']['name'] = 'Local';
@@ -478,7 +480,6 @@ EOT;
                 $fs->remove($file);
             }
         }
-        $binaryInstallerPlugin = new BinaryInstallerPlugin();
         $tugboatConfig = [
             'nodejs_version' => '18',
             'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm-bookworm',
@@ -489,7 +490,6 @@ EOT;
             'build_command' => 'build',
             'update_command' => 'drupal:update',
             'init' => [],
-            'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
             'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
             'overrides' => ['php' => '', 'solr' => ''],
         ];
