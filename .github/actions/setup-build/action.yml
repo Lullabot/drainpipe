@@ -48,7 +48,6 @@ runs:
 
     - name: Configure DDEV
       run: |
-        ddev config --auto
         ddev config --php-version ${{ inputs.php-version || '8.3' }}
       shell: bash
 
@@ -61,21 +60,22 @@ runs:
 
     - name: Configure Composer
       run: |
-        composer config extra.drupal-scaffold.gitignore true
-        composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
-        composer config --no-plugins allow-plugins.lullabot/drainpipe true
-        composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
-        composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": true}}'
-        composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe/drainpipe-dev", "options": {"symlink": true}}'
-        composer config minimum-stability dev
-        composer config platform.php ${{ inputs.php-version || '8.3' }}
+        ddev composer config extra.drupal-scaffold.gitignore true
+        ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
+        ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
+        ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+        ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": true}}'
+        ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe/drainpipe-dev", "options": {"symlink": true}}'
+        ddev composer config minimum-stability dev
+        ddev composer config platform.php ${{ inputs.php-version || '8.3' }}
         php -r '$json = json_decode(file_get_contents ("composer.json"), true);$json["autoload-dev"]["files"][] = "vendor/lullabot/drainpipe/scaffold/env/dotenv.php";file_put_contents("composer.json", json_encode($json, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));'
-        composer update --lock
-        composer validate
-        composer require "lullabot/drainpipe @dev" --with-all-dependencies
-        composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
-      shell: bash
 
     - name: Restart DDEV
       run: ddev restart
+        ddev composer update --lock
+        ddev composer validate
+        ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
+        ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
+        # Restart required for new container
+        ddev restart
       shell: bash
