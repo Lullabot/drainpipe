@@ -42,7 +42,7 @@ curl -O https://taskfile.dev/schema.json
 npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
 ```
 
-See [.github/workflows/validate-taskfile.yml](`.github/workflows/validate-taskfile.yml`)
+See [`.github/workflows/ValidateTaskfile.yml`](.github/workflows/ValidateTaskfile.yml)
 for an example of this in use.
 
 ```
@@ -184,6 +184,21 @@ and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
 upstream dependencies e.g. https://github.com/go-task/task/releases
 
 
+## Renovate Presets
+
+If you are using [Renovate](https://docs.renovatebot.com/) (for automated dependency updates) you can use/extend our Drupal presets by doing the following:
+
+```
+{
+  "extends": [
+    "group:drupal-core"
+ ]
+}
+```
+
+This preset provides safe automation with flexibility and control for teams maintaining Drupal applications, minimizing risk by requiring approval for major changes while accelerating security patches through the automerging of minor updates.
+---
+
 ## Database Updates
 
 The `drupal:update` command follows the same procedure as the
@@ -196,8 +211,8 @@ drush updatedb --no-cache-clear
 drush cache:rebuild
 drush config:import || true
 drush config:import
-drush cache:rebuild
 drush deploy:hook
+drush cache:rebuild
 ```
 
 ## .env support
@@ -554,7 +569,20 @@ They are composite actions which can be used in any of your workflows e.g.
 ```
 
 Tests can be run locally with [act](https://github.com/nektos/act):
-`act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
+```
+# Windows
+act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests
+
+# Mac
+act --container-options "--group-add $(stat -f %g /var/run/docker.sock)" \
+  -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+
+# Linux
+act --container-options "--group-add $(stat -c %g /var/run/docker.sock)" \
+  -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+```
 
 ### Tests
 Workflows for running static and functional tests can be added with the following
@@ -868,13 +896,21 @@ and re-running `composer install`.
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
 it. The following keys can be added to your `config.yml` via a
-`.tugboat/config.drainppipe-override.yml` file:
+`.tugboat/config.drainpipe-override.yml` file:
 ```
 php:
   aliases:
   urls:
   screenshot:
   visualdiff:
+solr:
+  commands:
+  checkout:
+  depends:
+  aliases:
+  urls:
+  volumes:
+  environment:
 ```
 
 ## Contributor Docs
