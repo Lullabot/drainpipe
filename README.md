@@ -23,6 +23,8 @@ and if using DDEV, restart to enable the added features:
 ddev restart
 ```
 
+The Tugboat configuration file is not a static file; it is dynamically generated based on your `.ddev/config` file. See [/src/ScaffoldInstallerPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/ScaffoldInstallerPlugin.php#L451) for the implementation details.
+
 This will scaffold out various files, most importantly a `Taskfile.yml` in the
 root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool that aims to be
 simpler and easier to use than, for example, GNU Make. Since it's written in Go,
@@ -48,7 +50,38 @@ for an example of this in use.
 ln -s web/ docroot
 ```
 
+### Overriding files provided by drainpipe
+
+Drupal scaffolds are core files automatically placed and updated in the project
+root by `drupal/core-composer-scaffold` ([documentation](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4)).
+
+Scaffold files provided by Drainpipe are located in the main `scaffold` directory,
+while Nightwatch specific scaffold files can be found in `drainpipe-dev/scaffold`.
+
+To determine where a file is placed, edit the `extra.drupal-scaffold` section in
+`composer.json`. Check how each scaffolded file defined in `/src/ScaffoldInstallerPlugin.php`
+for Drainpipe provided files, and `drainpipe-dev/src/NightwatchScaffoldPlugin.php`
+for Nightwatch specific files.
+
+A specific file scaffolding can be disabled by mapping it to false under the
+`extra.drupal-scaffold.file-mapping` in the project `composer.json` file. This
+prevents it from being created or overriden when running `composer install` or
+`composer update`. Note Drainpipe workflows cannot be overridden.
+
+```
+{
+  "extra": {
+    "drupal-scaffold": {
+      "file-mapping": {
+        "[web-root]/robots.txt": false
+      }
+    }
+  }
+}
+```
+
 ### Binaries
+
 If you receive an error such as `exec format error: ./vendor/bin/task`, then
 you may have the wrong binary for your architecture. If your architecture
 wasn't detected correctly, please open an issue with the output of `php -r "echo php_uname('m');"`,
@@ -58,7 +91,6 @@ You can override the platform and processor with environment variables `DRAINPIP
 and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `windows`,
 and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
 upstream dependencies e.g. https://github.com/go-task/task/releases
-
 
 ## Renovate Presets
 
@@ -73,7 +105,7 @@ If you are using [Renovate](https://docs.renovatebot.com/) (for automated depend
 ```
 
 This preset provides safe automation with flexibility and control for teams maintaining Drupal applications, minimizing risk by requiring approval for major changes while accelerating security patches through the automerging of minor updates.
----
+
 
 ## Database Updates
 
@@ -92,6 +124,7 @@ drush cache:rebuild
 ```
 
 ## .env support
+
 Drainpipe will add `.env` file support for managing environment variables.
 
 **This is only used for locals** - other environments such as CI and production
@@ -156,6 +189,7 @@ the following:
 JavaScript bundling support is via [esbuild](https://esbuild.github.io/).
 
 ### Setup
+
 - Add @lullabot/drainpipe-javascript to your project
   `yarn add @lullabot/drainpipe-javascript` or `npm install @lullabot/drainpipe-javascript`
 - Edit `Taskfile.yml` and add `DRAINPIPE_JAVASCRIPT` in the `vars section`
@@ -183,6 +217,7 @@ JavaScript bundling support is via [esbuild](https://esbuild.github.io/).
   ```
 
 ## Testing
+
 This is provided by the separate [drainpipe-dev](https://github.com/Lullabot/drainpipe-dev)
 package (so the development/testing dependencies aren't installed in production
 builds).
@@ -249,6 +284,7 @@ _beware: DTT tests will run against the main working Drupal site rather than
 installing a new instance in isolation_
 
 #### Nightwatch
+
 `task test:nightwatch`
 
 Runs functional browser tests with [Nightwatch](https://nightwatchjs.org/).
@@ -305,6 +341,7 @@ Currently, this is just fixing PHPCS errors with PHPCBF.
 ## Hosting Provider Integration
 
 ### Generic
+
 Generic helpers for deployments can be found in [`tasks/snapshot.yml`,](tasks/snapshot.yml)
 [`tasks/deploy.yml`](tasks/deploy.yml), and [`tasks/drupal.yml`](tasks/drupal.yml)
 
@@ -354,6 +391,7 @@ This folder can then be deployed to a remote service either as an archive, or
 pushed to a git remote with `task deploy:git`.
 
 ### Pantheon
+
 Pantheon specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.yml).
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
 ```yml
@@ -395,6 +433,7 @@ composer require pantheon-systems/drupal-integrations
 ```
 
 ### Acquia
+
 Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
 ```yml
@@ -417,7 +456,6 @@ To enable auto configuration of Acquia Cloud settings:
     }
 }
 ```
-
 
 ## GitHub Actions Integration
 
@@ -461,6 +499,7 @@ act --container-options "--group-add $(stat -c %g /var/run/docker.sock)" \
 ```
 
 ### Tests
+
 Workflows for running static and functional tests can be added with the following
 configuration:
 ```json
@@ -475,11 +514,12 @@ The build process for the functional tests will use `task build:ci:functional`,
 falling back to `task build:dev`, and then `task build`. The static tests
 should not require a build step.
 
-These workflow flies will continue to be managed by Drainpipe and cannot be
+These workflow files will continue to be managed by Drainpipe and cannot be
 overridden. If you wish to do so then it's recommended you maintain your own
 workflows for testing.
 
 ### Security
+
 ```json
 "extra": {
   "drainpipe": {
@@ -530,6 +570,7 @@ To enable deployment of Pantheon Review Apps:
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
 
 ### Acquia
+
 To add Acquia specific GitHub actions, add the following composer.json
   ```json
   "extra": {
@@ -581,7 +622,6 @@ When a deployment is made, you must run your own code _before_ and _after_ the d
         - task: drupal:update
   ```
 
-
 ## GitLab CI Integration
 
 Add the following to `composer.json` for GitLab helpers:
@@ -631,6 +671,7 @@ Available variables are:
 | DRAINPIPE_DDEV_VERSION            | Install a specific version of DDEV instead of the latest                                                                           |
 
 ### Composer Lock Diff
+
 Updates Merge Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
 Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
@@ -645,6 +686,7 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 ```
 
 ### Pantheon
+
 ```json
 "extra": {
     "drainpipe": {
