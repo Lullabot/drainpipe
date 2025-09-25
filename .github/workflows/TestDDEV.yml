@@ -64,3 +64,6 @@ jobs:
 
       - name: Test DDEV Settings Generated
         run: test -f web/sites/default/settings.ddev.php
+
+      - name: Ensure task if available
+        run: ddev task --help

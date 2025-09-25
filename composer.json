@@ -24,8 +24,7 @@
     },
     "extra": {
         "class": [
-            "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin",
-            "\\Lullabot\\Drainpipe\\BinaryInstallerPlugin"
+            "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin"
         ],
         "drupal-scaffold": {
             "gitignore": true,
