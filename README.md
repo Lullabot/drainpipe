@@ -487,15 +487,32 @@ Tests can be run locally with [act](https://github.com/nektos/act):
 # Windows
 act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests
 
-# Mac
+# Mac with Docker Desktop
 act --container-options "--group-add $(stat -f %g /var/run/docker.sock)" \
   -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+
+# Mac with OrbStack
+export DOCKER_HOST=$(docker context inspect --format '{{.Endpoints.docker.Host}}')
+act --container-options "--group-add $(stat -f %g ~/.orbstack/run/docker.sock)" \
+  -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+
+# Mac with Lima
+# Note this symlink will go away after a reboot.
+# https://github.com/nektos/act/issues/2239#issuecomment-2466020469
+sudo ln -s ~/.lima/default/sock/docker.sock /var/run/docker.sock
+act \
+  -P warp-ubuntu-latest-x64-2x-spot=ghcr.io/catthehacker/ubuntu:runner-latest \
   -j Static-Tests
 
 # Linux
 act --container-options "--group-add $(stat -c %g /var/run/docker.sock)" \
   -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
   -j Static-Tests
+
+# Using an alternate image like WarpBuild
+`-P warp-ubuntu-latest-x64-2x-spot=ghcr.io/catthehacker/ubuntu:runner-latest`.
 ```
 
 ### Tests
