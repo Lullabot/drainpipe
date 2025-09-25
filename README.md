@@ -502,7 +502,7 @@ act --container-options "--group-add $(stat -f %g ~/.orbstack/run/docker.sock)" 
 # Note this symlink will go away after a reboot.
 # https://github.com/nektos/act/issues/2239#issuecomment-2466020469
 sudo ln -s ~/.lima/default/sock/docker.sock /var/run/docker.sock
-act \
+act  --container-options "--group-add $(stat -f %g ~/.orbstack/run/docker.sock)" \
   -P warp-ubuntu-latest-x64-2x-spot=ghcr.io/catthehacker/ubuntu:runner-latest \
   -j Static-Tests
 
