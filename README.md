@@ -508,7 +508,7 @@ act --container-options "--group-add $(stat -f %g ~/.orbstack/run/docker.sock)" 
 # Run `lima` to shell into the VM, then install act following the docs or from
 # https://github.com/nektos/act/releases.
 # As well, comment out the chown in `.github/actions/drainpipe/ddev/action.yml`.
-act  \
+act  --container-options "--group-add $(stat -c %g /var/run/docker.sock)" \
   -P ubuntu-latestt=ghcr.io/catthehacker/ubuntu:runner-latest \
   -j Static-Tests
 
