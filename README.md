@@ -562,6 +562,8 @@ To enable deployment of Pantheon Review Apps:
 - Add the following [variables to your GitHub repository](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository):
     - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
     - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
+    - `TERMINUS_TIMEOUT_LIMIT` (optional) Number of seconds that terminus will wait until timeout. Defaults to 600
+    - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
