@@ -484,18 +484,41 @@ They are composite actions which can be used in any of your workflows e.g.
 
 Tests can be run locally with [act](https://github.com/nektos/act):
 ```
+# Turn off ddev so it doesn't get confused between your real host and the
+# "host" inside of act. Do this again and when done and you want to run
+# the app on your host again.
+ddev poweroff
+
 # Windows
 act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests
 
-# Mac
+# Mac with Docker Desktop
 act --container-options "--group-add $(stat -f %g /var/run/docker.sock)" \
   -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+
+# Mac with OrbStack
+export DOCKER_HOST=$(docker context inspect --format '{{.Endpoints.docker.Host}}')
+act --container-options "--group-add $(stat -f %g ~/.orbstack/run/docker.sock)" \
+  -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+
+# Mac with Lima
+# Act gets confused with socket permissions. Run act from inside the lima VM.
+# Run `lima` to shell into the VM, then install act following the docs or from
+# https://github.com/nektos/act/releases.
+# As well, comment out the chown in `.github/actions/drainpipe/ddev/action.yml`.
+act  --container-options "--group-add $(stat -c %g /var/run/docker.sock)" \
+  -P ubuntu-latestt=ghcr.io/catthehacker/ubuntu:runner-latest \
   -j Static-Tests
 
 # Linux
 act --container-options "--group-add $(stat -c %g /var/run/docker.sock)" \
   -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
   -j Static-Tests
+
+# Using an alternate image like WarpBuild
+`-P warp-ubuntu-latest-x64-2x-spot=ghcr.io/catthehacker/ubuntu:runner-latest`.
 ```
 
 ### Tests
