@@ -35,6 +35,16 @@ runs:
   steps:
     - uses: ./.github/actions/drainpipe/set-env
 
+    - name: Validate clone-from parameter
+      run: |
+        CLONE_FROM="${{ inputs.clone-from }}"
+        if ! [[ "$CLONE_FROM" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+          echo "::error::clone-from parameter must contain only alphanumeric characters, periods, underscores, and hyphens. Current value: $CLONE_FROM"
+          exit 1
+        fi
+        echo "Clone-from environment validated: $CLONE_FROM"
+      shell: bash
+
     - name: Trust all drush.in hosts
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
