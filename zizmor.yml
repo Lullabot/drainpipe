@@ -1,0 +1,9 @@
+rules:
+   # Rule name
+   github-env:
+     ignore:
+       - "scaffold/github/actions/common/set-env/action.yml"
+   excessive-permissions:
+     ignore:
+       - "TestFunctional.yml"
+

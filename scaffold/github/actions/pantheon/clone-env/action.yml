@@ -22,20 +22,26 @@ runs:
     - name: Clone Environment
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "terminus auth:login --machine-token=\"${{ inputs.terminus-token }}\""
-        if [ "${{ inputs.source-site-name }}" == "${{ inputs.target-site-name }}" ]; then
-          drainpipe_exec "terminus -y env:clone-content ${{ inputs.source-site-name }}.${{ inputs.source-environment }} ${{ inputs.target-environment }}"
+        drainpipe_exec "terminus auth:login --machine-token=\"${TERMINUS_TOKEN}\""
+        if [ "${SOURCE_SITE_NAME}" == "${TARGET_SITE_NAME}" ]; then
+          drainpipe_exec "terminus -y env:clone-content ${SOURCE_SITE_NAME}.${SOURCE_ENVIRONMENT} ${TARGET_ENVIRONMENT}"
         else
-          drainpipe_exec "terminus backup:create ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=database"
-          drainpipe_exec "terminus backup:create ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=files"
-          TARGET_SITE_ID=$(drainpipe_exec "terminus site:lookup ${{ inputs.target-site-name }}")
-          DATABASE_URL=$(drainpipe_exec "terminus backup:get ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=database")
+          drainpipe_exec "terminus backup:create ${SOURCE_SITE_NAME}.${SOURCE_ENVIRONMENT} --element=database"
+          drainpipe_exec "terminus backup:create ${SOURCE_SITE_NAME}.${SOURCE_ENVIRONMENT} --element=files"
+          TARGET_SITE_ID=$(drainpipe_exec "terminus site:lookup ${TARGET_SITE_NAME}")
+          DATABASE_URL=$(drainpipe_exec "terminus backup:get ${SOURCE_SITE_NAME}.${SOURCE_ENVIRONMENT} --element=database")
           # Cannot pass the URL on the command line directly because it has weird characters.
           echo $DATABASE_URL > db.env
-          drainpipe_exec "terminus -y import:database ${{ inputs.target-site-name }}.${{ inputs.target-environment }} \"\$(cat db.env)\""
+          drainpipe_exec "terminus -y import:database ${TARGET_SITE_NAME}.${TARGET_ENVIRONMENT} \"\$(cat db.env)\""
           rm db.env
-          curl -o files.tar.gz $(drainpipe_exec "terminus backup:get ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=files")
+          curl -o files.tar.gz $(drainpipe_exec "terminus backup:get ${SOURCE_SITE_NAME}.${SOURCE_ENVIRONMENT} --element=files")
           tar -xf files.tar.gz
-          drainpipe_exec "rsync -rLvz --delete --size-only --checksum --ipv4 --progress -e 'ssh -p 2222' ./files_${{ inputs.source-environment }}/. --temp-dir=~/tmp/ ${{ inputs.target-environment }}.$TARGET_SITE_ID@appserver.${{ inputs.target-environment }}.$TARGET_SITE_ID.drush.in:files"
+          drainpipe_exec "rsync -rLvz --delete --size-only --checksum --ipv4 --progress -e 'ssh -p 2222' ./files_${SOURCE_ENVIRONMENT}/. --temp-dir=~/tmp/ ${TARGET_ENVIRONMENT}.$TARGET_SITE_ID@appserver.${TARGET_ENVIRONMENT}.$TARGET_SITE_ID.drush.in:files"
         fi
       shell: bash
+      env:
+        TARGET_ENVIRONMENT: ${{ inputs.target-environment }}
+        SOURCE_ENVIRONMENT: ${{ inputs.source-environment }}
+        SOURCE_SITE_NAME: ${{ inputs.source-site-name }}
+        TARGET_SITE_NAME: ${{ inputs.target-site-name }}
+        TERMINUS_TOKEN: ${{ inputs.terminus-token }}

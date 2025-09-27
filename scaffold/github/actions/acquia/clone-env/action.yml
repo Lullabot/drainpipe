@@ -19,6 +19,11 @@ runs:
     - name: Clone Environment
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
-        drainpipe_exec "acli env:mirror --no-config --no-interaction ${{ inputs.source-environment }} ${{ inputs.target-environment }}"
+        drainpipe_exec "ACQUIA_API_KEY=${ACQUIA_API_KEY} ACQUIA_API_SECRET=${ACQUIA_API_SECRET} ./vendor/bin/task acquia:auth"
+        drainpipe_exec "acli env:mirror --no-config --no-interaction ${SOURCE_ENVIRONMENT} ${TARGET_ENVIRONMENT}"
       shell: bash
+      env:
+        ACQUIA_API_KEY: ${{ inputs.api-key }}
+        ACQUIA_API_SECRET: ${{ inputs.api-secret }}
+        SOURCE_ENVIRONMENT: ${{ inputs.source-environment }}
+        TARGET_ENVIRONMENT: ${{ inputs.target-environment }}

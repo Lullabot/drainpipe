@@ -14,13 +14,16 @@ runs:
         sudo apt-get update
         sudo apt-get install -y openssh-client
         eval $(ssh-agent -s)
-        echo "${{ inputs.ssh-private-key }}" | tr -d '\r' | ssh-add -
+        echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
         touch ~/.ssh/config
         chmod 600 ~/.ssh/config
-        if [ "${{ inputs.ssh-known-hosts}}" != "" ]; then
-          echo "${{ inputs.ssh-known-hosts }}" >> ~/.ssh/known_hosts
+        if [ "${SSH_KNOWN_HOSTS}" != "" ]; then
+          echo "${SSH_KNOWN_HOSTS}" >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
         fi
       shell: bash
+      env:
+        SSH_PRIVATE_KEY: ${{ inputs.ssh-private-key }}
+        SSH_KNOWN_HOSTS: ${{ inputs.ssh-known-hosts }}
