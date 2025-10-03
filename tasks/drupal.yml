@@ -45,7 +45,7 @@ tasks:
       - ./vendor/bin/drush {{ .site }} sql:drop --yes
       - echo "📰 Importing database"
       - gunzip --keep --force $DB_DIR/db.sql.gz
-      - ./vendor/bin/drush {{ .site }} sql:query --file=$DB_DIR/db.sql
+      - ./vendor/bin/drush {{ .site }} sql:query --extra=--ssl-mode=DISABLED --file=$DB_DIR/db.sql
       - defer: rm -f $DB_DIR/db.sql
   export-db:
     desc: "Exports a database fetched with a *:fetch-db command"
@@ -69,7 +69,7 @@ tasks:
       - ./vendor/bin/drush {{.site}} --yes deploy:hook
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - |
-       # drush config:status --format=json is outputting notices in Pantheon even with the json format, 
+       # drush config:status --format=json is outputting notices in Pantheon even with the json format,
        # so we need to tail the last line.
         config_status_output=$(./vendor/bin/drush {{.site}} config:status --format=json --state=Different | tail -n1)
         if [[ $config_status_output != '[]' ]]; then
