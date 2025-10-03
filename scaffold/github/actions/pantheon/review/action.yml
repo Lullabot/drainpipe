@@ -129,12 +129,6 @@ runs:
         echo "::notice::Waiting ${{ inputs.terminus-timeout-limit }} seconds for Pantheon to sync..."
         drainpipe_exec "terminus workflow:wait -vv --max ${{ inputs.terminus-timeout-limit }} -- ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
 
-        echo "::notice::Debugging available environments for Pantheon Review Apps"
-        drainpipe_exec "terminus env:list ${{ inputs.site-name }} --field=ID | grep pr-"
-
-        echo "::notice::Setting aliases..."
-        drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes --print"
-
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes site:install --existing-config"
