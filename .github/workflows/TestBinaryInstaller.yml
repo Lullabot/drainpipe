@@ -12,13 +12,21 @@ concurrency:
 
 jobs:
   Test-Binary-Installer:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        php-version: [ 8.1, 8.2, 8.3 ]
+        include:
+          - php-version: 8.1
+            drupal-version: ":^10"
+          - php-version: 8.2
+            drupal-version: ":^10"
     steps:
 
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: drainpipe
 
@@ -37,22 +45,23 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
+          ddev config --php-version ${{ matrix.php-version }}
           ddev start
-          ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
-          ddev composer config --no-plugins allow-plugins.composer/installers true
-          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
-          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
-          ddev composer config minimum-stability dev
+          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
+          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages '["lullabot/drainpipe-dev", "lullabot/drainpipe"]'
+          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
+          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
+          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
+          ddev exec --raw composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
 
       - name: Simulate failure
         run: |
-          ddev exec touch /var/www/html/composer-cache/files/lullabot/drainpipe/bin/task/3.28.0/task_linux_amd64.tar
+          ddev exec touch /var/www/html/composer-cache/files/lullabot/drainpipe/bin/task/3.45.4/task_linux_amd64.tar
           ddev composer install
 
       - name: Test installing without composer cache
@@ -67,3 +76,18 @@ jobs:
           rm -rf vendor
           ddev composer install --no-cache
           test -x vendor/bin/task
+
+      - name: Prove we can upgrade task within task
+        run: |
+          cp -a drainpipe/tests/fixtures/drainpipe-task-upgrade .
+          cp -a drainpipe drainpipe-task-upgrade
+          cd drainpipe-task-upgrade
+          ddev start
+          ddev composer install
+          ddev task drupal:composer:development
+          cp composer-upgraded.json composer.json
+          cp composer-upgraded.lock composer.lock
+          # Composer won't run updated plugin code until after its been
+          # installed. Once we have two new releases after 3.11.0, that upgrade
+          # task, we can remove this double call.
+          ddev task drupal:composer:development || ddev task drupal:composer:development

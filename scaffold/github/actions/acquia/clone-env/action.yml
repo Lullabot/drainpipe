@@ -1,0 +1,24 @@
+name: "Clone Environment"
+description: "Clones an Acquia Environment to another site"
+inputs:
+  source-environment:
+    description: "Source environment i.e. the uuid or environment alias"
+    required: true
+  target-environment:
+    description: "Target environment i.e. the uuid or environment alias"
+    required: true
+  api-key:
+    description: "Acquia API Key"
+    required: true
+  api-secret:
+    description: "Acquia API Secret"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Clone Environment
+      run: |
+        source .github/actions/drainpipe/set-env/bash_aliases
+        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+        drainpipe_exec "acli env:mirror --no-config --no-interaction ${{ inputs.source-environment }} ${{ inputs.target-environment }}"
+      shell: bash

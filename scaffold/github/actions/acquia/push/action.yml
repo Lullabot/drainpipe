@@ -1,0 +1,73 @@
+name: 'Push code to Acquia'
+description: 'Pushes code to an Acquia environment'
+inputs:
+  environment:
+    description: "The environment to push to, either uuid or alias"
+    required: true
+  commit-message:
+    description: "The commit message to use when pushing to Acquia"
+    required: true
+  api-key:
+    description: "Acquia API Key"
+    required: true
+  api-secret:
+    description: "Acquia API Secret"
+    required: true
+  acquia-ssh-private-key:
+    description: "Acquia SSH Private Key"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Push to Acquia
+      run: |
+
+        source .github/actions/drainpipe/set-env/bash_aliases
+
+        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+
+        ENV_INFO=$(drainpipe_exec "acli --no-interaction api:environments:find ${{ inputs.environment }}")
+
+        VCS_TYPE=$(echo $ENV_INFO | jq -r ".vcs.type")
+        if [ "$VCS_TYPE" != "git" ]; then
+          echo "Unrecognised VCS type"
+          exit 1
+        fi
+
+        BRANCH=$(echo $ENV_INFO | jq -r ".vcs.path")
+        REMOTE_VCS=$(echo $ENV_INFO | jq -r ".vcs.url")
+        REMOTE_HOST=$(echo "$REMOTE_VCS" | awk -F'[@:]' '{print $2}')
+        REMOTE_SSH_URL=$(echo $ENV_INFO | jq -r ".ssh_url" | awk -F'[@:]' '{print $2}')
+
+        # Add Remote Host from VCS to known_hosts.
+        echo "Keyscanning $REMOTE_HOST"
+        drainpipe_exec "ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts" || true
+        echo "Keyscanning $REMOTE_SSH_URL"
+        drainpipe_exec "ssh-keyscan -H $REMOTE_SSH_URL >> ~/.ssh/known_hosts" || true
+
+        RELEASE_DIR="/tmp/release-$(date +%s)"
+
+        # Create a snapshot of the site.
+        drainpipe_exec "./vendor/bin/task snapshot:directory directory=\"$RELEASE_DIR\""
+
+        # Run the deploy task.
+        drainpipe_exec "./vendor/bin/task deploy:git directory=\"$RELEASE_DIR\" branch=\"$BRANCH\" remote=\"$REMOTE_VCS\" message=\"${{ inputs.commit-message }}\""
+
+        echo "We are about to code-switch to $BRANCH on ${{ inputs.environment }}."
+        echo "This may take a while... 🕒"
+
+        # Run code-switch to the same branch so we wait for everything to sync.
+        # Running in background avoids ACLI verbosity filling up the logs.
+        drainpipe_exec "acli api:environments:code-switch --task-wait --quiet ${{ inputs.environment }} \"$BRANCH\"" &
+        TASK_ID=$!
+        SECONDS_TO_WAIT=30
+
+        while kill -0 $TASK_ID 2>/dev/null; do
+          echo "🏃🏽 Code Switch running... Waiting $SECONDS_TO_WAIT seconds."
+          sleep $SECONDS_TO_WAIT
+        done
+
+        echo "✅ Acquia Code-switch complete."
+
+      shell: bash
+

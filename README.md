@@ -23,6 +23,8 @@ and if using DDEV, restart to enable the added features:
 ddev restart
 ```
 
+The Tugboat configuration file is not a static file; it is dynamically generated based on your `.ddev/config` file. See [/src/ScaffoldInstallerPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/ScaffoldInstallerPlugin.php#L451) for the implementation details.
+
 This will scaffold out various files, most importantly a `Taskfile.yml` in the
 root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool that aims to be
 simpler and easier to use than, for example, GNU Make. Since it's written in Go,
@@ -40,7 +42,7 @@ curl -O https://taskfile.dev/schema.json
 npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
 ```
 
-See [.github/workflows/validate-taskfile.yml](`.github/workflows/validate-taskfile.yml`)
+See [`.github/workflows/ValidateTaskfile.yml`](.github/workflows/ValidateTaskfile.yml)
 for an example of this in use.
 
 ```
@@ -48,7 +50,38 @@ for an example of this in use.
 ln -s web/ docroot
 ```
 
+### Overriding files provided by drainpipe
+
+Drupal scaffolds are core files automatically placed and updated in the project
+root by `drupal/core-composer-scaffold` ([documentation](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4)).
+
+Scaffold files provided by Drainpipe are located in the main `scaffold` directory,
+while Nightwatch specific scaffold files can be found in `drainpipe-dev/scaffold`.
+
+To determine where a file is placed, edit the `extra.drupal-scaffold` section in
+`composer.json`. Check how each scaffolded file defined in `/src/ScaffoldInstallerPlugin.php`
+for Drainpipe provided files, and `drainpipe-dev/src/NightwatchScaffoldPlugin.php`
+for Nightwatch specific files.
+
+A specific file scaffolding can be disabled by mapping it to false under the
+`extra.drupal-scaffold.file-mapping` in the project `composer.json` file. This
+prevents it from being created or overriden when running `composer install` or
+`composer update`. Note Drainpipe workflows cannot be overridden.
+
+```
+{
+  "extra": {
+    "drupal-scaffold": {
+      "file-mapping": {
+        "[web-root]/robots.txt": false
+      }
+    }
+  }
+}
+```
+
 ### Binaries
+
 If you receive an error such as `exec format error: ./vendor/bin/task`, then
 you may have the wrong binary for your architecture. If your architecture
 wasn't detected correctly, please open an issue with the output of `php -r "echo php_uname('m');"`,
@@ -59,7 +92,20 @@ and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `wind
 and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
 upstream dependencies e.g. https://github.com/go-task/task/releases
 
----
+## Renovate Presets
+
+If you are using [Renovate](https://docs.renovatebot.com/) (for automated dependency updates) you can use/extend our Drupal presets by doing the following:
+
+```
+{
+  "extends": [
+    "group:drupal-core"
+ ]
+}
+```
+
+This preset provides safe automation with flexibility and control for teams maintaining Drupal applications, minimizing risk by requiring approval for major changes while accelerating security patches through the automerging of minor updates.
+
 
 ## Database Updates
 
@@ -73,11 +119,12 @@ drush updatedb --no-cache-clear
 drush cache:rebuild
 drush config:import || true
 drush config:import
-drush cache:rebuild
 drush deploy:hook
+drush cache:rebuild
 ```
 
 ## .env support
+
 Drainpipe will add `.env` file support for managing environment variables.
 
 **This is only used for locals** - other environments such as CI and production
@@ -142,6 +189,7 @@ the following:
 JavaScript bundling support is via [esbuild](https://esbuild.github.io/).
 
 ### Setup
+
 - Add @lullabot/drainpipe-javascript to your project
   `yarn add @lullabot/drainpipe-javascript` or `npm install @lullabot/drainpipe-javascript`
 - Edit `Taskfile.yml` and add `DRAINPIPE_JAVASCRIPT` in the `vars section`
@@ -169,6 +217,7 @@ JavaScript bundling support is via [esbuild](https://esbuild.github.io/).
   ```
 
 ## Testing
+
 This is provided by the separate [drainpipe-dev](https://github.com/Lullabot/drainpipe-dev)
 package (so the development/testing dependencies aren't installed in production
 builds).
@@ -235,9 +284,20 @@ _beware: DTT tests will run against the main working Drupal site rather than
 installing a new instance in isolation_
 
 #### Nightwatch
+
 `task test:nightwatch`
 
 Runs functional browser tests with [Nightwatch](https://nightwatchjs.org/).
+
+To enable Nightwatch support, add the following to your `composer.json`, then
+run `composer install` to ensure required files are scaffolded:
+```
+"extra": {
+    "drainpipe": {
+        "testing": ["Nightwatch"]
+    },
+},
+```
 
 Run `test:nightwatch:setup` to help you setup your project to run Nightwatch
 tests by installing the necessary node packages and DDEV configurations.
@@ -281,6 +341,7 @@ Currently, this is just fixing PHPCS errors with PHPCBF.
 ## Hosting Provider Integration
 
 ### Generic
+
 Generic helpers for deployments can be found in [`tasks/snapshot.yml`,](tasks/snapshot.yml)
 [`tasks/deploy.yml`](tasks/deploy.yml), and [`tasks/drupal.yml`](tasks/drupal.yml)
 
@@ -330,6 +391,7 @@ This folder can then be deployed to a remote service either as an archive, or
 pushed to a git remote with `task deploy:git`.
 
 ### Pantheon
+
 Pantheon specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.yml).
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
 ```yml
@@ -362,6 +424,38 @@ ddev ssh
 terminus site:upstream:set [site_name] empty
 ```
 
+#### Pantheon Systems: Drupal Integrations
+
+`pantheon-systems/drupal-integrations` is a package that provides essential Pantheon functionality. It is strongly recommended to install it.
+
+```
+composer require pantheon-systems/drupal-integrations
+```
+
+### Acquia
+
+Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
+Add the following to your `Taskfile.yml`'s `includes` section to use them:
+```yml
+includes:
+  acquia: ./vendor/lullabot/drainpipe/tasks/acquia.yml
+```
+|                        |                                                                                                                                                                |
+|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `task acquia:fetch-db` | Fetches a database from Acquia. Set `ACQUIA_ENVIRONMENT_ID` in Taskfile `vars`, along with `ACQUIA_API_KEY` and `ACQUIA_API_SECRET` as environment variables |
+
+> ⚠️ **Beta Notice**: The Acquia integration is currently in beta. While we strive to maintain stability, you may encounter unexpected issues. Please report any problems you encounter through our issue tracker.
+
+To enable auto configuration of Acquia Cloud settings:
+```json
+"extra": {
+    "drainpipe": {
+        "acquia": {
+            "settings": true
+        },
+    }
+}
+```
 
 ## GitHub Actions Integration
 
@@ -389,9 +483,81 @@ They are composite actions which can be used in any of your workflows e.g.
 ```
 
 Tests can be run locally with [act](https://github.com/nektos/act):
-`act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests`
+```
+# Turn off ddev so it doesn't get confused between your real host and the
+# "host" inside of act. Do this again and when done and you want to run
+# the app on your host again.
+ddev poweroff
 
-### Composer Lock Diff
+# Windows
+act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest -j Static-Tests
+
+# Mac with Docker Desktop
+act --container-options "--group-add $(stat -f %g /var/run/docker.sock)" \
+  -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+
+# Mac with OrbStack
+export DOCKER_HOST=$(docker context inspect --format '{{.Endpoints.docker.Host}}')
+act --container-options "--group-add $(stat -f %g ~/.orbstack/run/docker.sock)" \
+  -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+
+# Mac with Lima
+# Act gets confused with socket permissions. Run act from inside the lima VM.
+# Run `lima` to shell into the VM, then install act following the docs or from
+# https://github.com/nektos/act/releases.
+# As well, comment out the chown in `.github/actions/drainpipe/ddev/action.yml`.
+act  --container-options "--group-add $(stat -c %g /var/run/docker.sock)" \
+  -P ubuntu-latestt=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+
+# Linux
+act --container-options "--group-add $(stat -c %g /var/run/docker.sock)" \
+  -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner-latest \
+  -j Static-Tests
+
+# Using an alternate image like WarpBuild
+`-P warp-ubuntu-latest-x64-2x-spot=ghcr.io/catthehacker/ubuntu:runner-latest`.
+```
+
+### Tests
+
+Workflows for running static and functional tests can be added with the following
+configuration:
+```json
+"extra": {
+  "drainpipe": {
+    "github": ["TestStatic", "TestFunctional"]
+  }
+}
+```
+
+The build process for the functional tests will use `task build:ci:functional`,
+falling back to `task build:dev`, and then `task build`. The static tests
+should not require a build step.
+
+These workflow files will continue to be managed by Drainpipe and cannot be
+overridden. If you wish to do so then it's recommended you maintain your own
+workflows for testing.
+
+### Security
+
+```json
+"extra": {
+  "drainpipe": {
+    "github": ["Security"]
+  }
+}
+```
+
+Runs security checks for composer packages and Drupal contrib, as well as posting
+a diff of `composer.lock` as a review comment.
+
+### Composer Lock Diff (Deprecated)
+
+**This is now provided as part of the Security workflow**
+
 Update Pull Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
 
@@ -422,9 +588,62 @@ To enable deployment of Pantheon Review Apps:
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
-    - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`
+    - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth local
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
+
+### Acquia
+
+To add Acquia specific GitHub actions, add the following composer.json
+  ```json
+  "extra": {
+      "drainpipe": {
+          "github": ["acquia"]
+      }
+  }
+  ```
+Then run `composer install`. A Deploy to Acquia workflow at `.github/workflows/AcquiaDeploy.yml` will be added (with its dependant actions).
+
+After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
+
+**Github repository settings**
+
+In your Github repository settings you need to create the following:
+- Repository Variables
+  - To identify the project we are deploying (same value of the AH_SITE_GROUP environment value)
+    - ACQUIA_SITE_GROUP
+- Repository Secrets
+  - To use Acquia CLI (acli) to interact with [Acquia's Cloud Platform](https://docs.acquia.com/acquia-cloud-platform/add-ons/acquia-cli/start)
+    - ACQUIA_API_KEY
+    - ACQUIA_API_SECRET
+  - To push code to your Acquia repository
+    - ACQUIA_SSH_PRIVATE_KEY
+
+**Task settings**
+
+When a deployment is made, you must run your own code _before_ and _after_ the deployment. To do so, define your in your `/Taskfile.yml` the following:
+
+- **acquia:deploy:before**
+
+  ```
+    acquia:deploy:before
+      desc: "Before the code is deployed to Acquia, run these commands on the GitHub Actions runner"
+      cmds:
+        # This task is run on the GitHub Actions runner
+        # It is a good moment to run tasks like build
+        # so we can later create the artifact for the Acquia environment.
+        - task: build
+  ```
+- **acquia:deploy:after**
+  ```
+    acquia:deploy:after:
+      desc: "After the code is switched on the Acquia environment, run these commands"
+      cmds:
+        # When using Drainpipe's deployment workflow,
+        # drupal:update runs on the Acquia environment because it sends
+        # a parameter that specifies the environment alias.
+        - task: drupal:update
+  ```
 
 ## GitLab CI Integration
 
@@ -468,13 +687,14 @@ Available variables are:
 | Variable                          |                                                                                                                                    |
 |-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
 | DRAINPIPE_DDEV_SSH_PRIVATE_KEY    | SSH private key used for e.g. committing to git                                                                                    |
-| DRAINPIPE_DDEV_SSH_KNOWN_HOSTS    | The result of running e.g. `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`                                              |
+| DRAINPIPE_DDEV_SSH_KNOWN_HOSTS    | The result of running e.g. `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`                                              |
 | DRAINPIPE_DDEV_GIT_EMAIL          | E-mail address to use for git commits                                                                                              |
 | DRAINPIPE_DDEV_GIT_NAME           | Name to use for git commits                                                                                                        |
 | DRAINPIPE_DDEV_COMPOSER_CACHE_DIR | Set to "false" to disable composer cache dir, or another value to override the default location of .ddev/.drainpipe-composer-cache |
 | DRAINPIPE_DDEV_VERSION            | Install a specific version of DDEV instead of the latest                                                                           |
 
 ### Composer Lock Diff
+
 Updates Merge Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
 Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
@@ -489,6 +709,7 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 ```
 
 ### Pantheon
+
 ```json
 "extra": {
     "drainpipe": {
@@ -511,7 +732,7 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 - Add the following [variables to your GitLab repository](https://docs.gitlab.com/ee/ci/variables/#for-a-project):
   - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
-  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H codeserver.dev.$PANTHEON_SITE_ID.drush.in`  (enable the _Mask variable_ checkbox)
+  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`  (enable the _Mask variable_ checkbox)
   - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
@@ -554,10 +775,24 @@ Additionally, Pantheon Terminus can be added:
 }
 ```
 
+### Tasks
+
+Tugboat specific tasks are contained in [`tasks/tugboat.yml`](tasks/tugboat.yml).
+Add the following to your `Taskfile.yml`'s `includes` section to use them:
+```yml
+includes:
+  tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+```
+| Task | Action | Usage |
+|---|---|---|
+| `task tugboat:drush-uli-ready` | Configures Drush with the Tugboat service URL for the environment. | Run it once as part of your Tugboat _build_ or _online_ commands defined at `.tugboat/config.yml`
+
+
 It is assumed the following tasks exist:
 - `sync`
 - `build`
 - `update`
+- `online`
 
 The `build`, `sync`, and `update` tasks can be overridden with `sync:tugboat`,
 `build:tugboat`, and `update:tugboat` tasks if required (you will need to re-run
@@ -597,18 +832,26 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-You can additionally add an `online` step by adding a task named `online:tugboat`
+You can also add an `online` step by adding a task named `online:tugboat`
 and re-running `composer install`.
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
 it. The following keys can be added to your `config.yml` via a
-`.tugboat/config.drainppipe-override.yml` file:
+`.tugboat/config.drainpipe-override.yml` file:
 ```
 php:
   aliases:
   urls:
   screenshot:
   visualdiff:
+solr:
+  commands:
+  checkout:
+  depends:
+  aliases:
+  urls:
+  volumes:
+  environment:
 ```
 
 ## Contributor Docs
@@ -702,3 +945,5 @@ To generate new NPM package releases:
 
 1. Have the latest main branch checked out locally
 2. Run `yarn install && yarn lerna publish`
+3. Create a pull request with the changes
+4. Once merged, locally switch to the main branch and run `yarn lerna exec -- npm publish`

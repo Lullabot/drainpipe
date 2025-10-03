@@ -13,42 +13,39 @@
         "php": "^8.1",
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
-        "phpunit/phpunit": "^9.6.20",
-        "sserbin/twig-linter": "^3.1.0",
-        "mikey179/vfsstream": "^1.6.11",
-        "mockery/mockery": "^1.6.12",
-        "behat/mink": "^1.11.0",
-        "symfony/phpunit-bridge": "^6|^7",
-        "lullabot/drainpipe": "*",
-        "mglaman/phpstan-drupal": "^1.2.11",
-        "symfony/yaml": "^6|^7",
-        "drupal/coder": "^8.3.24",
+        "behat/mink": "^1.12.0",
         "behat/mink-browserkit-driver": "^2.2.0",
+        "davidrjonas/composer-lock-diff": "^1.7.1",
+        "drupal/coder": "^8.3.30",
+        "lullabot/drainpipe": "*",
+        "mglaman/phpstan-drupal": "^2.0.9",
+        "mikey179/vfsstream": "^1.6.12",
+        "mockery/mockery": "^1.6.12",
+        "phpspec/prophecy-phpunit": "^2",
+        "phpstan/phpstan-deprecation-rules": "^2.0.3",
+        "phpunit/phpunit": "^9|^10|^11",
+        "symfony/phpunit-bridge": "^6|^7",
+        "symfony/yaml": "^6|^7",
         "tijsverkoyen/convert-to-junit-xml": "^1.11.0",
-        "phpstan/phpstan-deprecation-rules": "^1.2.0",
-        "phpspec/prophecy-phpunit": "^2"
+        "vincentlanglet/twig-cs-fixer": "^3.10.0"
     },
     "require-dev": {
-        "composer/composer": "^2.7.7"
+        "composer/composer": "^2.8.12"
     },
     "bin": [
-        "bin/drainpipe-twig-linter",
         "bin/drainpipe-convert-to-junit-xml"
     ],
     "extra": {
         "class": [
-            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin"
+            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin",
+            "\\Lullabot\\DrainpipeDev\\NightwatchScaffoldPlugin"
         ],
         "drupal-scaffold": {
             "gitignore": true,
             "file-mapping": {
-                "[project-root]/nightwatch.conf.js": "scaffold/nightwatch/nightwatch.conf.js",
-                "[web-root]/sites/chrome/settings.php": "scaffold/nightwatch/chrome.settings.php",
-                "[web-root]/sites/firefox/settings.php": "scaffold/nightwatch/firefox.settings.php",
-                "[web-root]/sites/sites.php": "scaffold/nightwatch/sites.php",
-                "[project-root]/.ddev/docker-compose.selenium.yaml": "scaffold/nightwatch/docker-compose.selenium.yaml",
-                "[project-root]/test/nightwatch/example.nightwatch.js": "scaffold/nightwatch/example.nightwatch.js",
-                "[project-root]/phpcs.xml.dist": "scaffold/phpcs.xml.dist"
+                "[project-root]/phpcs.xml.dist": "scaffold/phpcs.xml.dist",
+                "[project-root]/phpstan.neon.dist": "scaffold/phpstan.neon.dist",
+                "[project-root]/.twig-cs-fixer.dist.php": "scaffold/.twig-cs-fixer.dist.php"
             }
         }
     },

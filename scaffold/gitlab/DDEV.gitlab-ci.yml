@@ -1,5 +1,5 @@
 default:
-  image: ghcr.io/catthehacker/ubuntu:runner-22.04
+  image: ghcr.io/catthehacker/ubuntu:runner-24.04
   services:
     - name: docker:dind
       alias: docker
@@ -28,7 +28,10 @@ cache:
     - |
       mkdir -p .ddev/homeadditions/.ssh
       # Copy private key
-      if [ "$DRAINPIPE_DDEV_SSH_PRIVATE_KEY" != "" ]; then
+      if [ "$DRAINPIPE_SSH_PRIVATE_KEY_BASE64" != "" ]; then
+        echo "$DRAINPIPE_SSH_PRIVATE_KEY_BASE64" | base64 -d > .ddev/homeadditions/.ssh/id_rsa
+        chmod 600 .ddev/homeadditions/.ssh/id_rsa
+      elif [ "$DRAINPIPE_DDEV_SSH_PRIVATE_KEY" != "" ]; then
         echo "$DRAINPIPE_DDEV_SSH_PRIVATE_KEY" > .ddev/homeadditions/.ssh/id_rsa
         chmod 600 .ddev/homeadditions/.ssh/id_rsa
       fi

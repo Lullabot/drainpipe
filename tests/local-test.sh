@@ -2,7 +2,7 @@
 set -eux
 # Helper script to setup a local test of Drainpipe
 # Copy this to the same directory level that your drainpipe directory is in
-composer create-project drupal/recommended-project drainpipe-test --ignore-platform-req=ext-gd
+composer create-project drupal/recommended-project drainpipe-test --ignore-platform-reqs
 cd drainpipe-test
 cp -R ../drainpipe .
 
@@ -17,6 +17,7 @@ ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
 ddev composer config --no-plugins allow-plugins.lullabot/drainpipe-dev true
 ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
 ddev composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe/drainpipe-dev", "options": {"symlink": false}}'
+ddev composer config extra.drainpipe.acquia --json '{"settings": true, "github": []}'
 ddev composer config minimum-stability dev
 ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
 ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies

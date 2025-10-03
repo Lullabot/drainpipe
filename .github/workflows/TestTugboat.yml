@@ -10,12 +10,12 @@ concurrency:
 
 jobs:
   Test-Tugboat:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: drainpipe
 
@@ -34,42 +34,42 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --php-version "8.1"
+          ddev config --php-version "8.3"
           ddev config --nodejs-version "18"
           ddev get ddev/ddev-redis --version v1.2.0
           ddev get ddev/ddev-elasticsearch --version v0.3.2
           ddev restart
-          ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
-          ddev composer config --no-plugins allow-plugins.composer/installers true
-          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev composer config minimum-stability dev
-          ddev composer config extra.drainpipe --json '{"tugboat": {}}'
+          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
+          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
+          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev exec --raw composer config minimum-stability dev
+          ddev exec --raw composer config extra.drainpipe --json '{"tugboat": {}}'
           mkdir -p .tugboat
           echo "php:" >  .tugboat/config.drainpipe-override.yml
           echo "  aliases:" >> .tugboat/config.drainpipe-override.yml
           echo "    - foo" >> .tugboat/config.drainpipe-override.yml
           echo "  urls:" >> .tugboat/config.drainpipe-override.yml
           echo "    - /" >> .tugboat/config.drainpipe-override.yml
+          echo "    - /?v=1" >> .tugboat/config.drainpipe-override.yml
           echo "  screenshot:" >> .tugboat/config.drainpipe-override.yml
           echo "    timeout: 45" >> .tugboat/config.drainpipe-override.yml
           echo "  visualdiff:" >> .tugboat/config.drainpipe-override.yml
           echo "    fullPage: false" >> .tugboat/config.drainpipe-override.yml
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
-      - name: Add an online step
+      - name: Install Drainpipe, again, now with Taskfile updated
         run: |
-          echo "  online:tugboat:" >> Taskfile.yml
-          echo "    cmds:" >> Taskfile.yml
-          echo "      - echo \"Tugboat online\"" >> Taskfile.yml
-          ddev composer install
+
+          ddev composer require lullabot/drainpipe --with-all-dependencies
 
       # Compare the generated files to the ones used to build this repository
       # preview - they should be the same.
       - name: Test Generated Files
         run: |
+
           diff -up drainpipe/.tugboat/config.yml .tugboat/config.yml
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/1-init.sh
           sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/steps/2-update.sh
@@ -80,13 +80,12 @@ jobs:
           diff -up drainpipe/.tugboat/steps/3-build.sh .tugboat/steps/3-build.sh
           diff -up drainpipe/.tugboat/steps/4-online.sh .tugboat/steps/4-online.sh
 
-      - name: Add a build:tugboat step
-        run: |
-          echo "  build:tugboat:" >> Taskfile.yml
-          echo "    cmds:" >> Taskfile.yml
-          echo "      - echo \"Tugboat build\"" >> Taskfile.yml
-          ddev composer install
-          if ! grep -q './vendor/bin/task build:tugboat' .tugboat/steps/3-build.sh; then
+          # Run the online task to generate drush/drush.yml.
+          ddev task tugboat:drush-uli-ready
+
+          # Check drush/drush.yml exists.
+          if [ ! -f drush/drush.yml ]; then
+            echo "drush/drush.yml does not exist"
             exit 1
           fi
 
@@ -98,12 +97,12 @@ jobs:
           path: .tugboat
 
   Test-Non-Default-Nodejs:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: drainpipe
 
@@ -119,17 +118,17 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --php-version "8.1"
+          ddev config --php-version "8.3"
           ddev config --nodejs-version "16"
           ddev restart
-          ddev composer config extra.drupal-scaffold.gitignore true
-          ddev composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
-          ddev composer config --no-plugins allow-plugins.composer/installers true
-          ddev composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
-          ddev composer config --no-plugins allow-plugins.lullabot/drainpipe true
-          ddev composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
-          ddev composer config minimum-stability dev
-          ddev composer config extra.drainpipe --json '{"tugboat": {}}'
+          ddev exec --raw composer config extra.drupal-scaffold.gitignore true
+          ddev exec --raw composer config --json extra.drupal-scaffold.allowed-packages \[\"lullabot/drainpipe\"]
+          ddev exec --raw composer config --no-plugins allow-plugins.composer/installers true
+          ddev exec --raw composer config --no-plugins allow-plugins.drupal/core-composer-scaffold true
+          ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
+          ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
+          ddev exec --raw composer config minimum-stability dev
+          ddev exec --raw composer config extra.drainpipe --json '{"tugboat": {}}'
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
       - name: Test NODE_MAJOR is correct

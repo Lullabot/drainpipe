@@ -44,7 +44,8 @@ tasks:
       - echo "🚮 Dropping existing database"
       - ./vendor/bin/drush {{ .site }} sql:drop --yes
       - echo "📰 Importing database"
-      - ./vendor/bin/drush {{ .site }} sql:query --file=$DB_DIR/db.sql.gz
+      - gunzip --keep --force $DB_DIR/db.sql.gz
+      - ./vendor/bin/drush {{ .site }} sql:query --file=$DB_DIR/db.sql
       - defer: rm -f $DB_DIR/db.sql
   export-db:
     desc: "Exports a database fetched with a *:fetch-db command"
@@ -52,22 +53,26 @@ tasks:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
     cmds:
       - echo "➡ Exporting database"
-      - ./vendor/bin/drush {{.site }} sql:dump --result-file=$DB_DIR/db.sql.gz
+      - ./vendor/bin/drush {{.site }} sql:dump --gzip --result-file=$DB_DIR/db.sql
   update:
     desc: Run Drupal update tasks after deploying new code
     cmds:
       # See https://www.drush.org/12.x/deploycommand/
-      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
+      # See https://architecture.lullabot.com/adr/20230929-drupal-build-steps/
       - ./vendor/bin/drush {{.site}} --yes cache:rebuild
+      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
       # Run config:import twice to make sure we catch any config that didn't declare
       # a dependency correctly. This is also useful when importing large config sets
       # as it can sometimes hit an out of memory error.
       - ./vendor/bin/drush {{.site}} --yes config:import || true
       - ./vendor/bin/drush {{.site}} --yes config:import
-      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - ./vendor/bin/drush {{.site}} --yes deploy:hook
+      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
       - |
-        if [[ $(./vendor/bin/drush {{.site}} config:status --format=json --state=Different) != '[]' ]]; then
+       # drush config:status --format=json is outputting notices in Pantheon even with the json format, 
+       # so we need to tail the last line.
+        config_status_output=$(./vendor/bin/drush {{.site}} config:status --format=json --state=Different | tail -n1)
+        if [[ $config_status_output != '[]' ]]; then
           echo "Config export does not match database."
           ./vendor/bin/drush {{.site}} config:status
           exit 1;
@@ -82,3 +87,4 @@ tasks:
     desc: Turn off Maintenance Mode
     cmds:
       - ./vendor/bin/drush {{.site}} --yes state:set system.maintenance_mode 0 --input-format=integer
+      - ./vendor/bin/drush {{.site}} --yes cache:rebuild

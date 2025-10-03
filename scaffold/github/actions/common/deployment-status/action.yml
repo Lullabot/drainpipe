@@ -1,0 +1,38 @@
+name: 'Sets the GitHub Deployment status'
+description: 'Sets a GitHub deployment to success or failure'
+inputs:
+  github-token:
+    description: "GitHub token as generated automatically in secrets.GITHUB_TOKEN"
+    required: true
+  environment-url:
+    description: "The environment URL"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/drainpipe/set-env
+
+    - name: Set deployment to success
+      run: |
+
+        if [ -z "$GITHUB_DEPLOYMENT_ID" ] || [ "$GITHUB_DEPLOYMENT_ID" = "null" ]; then echo $GITHUB_DEPLOYMENT && exit 1; fi
+
+        curl -f -X POST \
+          -H "Authorization: token ${{ inputs.github-token }}"  \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses \
+          -d '{"state":"success"}'
+
+      shell: bash
+
+    - name: Set Deployment Failure Status
+      run: |
+        curl -f -X POST \
+              -H "Authorization: Bearer ${{ inputs.github-token }}" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses \
+              -d "{\"state\":\"failure\"}"
+
+      if: ${{ failure() }}
+      shell: bash

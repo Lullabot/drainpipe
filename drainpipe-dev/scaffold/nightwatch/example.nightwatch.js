@@ -10,6 +10,8 @@ module.exports = {
           .url(url)
           .assert.titleContains('admin');
       })
+      // @see https://nightwatchjs.org/guide/writing-tests/visual-regression-testing.html
+      //.assert.screenshotIdenticalToBaseline('body')
       .end();
   }
 };

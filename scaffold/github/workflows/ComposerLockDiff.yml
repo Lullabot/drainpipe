@@ -3,6 +3,8 @@ name: "Composer Lock Diff"
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - 'composer.lock'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -10,7 +12,7 @@ concurrency:
 
 jobs:
   Composer-Lock-Diff:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: write

@@ -1,12 +1,12 @@
 {
   "name": "@lullabot/drainpipe-javascript",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "bin": "./esbuild.js",
   "dependencies": {
     "@yarnpkg/esbuild-plugin-pnp": "^3.0.0-rc.15",
-    "chokidar": "^3.6.0",
-    "esbuild": "^0.23.0",
-    "yargs": "^17.7.2"
+    "chokidar": "^4.0.3",
+    "esbuild": "^0.25.10",
+    "yargs": "^18.0.0"
   },
   "repository": {
     "type": "git",

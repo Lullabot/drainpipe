@@ -1,0 +1,70 @@
+name: "Pantheon Review Apps"
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+# You will also need to add the secrets used below to Dependabot secrets
+# if you want this to successfully run in auto-created PRs.
+permissions:
+  deployments: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  Drainpipe-Deploy-Pantheon-Multidev:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - uses: ./.github/actions/drainpipe/set-env
+
+      - uses: ./.github/actions/drainpipe/setup-git
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - uses: ./.github/actions/drainpipe/setup-ssh
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
+        with:
+          pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          terminus-plugins: ${{ vars.TERMINUS_PLUGINS || secrets.TERMINUS_PLUGINS }}
+
+      - uses: php-actions/composer@v6
+
+      - name: Build Project
+        env:
+          directory: /tmp/release
+        run: |
+          composer install
+          task build
+          task snapshot:directory directory=/tmp/release
+
+      - name: Deploy Pantheon Review App
+        uses: ./.github/actions/drainpipe/pantheon/review
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          commit-message: ${{ github.sha }}
+          site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
+          lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
+          lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}

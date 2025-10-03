@@ -1,10 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
   "rangeStrategy": "bump",
-  "ignoreDeps": ["drainpipe"],
+  "ignoreDeps": [
+    "drainpipe"
+  ],
   "packageRules": [
     {
       "matchPackageNames": [
@@ -15,7 +17,30 @@
         "twig/twig",
         "vlucas/phpdotenv"
       ],
-      "addLabels": ["test only - do not merge"]
+      "addLabels": [
+        "test only - do not merge"
+      ]
+    },
+    {
+      "matchPackageNames": [
+        "lullabot/drainpipe",
+        "lullabot/drainpipe-dev"
+      ],
+      "enabled": false
+    },
+    {
+      "matchPackageNames": [
+        "drush/drush"
+      ],
+      "allowedVersions": "^11 || ^12 || ^13",
+      "rangeStrategy": "widen"
+    },
+    {
+      "matchPackageNames": [
+        "/^symfony//"
+      ],
+      "allowedVersions": "^6 || ^7",
+      "rangeStrategy": "widen"
     }
   ]
 }
