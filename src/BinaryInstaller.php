@@ -206,7 +206,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         else {
             $cacheFolder = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . $binary . \DIRECTORY_SEPARATOR . $version;
         }
-        $cacheDestination = $cacheFolder. \DIRECTORY_SEPARATOR . bin2hex(random_bytes(5)) . $fileName;
+        $cacheDestination = $cacheFolder. \DIRECTORY_SEPARATOR . $fileName;
         $cacheExtractedBinary = $cacheFolder . \DIRECTORY_SEPARATOR . $binary;
         $binDestination = $bin . \DIRECTORY_SEPARATOR . $binary;
 
@@ -224,21 +224,31 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
             throw new \Exception('SHA does not match for '.$binary);
         }
 
-        if ('.tar.gz' === substr($fileName, -7)) {
-            // Remove .tar
-            $fs->remove(substr($cacheDestination, 0, -3));
-            $archive = new \PharData($cacheDestination);
-            $archive->decompress();
-            $archive = new \PharData(substr($cacheDestination, 0, -3));
-            $archive->extractTo($cacheFolder, $binary, true);
-            // Remove .tar
-            $fs->remove(substr($cacheDestination, 0, -3));
-        } elseif ('.zip' === substr($fileName, -4)) {
-            $archive = new \ZipArchive();
-            $archive->open(substr($cacheDestination, 0, -4));
-            $archive->extractTo($cacheFolder, $binary);
-        } else {
-            $fs->copy($cacheDestination, $cacheExtractedBinary);
+        // Create a temporary copy for extraction to avoid race conditions
+        $tempExtractSource = $cacheFolder . \DIRECTORY_SEPARATOR . bin2hex(random_bytes(5)) . '_' . $fileName;
+        $fs->copy($cacheDestination, $tempExtractSource);
+
+        try {
+            if ('.tar.gz' === substr($fileName, -7)) {
+                // Remove .tar
+                $fs->remove(substr($tempExtractSource, 0, -3));
+                $archive = new \PharData($tempExtractSource);
+                $archive->decompress();
+                $archive = new \PharData(substr($tempExtractSource, 0, -3));
+                $archive->extractTo($cacheFolder, $binary, true);
+                // Remove .tar
+                $fs->remove(substr($tempExtractSource, 0, -3));
+            } elseif ('.zip' === substr($fileName, -4)) {
+                $archive = new \ZipArchive();
+                $archive->open($tempExtractSource);
+                $archive->extractTo($cacheFolder, $binary);
+                $archive->close();
+            } else {
+                $fs->copy($tempExtractSource, $cacheExtractedBinary);
+            }
+        } finally {
+            // Clean up temporary extraction file
+            $fs->remove($tempExtractSource);
         }
 
         // Check the vendor/bin directory first, otherwise we could hit a
