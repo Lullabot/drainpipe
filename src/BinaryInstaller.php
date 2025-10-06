@@ -206,7 +206,7 @@ class BinaryInstaller implements PluginInterface, EventSubscriberInterface
         else {
             $cacheFolder = sys_get_temp_dir() . \DIRECTORY_SEPARATOR . $binary . \DIRECTORY_SEPARATOR . $version;
         }
-        $cacheDestination = $cacheFolder. \DIRECTORY_SEPARATOR . $fileName;
+        $cacheDestination = $cacheFolder . \DIRECTORY_SEPARATOR . $fileName;
         $cacheExtractedBinary = $cacheFolder . \DIRECTORY_SEPARATOR . $binary;
         $binDestination = $bin . \DIRECTORY_SEPARATOR . $binary;
 
