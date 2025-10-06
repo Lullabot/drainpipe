@@ -53,7 +53,7 @@ tasks:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
     cmds:
       - echo "➡ Exporting database"
-      - ./vendor/bin/drush {{.site }} sql:dump --gzip --result-file=$DB_DIR/db.sql --extra-dump=--skip-ssl
+      - ./vendor/bin/drush {{.site }} sql:dump --gzip --result-file=$DB_DIR/db.sql
   update:
     desc: Run Drupal update tasks after deploying new code
     cmds:
