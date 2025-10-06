@@ -45,7 +45,7 @@ tasks:
       - ./vendor/bin/drush {{ .site }} sql:drop --yes
       - echo "📰 Importing database"
       - gunzip --keep --force $DB_DIR/db.sql.gz
-      - ./vendor/bin/drush {{ .site }} sql:query --extra=--ssl=0 --file=$DB_DIR/db.sql
+      - ./vendor/bin/drush {{ .site }} sql:query --file=$DB_DIR/db.sql
       - defer: rm -f $DB_DIR/db.sql
   export-db:
     desc: "Exports a database fetched with a *:fetch-db command"
@@ -53,7 +53,7 @@ tasks:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
     cmds:
       - echo "➡ Exporting database"
-      - ./vendor/bin/drush {{.site }} sql:dump --gzip --result-file=$DB_DIR/db.sql
+      - ./vendor/bin/drush {{.site }} sql:dump --gzip --result-file=$DB_DIR/db.sql --extra-dump=--skip-ssl
   update:
     desc: Run Drupal update tasks after deploying new code
     cmds:
