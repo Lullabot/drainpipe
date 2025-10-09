@@ -19,6 +19,12 @@ jobs:
         include:
           - php-version: 8.1
             drupal-version: ":^10"
+          - php-version: 8.2
+            drupal-version: ":^10"
+          - php-version: 8.3
+            drupal-version: ":^10"
+          - php-version: 8.4
+            drupal-version: ":^10"
     steps:
       - uses: actions/checkout@v5
 
