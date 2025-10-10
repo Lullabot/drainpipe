@@ -1,7 +1,7 @@
 version: '3'
 
 includes:
-  test: ./vendor/lullabot/drainpipe/tasks/test.yml
+  test: ./vendor/lullabot/drainpipe-dev/tasks/test.yml
 
 output: prefixed
 silent: true
