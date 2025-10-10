@@ -9,6 +9,7 @@ drainpipe_composer_lock_diff:
       changes:
         - composer.json
         - composer.lock
+        - package-lock.json
   variables:
     GIT_STRATEGY: clone
   interruptible: false
@@ -25,15 +26,30 @@ drainpipe_composer_lock_diff:
     - composer global exec -- "composer-lock-diff --md > composer_lock_diff.md"
     - cat composer_lock_diff.md
     - |
+      # Run package-lock.json diff if file exists
+      if [ -f "package-lock.json" ]; then
+        apk add nodejs npm
+        npm install -g diff-lockfiles
+        npx diff-lockfiles --markdown $CI_MERGE_REQUEST_TARGET_BRANCH_NAME HEAD > package_lock_diff.md || echo "" > package_lock_diff.md
+        cat package_lock_diff.md
+      fi
+    - |
       curl --fail -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID | jq '. | {id, iid, description}' > merge_request.json
     - sed -i 's/<!--Composer Lock Diff-->.*<!--\/Composer Lock Diff-->//g' merge_request.json
+    - sed -i 's/<!--Package Lock Diff-->.*<!--\/Package Lock Diff-->//g' merge_request.json
     - |
-      DIFF_CONTENT=""
+      COMPOSER_DIFF_CONTENT=""
       if [ -s composer_lock_diff.md ]; then
-        DIFF_CONTENT=$(cat composer_lock_diff.md)
+        COMPOSER_DIFF_CONTENT=$(cat composer_lock_diff.md)
+      fi
+      PACKAGE_DIFF_CONTENT=""
+      if [ -f package_lock_diff.md ] && [ -s package_lock_diff.md ]; then
+        PACKAGE_DIFF_CONTENT=$(cat package_lock_diff.md)
       fi
       JSON=$(jq -c \
-        --arg diff "$DIFF_CONTENT" \
-        'if $diff != "" then .description += "\n<!--Composer Lock Diff-->\n## Composer Lock Diff\n" + $diff + "\n<!--/Composer Lock Diff-->" else . end' \
+        --arg composer_diff "$COMPOSER_DIFF_CONTENT" \
+        --arg package_diff "$PACKAGE_DIFF_CONTENT" \
+        'if $composer_diff != "" then .description += "\n<!--Composer Lock Diff-->\n## Composer Lock Diff\n" + $composer_diff + "\n<!--/Composer Lock Diff-->" else . end |
+         if $package_diff != "" then .description += "\n<!--Package Lock Diff-->\n## Package Lock Diff\n" + $package_diff + "\n<!--/Package Lock Diff-->" else . end' \
         merge_request.json)
       curl --fail -X PUT -d "$JSON" -H "Content-Type: application/json" -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID

@@ -44,17 +44,17 @@ jobs:
         run: ddev composer install
 
       - name: Run Security Checks
-        run: ddev task test:security composer_lock_diff_from=${{ github.base_ref }} composer_lock_diff=composer-lock-diff.md
+        run: ddev task test:security composer_lock_diff_from=${{ github.base_ref }} composer_lock_diff=composer-lock-diff.md package_lock_diff=package-lock-diff.md
 
       - name: Publish Results
         run: |
           COMPOSER_LOCK_DIFF="<!-- composer-lock-diff -->
           ## Composer Lock Diff
           $(cat composer-lock-diff.md)"
-          EMPTY=true
+          COMPOSER_EMPTY=true
           if [ "$(cat composer-lock-diff.md)" != "" ]; then
             echo $COMPOSER_LOCK_DIFF >> $GITHUB_STEP_SUMMARY
-            EMPTY=false
+            COMPOSER_EMPTY=false
           fi
           COMPOSER_LOCK_DIFF=$(echo "$COMPOSER_LOCK_DIFF" | jq -Rsa .)
           FIRST=true
@@ -62,7 +62,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER/comments | jq -rc '.[]|select(.body | contains("<!-- composer-lock-diff -->")) | .id'); do
-            if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
+            if [ "$FIRST" == "true" ] && [ "$COMPOSER_EMPTY" == "false" ]; then
               curl -s -L -f -X PATCH \
                 --output /dev/null \
                 -H "Accept: application/vnd.github+json" \
@@ -81,7 +81,7 @@ jobs:
               FIRST=false
             fi
           done
-          if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
+          if [ "$FIRST" == "true" ] && [ "$COMPOSER_EMPTY" == "false" ]; then
             curl -s -L -f -X POST \
               --output /dev/null \
               -H "Accept: application/vnd.github+json" \
@@ -89,4 +89,50 @@ jobs:
               -H "X-GitHub-Api-Version: 2022-11-28" \
               https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER/comments \
               -d "{\"body\":$COMPOSER_LOCK_DIFF,\"commit_id\":\"$DRAINPIPE_SHA\",\"path\":\"composer.lock\",\"subject_type\":\"file\",\"side\":\"RIGHT\"}"
+          fi
+          
+          # Package lock diff
+          if [ -f "package-lock-diff.md" ]; then
+            PACKAGE_LOCK_DIFF="<!-- package-lock-diff -->
+            ## Package Lock Diff
+            $(cat package-lock-diff.md)"
+            PACKAGE_EMPTY=true
+            if [ "$(cat package-lock-diff.md)" != "" ]; then
+              echo "$PACKAGE_LOCK_DIFF" >> $GITHUB_STEP_SUMMARY
+              PACKAGE_EMPTY=false
+            fi
+            PACKAGE_LOCK_DIFF=$(echo "$PACKAGE_LOCK_DIFF" | jq -Rsa .)
+            FIRST=true
+            for i in $(curl -s -L -f -X GET \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER/comments | jq -rc '.[]|select(.body | contains("<!-- package-lock-diff -->")) | .id'); do
+              if [ "$FIRST" == "true" ] && [ "$PACKAGE_EMPTY" == "false" ]; then
+                curl -s -L -f -X PATCH \
+                  --output /dev/null \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  https://api.github.com/repos/${{ github.repository }}/pulls/comments/$i \
+                  -d "{\"body\":$PACKAGE_LOCK_DIFF}"
+              else
+                curl -s -L -f -X DELETE \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  https://api.github.com/repos/${{ github.repository }}/pulls/comments/$i
+              fi
+              if [ "$FIRST" == "true" ]; then
+                FIRST=false
+              fi
+            done
+            if [ "$FIRST" == "true" ] && [ "$PACKAGE_EMPTY" == "false" ]; then
+              curl -s -L -f -X POST \
+                --output /dev/null \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER/comments \
+                -d "{\"body\":$PACKAGE_LOCK_DIFF,\"commit_id\":\"$DRAINPIPE_SHA\",\"path\":\"package-lock.json\",\"subject_type\":\"file\",\"side\":\"RIGHT\"}"
+            fi
           fi

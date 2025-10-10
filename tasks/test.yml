@@ -50,6 +50,22 @@ tasks:
         if [ "" != {{ shellQuote (.composer_lock_diff | default "") }} ]; then
           ./vendor/bin/composer-lock-diff --from {{ shellQuote (.composer_lock_diff_from | default "main") }} --md > {{ shellQuote (.composer_lock_diff | default "") }}
         fi
+      - |
+        if [ -f "package-lock.json" ]; then
+          if ! command -v npx &> /dev/null; then
+            echo "npx not found, skipping package-lock.json diff"
+          else
+            # Install diff-lockfiles if not already installed
+            if ! npx --no-install diff-lockfiles --version &> /dev/null; then
+              npm install -g diff-lockfiles
+            fi
+            # Run the diff
+            npx diff-lockfiles --markdown {{ shellQuote (.composer_lock_diff_from | default "main") }} HEAD || true
+            if [ "" != {{ shellQuote (.package_lock_diff | default "") }} ]; then
+              npx diff-lockfiles --markdown {{ shellQuote (.composer_lock_diff_from | default "main") }} HEAD > {{ shellQuote (.package_lock_diff | default "") }} || echo "" > {{ shellQuote (.package_lock_diff | default "") }}
+            fi
+          fi
+        fi
   lint:
     desc: Runs lint on composer, YAML, and Twig files
     # @todo JUnit output
