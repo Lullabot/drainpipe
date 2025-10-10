@@ -1,16 +1,14 @@
 name: "Pantheon Review Apps"
 
 on:
-  pull_request:
-    types: [ labeled, unlabeled, opened, synchronize, reopened]
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
-    if: contains(github.event.pull_request.labels.*.name, 'pantheon-multidev')
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
