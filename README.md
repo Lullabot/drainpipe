@@ -789,6 +789,32 @@ solr:
   environment:
 ```
 
+### Mail Configuration
+
+By default, Drainpipe configures Tugboat environments to capture email using Tugboat's built-in mail capture service. This automatically configures:
+- The core mail system to use `php_mail`
+- The Mail System module (if installed) to use `php_mail` as the sender
+- Symfony Mailer (if installed) to send mail through Tugboat's SMTP service
+
+If you need to use a different mail configuration (e.g., for testing with a specific mail service or module), you can override these settings in your custom settings file (typically `web/sites/default/settings.tugboat.php` or `web/sites/default/settings.php`).
+
+For example, to use a different mail backend:
+
+```php
+// Override the default Drainpipe mail configuration.
+// This should come after including settings.tugboat.php
+if (getenv('TUGBOAT_REPO')) {
+  // Example: Use a custom mail transport
+  $config['system.mail']['interface']['default'] = 'my_custom_mailer';
+
+  // Example: Configure Symfony Mailer differently
+  $config['symfony_mailer.settings']['default_transport'] = 'custom_transport';
+  $config['symfony_mailer.mailer_transport.custom_transport']['plugin'] = 'smtp';
+  $config['symfony_mailer.mailer_transport.custom_transport']['configuration']['host'] = 'custom.smtp.example.com';
+  $config['symfony_mailer.mailer_transport.custom_transport']['configuration']['port'] = '587';
+}
+```
+
 ## Contributor Docs
 
 This repo is public.
