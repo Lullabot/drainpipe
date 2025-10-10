@@ -15,11 +15,15 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        php-version: [ 8.1, 8.2, 8.3 ]
+        php-version: [ 8.1, 8.2, 8.3, 8.4 ]
         include:
           - php-version: 8.1
             drupal-version: ":^10"
           - php-version: 8.2
+            drupal-version: ":^10"
+          - php-version: 8.3
+            drupal-version: ":^10"
+          - php-version: 8.4
             drupal-version: ":^10"
     steps:
 
@@ -62,7 +66,7 @@ jobs:
 
       - name: Simulate failure
         run: |
-          ddev exec touch /var/www/html/composer-cache/files/lullabot/drainpipe/bin/task/3.38.0/task_linux_amd64.tar
+          ddev exec touch /var/www/html/composer-cache/files/lullabot/drainpipe/bin/task/3.45.4/task_linux_amd64.tar
           ddev composer install
 
       - name: Test installing without composer cache
