@@ -62,6 +62,30 @@ tasks:
             fi
           fi
         fi
+      - |
+        if [ -f "yarn.lock" ]; then
+          # Generate yarn.lock diff using git diff
+          BASE_REF={{ shellQuote (.composer_lock_diff_from | default "main") }}
+          if git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
+            DIFF_OUTPUT=$(git diff "$BASE_REF" HEAD -- yarn.lock | grep -E '^\+[^+]|^-[^-]' | grep -E '^[-+]\s*[a-zA-Z0-9@]|^[-+]\s*version|^[-+]\s*resolved' || true)
+            if [ "" != {{ shellQuote (.yarn_lock_diff | default "") }} ]; then
+              if [ -n "$DIFF_OUTPUT" ]; then
+                echo "## Yarn Lock Changes" > {{ shellQuote (.yarn_lock_diff | default "") }}
+                echo "" >> {{ shellQuote (.yarn_lock_diff | default "") }}
+                echo '```diff' >> {{ shellQuote (.yarn_lock_diff | default "") }}
+                echo "$DIFF_OUTPUT" >> {{ shellQuote (.yarn_lock_diff | default "") }}
+                echo '```' >> {{ shellQuote (.yarn_lock_diff | default "") }}
+              else
+                echo "" > {{ shellQuote (.yarn_lock_diff | default "") }}
+              fi
+            fi
+          else
+            echo "Base ref $BASE_REF not found, skipping yarn.lock diff"
+            if [ "" != {{ shellQuote (.yarn_lock_diff | default "") }} ]; then
+              echo "" > {{ shellQuote (.yarn_lock_diff | default "") }}
+            fi
+          fi
+        fi
   lint:
     desc: Runs lint on composer, YAML, and Twig files
     # @todo JUnit output
