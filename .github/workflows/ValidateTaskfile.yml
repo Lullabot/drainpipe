@@ -20,6 +20,4 @@ jobs:
         # Also update src/BinaryInstallPlugin.php if changing version
         run: |
           curl -O https://raw.githubusercontent.com/go-task/task/v3.45.4/website/src/public/schema.json
-          NODE_NO_WARNINGS=1 npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
-        env:
-          NODE_NO_WARNINGS: 1
+          NODE_OPTIONS="--disable-warning=DEP0040" npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
