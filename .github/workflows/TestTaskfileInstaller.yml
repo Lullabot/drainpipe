@@ -1,4 +1,4 @@
-name: Test Binary Installer
+name: Test Taskfile Installer
 on:
   push:
     branches:
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Test-Binary-Installer:
+  Test-Taskfile-Installer:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
@@ -62,11 +62,6 @@ jobs:
           ddev exec --raw composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
-
-      - name: Simulate failure
-        run: |
-          ddev exec touch /var/www/html/composer-cache/files/lullabot/drainpipe/bin/task/3.45.4/task_linux_amd64.tar
-          ddev composer install
 
       - name: Test installing without composer cache
         run: |
