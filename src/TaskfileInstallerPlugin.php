@@ -50,6 +50,14 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             return;
         }
 
+        // Check if task is already available system-wide
+        $systemTaskPath = $this->findSystemTask($os);
+        if ($systemTaskPath) {
+            $io->write("<info>Found existing Taskfile at: {$systemTaskPath}</info>");
+            $this->createSymlink($systemTaskPath, $taskBin, $io);
+            return;
+        }
+
         $binDir = $vendorDir . DIRECTORY_SEPARATOR . 'bin';
 
         if (!is_dir($binDir)) {
@@ -60,6 +68,43 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $this->installWindows($binDir, $io);
         } else {
             $this->installUnix($binDir, $io);
+        }
+    }
+
+    private function findSystemTask(string $os): ?string
+    {
+        if ($os === 'Windows') {
+            // Use 'where' command on Windows
+            exec('where task.exe 2>NUL', $output, $returnCode);
+        } else {
+            // Use 'which' command on Unix-like systems
+            exec('which task 2>/dev/null', $output, $returnCode);
+        }
+
+        if ($returnCode === 0 && !empty($output[0])) {
+            return trim($output[0]);
+        }
+
+        return null;
+    }
+
+    private function createSymlink(string $target, string $link, IOInterface $io): void
+    {
+        $linkDir = dirname($link);
+
+        if (!is_dir($linkDir)) {
+            mkdir($linkDir, 0755, true);
+        }
+
+        // Remove existing symlink/file if it exists
+        if (file_exists($link) || is_link($link)) {
+            @unlink($link);
+        }
+
+        if (@symlink($target, $link)) {
+            $io->write("<info>✓ Created symlink to system Taskfile in vendor/bin</info>");
+        } else {
+            $io->writeError('<e>Failed to create symlink, will install locally instead</e>');
         }
     }
 
