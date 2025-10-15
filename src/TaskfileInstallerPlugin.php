@@ -53,7 +53,7 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         // Check if task is already available system-wide
         $systemTaskPath = $this->findSystemTask($os);
         if ($systemTaskPath) {
-            $io->write("<info>Found existing Taskfile at: {$systemTaskPath}</info>");
+            $io->write("<info>Found existing Taskfile binary at: {$systemTaskPath}</info>");
             $this->createSymlink($systemTaskPath, $taskBin, $io);
             return;
         }
@@ -102,9 +102,9 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         }
 
         if (@symlink($target, $link)) {
-            $io->write("<info>✓ Created symlink to system Taskfile in vendor/bin</info>");
+            $io->write("<info>Created symlink to system Taskfile in vendor/bin</info>");
         } else {
-            $io->writeError('<e>Failed to create symlink, will install locally instead</e>');
+            $io->writeError('Failed to create symlink, will install locally instead');
         }
     }
 
@@ -126,9 +126,9 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         @unlink($script);
 
         if ($returnCode === 0) {
-            $io->write('<info>✓ Taskfile installed successfully</info>');
+            $io->write('<info>Taskfile installed successfully</info>');
         } else {
-            $io->writeError('<error>Failed to install Taskfile</error>');
+            $io->writeError('Failed to install Taskfile');
         }
     }
 
@@ -145,9 +145,9 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         exec($cmd, $output, $returnCode);
 
         if ($returnCode === 0) {
-            $io->write('<info>✓ Taskfile installed successfully</info>');
+            $io->write('<info>Taskfile installed successfully</info>');
         } else {
-            $io->writeError('<error>Failed to install Taskfile</error>');
+            $io->writeError('Failed to install Taskfile');
         }
     }
 }

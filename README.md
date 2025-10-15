@@ -31,6 +31,9 @@ simpler and easier to use than, for example, GNU Make. Since it's written in Go,
 Task is just a single binary and has no other dependencies. It's also
 cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
 
+If you already have Task installed system-wide and are not using DDEV, your
+installed version will be linked from the `vendor/bin` directory.
+
 You can see what tasks are available after installation by running
 `./vendor/bin/task --list` or `ddev task --list` if you're running DDEV. To get
 more information on a specific task e.g. what parameters it takes, you can run
