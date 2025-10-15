@@ -4,7 +4,7 @@ tasks:
   actions:lint:
     desc: Run lint on Github Actions and Workflows
     preconditions:
-      - sh: '[ ! command -v action-validator ]'
+      - sh: 'command -v action-validator'
         msg: "The action-validator package is not installed. Please run `yarn add @action-validator/cli` or `npm install -g @action-validator/core @action-validator/cli` to install it."
     summary: |
       Runs @action-validator/cli on GitHub Actions and Workflows
