@@ -38,13 +38,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     protected $extra;
 
     /**
-     * Node JS version to install.
-     *
-     * @var string
-     */
-    protected $node;
-
-    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
@@ -52,7 +45,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->io = $io;
         $this->config = $composer->getConfig();
         $this->extra = $composer->getPackage()->getExtra();
-        $this->node = trim(file_get_contents(__DIR__ . '/../.node_version'));
     }
 
     /**
@@ -488,7 +480,7 @@ EOT;
         }
         $binaryInstallerPlugin = new BinaryInstallerPlugin();
         $tugboatConfig = [
-            'nodejs_version' => $this->node,
+            'nodejs_version' => '$(cat ${TUGBOAT_ROOT}/.node_version)',
             'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm-bookworm',
             'database_type' => 'mariadb',
             'database_version' => '10.11',
