@@ -48,8 +48,8 @@ runs:
         GH_TOKEN: ${{ github.token }}
 
     - uses: actions/checkout@v5
-        with:
-          path: /tmp/drainpipe
+      with:
+        path: /tmp/drainpipe
 
     - run: |
         # Configure NodeJS version for Github Actions
