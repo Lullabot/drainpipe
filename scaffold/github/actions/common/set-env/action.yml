@@ -39,6 +39,9 @@ runs:
         fi
         echo "DRAINPIPE_SHA=$DRAINPIPE_SHA" >> $GITHUB_ENV
 
+        # Configure NodeJS version for Github Actions
+        echo "NODE_MAJOR=$(cat .node-version | tr -d '[:space:]')" >> $GITHUB_ENV
+
         echo "The variables have been set:"
         echo "DRAINPIPE_PR_NUMBER: $DRAINPIPE_PR_NUMBER"
         echo "DRAINPIPE_SHA: $DRAINPIPE_SHA"

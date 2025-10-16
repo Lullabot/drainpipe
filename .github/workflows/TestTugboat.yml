@@ -35,7 +35,7 @@ jobs:
         run: |
           ddev config --auto
           ddev config --php-version "8.3"
-          ddev config --nodejs-version "18"
+          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
           ddev get ddev/ddev-redis --version v1.2.0
           ddev get ddev/ddev-elasticsearch --version v0.3.2
           ddev restart

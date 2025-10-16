@@ -35,7 +35,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "22"
+          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
           ddev config --corepack-enable
           ddev start
           ddev exec --raw composer config extra.drupal-scaffold.gitignore true
