@@ -52,7 +52,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->io = $io;
         $this->config = $composer->getConfig();
         $this->extra = $composer->getPackage()->getExtra();
-        $this->node = trim(file_get_contents(__DIR__ . '/../.node-version'));
+        $this->node = trim(file_get_contents(__DIR__ . '/../.node_version'));
     }
 
     /**
