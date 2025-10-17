@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        php-version: [ 8.1, 8.2, 8.3, 8.4 ]
+        php-version: [ 8.1, 8.2, 8.3, 8.4, 8.5 ]
         include:
           - php-version: 8.1
             drupal-version: ":^10"
@@ -24,6 +24,8 @@ jobs:
           - php-version: 8.3
             drupal-version: ":^10"
           - php-version: 8.4
+            drupal-version: ":^10"
+          - php-version: 8.5
             drupal-version: ":^10"
     steps:
 
