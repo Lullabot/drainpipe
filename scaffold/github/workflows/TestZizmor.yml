@@ -1,0 +1,28 @@
+name: Security Analysis with Zizmor
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  zizmor:
+    name: Run Zizmor Security Analysis
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+      - name: Install Zizmor
+        uses: fabasoad/setup-zizmor-action@29d6175083400e068d436300a3560365c94e230b # v0.1.0
+      - name: Run Zizmor
+        run: zizmor --format sarif . > results.sarif
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@6bb031afdd8eb862ea3fc1848194185e076637e5 # v3.28.11
+        with:
+          sarif_file: results.sarif
+          category: zizmor

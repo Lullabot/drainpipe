@@ -27,7 +27,7 @@ jobs:
           git-email: no-reply@example.com
 
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd #v0.9.1
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
           log-public-key: false
@@ -36,9 +36,11 @@ jobs:
         working-directory: drainpipe-dev
         run: |
           git init
-          git branch -m ${{ github.ref_name }}
+          git branch -m ${GH_REF_NAME}
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
+        env:
+          GH_REF_NAME: ${{ github.ref_name }}
 
       - name: Commit and push changes (Tag)
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -46,15 +48,20 @@ jobs:
         run: |
           git reset --mixed origin/main
           git add -A
-          git commit -m "${{ github.ref_name }}" --allow-empty
-          git tag ${{ github.ref_name }}
-          git push origin refs/tags/${{ github.ref_name }}
+          git commit -m "${GH_REF_NAME}" --allow-empty
+          git tag ${GH_REF_NAME}
+          git push origin refs/tags/${GH_REF_NAME}
+        env:
+          GH_REF_NAME: ${{ github.ref_name }}
 
       - name: Commit and push changes (Branch)
         if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         working-directory: drainpipe-dev
         run: |
-          git reset --mixed origin/${{ github.ref_name }} || git reset --mixed origin/main
+          git reset --mixed origin/${GH_REF_NAME} || git reset --mixed origin/main
           git add -A
-          git commit -m "${{ github.event.head_commit.message }}" --allow-empty
-          git push origin refs/heads/${{ github.ref_name }}
+          git commit -m "${GH_MESSAGE}" --allow-empty
+          git push origin refs/heads/${GH_REF_NAME}
+        env:
+          GH_REF_NAME: ${{ github.ref_name }}
+          GH_MESSAGE: ${{ github.event.head_commit.message }}

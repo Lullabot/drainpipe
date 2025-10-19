@@ -55,13 +55,18 @@ runs:
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
 
         # Log in to Acquia Cloud.
-        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+        drainpipe_exec "ACQUIA_API_KEY=${ACQUIA_API_KEY} ACQUIA_API_SECRET=${ACQUIA_API_SECRET} ./vendor/bin/task acquia:auth"
+      env:
+        ACQUIA_API_KEY: ${{ inputs.api-key }}
+        ACQUIA_API_SECRET: ${{ inputs.api-secret }}
 
     - name: Validate environment alias by running `drush status`
       shell: bash
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "vendor/bin/acli remote:drush ${{ inputs.environment }} -- status"
+        drainpipe_exec "vendor/bin/acli remote:drush ${ENVIRONMENT} -- status"
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
 
     - name: Build
       shell: bash
@@ -83,7 +88,6 @@ runs:
 
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        ENVIRONMENT="${{ inputs.environment }}"
         APPLICATION=${ENVIRONMENT%.*}
         ALIAS_DIR_DESTINATION="$(drainpipe_exec \"pwd\")/drush/sites"
         drainpipe_exec "vendor/bin/acli remote:aliases:download --no-interaction $APPLICATION"
@@ -99,6 +103,8 @@ runs:
 
         # Extract the environment.uri value
         echo "acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e '.${ENVIRONMENT}.uri' -)" >> $GITHUB_ENV
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
 
     - name: Push to Acquia
       uses: ./.github/actions/drainpipe/acquia/push
@@ -123,13 +129,15 @@ runs:
 
         source .github/actions/drainpipe/set-env/bash_aliases
         # Get the domains on the environment as a JSON array.
-        DOMAINS_JSON=$(drainpipe_exec "acli api:environments:domain-list --no-interaction \"${{ inputs.environment }}\"")
+        DOMAINS_JSON=$(drainpipe_exec "acli api:environments:domain-list --no-interaction \"${ENVIRONMENT}\"")
 
         # Convert the JSON array into a bash array.
         DOMAINS_HOSTNAMES=$(echo "$DOMAINS_JSON" | jq -r '[.[].hostname] | join(" ")')
 
         # Clear the external caches.
-        drainpipe_exec "acli api:environments:clear-caches --no-interaction ${{ inputs.environment }} $DOMAINS_HOSTNAMES"
+        drainpipe_exec "acli api:environments:clear-caches --no-interaction ${ENVIRONMENT} $DOMAINS_HOSTNAMES"
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
 
     - name: Set Deployment Status
       uses: ./.github/actions/drainpipe/deployment-status
