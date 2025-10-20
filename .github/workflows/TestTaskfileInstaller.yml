@@ -78,7 +78,7 @@ jobs:
 
       - name: Test installing an old version
         run: |
-          echo "v3.44.1" > drainpipe/.taskfile
+          echo "v3.44.1" > vendor/lullabot/drainpipe/.taskfile
           rm vendor/bin/task
           ddev composer install
           [[ "$(ddev task --version)" == "v3.44.1" ]]
