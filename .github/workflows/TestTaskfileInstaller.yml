@@ -76,6 +76,13 @@ jobs:
           ddev composer install --no-cache
           test -x vendor/bin/task
 
+      - name: Test installing an old version
+        run: |
+          echo "v3.44.1" > drainpipe/.taskfile
+          rm vendor/bin/task
+          ddev composer install
+          [[ "$(ddev task --version)" == "v3.44.1" ]]
+
       - name: Prove we can upgrade task within task
         run: |
           cp -a drainpipe/tests/fixtures/drainpipe-task-upgrade .
