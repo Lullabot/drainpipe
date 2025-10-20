@@ -126,22 +126,7 @@ tasks:
           mkdir -p test_result/phpunit
           CONFIG="$CONFIG --log-junit $(pwd)/test_result/phpunit.xml"
         fi
-
-        # Link web to actual web root if not standard
-        WEB_ROOT=$(jq -r '.extra["drupal-scaffold"].locations["web-root"]' composer.json)
-        if [ "$WEB_ROOT" != "null" ] && [ -n "$WEB_ROOT" ] && [ "$WEB_ROOT" != "web/" ]; then
-          ln -s ${WEB_ROOT%/} web
-        else
-          if [ -d "docroot" ] && ! [ -d "web" ]; then
-            ln -s docroot web
-          fi
-        fi
-
-        # Run PHP Unit
         ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
-
-        # Remove symlink, if it was created
-        [ -L "web" ] && rm "web"
   phpunit:functional:
     desc: Runs PHPUnit functional tests
     cmds:
