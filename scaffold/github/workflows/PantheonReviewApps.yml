@@ -35,6 +35,8 @@ jobs:
 
       - uses: ./.github/actions/drainpipe/set-env
 
+      - uses: ./.github/actions/drainpipe/validate-terminus-timeout
+
       - uses: ./.github/actions/drainpipe/setup-git
         with:
           git-name: Drainpipe Bot
@@ -69,3 +71,5 @@ jobs:
           site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
           lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+          clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
+          terminus-timeout-limit: ${{ env.TERMINUS_TIMEOUT_LIMIT }}

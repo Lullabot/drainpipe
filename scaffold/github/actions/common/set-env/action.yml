@@ -52,6 +52,5 @@ runs:
         path: drainpipe
 
     - run: |
-        # Configure NodeJS version for Github Actions
-        echo "NODE_MAJOR=$(cat drainpipe/.node_version | tr -d '[:space:]')" >> $GITHUB_ENV
+        echo "NODE_MAJOR=$(cat drainpipe/.nvmrc | tr -d '[:space:]')" >> $GITHUB_ENV
       shell: bash

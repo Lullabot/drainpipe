@@ -12,11 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: ./scaffold/github/actions/common/set-env
-
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_MAJOR }}
+          node-version-file: '.nvmrc'
 
       - name: Validate Taskfile.yml
         # Also update src/BinaryInstallPlugin.php if changing version

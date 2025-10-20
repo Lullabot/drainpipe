@@ -22,10 +22,28 @@ inputs:
   lock-password:
     description: "The password if locking this environment with Basic Auth"
     required: false
+  clone-from:
+    description: "The environment to clone from. Defaults to live."
+    required: false
+    default: "live"
+  terminus-timeout-limit:
+    description: "The number of seconds that terminus will wait until timeout. Defaults to 600."
+    required: false
+    default: "600"
 runs:
   using: "composite"
   steps:
     - uses: ./.github/actions/drainpipe/set-env
+
+    - name: Validate clone-from parameter
+      run: |
+        CLONE_FROM="${{ inputs.clone-from }}"
+        if ! [[ "$CLONE_FROM" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+          echo "::error::clone-from parameter must contain only alphanumeric characters, periods, underscores, and hyphens. Current value: $CLONE_FROM"
+          exit 1
+        fi
+        echo "Clone-from environment validated: $CLONE_FROM"
+      shell: bash
 
     - name: Trust all drush.in hosts
       run: |
@@ -89,10 +107,10 @@ runs:
         if [ "$ENVIRONMENT_EXISTS" == "pr-$DRAINPIPE_PR_NUMBER" ]; then
           drainpipe_exec "terminus env:wipe ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER --yes"
         else
-          drainpipe_exec "terminus multidev:create ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --no-db --no-files --yes"
+          drainpipe_exec "terminus multidev:create ${{ inputs.site-name }}.${{ inputs.clone-from }} pr-$DRAINPIPE_PR_NUMBER --no-db --no-files --yes"
         fi
         if [ "${{ inputs.run-installer }}" != "true" ]; then
-            drainpipe_exec "terminus env:clone-content ${{ inputs.site-name }}.live pr-$DRAINPIPE_PR_NUMBER --yes"
+            drainpipe_exec "terminus env:clone-content ${{ inputs.site-name }}.${{ inputs.clone-from }} pr-$DRAINPIPE_PR_NUMBER --yes"
         fi
       shell: bash
 
@@ -107,7 +125,9 @@ runs:
     - name: Deploy to Pantheon
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "terminus workflow:wait ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
+
+        echo "::notice::Waiting ${{ inputs.terminus-timeout-limit }} seconds for Pantheon to sync..."
+        drainpipe_exec "terminus workflow:wait -vv --max ${{ inputs.terminus-timeout-limit }} -- ${{ inputs.site-name }}.pr-$DRAINPIPE_PR_NUMBER"
 
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then

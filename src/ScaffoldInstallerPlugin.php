@@ -480,7 +480,7 @@ EOT;
         }
         $binaryInstallerPlugin = new BinaryInstallerPlugin();
         $tugboatConfig = [
-            'nodejs_version' => '$(cat ${TUGBOAT_ROOT}/.node_version)',
+            'nodejs_version' => '$(cat ${TUGBOAT_ROOT}/.nvmrc)',
             'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm-bookworm',
             'database_type' => 'mariadb',
             'database_version' => '10.11',
