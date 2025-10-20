@@ -65,7 +65,7 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         }
 
         $drainpipeDir = $vendorDir . DIRECTORY_SEPARATOR . 'lullabot' . DIRECTORY_SEPARATOR . 'drainpipe';
-        $version = @file_get_contents($drainpipeDir . DIRECTORY_SEPARATOR . '.taskfile') ?: '';
+        $version = trim(@file_get_contents($drainpipeDir . DIRECTORY_SEPARATOR . '.taskfile') ?: '');
 
         if ($os === 'Windows') {
             $this->installWindows($binDir, $io, $version);
