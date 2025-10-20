@@ -18,6 +18,7 @@ jobs:
 
       - name: Validate Taskfile.yml
         run: |
-          curl -sL https://taskfile.dev/install.sh | sh -s -- -d -b /usr/local/bin
-          curl -O https://raw.githubusercontent.com/go-task/task/v$(task --version)/website/src/public/schema.json
+          TASKFILE_VERSION=$(jq -r '.extra.drainpipe.taskfile' composer.json)
+          curl -sL https://taskfile.dev/install.sh | sh -s -- -d $TASKFILE_VERSION -b /usr/local/bin
+          curl -O https://raw.githubusercontent.com/go-task/task/$TASKFILE_VERSION/website/src/public/schema.json
           npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml

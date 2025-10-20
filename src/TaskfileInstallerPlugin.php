@@ -64,10 +64,12 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             mkdir($binDir, 0755, true);
         }
 
+        $version = $this->getTaskfileVersion();
+
         if ($os === 'Windows') {
-            $this->installWindows($binDir, $io);
+            $this->installWindows($binDir, $io, $version);
         } else {
-            $this->installUnix($binDir, $io);
+            $this->installUnix($binDir, $io, $version);
         }
     }
 
@@ -108,7 +110,7 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         }
     }
 
-    private function installWindows(string $binDir, IOInterface $io): void
+    private function installWindows(string $binDir, IOInterface $io, string $version): void
     {
         $url = 'https://taskfile.dev/install.ps1';
         $script = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install-task.ps1';
@@ -121,6 +123,10 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $binDir
         );
 
+        if ($version) {
+            $cmd .= sprintf(' -Version "%s"', $version);
+        }
+
         exec($cmd, $output, $returnCode);
 
         @unlink($script);
@@ -132,13 +138,14 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         }
     }
 
-    private function installUnix(string $binDir, IOInterface $io): void
+    private function installUnix(string $binDir, IOInterface $io, string $version): void
     {
         $url = 'https://taskfile.dev/install.sh';
 
         $cmd = sprintf(
-            'curl -sL %s | sh -s -- -d -b %s',
+            'curl -sL %s | sh -s -- -d %s -b %s',
             escapeshellarg($url),
+            escapeshellarg($version),
             escapeshellarg($binDir)
         );
 
@@ -149,5 +156,18 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         } else {
             $io->writeError('Failed to install Taskfile');
         }
+    }
+
+    private function getTaskfileVersion(): string
+    {
+        $package = $this->composer->getPackage();
+        $extra = $package->getExtra();
+
+        // Navigate to your configuration
+        if (!isset($extra['drainpipe']['taskfile'])) {
+          return '';
+        }
+
+        return $extra['drainpipe']['taskfile'];
     }
 }
