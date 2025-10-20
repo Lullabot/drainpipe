@@ -15,6 +15,7 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 {
     public function activate(Composer $composer, IOInterface $io): void
     {
+        $this->composer = $composer;
     }
 
     public function deactivate(Composer $composer, IOInterface $io): void
