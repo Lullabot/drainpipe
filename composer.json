@@ -27,9 +27,6 @@
             "\\Lullabot\\Drainpipe\\TaskfileInstallerPlugin",
             "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin"
         ],
-        "drainpipe": {
-            "taskfile": "v3.45.4"
-        },
         "drupal-scaffold": {
             "gitignore": true,
             "file-mapping": {

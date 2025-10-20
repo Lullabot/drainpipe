@@ -44,7 +44,7 @@ services:
     checkout: true
     commands:
       init:
-        - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d $(jq -r '.extra.drainpipe.taskfile' composer.json) -b /usr/local/bin
+        - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d $(cat .taskfile) -b /usr/local/bin
         - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
         - yq -i 'del(."includes")' Taskfile.yml
         - task tugboat:mysql:init
@@ -57,7 +57,7 @@ services:
     checkout: true
     commands:
       init:
-        - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d $(jq -r '.extra.drainpipe.taskfile' composer.json) -b /usr/local/bin
+        - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d $(cat .taskfile) -b /usr/local/bin
         - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
         - yq -i 'del(."includes")' Taskfile.yml
         - task tugboat:redis:init
@@ -71,7 +71,7 @@ services:
     checkout: true
     commands:
       init:
-        - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d $(jq -r '.extra.drainpipe.taskfile' composer.json) -b /usr/local/bin
+        - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d $(cat .taskfile) -b /usr/local/bin
         - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
         - yq -i 'del(."includes")' Taskfile.yml
         - task tugboat:solr:init

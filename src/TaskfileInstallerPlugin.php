@@ -15,7 +15,6 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 {
     public function activate(Composer $composer, IOInterface $io): void
     {
-        $this->composer = $composer;
     }
 
     public function deactivate(Composer $composer, IOInterface $io): void
@@ -65,7 +64,8 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             mkdir($binDir, 0755, true);
         }
 
-        $version = $this->getTaskfileVersion();
+        $drainpipeDir = $vendorDir . DIRECTORY_SEPARATOR . 'lullabot' . DIRECTORY_SEPARATOR . 'drainpipe';
+        $version = @file_get_contents($drainpipeDir . DIRECTORY_SEPARATOR . '.taskfile') ?: '';
 
         if ($os === 'Windows') {
             $this->installWindows($binDir, $io, $version);
@@ -157,18 +157,5 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         } else {
             $io->writeError('Failed to install Taskfile');
         }
-    }
-
-    private function getTaskfileVersion(): string
-    {
-        $package = $this->composer->getPackage();
-        $extra = $package->getExtra();
-
-        // Navigate to your configuration
-        if (!isset($extra['drainpipe']['taskfile'])) {
-          return '';
-        }
-
-        return $extra['drainpipe']['taskfile'];
     }
 }
