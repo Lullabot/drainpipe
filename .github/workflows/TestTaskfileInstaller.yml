@@ -81,8 +81,7 @@ jobs:
           echo "v3.44.1" > vendor/lullabot/drainpipe/.taskfile
           rm vendor/bin/task
           ddev composer install
-          echo "Installed version $(ddev task --version)"
-          [[ "$(ddev task --version)" == "v3.44.1" ]]
+          [[ "$(ddev task --version)" == "3.44.1" ]]
 
       - name: Prove we can upgrade task within task
         run: |
