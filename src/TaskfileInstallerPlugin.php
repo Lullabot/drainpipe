@@ -144,10 +144,10 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $url = 'https://taskfile.dev/install.sh';
 
         $cmd = sprintf(
-            'curl -sL %s | sh -s -- -d %s -b %s',
+            'curl -sL %s | sh -s -- -b %s -d %s',
             escapeshellarg($url),
-            escapeshellarg($version),
-            escapeshellarg($binDir)
+            escapeshellarg($binDir),
+            escapeshellarg($version)
         );
 
         exec($cmd, $output, $returnCode);
