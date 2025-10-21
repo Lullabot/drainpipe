@@ -261,7 +261,7 @@ EOT;
             $configYaml = preg_replace('/^\s*nodejs_version\s*:\s*(?:["\']?).*(?:["\']?)\s*$(\r?\n)?/m', '', $configYaml);
             $configYaml = rtrim($configYaml, " \t\n\r") . "\n\n" . 'nodejs_version: "' . $nodejs_version . '"' . "\n";
             file_put_contents('./.ddev/config.yaml', $configYaml);
-            $this->io->write(sprintf("🪠 [Drainpipe] Configured DDEV to use Node JS version %s", $data['nodejs_version']));
+            $this->io->write(sprintf("🪠 [Drainpipe] Configured DDEV to use Node JS version %s", $nodejs_version));
         }
     }
 
