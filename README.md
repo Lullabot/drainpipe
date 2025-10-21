@@ -95,8 +95,9 @@ upstream dependencies e.g. https://github.com/go-task/task/releases
 ### Node JS
 
 All Drainpipe components (DDEV, Github Actions, Tugboat) are configured to use
-the same Node JS major version. This is set in the `.nvmrc` file, in the Drainpipe
-project root.
+the same Node JS major version. This is set in the `.nvmrc` file, which is
+scaffolded from the Drainpipe's root directory, but can be overriden to use a
+different Node version.
 
 ## Renovate Presets
 

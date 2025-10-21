@@ -52,5 +52,5 @@ runs:
         path: drainpipe
 
     - run: |
-        echo "NODE_MAJOR=$(cat drainpipe/.nvmrc | tr -d '[:space:]')" >> $GITHUB_ENV
+        echo "NODE_MAJOR=$([ -f .nvmrc ] && cat .nvmrc || cat drainpipe/.nvmrc | tr -d '[:space:]')" >> $GITHUB_ENV
       shell: bash

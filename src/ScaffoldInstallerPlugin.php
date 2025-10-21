@@ -79,6 +79,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostInstallCmd(Event $event)
     {
+        $this->installNvmRc();
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
@@ -97,6 +98,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostUpdateCmd(Event $event)
     {
+        $this->installNvmRc();
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
@@ -106,6 +108,27 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if ($this->hasPantheonConfigurationFiles()) {
             $this->pantheonSystemDrupalIntegrationsWarning();
         }
+    }
+
+    /**
+     * Copies .nvmrc from Drainpipe root directory if it doesn't yet exist.
+     */
+    private function installNvmRc(): void
+    {
+        $vendor = $this->config->get('vendor-dir');
+        $nvmrcPath = $vendor.'/lullabot/drainpipe/.nvmrc';
+
+        if (!file_exists('./.nvmrc')) {
+            $this->io->write('<info>Creating initial .nvmrc file...</info>');
+            $fs = new Filesystem();
+            $fs->copy(
+                $nvmrcPath,
+                './.nvmrc'
+            );
+        } else {
+            $this->io->write('<info>.nvmrc file already present, skipping...</info>');
+        }
+
     }
 
     /**
@@ -230,6 +253,15 @@ $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
 EOT;
                     file_put_contents('./web/sites/default/settings.ddev.php', $include . PHP_EOL, FILE_APPEND);
                 }
+            }
+
+            // Configure DDEV to use configured NodeJS version
+            $data = Yaml::parseFile('./.ddev/config.yaml');
+            if (is_array($data)) {
+                $data['nodejs_version'] = trim(file_get_contents('./.nvmrc'), ' \t\n\r\0\x0B');
+                $yaml = Yaml::dump($data, /* inline */ 2, /* indent */ 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+                file_put_contents($path, $yaml);
+                $this->io->write(sprintf("🪠 [Drainpipe] Configured DDEV to use Node JS version %s", $data['nodejs_version']));
             }
         }
     }
