@@ -92,6 +92,12 @@ and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `wind
 and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
 upstream dependencies e.g. https://github.com/go-task/task/releases
 
+### Node JS
+
+All Drainpipe components (DDEV, Github Actions, Tugboat) are configured to use
+the same Node JS major version. This is set in the `.nvmrc` file, in the Drainpipe
+project root.
+
 ## Renovate Presets
 
 If you are using [Renovate](https://docs.renovatebot.com/) (for automated dependency updates) you can use/extend our Drupal presets by doing the following:
