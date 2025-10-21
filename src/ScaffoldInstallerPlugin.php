@@ -256,13 +256,12 @@ EOT;
             }
 
             // Configure DDEV to use configured NodeJS version
-            $data = Yaml::parseFile('./.ddev/config.yaml');
-            if (is_array($data)) {
-                $data['nodejs_version'] = trim(file_get_contents('./.nvmrc'), ' \t\n\r\0\x0B');
-                $yaml = Yaml::dump($data, 4, 2, Yaml::DUMP_OBJECT_AS_MAP);
-                file_put_contents('./.ddev/config.yaml', $yaml);
-                $this->io->write(sprintf("🪠 [Drainpipe] Configured DDEV to use Node JS version %s", $data['nodejs_version']));
-            }
+            $nodejs_version = trim(file_get_contents('./.nvmrc'), " \t\n\r\0\x0B");
+            $configYaml = file_get_contents('./.ddev/config.yaml');
+            $configYaml = preg_replace('/^\s*nodejs_version\s*:\s*(?:["\']?).*(?:["\']?)\s*$(\r?\n)?/m', '', $configYaml);
+            $configYaml = rtrim($configYaml, " \t\n\r") . "\n\n" . 'nodejs_version: "' . $nodejs_version . '"' . "\n";
+            file_put_contents('./.ddev/config.yaml', $configYaml);
+            $this->io->write(sprintf("🪠 [Drainpipe] Configured DDEV to use Node JS version %s", $data['nodejs_version']));
         }
     }
 
