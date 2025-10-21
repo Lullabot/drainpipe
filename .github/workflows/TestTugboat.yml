@@ -129,6 +129,7 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
           ddev exec --raw composer config extra.drainpipe --json '{"tugboat": {}}'
+          ddev exec --raw echo "16" > .nvmrc
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
       - name: Test NODE_MAJOR is correct

@@ -532,9 +532,6 @@ EOT;
             $tugboatConfig['database_version'] = $ddevConfig['database']['version'];
             $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm-bookworm';
 
-            if (!empty($ddevConfig['nodejs_version'])) {
-                $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
-            }
             if (!empty($ddevConfig['webserver_type']) && $ddevConfig['webserver_type'] === 'apache-fpm') {
                 $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache-bookworm';
             }
