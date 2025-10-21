@@ -260,7 +260,7 @@ EOT;
             if (is_array($data)) {
                 $data['nodejs_version'] = trim(file_get_contents('./.nvmrc'), ' \t\n\r\0\x0B');
                 $yaml = Yaml::dump($data, /* inline */ 2, /* indent */ 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
-                file_put_contents($path, $yaml);
+                file_put_contents('./.ddev/config.yaml', $yaml);
                 $this->io->write(sprintf("🪠 [Drainpipe] Configured DDEV to use Node JS version %s", $data['nodejs_version']));
             }
         }
