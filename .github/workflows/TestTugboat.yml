@@ -134,6 +134,7 @@ jobs:
 
       - name: Test NODE_MAJOR is correct
         run: |
-          cat .tugboat/steps/1-init.sh
-          grep -q NODE_MAJOR=16 .tugboat/steps/1-init.sh
+          export TUGBOAT_ROOT=. && \
+            eval "$(grep 'NODE_MAJOR=' .tugboat/steps/1-init.sh)" && \
+            echo $NODE_MAJOR | grep -q 16
 
