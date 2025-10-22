@@ -46,3 +46,11 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+
+    - uses: actions/checkout@v5
+      with:
+        path: drainpipe
+
+    - run: |
+        echo "NODE_MAJOR=$([ -f .nvmrc ] && cat .nvmrc || cat drainpipe/.nvmrc | tr -d '[:space:]')" >> $GITHUB_ENV
+      shell: bash
