@@ -38,12 +38,12 @@
     "extra": {
         "class": [
             "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin",
-            "\\Lullabot\\DrainpipeDev\\NightwatchScaffoldPlugin"
+            "\\Lullabot\\DrainpipeDev\\NightwatchScaffoldPlugin",
+            "\\Lullabot\\DrainpipeDev\\ScaffoldInstallerPlugin"
         ],
         "drupal-scaffold": {
             "gitignore": true,
             "file-mapping": {
-                "[project-root]/phpcs.xml.dist": "scaffold/phpcs.xml.dist",
                 "[project-root]/phpstan.neon.dist": "scaffold/phpstan.neon.dist",
                 "[project-root]/.twig-cs-fixer.dist.php": "scaffold/.twig-cs-fixer.dist.php"
             }
