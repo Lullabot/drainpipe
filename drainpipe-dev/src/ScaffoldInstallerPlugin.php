@@ -23,15 +23,9 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      * Composer instance configuration.
      *
      * @var Config
+     * @var \Composer\Config
      */
     protected $config;
-
-    /**
-     * Composer extra field configuration.
-     *
-     * @var array
-     */
-    protected $extra;
 
     /**
      * {@inheritDoc}
@@ -40,7 +34,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     {
         $this->io = $io;
         $this->config = $composer->getConfig();
-        $this->extra = $composer->getPackage()->getExtra();
     }
 
     /**
@@ -81,7 +74,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     /**
      * Handle post update command events.
      *
-     * @param event $event The event to handle
+     * @param Event $event The event to handle
      */
     public function onPostUpdateCmd(Event $event)
     {
@@ -97,13 +90,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     {
         $fs = new Filesystem();
         $vendor = $this->config->get('vendor-dir');
-
-        $web_root = '';
-        foreach (['web', 'docroot'] as $dir) {
-            if ($this->isWebRoot('./' . $dir)) {
-                $web_root = $dir;
-            }
-        }
+        $web_root = $this->isWebRoot('./docroot') ? 'docroot' : 'web';
 
         if (!is_file('./phpcs.xml.dist')) {
             $fs->copy($vendor . '/lullabot/drainpipe-dev/scaffold/phpcs.xml.dist', './phpcs.xml.dist');
@@ -112,6 +99,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (file_put_contents('./phpcs.xml.dist', $newContent) === false) {
                 throw new RuntimeException("Failed to write to file ./phpcs.xml.dist");
             }
+            $this->io->write('<info>Creating initial phpcs.xml.dist file...</info>');
         }
     }
 

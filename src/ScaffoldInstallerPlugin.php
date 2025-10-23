@@ -242,14 +242,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     {
         $fs = new Filesystem();
         $vendor = $this->config->get('vendor-dir');
-
-        // Guess web root directory.
-        $web_root = '';
-        foreach (['web', 'docroot'] as $dir) {
-            if ($this->isWebRoot('./' . $dir)) {
-                $web_root = $dir;
-            }
-        }
+        $web_root = $this->isWebRoot('./docroot') ? 'docroot' : 'web';
 
         if (!is_file('./phpunit.xml')) {
             $fs->copy($vendor . '/lullabot/drainpipe/scaffold/phpunit.xml', './phpunit.xml');
@@ -258,6 +251,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (file_put_contents('./phpunit.xml', $newContent) === false) {
                 throw new RuntimeException("Failed to write to file ./phpunit.xml");
             }
+            $this->io->write('<info>Creating initial phpunit.xml file...</info>');
         }
 
         if (!is_file('./phpunit-testtraits.xml')) {
@@ -267,6 +261,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             if (file_put_contents('./phpunit-testtraits.xml', $newContent) === false) {
                 throw new RuntimeException("Failed to write to file ./phpunit-testtraits.xml");
             }
+            $this->io->write('<info>Creating initial phpunit-testtraits.xml file...</info>');
         }
     }
 
