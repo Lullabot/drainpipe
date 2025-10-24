@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload artifact
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: processed-descriptions-${{ matrix.drupal-version }}
           path: |
