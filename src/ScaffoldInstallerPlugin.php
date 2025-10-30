@@ -86,7 +86,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installHostingProviderSupport();
         $this->installCICommands($event->getComposer());
         $this->installEnvSupport();
-        $this->installPhpUnit();
         if ($this->hasPantheonConfigurationFiles()) {
             $this->checkPantheonSystemDrupalIntegrations($event->getComposer());
         }
@@ -106,7 +105,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installHostingProviderSupport();
         $this->installCICommands($event->getComposer());
         $this->installEnvSupport();
-        $this->installPhpUnit();
         if ($this->hasPantheonConfigurationFiles()) {
             $this->pantheonSystemDrupalIntegrationsWarning();
         }
@@ -231,54 +229,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if (empty($composerFullConfig['autoload-dev']['files']) || !in_array("$vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php", $composerFullConfig['autoload-dev']['files'])) {
             $this->io->warning("🪠 [Drainpipe] $vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php' missing from autoload-dev files");
         }
-    }
-
-    /**
-     * Install PHP Unit files.
-     *
-     * @throws \RuntimeException If the docroot placeholder can not be replaced.
-     */
-    private function installPhpUnit(): void
-    {
-        $fs = new Filesystem();
-        $vendor = $this->config->get('vendor-dir');
-        $web_root = $this->isWebRoot('./docroot') ? 'docroot' : 'web';
-
-        if (!is_file('./phpunit.xml')) {
-            $fs->copy($vendor . '/lullabot/drainpipe/scaffold/phpunit.xml', './phpunit.xml');
-            $content = file_get_contents('./phpunit.xml');
-            $newContent = str_replace('{% DOCROOT %}', $web_root, $content);
-            if (file_put_contents('./phpunit.xml', $newContent) === false) {
-                throw new RuntimeException("Failed to write to file ./phpunit.xml");
-            }
-            $this->io->write('<info>Creating initial phpunit.xml file...</info>');
-        }
-
-        if (!is_file('./phpunit-testtraits.xml')) {
-            $fs->copy($vendor . '/lullabot/drainpipe/scaffold/phpunit-testtraits.xml', './phpunit-testtraits.xml');
-            $content = file_get_contents('./phpunit-testtraits.xml');
-            $newContent = str_replace('{% DOCROOT %}', $web_root, $content);
-            if (file_put_contents('./phpunit-testtraits.xml', $newContent) === false) {
-                throw new RuntimeException("Failed to write to file ./phpunit-testtraits.xml");
-            }
-            $this->io->write('<info>Creating initial phpunit-testtraits.xml file...</info>');
-        }
-    }
-
-    /**
-     * Guess if a given directory is web root.
-     */
-    private function isWebRoot(string $path): bool
-    {
-        return (
-          is_dir($path) &&
-          is_file($path . '/index.php') &&
-          is_dir($path . '/core') &&
-          is_dir($path . '/profiles') &&
-          is_dir($path . '/sites') &&
-          is_dir($path . '/modules') &&
-          is_dir($path . '/themes')
-        );
     }
 
     /**

@@ -28,12 +28,20 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     protected $config;
 
     /**
+     * Web root directory.
+     *
+     * @var string
+     */
+    protected $webRoot;
+
+    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
     {
         $this->io = $io;
         $this->config = $composer->getConfig();
+        $this->webRoot = $this->isWebRoot('./docroot') ? 'docroot' : 'web';
     }
 
     /**
@@ -69,6 +77,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     public function onPostInstallCmd(Event $event)
     {
         $this->installPhpCs();
+        $this->installPhpUnit();
     }
 
     /**
@@ -79,6 +88,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     public function onPostUpdateCmd(Event $event)
     {
         $this->installPhpCs();
+        $this->installPhpUnit();
     }
 
     /**
@@ -88,19 +98,18 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     private function installPhpCs(): void
     {
-        $fs = new Filesystem();
-        $vendor = $this->config->get('vendor-dir');
-        $web_root = $this->isWebRoot('./docroot') ? 'docroot' : 'web';
+        $this->scaffoldTemplate('phpcs.xml.dist', '{% DOCROOT %}', $this->webRoot);
+    }
 
-        if (!is_file('./phpcs.xml.dist')) {
-            $fs->copy($vendor . '/lullabot/drainpipe-dev/scaffold/phpcs.xml.dist', './phpcs.xml.dist');
-            $content = file_get_contents('./phpcs.xml.dist');
-            $newContent = str_replace('{% DOCROOT %}', $web_root, $content);
-            if (file_put_contents('./phpcs.xml.dist', $newContent) === false) {
-                throw new RuntimeException("Failed to write to file ./phpcs.xml.dist");
-            }
-            $this->io->write('<info>Creating initial phpcs.xml.dist file...</info>');
-        }
+    /**
+     * Install PHP Unit files.
+     *
+     * @throws \RuntimeException If the docroot placeholder can not be replaced.
+     */
+    private function installPhpUnit(): void
+    {
+        $this->scaffoldTemplate('phpunit.xml', '{% DOCROOT %}', $this->webRoot);
+        $this->scaffoldTemplate('phpunit-testtraits.xml', '{% DOCROOT %}', $this->webRoot);
     }
 
     /**
@@ -117,6 +126,26 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
           is_dir($path . '/modules') &&
           is_dir($path . '/themes')
         );
+    }
+
+    /**
+     * Helper function to scaffold a template file and replace its placeholders.
+     */
+    private function scaffoldTemplate(string $file, string $placeholder, string $placeholderValue): void {
+        $fs = new Filesystem();
+        $vendor = $this->config->get('vendor-dir');
+        $source = sprintf('%s/lullabot/drainpipe-dev/scaffold/%s', $vendor, $file);
+        $target = sprintf('./%s', $file);
+
+        if (!is_file($target)) {
+            $fs->copy($source, $target);
+            $content = file_get_contents($target);
+            $newContent = str_replace($placeholder, $placeholderValue, $content);
+            if (file_put_contents($target, $newContent) === false) {
+                throw new RuntimeException(sprintf('Failed to write to file %s', $target));
+            }
+            $this->io->write(sprintf('<info>Creating initial %s file...</info>', $target));
+        }
     }
 
 }
