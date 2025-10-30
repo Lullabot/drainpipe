@@ -56,9 +56,9 @@ tasks:
             echo "npx not found, skipping package-lock.json diff"
           else
             # Run the diff using npx (will download diff-lockfiles if needed)
-            npx diff-lockfiles --markdown {{ shellQuote (.composer_lock_diff_from | default "main") }} HEAD || true
+            npx diff-lockfiles --format markdown {{ shellQuote (.composer_lock_diff_from | default "main") }} HEAD || true
             if [ "" != {{ shellQuote (.package_lock_diff | default "") }} ]; then
-              npx diff-lockfiles --markdown {{ shellQuote (.composer_lock_diff_from | default "main") }} HEAD > {{ shellQuote (.package_lock_diff | default "") }} || echo "" > {{ shellQuote (.package_lock_diff | default "") }}
+              npx diff-lockfiles --format markdown {{ shellQuote (.composer_lock_diff_from | default "main") }} HEAD > {{ shellQuote (.package_lock_diff | default "") }} || echo "" > {{ shellQuote (.package_lock_diff | default "") }}
             fi
           fi
         fi
