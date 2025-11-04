@@ -30,6 +30,7 @@ tasks:
     cmds:
       - |
         if [ "{{.format}}" == "junit" ]; then
+          composer global config allow-plugins.nedbase/composer-audit-common-report-formats-plugin true
           composer global require nedbase/composer-audit-common-report-formats-plugin
           composer audit:junit
         else
