@@ -45,11 +45,6 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $taskBin .= '.exe';
         }
 
-        // Skip if already installed
-        if (file_exists($taskBin)) {
-            return;
-        }
-
         // Check if task is already available system-wide
         $systemTaskPath = $this->findSystemTask($os);
         if ($systemTaskPath) {
@@ -79,13 +74,14 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if ($os === 'Windows') {
             // Use 'where' command on Windows
             exec('where task.exe 2>NUL', $output, $returnCode);
+            if ($returnCode === 0 && !empty($output[0])) {
+                return trim($output[0]);
+            }
         } else {
-            // Use 'which' command on Unix-like systems
-            exec('which task 2>/dev/null', $output, $returnCode);
-        }
-
-        if ($returnCode === 0 && !empty($output[0])) {
-            return trim($output[0]);
+            $path = '/usr/local/bin/task';
+            if (is_file($path) && is_executable($path)) {
+                return $path;
+            }
         }
 
         return null;
@@ -113,10 +109,19 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
     private function installWindows(string $binDir, IOInterface $io, string $version): void
     {
-        $url = 'https://taskfile.dev/install.ps1';
-        $script = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install-task.ps1';
+        // Do not reinstall if desired version is already present
+        if (file_exists($binDir . DIRECTORY_SEPARATOR . 'task.exe')) {
+            exec('"' . $binDir . DIRECTORY_SEPARATOR . 'task.exe" --version', $output, $returnCode);
+            if ($returnCode === 0 && isset($output[0])) {
+                if (trim($output[0]) === ltrim($version, 'v')) {
+                    return;
+                }
+            }
+        }
 
-        file_put_contents($script, file_get_contents($url));
+        // Run official installer
+        $script = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install-task.ps1';
+        file_put_contents($script, file_get_contents('https://taskfile.dev/install.ps1'));
 
         $cmd = sprintf(
             'powershell -ExecutionPolicy Bypass -File "%s" -InstallPath "%s"',
@@ -141,15 +146,23 @@ class TaskfileInstallerPlugin implements PluginInterface, EventSubscriberInterfa
 
     private function installUnix(string $binDir, IOInterface $io, string $version): void
     {
-        $url = 'https://taskfile.dev/install.sh';
+        // Do not reinstall if desired version is already present
+        if (file_exists($binDir . '/task')) {
+            exec($binDir . '/task --version', $output, $returnCode);
+            if ($returnCode === 0 && isset($output[0])) {
+                if (trim($output[0]) === ltrim($version, 'v')) {
+                    return;
+                }
+            }
+        }
 
+        // Run official installer
         $cmd = sprintf(
             'curl -sL %s | sh -s -- -b %s -d %s',
-            escapeshellarg($url),
+            escapeshellarg('https://taskfile.dev/install.sh'),
             escapeshellarg($binDir),
             escapeshellarg($version)
         );
-
         exec($cmd, $output, $returnCode);
 
         if ($returnCode === 0) {
