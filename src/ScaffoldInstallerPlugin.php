@@ -244,6 +244,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs->copy($ddevScaffoldDir . 'task-command.sh', './.ddev/commands/web/task');
             $fs->ensureDirectoryExists('./.ddev/web-build');
             $fs->copy($ddevScaffoldDir . 'drainpipe.Dockerfile', './.ddev/web-build/Dockerfile.drainpipe');
+            $fs->copy($vendor . '/lullabot/drainpipe/.taskfile', './.ddev/web-build/.taskfile');
             if (file_exists('./web/sites/default/settings.ddev.php')) {
                 $settings = file_get_contents('./web/sites/default/settings.ddev.php');
                 if (str_contains($settings, 'environment_indicator.indicator')) {
@@ -257,13 +258,14 @@ EOT;
                 }
             }
 
-            // Configure DDEV to use configured NodeJS version
-            $nodejs_version = trim(file_get_contents('./.nvmrc'), " \t\n\r\0\x0B");
-            $configYaml = file_get_contents('./.ddev/config.yaml');
-            $configYaml = preg_replace('/^\s*nodejs_version\s*:\s*(?:["\']?).*(?:["\']?)\s*$(\r?\n)?/m', '', $configYaml);
-            $configYaml = rtrim($configYaml, " \t\n\r") . "\n\n" . 'nodejs_version: "' . $nodejs_version . '"' . "\n";
-            file_put_contents('./.ddev/config.yaml', $configYaml);
-            $this->io->write(sprintf("🪠 [Drainpipe] Configured DDEV to use Node JS version %s", $nodejs_version));
+            // Configure DDEV to use NodeJS version set in .nvmrc
+            $data = Yaml::parseFile('./.ddev/config.yaml', Yaml::PARSE_OBJECT_FOR_MAP);
+            $data = json_decode(json_encode($data), true);
+            if (!is_array($data)) {
+                $data = [];
+            }
+            $data['nodejs_version'] = 'auto';
+            file_put_contents('./.ddev/config.yaml', Yaml::dump($data, 10, 4, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE));
         }
     }
 

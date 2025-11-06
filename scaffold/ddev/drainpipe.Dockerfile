@@ -1,4 +1,5 @@
 # Install Task
+ADD .taskfile .
 RUN sh -c "$(curl -fsSL https://taskfile.dev/install.sh)" -- -b /usr/local/bin -d $(cat .taskfile)
 
 # Install action-validator
