@@ -4,14 +4,13 @@ inputs:
   terminus_timeout_limit:
     description: 'Timeout in seconds for Terminus'
     required: false
-    default: '600'
 runs:
   using: "composite"
   steps:
     - name: Validate TERMINUS_TIMEOUT_LIMIT
       shell: bash
       run: |
-        TIMEOUT_LIMIT="${{ inputs.terminus_timeout_limit }}"
+        TIMEOUT_LIMIT="${{ inputs.terminus_timeout_limit || '600' }}"
         if ! [[ "$TIMEOUT_LIMIT" =~ ^[0-9]+$ ]]; then
           echo "::error::TERMINUS_TIMEOUT_LIMIT must be a number. It represents the number of seconds that terminus will wait until timeout. Current value: $TIMEOUT_LIMIT"
           exit 1
