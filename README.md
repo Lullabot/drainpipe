@@ -23,11 +23,6 @@ and if using DDEV, restart to enable the added features:
 ddev restart
 ```
 
-If your docroot is not the standard `web/` path, you must create a symlink to it
-```
-ln -s web/ docroot
-```
-
 ### Taskfile
 
 Drainpipe will scaffold out various files, most importantly a `Taskfile.yml` in
