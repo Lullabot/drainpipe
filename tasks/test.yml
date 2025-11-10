@@ -1,12 +1,19 @@
 version: '3'
 
 vars:
-  YAML_DIRS: '{{ default "web/**/*.yml" .YAML_DIRS }}'
-  TWIG_DIRS: '{{ default "web/modules/custom web/profiles web/themes/custom" .TWIG_DIRS }}'
+  WEBROOT:
+    sh: |
+      if [ -d "docroot" ] && [ -d "docroot/modules" ] && [ -d "docroot/themes" ] && [ -f "docroot/index.php" ]; then
+        echo "docroot"
+      else
+        echo "web"
+      fi
+  YAML_DIRS: '{{ default (printf "%s/**/*.yml" .WEBROOT) .YAML_DIRS }}'
+  TWIG_DIRS: '{{ default (printf "%s/modules/custom %s/profiles %s/themes/custom" .WEBROOT .WEBROOT .WEBROOT) .TWIG_DIRS }}'
   # These directories are configured in phpcs.xml. However, phpcs will fail if
   # those directories do not exist, so we create them with the assumption that
   # every Drupal site will eventually have these directories.
-  TEST_DIRS: '{{ default "web/modules/custom web/themes/custom web/sites" .TEST_DIRS }}'
+  TEST_DIRS: '{{ default (printf "%s/modules/custom %s/themes/custom %s/sites" .WEBROOT .WEBROOT .WEBROOT) .TEST_DIRS }}'
   NIGHTWATCH_TEST_DIRS: '{{ default "test" .NIGHTWATCH_TEST_DIRS }}'
   FUNC_ENSURE_DIRS: |
     DIRS_ARR=({{.TEST_DIRS}})
@@ -109,9 +116,9 @@ tasks:
     desc: Runs PHPUnit unit tests
     cmds:
       - |
-        CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
+        CONFIG="$(pwd)/phpunit.xml"
         if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
+          CONFIG="$(pwd)/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result/phpunit
@@ -122,9 +129,9 @@ tasks:
     desc: Runs PHPUnit functional tests
     cmds:
       - |
-        CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
+        CONFIG="$(pwd)/phpunit.xml"
         if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
+          CONFIG="$(pwd)/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result/phpunit

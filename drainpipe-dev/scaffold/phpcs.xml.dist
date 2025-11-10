@@ -6,7 +6,7 @@
     <arg name="colors"/>
     <!-- Show progress. -->
     <arg value="p"/>
-    
+
     <!-- Add Drupal specific PHP file extensions -->
     <arg name="extensions" value="php,inc,module,theme,install"/>
 
@@ -23,9 +23,9 @@
     <!-- See ADR: Use strict types in PHP code -->
     <rule ref="Generic.PHP.RequireStrictTypes"/>
 
-    <file>web/modules/custom</file>
-    <file>web/themes/custom</file>
-    <file>web/sites</file>
+    <file>{% DOCROOT %}/modules/custom</file>
+    <file>{% DOCROOT %}/themes/custom</file>
+    <file>{% DOCROOT %}/sites</file>
 
     <!-- Exclude JS and CSS, this is covered by yarn scripts -->
     <exclude-pattern>**/*.js</exclude-pattern>
