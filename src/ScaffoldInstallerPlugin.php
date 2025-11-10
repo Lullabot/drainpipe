@@ -232,7 +232,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
-     *
+     * Installs DDEV custom task command and settings.php file.
      */
     private function installDdevCommand(): void
     {
