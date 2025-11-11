@@ -32,12 +32,8 @@
     "require-dev": {
         "composer/composer": "^2.8.12"
     },
-    "bin": [
-        "bin/drainpipe-convert-to-junit-xml"
-    ],
     "extra": {
         "class": [
-            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin",
             "\\Lullabot\\DrainpipeDev\\NightwatchScaffoldPlugin",
             "\\Lullabot\\DrainpipeDev\\ScaffoldInstallerPlugin"
         ],
@@ -57,4 +53,3 @@
         }
     }
 }
-
