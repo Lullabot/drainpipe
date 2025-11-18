@@ -23,15 +23,19 @@ and if using DDEV, restart to enable the added features:
 ddev restart
 ```
 
-The Tugboat configuration file is not a static file; it is dynamically generated based on your `.ddev/config` file. See [/src/ScaffoldInstallerPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/ScaffoldInstallerPlugin.php#L451) for the implementation details.
+### Taskfile
 
-This will scaffold out various files, most importantly a `Taskfile.yml` in the
-root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool that aims to be
-simpler and easier to use than, for example, GNU Make. Since it's written in Go,
-Task is just a single binary and has no other dependencies. It's also
-cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
+Drainpipe will scaffold out various files, most importantly a `Taskfile.yml` in
+the root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool
+that aims to be simpler and easier to use than, for example, GNU Make. Since
+it's written in Go, Task is just a single binary and has no other dependencies.
+It's also cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
 
-You can see what tasks are available after installation by running
+Drainpipe installs the Task binary for you, no matter if you are using DDEV or
+not. If you already have Task installed system-wide and are not using DDEV, your
+installed binary will be linked from the `vendor/bin` directory.
+
+You can see which tasks are available after installation by running
 `./vendor/bin/task --list` or `ddev task --list` if you're running DDEV. To get
 more information on a specific task e.g. what parameters it takes, you can run
 `task [task name] --summary`.
@@ -44,11 +48,6 @@ npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
 
 See [`.github/workflows/ValidateTaskfile.yml`](.github/workflows/ValidateTaskfile.yml)
 for an example of this in use.
-
-```
-💡 If your docroot is not the standard `web/` path, you must create a symlink to it
-ln -s web/ docroot
-```
 
 ### Overriding files provided by drainpipe
 
@@ -91,6 +90,12 @@ You can override the platform and processor with environment variables `DRAINPIP
 and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `windows`,
 and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
 upstream dependencies e.g. https://github.com/go-task/task/releases
+
+### Tugboat
+
+The Tugboat configuration file is not a static file; it is dynamically generated
+based on your `.ddev/config` file. To see the implementation details, check
+[/src/ScaffoldInstallerPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/ScaffoldInstallerPlugin.php#L451).
 
 ### Node JS
 

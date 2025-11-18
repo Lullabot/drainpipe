@@ -35,23 +35,14 @@ tasks:
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
-      - cmd: |
-          if [ "{{.format}}" == "junit" ]; then
-            mkdir -p test_result
-            ./vendor/bin/local-php-security-checker --format=json > test_result/local-php-security-checker.json
-          fi
-        ignore_error: true
       - |
         if [ "{{.format}}" == "junit" ]; then
-          RESULT=$(cat test_result/local-php-security-checker.json)
-          ./vendor/bin/drainpipe-convert-to-junit-xml convert:sensiolabs-security-check "$RESULT" > test_result/local-php-security-checker.xml
-          if [ "$RESULT" != "{}" ]; then
-            exit 1
-          fi
+          composer global config allow-plugins.nedbase/composer-audit-common-report-formats-plugin true
+          composer global require nedbase/composer-audit-common-report-formats-plugin
+          composer audit:junit
         else
-          ./vendor/bin/local-php-security-checker
+          composer audit
         fi
-      - composer audit
       - |
         ./vendor/bin/composer-lock-diff --from {{ shellQuote (.composer_lock_diff_from | default "main") }} --md
         if [ "" != {{ shellQuote (.composer_lock_diff | default "") }} ]; then

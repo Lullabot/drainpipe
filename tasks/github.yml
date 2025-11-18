@@ -3,6 +3,9 @@ version: '3'
 tasks:
   actions:lint:
     desc: Run lint on Github Actions and Workflows
+    preconditions:
+      - sh: 'command -v action-validator'
+        msg: "The action-validator package is not installed. Please run `yarn add @action-validator/cli` or `npm install -g @action-validator/core @action-validator/cli` to install it."
     summary: |
       Runs @action-validator/cli on GitHub Actions and Workflows
 
@@ -13,14 +16,7 @@ tasks:
       - |
           directories=".github/workflows .github/actions"
           if [ "{{ .directories }}" != "" ]; then directories="{{ .directories }}"; fi
-
-          if [ -f ./vendor/bin/action-validator ]; then
-              find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 ./vendor/bin/action-validator
-          # Fallback for architectures that don't have a release e.g. Windows
-          else
-              yamls=$(find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \))
-              echo $yamls | xargs -n1 action-validator
-          fi
+          find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 action-validator
 
   composer-lock-diff:
     desc: Runs composer-lock-diff on a pull request description and produces a new description

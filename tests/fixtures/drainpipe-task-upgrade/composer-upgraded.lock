@@ -1685,8 +1685,8 @@
             "type": "composer-plugin",
             "extra": {
                 "class": [
-                    "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin",
-                    "\\Lullabot\\Drainpipe\\BinaryInstallerPlugin"
+                    "\\Lullabot\\Drainpipe\\TaskfileInstallerPlugin",
+                    "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin"
                 ],
                 "drupal-scaffold": {
                     "gitignore": true,

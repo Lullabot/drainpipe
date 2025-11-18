@@ -166,13 +166,15 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: ddev start
+        run: |
+          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
+          ddev start
 
       - name: Setup Nightwatch
         run: |
           ddev exec corepack disable
           ddev exec npm i -g yarn@1.22.1
-          ddev exec 'rm /usr/local/bin/yarn'
+          ddev exec 'rm -f /usr/local/bin/yarn'
           ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
           ddev yarn init -y
           ddev yarn add nightwatch nightwatch-accessibility @lullabot/nightwatch-drupal-commands lodash --dev

@@ -44,6 +44,7 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
+          ddev restart
 
       - name: Commit current state
         run: |
