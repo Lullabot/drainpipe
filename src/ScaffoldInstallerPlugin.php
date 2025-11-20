@@ -244,7 +244,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs->copy($ddevScaffoldDir . 'task-command.sh', './.ddev/commands/web/task');
             $fs->ensureDirectoryExists('./.ddev/web-build');
             $fs->copy($ddevScaffoldDir . 'drainpipe.Dockerfile', './.ddev/web-build/Dockerfile.drainpipe');
-            $fs->copy($vendor . '/lullabot/drainpipe/.taskfile', './.ddev/web-build/.taskfile');
+            $fs->copy($vendor . '/lullabot/drainpipe/taskfile', './.ddev/web-build/taskfile');
             if (file_exists('./web/sites/default/settings.ddev.php')) {
                 $settings = file_get_contents('./web/sites/default/settings.ddev.php');
                 if (str_contains($settings, 'environment_indicator.indicator')) {
