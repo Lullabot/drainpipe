@@ -45,6 +45,7 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config extra.drainpipe.github --json '["acquia"]'
           ddev exec --raw composer config minimum-stability dev
+          ddev exec --raw composer config audit.block-insecure false
 
           # Recommended settings for Acquia
           ddev composer config --no-plugins allow-plugins.acquia/drupal-recommended-settings false
