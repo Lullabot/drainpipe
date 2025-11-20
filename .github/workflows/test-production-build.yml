@@ -28,7 +28,7 @@ jobs:
           - php-version: 8.5
             drupal-version: ":^10"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: shivammathur/setup-php@v2
         with:
