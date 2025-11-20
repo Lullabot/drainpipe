@@ -41,6 +41,11 @@
       ],
       "allowedVersions": "^6 || ^7",
       "rangeStrategy": "widen"
+    },
+    {
+      "matchDatasources": ["node-version"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "enabled": false
     }
   ]
 }

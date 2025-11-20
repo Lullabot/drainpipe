@@ -44,6 +44,7 @@ jobs:
           ddev exec --raw composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
           ddev composer require --dev lullabot/drainpipe-dev --with-all-dependencies
+          ddev restart
 
       - name: Install Drupal
         run: |

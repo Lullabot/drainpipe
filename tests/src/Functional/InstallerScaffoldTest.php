@@ -40,8 +40,18 @@ class InstallerScaffoldTest extends TestCase
         $this->assertStringContainsString('.task', $gitignore);
     }
 
+    public function testDockerfile(): void {
+        if (!getenv('IS_DDEV_PROJECT')) {
+            $this->markTestSkipped('Not running with DDEV');
+        }
+        $this->assertFileExists(self::PROJECT_PATH.'/.ddev/web-build/Dockerfile.drainpipe');
+    }
+
     public function testBinaries(): void
     {
-        $this->assertFileExists(self::PROJECT_PATH.'/vendor/bin/task');
+        if (!getenv('IS_DDEV_PROJECT')) {
+            $this->markTestSkipped('Not running with DDEV');
+        }
+        $this->assertFileExists('/usr/local/bin/task');
     }
 }

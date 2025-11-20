@@ -16,9 +16,9 @@
         "behat/mink": "^1.12.0",
         "behat/mink-browserkit-driver": "^2.2.0",
         "davidrjonas/composer-lock-diff": "^1.7.1",
-        "drupal/coder": "^8.3.30",
+        "drupal/coder": "^8.3.31",
         "lullabot/drainpipe": "*",
-        "mglaman/phpstan-drupal": "^2.0.9",
+        "mglaman/phpstan-drupal": "^2.0.10",
         "mikey179/vfsstream": "^1.6.12",
         "mockery/mockery": "^1.6.12",
         "phpspec/prophecy-phpunit": "^2",
@@ -32,18 +32,14 @@
     "require-dev": {
         "composer/composer": "^2.8.12"
     },
-    "bin": [
-        "bin/drainpipe-convert-to-junit-xml"
-    ],
     "extra": {
         "class": [
-            "\\Lullabot\\DrainpipeDev\\DevBinaryInstallerPlugin",
-            "\\Lullabot\\DrainpipeDev\\NightwatchScaffoldPlugin"
+            "\\Lullabot\\DrainpipeDev\\NightwatchScaffoldPlugin",
+            "\\Lullabot\\DrainpipeDev\\ScaffoldInstallerPlugin"
         ],
         "drupal-scaffold": {
             "gitignore": true,
             "file-mapping": {
-                "[project-root]/phpcs.xml.dist": "scaffold/phpcs.xml.dist",
                 "[project-root]/phpstan.neon.dist": "scaffold/phpstan.neon.dist",
                 "[project-root]/.twig-cs-fixer.dist.php": "scaffold/.twig-cs-fixer.dist.php"
             }
@@ -57,4 +53,3 @@
         }
     }
 }
-

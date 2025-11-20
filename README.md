@@ -23,15 +23,19 @@ and if using DDEV, restart to enable the added features:
 ddev restart
 ```
 
-The Tugboat configuration file is not a static file; it is dynamically generated based on your `.ddev/config` file. See [/src/ScaffoldInstallerPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/ScaffoldInstallerPlugin.php#L451) for the implementation details.
+### Taskfile
 
-This will scaffold out various files, most importantly a `Taskfile.yml` in the
-root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool that aims to be
-simpler and easier to use than, for example, GNU Make. Since it's written in Go,
-Task is just a single binary and has no other dependencies. It's also
-cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
+Drainpipe will scaffold out various files, most importantly a `Taskfile.yml` in
+the root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool
+that aims to be simpler and easier to use than, for example, GNU Make. Since
+it's written in Go, Task is just a single binary and has no other dependencies.
+It's also cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
 
-You can see what tasks are available after installation by running
+Drainpipe installs the Task binary for you, no matter if you are using DDEV or
+not. If you already have Task installed system-wide and are not using DDEV, your
+installed binary will be linked from the `vendor/bin` directory.
+
+You can see which tasks are available after installation by running
 `./vendor/bin/task --list` or `ddev task --list` if you're running DDEV. To get
 more information on a specific task e.g. what parameters it takes, you can run
 `task [task name] --summary`.
@@ -44,11 +48,6 @@ npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
 
 See [`.github/workflows/ValidateTaskfile.yml`](.github/workflows/ValidateTaskfile.yml)
 for an example of this in use.
-
-```
-💡 If your docroot is not the standard `web/` path, you must create a symlink to it
-ln -s web/ docroot
-```
 
 ### Overriding files provided by drainpipe
 
@@ -91,6 +90,19 @@ You can override the platform and processor with environment variables `DRAINPIP
 and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `windows`,
 and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
 upstream dependencies e.g. https://github.com/go-task/task/releases
+
+### Tugboat
+
+The Tugboat configuration file is not a static file; it is dynamically generated
+based on your `.ddev/config` file. To see the implementation details, check
+[/src/ScaffoldInstallerPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/ScaffoldInstallerPlugin.php#L451).
+
+### Node JS
+
+All Drainpipe components (DDEV, Github Actions, Tugboat) are configured to use
+the same Node JS major version. This is set in the `.nvmrc` file, which is
+scaffolded from the Drainpipe's root directory, but can be overriden to use a
+different Node version.
 
 ## Renovate Presets
 
@@ -585,6 +597,8 @@ To enable deployment of Pantheon Review Apps:
 - Add the following [variables to your GitHub repository](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository):
     - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
     - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
+    - `TERMINUS_TIMEOUT_LIMIT` (optional) Number of seconds that terminus will wait until timeout. Defaults to 600
+    - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon

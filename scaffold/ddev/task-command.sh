@@ -4,4 +4,4 @@
 ## Usage: task
 ## Example: "ddev task build"
 
-./vendor/bin/task "$@"
+task "$@"

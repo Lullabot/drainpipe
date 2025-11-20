@@ -1,6 +1,9 @@
 {
   "name": "@lullabot/drainpipe",
-  "packageManager": "yarn@4.10.3",
+  "packageManager": "yarn@4.11.0",
+  "engines": {
+    "node": ">=22.0.0 <23.0.0"
+  },
   "workspaces": [
     "metapackages/*"
   ],

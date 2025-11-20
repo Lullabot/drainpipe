@@ -79,6 +79,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostInstallCmd(Event $event)
     {
+        $this->installNvmRc();
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
@@ -97,6 +98,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostUpdateCmd(Event $event)
     {
+        $this->installNvmRc();
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
@@ -106,6 +108,27 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if ($this->hasPantheonConfigurationFiles()) {
             $this->pantheonSystemDrupalIntegrationsWarning();
         }
+    }
+
+    /**
+     * Copies .nvmrc from Drainpipe root directory if it doesn't yet exist.
+     */
+    private function installNvmRc(): void
+    {
+        $vendor = $this->config->get('vendor-dir');
+        $nvmrcPath = $vendor.'/lullabot/drainpipe/.nvmrc';
+
+        if (!file_exists('./.nvmrc')) {
+            $this->io->write('<info>Creating initial .nvmrc file...</info>');
+            $fs = new Filesystem();
+            $fs->copy(
+                $nvmrcPath,
+                './.nvmrc'
+            );
+        } else {
+            $this->io->write('<info>.nvmrc file already present, skipping...</info>');
+        }
+
     }
 
     /**
@@ -209,19 +232,22 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
-     *
+     * Installs DDEV custom task command and settings.php file.
      */
     private function installDdevCommand(): void
     {
         if (file_exists('./.ddev/config.yaml')) {
             $vendor = $this->config->get('vendor-dir');
-            $ddevCommandPath = $vendor . '/lullabot/drainpipe/scaffold/ddev/task-command.sh';
+            $ddevScaffoldDir = $vendor . '/lullabot/drainpipe/scaffold/ddev/';
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
-            $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
+            $fs->copy($ddevScaffoldDir . 'task-command.sh', './.ddev/commands/web/task');
+            $fs->ensureDirectoryExists('./.ddev/web-build');
+            $fs->copy($ddevScaffoldDir . 'drainpipe.Dockerfile', './.ddev/web-build/Dockerfile.drainpipe');
+            $fs->copy($vendor . '/lullabot/drainpipe/.taskfile', './.ddev/web-build/.taskfile');
             if (file_exists('./web/sites/default/settings.ddev.php')) {
                 $settings = file_get_contents('./web/sites/default/settings.ddev.php');
-                if (strpos($settings, 'environment-indicator') === false) {
+                if (str_contains($settings, 'environment_indicator.indicator')) {
                     $include = <<<'EOT'
 // See https://architecture.lullabot.com/adr/20210609-environment-indicator/
 $config['environment_indicator.indicator']['name'] = 'Local';
@@ -231,6 +257,15 @@ EOT;
                     file_put_contents('./web/sites/default/settings.ddev.php', $include . PHP_EOL, FILE_APPEND);
                 }
             }
+
+            // Configure DDEV to use NodeJS version set in .nvmrc
+            $data = Yaml::parseFile('./.ddev/config.yaml', Yaml::PARSE_OBJECT_FOR_MAP);
+            $data = json_decode(json_encode($data), true);
+            if (!is_array($data)) {
+                $data = [];
+            }
+            $data['nodejs_version'] = 'auto';
+            file_put_contents('./.ddev/config.yaml', Yaml::dump($data, 10, 4, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE));
         }
     }
 
@@ -478,9 +513,8 @@ EOT;
                 $fs->remove($file);
             }
         }
-        $binaryInstallerPlugin = new BinaryInstallerPlugin();
         $tugboatConfig = [
-            'nodejs_version' => '18',
+            'nodejs_version' => '$(cat ${TUGBOAT_ROOT}/.nvmrc)',
             'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm-bookworm',
             'database_type' => 'mariadb',
             'database_version' => '10.11',
@@ -489,7 +523,6 @@ EOT;
             'build_command' => 'build',
             'update_command' => 'drupal:update',
             'init' => [],
-            'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
             'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
             'overrides' => ['php' => '', 'solr' => ''],
         ];
@@ -501,9 +534,6 @@ EOT;
             $tugboatConfig['database_version'] = $ddevConfig['database']['version'];
             $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm-bookworm';
 
-            if (!empty($ddevConfig['nodejs_version'])) {
-                $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
-            }
             if (!empty($ddevConfig['webserver_type']) && $ddevConfig['webserver_type'] === 'apache-fpm') {
                 $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache-bookworm';
             }

@@ -35,7 +35,7 @@ jobs:
         run: |
           ddev config --auto
           ddev config --php-version "8.3"
-          ddev config --nodejs-version "18"
+          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
           ddev get ddev/ddev-redis --version v1.2.0
           ddev get ddev/ddev-elasticsearch --version v0.3.2
           ddev restart
@@ -91,7 +91,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: .tugboat
           path: .tugboat
@@ -129,10 +129,12 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
           ddev exec --raw composer config extra.drainpipe --json '{"tugboat": {}}'
+          ddev exec --raw echo "16" > .nvmrc
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
       - name: Test NODE_MAJOR is correct
         run: |
-          cat .tugboat/steps/1-init.sh
-          grep -q NODE_MAJOR=16 .tugboat/steps/1-init.sh
+          export TUGBOAT_ROOT=. && \
+            eval "$(grep 'NODE_MAJOR=' .tugboat/steps/1-init.sh)" && \
+            echo $NODE_MAJOR | grep -q 16
 

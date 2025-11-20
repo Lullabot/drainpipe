@@ -21,6 +21,10 @@ jobs:
             ${{ runner.os }}-composer-
       - uses: ./.github/actions/drainpipe/set-env
 
+      - uses: ./.github/actions/drainpipe/validate-terminus-timeout
+        with:
+          terminus_timeout_limit: ${{ vars.TERMINUS_TIMEOUT_LIMIT }}
+
       - name: Install and Start DDEV
         uses: ./.github/actions/drainpipe/ddev
         with:
@@ -48,3 +52,5 @@ jobs:
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
           # set to "true" if you want to run the installer
           run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}
+          clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
+          terminus-timeout-limit: ${{ env.TERMINUS_TIMEOUT_LIMIT }}
