@@ -5,6 +5,8 @@
  * Setup Acquia Cloud settings.
  */
 
+declare(strict_types=1);
+
 if (getenv('AH_SITE_ENVIRONMENT')) {
   // If trusted_reverse_proxy_ips is not defined, fail gracefully.
   // phpcs:ignore
@@ -23,7 +25,7 @@ if (getenv('AH_SITE_ENVIRONMENT')) {
   $x_ips = getenv('HTTP_X_FORWARDED_FOR') ? explode(',', getenv('HTTP_X_FORWARDED_FOR')) : [];
   $x_ips = array_map('trim', $x_ips);
 
-  // Add REMOTE_ADDR to the X-Forwarded-For in case it's an internal AWS address.
+  // Add REMOTE_ADDR to X-Forwarded-For in case it's an internal AWS address.
   if (getenv('REMOTE_ADDR')) {
     $x_ips[] = getenv('REMOTE_ADDR');
   }
@@ -49,12 +51,8 @@ if (getenv('AH_SITE_ENVIRONMENT')) {
     }
   }
 
-  /**
-   * Site path.
-   *
-   * @var string $site_path
-   * This is always set and exposed by the Drupal Kernel.
-   */
+  // Site path is always set and exposed by the Drupal Kernel.
+  /* @phpstan-ignore class.notFound, variable.undefined */
   $site_name = EnvironmentDetector::getSiteName($site_path);
   $ah_group = getenv('AH_SITE_GROUP');
 
