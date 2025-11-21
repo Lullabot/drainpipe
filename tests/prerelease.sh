@@ -3,15 +3,17 @@ set -eux
 
 TESTMODE=${1:-new}
 if [ "$TESTMODE" != "new" ] && [ "$TESTMODE" != "update" ]; then
-    echo "Error: Invalid parameter '$TESTMODE'. Use 'new' or 'update'"
+    echo "Error: Invalid parameter '$TESTMODE'. Use 'new' or 'update'" >&2
     exit 1
 fi
 
 # Temporary directory for testing
 drainpipedir=$(realpath "$(mktemp -d "/tmp/drainpipe-XXXXXXXXX")")
 function tmpdir_cleanup() {
-  cd $drainpipedir && ddev delete -yO && cd ~
-  rm -rf "$drainpipedir"
+  if [ -d "$drainpipedir" ]; then
+    (cd "$drainpipedir" && ddev delete -yO)
+    rm -rf "$drainpipedir"
+  fi
 }
 trap "tmpdir_cleanup" SIGINT SIGTERM EXIT
 
@@ -67,7 +69,7 @@ ddev yarn add drainpipe-sass@file:./metapackages/sass/
 # Verify Taskfile version
 INSTALLED=$(ddev task --version)
 EXPECTED=$(cat vendor/lullabot/drainpipe/.taskfile | tr -d 'v')
-if [[ ${INSTALLED} -ne ${EXPECTED} ]]; then
+if [[ "${INSTALLED}" != "${EXPECTED}" ]]; then
   echo "Taskfile version does not match: expected ${EXPECTED}, got ${INSTALLED}"
   exit 1
 fi
