@@ -13,7 +13,7 @@
         "php": "^8.1",
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
-        "behat/mink": "^1.12.0",
+        "behat/mink": "^1.13.0",
         "behat/mink-browserkit-driver": "^2.3.0",
         "davidrjonas/composer-lock-diff": "^1.7.1",
         "drupal/coder": "^8.3.31",
