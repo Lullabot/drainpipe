@@ -56,7 +56,7 @@ jobs:
           git config --global user.name "GitHub Actions"
 
       - name: Clone Pantheon repo
-        run: git clone "${{ steps.gitinfo.outputs.git_url }}" pantheon
+        run: git clone "${{ steps.gitinfo.outputs.git_url }}" -b master pantheon
 
       - name: Create empty commit and push to environment branch
         run: |
