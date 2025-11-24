@@ -26,10 +26,13 @@ jobs:
           echo "- [ ] Drainpipe can be updated in an existing project" >> /tmp/body
           echo "- [ ] Can deploy to Acquia" >> /tmp/body
           echo "- [ ] Can deploy to Pantheon" >> /tmp/body
-          body=$(cat /tmp/body)
 
-          curl -s -X PATCH -H "Authorization: token $GITHUB_TOKEN" \
+          body="$(cat /tmp/body)"
+          data=$(jq -nc --arg body "$body" '{body: $body}')
+
+          curl -s -X PATCH \
+            -d "$data" \
+            -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/$owner/$repo/pulls/$pr_number \
-            -d "$(jq -nc --arg body "$template" '{body: $body}')"
+            "https://api.github.com/repos/$owner/$repo/pulls/$pr_number"
 
