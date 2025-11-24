@@ -72,14 +72,14 @@ jobs:
     steps:
       - name: Configure SSH for Pantheon
         env:
-          TERMINUS_DOWNSTREAM_SSH_KEY: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
+          PANTHEON_PRIVATE_SSH_KEY: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          echo "$TERMINUS_DOWNSTREAM_SSH_KEY" > ~/.ssh/id_rsa
+          echo "$PANTHEON_PRIVATE_SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H drush.in >> ~/.ssh/known_hosts
-          ssh-keyscan -H codeserver.dev >> ~/.ssh/known_hosts
+          ssh-keyscan -H drush.in >> ~/.ssh/known_hosts || true
+          ssh-keyscan -H codeserver.dev >> ~/.ssh/known_hosts || true
 
       - name: Authenticate Terminus
         env:
