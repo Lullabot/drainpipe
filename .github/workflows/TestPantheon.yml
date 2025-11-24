@@ -81,6 +81,11 @@ jobs:
           ssh-keyscan -H drush.in >> ~/.ssh/known_hosts || true
           ssh-keyscan -H codeserver.dev >> ~/.ssh/known_hosts || true
 
+      - name: Start ssh-agent and add key
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+
       - name: Authenticate Terminus
         env:
           TERMINUS_MACHINE_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
