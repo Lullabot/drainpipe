@@ -66,6 +66,7 @@ jobs:
         run: echo "$PANTHEON_TERMINUS_TOKEN" | terminus auth:login --machine-token
 
       - name: Get site Git URL (dev environment)
+        id: gitinfo
         env:
           SITE: ${{ vars.PANTHEON_SITE_NAME }}
           ENV: ${{ vars.PANTHEON_CLONE_FROM }}
@@ -76,6 +77,11 @@ jobs:
             exit 1
           fi
           echo "git_url=$GIT_URL" >> $GITHUB_OUTPUT
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
 
       - name: Clone Pantheon repo
         run: git clone "${{ steps.gitinfo.outputs.git_url }}" pantheon
@@ -88,15 +94,34 @@ jobs:
 
   deploy:
     needs: clone-pantheon
-    uses: lastcallmedia/github-actions/.github/workflows/terminus-safe-deploy.yml@main
-    secrets:
-      TERMINUS_DOWNSTREAM_SSH_KEY: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
-      TERMINUS_MACHINE_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
-    with:
-      environment_name: "test"
-      deploy_message: "Pre-release test"
-      deploy_force: false
-      post_import_config: true
-      post_db_update: true
-      clear_env_cache: true
+    runs-on: ubuntu-latest
+    container:
+      image: lastcallmedia/terminus-safe-deploy:latest
+    steps:
+      - name: Configure SSH for Pantheon
+        env:
+          TERMINUS_DOWNSTREAM_SSH_KEY: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$TERMINUS_DOWNSTREAM_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H drush.in >> ~/.ssh/known_hosts
+          ssh-keyscan -H codeserver.dev >> ~/.ssh/known_hosts
 
+      - name: Authenticate Terminus
+        env:
+          TERMINUS_MACHINE_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+        run: |
+          terminus auth:login --machine-token="$TERMINUS_MACHINE_TOKEN"
+
+      - name: Deploy to test environment
+        env:
+          SITE: ${{ vars.PANTHEON_SITE_NAME }}
+        run: |
+          terminus safe-deploy:deploy "${SITE}.test" \
+            --with-cim \
+            --with-updates \
+            --force-deploy \
+            --clear-env-caches \
+            "Pre-release test"
