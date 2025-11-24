@@ -9,8 +9,6 @@ on:
 jobs:
   clone-pantheon:
     runs-on: ubuntu-latest
-    container:
-      image: lastcallmedia/terminus-safe-deploy:latest
     steps:
       - uses: actions/checkout@v6
 
@@ -35,10 +33,9 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
 
-      - name: Authenticate Terminus
-        env:
-          PANTHEON_TERMINUS_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
-        run: echo "$PANTHEON_TERMINUS_TOKEN" | terminus auth:login --machine-token
+      - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
+        with:
+          pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
 
       - name: Get site Git URL (dev environment)
         id: gitinfo
