@@ -1,0 +1,37 @@
+name: Apply PR Template for main → stable
+
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  apply-template:
+    if: github.event.pull_request.head.ref == 'main' && github.event.pull_request.base.ref == 'stable'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set PR body to template
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pr_number=${{ github.event.pull_request.number }}
+          owner=${{ github.repository_owner }}
+          repo=${{ github.event.repository.name }}
+
+          template=$(cat <<'EOF'
+## Pre-release checklist
+- [ ] All checks and tests pass
+- [ ] Drainpipe can be installed in a new project
+- [ ] Drainpipe can be updated in an existing project
+- [ ] Can deploy to Acquia
+- [ ] Can deploy to Pantheon
+EOF
+)
+
+          curl -s -X PATCH -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/$owner/$repo/pulls/$pr_number \
+            -d "$(jq -nc --arg body "$template" '{body: $body}')"
+
