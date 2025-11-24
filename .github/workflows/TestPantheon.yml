@@ -33,7 +33,7 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
 
-      - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
+      - uses: ./scaffold/github/actions/pantheon/setup-terminus
         with:
           pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
 
