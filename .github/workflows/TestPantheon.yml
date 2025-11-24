@@ -5,12 +5,39 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - stable
+  workflow_dispatch:
+    inputs:
+      environment_name:
+        type: choice
+        description: Which Pantheon environment to deploy to
+        options:
+          - test
+          - live
+      deploy_message:
+        type: string
+        default: "Deploy from Drainpipe"
+      deploy_force:
+        type: boolean
+        default: false
+        description: Force deployment even if there is overridden configuration on the target environment
+      post_import_config:
+        type: boolean
+        default: true
+        description: Import configuration after deployment
+      post_db_update:
+        type: boolean
+        default: true
+        description: Run DB updates after deployment
+      clear_env_cache:
+        type: boolean
+        default: true
+        description: Clear target environment cache
 
 jobs:
   clone-pantheon:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install dependencies
         run: |
