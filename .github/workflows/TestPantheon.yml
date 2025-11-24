@@ -1,0 +1,75 @@
+name: "Test Pantheon"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - stable
+
+jobs:
+  clone-pantheon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ca-certificates curl unzip git openssh-client
+
+      - name: Configure SSH for Pantheon
+        env:
+          PANTHEON_PRIVATE_SSH_KEY: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$PANTHEON_PRIVATE_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H drush.in >> ~/.ssh/known_hosts || true
+          ssh-keyscan -H codeserver.dev >> ~/.ssh/known_hosts || true
+
+      - name: Start ssh-agent and add key
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+
+      - name: Authenticate Terminus
+        env:
+          PANTHEON_TERMINUS_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+        run: echo "$PANTHEON_TERMINUS_TOKEN" | terminus auth:login --machine-token
+
+      - name: Get site Git URL (dev environment)
+        env:
+          SITE: ${{ vars.PANTHEON_SITE_NAME }}
+          ENV: ${{ vars.PANTHEON_CLONE_FROM }}
+        run: |
+          GIT_URL="$(terminus connection:info "${SITE}.${ENV}" --field=git_url 2>/dev/null || true)"
+          if [ -z "$GIT_URL" ]; then
+            echo "Failed to obtain git_url from terminus"
+            exit 1
+          fi
+          echo "git_url=$GIT_URL" >> $GITHUB_OUTPUT
+
+      - name: Clone Pantheon repo
+        run: git clone "${{ steps.gitinfo.outputs.git_url }}" pantheon
+
+      - name: Create empty commit and push to environment branch
+        run: |
+          cd pantheon
+          git commit --allow-empty -m "Empty commit to trigger pipeline"
+          git push origin master
+
+  deploy:
+    needs: clone-pantheon
+    uses: lastcallmedia/github-actions/.github/workflows/terminus-safe-deploy.yml@main
+    secrets:
+      TERMINUS_DOWNSTREAM_SSH_KEY: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
+      TERMINUS_MACHINE_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+    with:
+      environment_name: "test"
+      deploy_message: "Pre-release test"
+      deploy_force: false
+      post_import_config: true
+      post_db_update: true
+      clear_env_cache: true
+
