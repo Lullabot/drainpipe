@@ -1,4 +1,4 @@
-name: Pre-release Test
+name: Pre-release Tests
 
 on:
   pull_request:
@@ -7,11 +7,9 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  validate-pr-source:
-    name: Validate PR Source Branch
+  prerelease-tests:
+    name: Pre-release checks
     runs-on: ubuntu-latest
-    outputs:
-      should_run: ${{ steps.check.outputs.should_run }}
     steps:
       - name: Check if PR is from main branch
         id: check
@@ -20,23 +18,25 @@ jobs:
           echo "Head branch: ${{ github.head_ref }}"
           if [[ "${{ github.head_ref }}" == "main" ]]; then
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "PR is from main to stable - tests will run"
           else
             echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "PR is not from main branch - skipping tests"
           fi
 
-  run-prerelease-tests:
-    name: Run Pre-release Scripts
-    runs-on: ubuntu-latest
-    needs: validate-pr-source
-    if: needs.validate-pr-source.outputs.should_run == 'true'
-    steps:
       - name: Checkout code
+        if: steps.check.outputs.should_run == 'true'
         uses: actions/checkout@v6
 
+      - name: Install DDEV
+        uses: ./scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
       - name: Test Drainpipe can be installed to a new project
+        if: steps.check.outputs.should_run == 'true'
         run: bash tests/prerelease.sh new
 
       - name: Test Drainpipe can be updated in a project already using it
+        if: steps.check.outputs.should_run == 'true'
         run: bash tests/prerelease.sh update
+
