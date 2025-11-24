@@ -86,6 +86,7 @@ jobs:
           TERMINUS_MACHINE_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
         run: |
           terminus auth:login --machine-token="$TERMINUS_MACHINE_TOKEN"
+          terminus self:plugin:install lastcallmedia/terminus-safe-deploy
 
       - name: Deploy to test environment
         env:
