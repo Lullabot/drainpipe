@@ -92,9 +92,10 @@ jobs:
         env:
           SITE: ${{ vars.PANTHEON_SITE_NAME }}
         run: |
-          terminus safe-deploy:deploy "${SITE}.test" \
+          terminus safe-deploy:deploy \
             --with-cim \
             --with-updates \
             --force-deploy \
             --clear-env-caches \
-            "Pre-release test"
+            --deploy-message "Pre-release test" \
+            "${SITE}.test"
