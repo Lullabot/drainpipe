@@ -4,8 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-concurrency: development
-
 jobs:
   Test-Acquia:
     runs-on: ubuntu-24.04
