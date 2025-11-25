@@ -15,7 +15,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Checkout base branch
         run: |
@@ -90,3 +90,120 @@ jobs:
               https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER/comments \
               -d "{\"body\":$COMPOSER_LOCK_DIFF,\"commit_id\":\"$DRAINPIPE_SHA\",\"path\":\"composer.lock\",\"subject_type\":\"file\",\"side\":\"RIGHT\"}"
           fi
+
+  Composer-Audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          composer install --prefer-dist --no-progress
+          sudo apt update -qq
+          sudo apt install -y jq
+
+      - name: Run composer audit
+        run: |
+          composer audit --format=json > audit-results.json 2>&1 || true
+
+          ADVISORY_COUNT=$(jq '.advisories // {} | length' audit-results.json)
+          IGNORED_COUNT=$(jq '."ignored-advisories" // {} | length' audit-results.json)
+
+          echo "## Composer Audit results" > comment.md
+
+          if [ "$ADVISORY_COUNT" -eq 0 ]; then
+            echo "**No security vulnerabilities found!**" >> comment.md
+            echo "" >> comment.md
+          else
+            echo "" > /tmp/active_issues.md
+            ACTIVE_COUNT=0
+
+            # Loop through advisories
+            while IFS= read -r package; do
+              while IFS= read -r advisory; do
+                ADVISORY_ID=$(echo "$advisory" | jq -r '.advisoryId // "unknown"')
+                TITLE=$(echo "$advisory" | jq -r '.title // "No title"')
+                CVE=$(echo "$advisory" | jq -r '.cve // "N/A"')
+                LINK=$(echo "$advisory" | jq -r '.link // ""')
+                AFFECTED=$(echo "$advisory" | jq -r '.affectedVersions // "N/A"')
+                VERSION=$(echo "$advisory" | jq -r '.reportedVersion // "N/A"')
+
+                echo "#### $package" >> /tmp/active_issues.md
+                echo "- **Advisory ID**: \`$ADVISORY_ID\`" >> /tmp/active_issues.md
+                echo "- **Title**: $TITLE" >> /tmp/active_issues.md
+                echo "- **CVE**: $CVE" >> /tmp/active_issues.md
+                echo "- **Affected Versions**: $AFFECTED" >> /tmp/active_issues.md
+                echo "- **Your Version**: $VERSION" >> /tmp/active_issues.md
+                [ -n "$LINK" ] && echo "- **Details**: $LINK" >> /tmp/active_issues.md
+                echo "" >> /tmp/active_issues.md
+                ACTIVE_COUNT=$((ACTIVE_COUNT + 1))
+              done < <(jq -c ".advisories[\"$package\"][]" audit-results.json)
+            done < <(jq -r '.advisories // {} | keys[]' audit-results.json)
+
+            # Add active issues section
+            if [ "$ACTIVE_COUNT" -gt 0 ]; then
+              echo "### Active Security Issues ($ACTIVE_COUNT)" >> comment.md
+              echo "" >> comment.md
+              echo "The following vulnerabilities require attention:" >> comment.md
+              echo "" >> comment.md
+              cat /tmp/active_issues.md >> comment.md
+            else
+              echo "### No Active Security Issues" >> comment.md
+              echo "" >> comment.md
+              echo "All detected vulnerabilities are currently ignored." >> comment.md
+              echo "" >> comment.md
+            fi
+
+            rm -f /tmp/active_issues.md
+          fi
+
+          if [ "$IGNORED_COUNT" -gt 0 ]; then
+            echo "" > /tmp/ignored_issues.md
+            IGNORED_COUNT=0
+
+            # Loop through ignored advisories
+            while IFS= read -r package; do
+              while IFS= read -r advisory; do
+                ADVISORY_ID=$(echo "$advisory" | jq -r '.advisoryId // "unknown"')
+                TITLE=$(echo "$advisory" | jq -r '.title // "No title"')
+                CVE=$(echo "$advisory" | jq -r '.cve // "N/A"')
+                LINK=$(echo "$advisory" | jq -r '.link // ""')
+                AFFECTED=$(echo "$advisory" | jq -r '.affectedVersions // "N/A"')
+                VERSION=$(echo "$advisory" | jq -r '.reportedVersion // "N/A"')
+
+                echo "#### $package" >> /tmp/ignored_issues.md
+                echo "- **Advisory ID**: \`$ADVISORY_ID\`" >> /tmp/ignored_issues.md
+                echo "- **Title**: $TITLE" >> /tmp/ignored_issues.md
+                echo "- **CVE**: $CVE" >> /tmp/ignored_issues.md
+                echo "- **Affected Versions**: $AFFECTED" >> /tmp/ignored_issues.md
+                echo "- **Your Version**: $VERSION" >> /tmp/ignored_issues.md
+                [ -n "$LINK" ] && echo "- **Details**: $LINK" >> /tmp/ignored_issues.md
+                echo "" >> /tmp/ignored_issues.md
+                IGNORED_COUNT=$((IGNORED_COUNT + 1))
+              done < <(jq -c ".[\"ignored-advisories\"][\"$package\"][]" audit-results.json)
+            done < <(jq -r '."ignored-advisories" // {} | keys[]' audit-results.json)
+
+            # Add ignored issues section
+            if [ "$IGNORED_COUNT" -gt 0 ]; then
+              echo "### Ignored Security Issues ($IGNORED_COUNT)" >> comment.md
+              echo "" >> comment.md
+              echo "<details>" >> comment.md
+              echo "<summary>Click to expand ignored vulnerabilities</summary>" >> comment.md
+              echo "" >> comment.md
+              cat /tmp/ignored_issues.md >> comment.md
+              echo "</details>" >> comment.md
+              echo "" >> comment.md
+            fi
+
+            rm -f /tmp/ignored_issues.md
+          fi
+
+      - name: Post comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: composer-security-audit
+          path: comment.md

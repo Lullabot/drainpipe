@@ -566,6 +566,27 @@ workflows for testing.
 Runs security checks for composer packages and Drupal contrib, as well as posting
 a diff of `composer.lock` as a review comment.
 
+Security checks rely on `composer audit`. This means `test:security` task will
+exit with error if your dependencies have known vulnerabilities. Sometimes, this
+is not desirable: think on a component which is required by Drupal core - you
+can not upgrade it directly, because it is pinned to a specific version by Drupal
+on the first place. To prevent these kind of situations from failing the security
+check, you can configure `composer audit` to ignore specific vulnerabilities
+when scanning your dependencies. To do so, the simplest way is to modify your
+`composer.json` file to add a list of vulnerabilities that should not trigger an
+error when running `test:security`:
+
+```json
+"config": {
+    "audit": {
+        "ignore": ["CVE-1234", "GHSA-xx", "PKSA-yy"]
+    }
+}
+```
+
+For more details about how to configure the ignore feature for `composer audit`,
+check the [Composer docs](https://getcomposer.org/doc/06-config.md#ignore).
+
 ### Composer Lock Diff (Deprecated)
 
 **This is now provided as part of the Security workflow**
