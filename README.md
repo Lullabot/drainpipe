@@ -564,7 +564,11 @@ workflows for testing.
 ```
 
 Runs security checks for composer packages and Drupal contrib, as well as posting
-a diff of `composer.lock` as a review comment.
+diffs of `composer.lock`, `package-lock.json`, and `yarn.lock` (if present) as review comments.
+
+The `package-lock.json` diff uses [diff-lockfiles](https://www.npmjs.com/package/diff-lockfiles)
+to show changes in NPM packages when `package-lock.json` is modified. The `yarn.lock` diff
+uses a git-based approach to show changes in Yarn packages.
 
 ### Composer Lock Diff (Deprecated)
 
@@ -710,7 +714,9 @@ Available variables are:
 ### Composer Lock Diff
 
 Updates Merge Request descriptions with a markdown table of any changes detected
-in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
+in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff),
+`package-lock.json` (if present) using [diff-lockfiles](https://www.npmjs.com/package/diff-lockfiles),
+and `yarn.lock` (if present) using a git-based diff approach.
 Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 `api` scope.
 
