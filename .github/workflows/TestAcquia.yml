@@ -4,8 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-concurrency: development
-
 jobs:
   Test-Acquia:
     runs-on: ubuntu-24.04
@@ -19,7 +17,7 @@ jobs:
           mv web docroot
           ln -s docroot web
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           path: drainpipe
 
@@ -45,6 +43,7 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config extra.drainpipe.github --json '["acquia"]'
           ddev exec --raw composer config minimum-stability dev
+          ddev exec --raw composer config audit.block-insecure false
 
           # Recommended settings for Acquia
           ddev composer config --no-plugins allow-plugins.acquia/drupal-recommended-settings false

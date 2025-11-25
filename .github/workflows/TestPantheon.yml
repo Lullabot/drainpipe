@@ -1,0 +1,118 @@
+name: "Test Pantheon"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  clone-pantheon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ca-certificates curl unzip git openssh-client
+
+      - name: Configure SSH for Pantheon
+        env:
+          PANTHEON_PRIVATE_SSH_KEY: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$PANTHEON_PRIVATE_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+
+      - uses: ./scaffold/github/actions/pantheon/setup-terminus
+        with:
+          pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+
+      - name: Get site Git URL and configure SSH host
+        id: gitinfo
+        env:
+          SITE: ${{ vars.PANTHEON_SITE_NAME }}
+          ENV: ${{ vars.PANTHEON_CLONE_FROM }}
+        run: |
+          GIT_URL="$(terminus connection:info "${SITE}.${ENV}" --field=git_url 2>/dev/null || true)"
+          if [ -z "$GIT_URL" ]; then
+            echo "Failed to obtain git_url from terminus"
+            exit 1
+          fi
+          echo "git_url=$GIT_URL" >> $GITHUB_OUTPUT
+
+          GIT_HOST=$(echo "$GIT_URL" | sed -E 's|ssh://([^@]+@)?([^:/]+).*|\2|')
+          if [ -n "$GIT_HOST" ]; then
+            ssh-keyscan -H "$GIT_HOST" >> ~/.ssh/known_hosts || true
+          fi
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Clone Pantheon repo
+        run: git clone "${{ steps.gitinfo.outputs.git_url }}" -b master pantheon
+
+      - name: Create empty commit and push to environment branch
+        run: |
+          cd pantheon
+          git commit --allow-empty -m "Empty commit to trigger pipeline"
+          git push origin master
+
+  deploy:
+    needs: clone-pantheon
+    runs-on: ubuntu-latest
+    container:
+      image: lastcallmedia/terminus-safe-deploy:latest
+    steps:
+      - name: Configure SSH for Pantheon
+        env:
+          PANTHEON_PRIVATE_SSH_KEY: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
+          TERMINUS_MACHINE_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          SITE: ${{ vars.PANTHEON_SITE_NAME }}
+        run: |
+          # Setup SSH directory and key
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$PANTHEON_PRIVATE_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Authenticate Terminus first to use connection:info
+          terminus auth:login --machine-token="$TERMINUS_MACHINE_TOKEN"
+          terminus self:plugin:install lastcallmedia/terminus-safe-deploy
+
+          # Get the actual SSH host for test environment
+          TEST_SSH_HOST=$(terminus connection:info "${SITE}.test" --field=sftp_host 2>/dev/null || true)
+          if [ -z "$TEST_SSH_HOST" ]; then
+            exit 1
+          fi
+          ssh-keyscan -H -p 2222 "$TEST_SSH_HOST" >> ~/.ssh/known_hosts || true
+
+          # Also add the appserver host pattern
+          APPSERVER_HOST=$(echo "$TEST_SSH_HOST" | sed 's/^[^@]*@//')
+          if [ -n "$APPSERVER_HOST" ]; then
+            ssh-keyscan -H -p 2222 "$APPSERVER_HOST" >> ~/.ssh/known_hosts || true
+          fi
+
+          # Start ssh-agent and add key
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+
+          # Make ssh-agent environment available to subsequent steps
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
+          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> $GITHUB_ENV
+
+      - name: Deploy to test environment
+        env:
+          SITE: ${{ vars.PANTHEON_SITE_NAME }}
+        run: |
+          terminus safe-deploy:deploy \
+            --with-cim \
+            --with-updates \
+            --force-deploy \
+            --clear-env-caches \
+            --deploy-message "Pre-release test" \
+            "${SITE}.test"
