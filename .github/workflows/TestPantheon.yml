@@ -3,8 +3,6 @@ name: "Test Pantheon"
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches:
-      - stable
 
 jobs:
   clone-pantheon:
@@ -25,11 +23,6 @@ jobs:
           chmod 700 ~/.ssh
           echo "$PANTHEON_PRIVATE_SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H drush.in >> ~/.ssh/known_hosts || true
-          ssh-keyscan -H codeserver.dev >> ~/.ssh/known_hosts || true
-
-      - name: Start ssh-agent and add key
-        run: |
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
 
@@ -37,7 +30,7 @@ jobs:
         with:
           pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
 
-      - name: Get site Git URL (dev environment)
+      - name: Get site Git URL and configure SSH host
         id: gitinfo
         env:
           SITE: ${{ vars.PANTHEON_SITE_NAME }}
@@ -49,6 +42,11 @@ jobs:
             exit 1
           fi
           echo "git_url=$GIT_URL" >> $GITHUB_OUTPUT
+
+          GIT_HOST=$(echo "$GIT_URL" | sed -E 's|ssh://([^@]+@)?([^:/]+).*|\2|')
+          if [ -n "$GIT_HOST" ]; then
+            ssh-keyscan -H "$GIT_HOST" >> ~/.ssh/known_hosts || true
+          fi
 
       - name: Configure Git
         run: |
@@ -73,25 +71,39 @@ jobs:
       - name: Configure SSH for Pantheon
         env:
           PANTHEON_PRIVATE_SSH_KEY: ${{ secrets.PANTHEON_PRIVATE_SSH_KEY }}
+          TERMINUS_MACHINE_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          SITE: ${{ vars.PANTHEON_SITE_NAME }}
         run: |
+          # Setup SSH directory and key
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           echo "$PANTHEON_PRIVATE_SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H drush.in >> ~/.ssh/known_hosts || true
-          ssh-keyscan -H codeserver.dev >> ~/.ssh/known_hosts || true
 
-      - name: Start ssh-agent and add key
-        run: |
+          # Authenticate Terminus first to use connection:info
+          terminus auth:login --machine-token="$TERMINUS_MACHINE_TOKEN"
+          terminus self:plugin:install lastcallmedia/terminus-safe-deploy
+
+          # Get the actual SSH host for test environment
+          TEST_SSH_HOST=$(terminus connection:info "${SITE}.test" --field=sftp_host 2>/dev/null || true)
+          if [ -z "$TEST_SSH_HOST" ]; then
+            exit 1
+          fi
+          ssh-keyscan -H -p 2222 "$TEST_SSH_HOST" >> ~/.ssh/known_hosts || true
+
+          # Also add the appserver host pattern
+          APPSERVER_HOST=$(echo "$TEST_SSH_HOST" | sed 's/^[^@]*@//')
+          if [ -n "$APPSERVER_HOST" ]; then
+            ssh-keyscan -H -p 2222 "$APPSERVER_HOST" >> ~/.ssh/known_hosts || true
+          fi
+
+          # Start ssh-agent and add key
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
 
-      - name: Authenticate Terminus
-        env:
-          TERMINUS_MACHINE_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
-        run: |
-          terminus auth:login --machine-token="$TERMINUS_MACHINE_TOKEN"
-          terminus self:plugin:install lastcallmedia/terminus-safe-deploy
+          # Make ssh-agent environment available to subsequent steps
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
+          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> $GITHUB_ENV
 
       - name: Deploy to test environment
         env:
