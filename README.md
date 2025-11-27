@@ -568,9 +568,9 @@ a diff of `composer.lock` as a review comment.
 
 Security checks rely on `composer audit`. This means `test:security` task will
 exit with error if your dependencies have known vulnerabilities. Sometimes, this
-is not desirable: think on a component which is required by Drupal core - you
+is not desirable: think of a component which is required by Drupal core - you
 can not upgrade it directly, because it is pinned to a specific version by Drupal
-on the first place. To prevent these kind of situations from failing the security
+in the first place. To prevent these kind of situations from failing the security
 check, you can configure `composer audit` to ignore specific vulnerabilities
 when scanning your dependencies. To do so, the simplest way is to modify your
 `composer.json` file to add a list of vulnerabilities that should not trigger an
