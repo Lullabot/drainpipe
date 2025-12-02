@@ -47,7 +47,7 @@ runs:
       env:
         GH_TOKEN: ${{ github.token }}
 
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         path: drainpipe
 

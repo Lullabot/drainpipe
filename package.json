@@ -1,6 +1,6 @@
 {
   "name": "@lullabot/drainpipe",
-  "packageManager": "yarn@4.11.0",
+  "packageManager": "yarn@4.12.0",
   "engines": {
     "node": ">=22.0.0 <23.0.0"
   },
@@ -8,6 +8,6 @@
     "metapackages/*"
   ],
   "devDependencies": {
-    "lerna": "^9.0.0"
+    "lerna": "^9.0.3"
   }
 }

@@ -85,6 +85,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installDdevCommand();
         $this->installHostingProviderSupport();
         $this->installCICommands($event->getComposer());
+        $this->configureRenovateIgnore();
         $this->installEnvSupport();
         if ($this->hasPantheonConfigurationFiles()) {
             $this->checkPantheonSystemDrupalIntegrations($event->getComposer());
@@ -104,6 +105,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installDdevCommand();
         $this->installHostingProviderSupport();
         $this->installCICommands($event->getComposer());
+        $this->configureRenovateIgnore();
         $this->installEnvSupport();
         if ($this->hasPantheonConfigurationFiles()) {
             $this->pantheonSystemDrupalIntegrationsWarning();
@@ -211,6 +213,69 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
+     * Configures Renovate to ignore dependencies managed by Drainpipe.
+     */
+    private function configureRenovateIgnore(): void
+    {
+        $renovateConfigPath = './renovate.json';
+        $fs = new Filesystem();
+
+        // Create base renovate.json if it doesn't exist
+        if (!file_exists($renovateConfigPath)) {
+            $this->io->write('<info>Creating initial renovate.json file...</info>');
+            $baseConfig = [
+                '$schema' => 'https://docs.renovatebot.com/renovate-schema.json',
+                'extends' => [
+                    'config:recommended'
+                ]
+            ];
+            file_put_contents($renovateConfigPath, json_encode($baseConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+        }
+
+        // Read and parse the existing renovate.json
+        $renovateConfigJson = file_get_contents($renovateConfigPath);
+        $renovateConfig = json_decode($renovateConfigJson, true);
+
+        if ($renovateConfig === null) {
+            $this->io->warning('Unable to parse renovate.json - skipping Renovate configuration');
+            return;
+        }
+
+        // Initialize packageRules if it doesn't exist
+        if (!isset($renovateConfig['packageRules']) || !is_array($renovateConfig['packageRules'])) {
+            $renovateConfig['packageRules'] = [];
+        }
+
+        // Check if the rule already exists
+        $ruleExists = false;
+        foreach ($renovateConfig['packageRules'] as $rule) {
+            if (isset($rule['matchPackageNames'])
+                && is_array($rule['matchPackageNames'])
+                && in_array('marocchino/sticky-pull-request-comment', $rule['matchPackageNames'])
+                && isset($rule['matchManagers'])
+                && is_array($rule['matchManagers'])
+                && in_array('github-actions', $rule['matchManagers'])
+            ) {
+                $ruleExists = true;
+                break;
+            }
+        }
+
+        // Add the rule if it doesn't exist
+        if (!$ruleExists) {
+            $renovateConfig['packageRules'][] = [
+                'matchManagers' => ['github-actions'],
+                'matchPackageNames' => ['marocchino/sticky-pull-request-comment'],
+                'enabled' => false,
+                'description' => 'Managed by Drainpipe',
+            ];
+
+            file_put_contents($renovateConfigPath, json_encode($renovateConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+            $this->io->write('<info>Updated renovate.json to ignore Drainpipe managed dependencies</info>');
+        }
+    }
+
+    /**
      * Install .env support.
      */
     private function installEnvSupport(): void
@@ -244,7 +309,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $fs->copy($ddevScaffoldDir . 'task-command.sh', './.ddev/commands/web/task');
             $fs->ensureDirectoryExists('./.ddev/web-build');
             $fs->copy($ddevScaffoldDir . 'drainpipe.Dockerfile', './.ddev/web-build/Dockerfile.drainpipe');
-            $fs->copy($vendor . '/lullabot/drainpipe/.taskfile', './.ddev/web-build/.taskfile');
+            $fs->copy($vendor . '/lullabot/drainpipe/.taskfile', './.ddev/web-build/taskfile');
             if (file_exists('./web/sites/default/settings.ddev.php')) {
                 $settings = file_get_contents('./web/sites/default/settings.ddev.php');
                 if (str_contains($settings, 'environment_indicator.indicator')) {
