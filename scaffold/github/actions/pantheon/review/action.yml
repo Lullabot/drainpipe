@@ -87,10 +87,10 @@ runs:
             -H "Authorization: token ${{ inputs.github-token }}" \
         )
         # Generate truncated PR names (Pantheon truncates to 11 chars)
-        PULL_NUMBERS=$(echo $PULLS | jq -r '.[] | ("pr-" + (.number|tostring))[:11]')
+        PULL_NUMBERS=$(echo $PULLS | jq -r '.[] | ("pr-" + (.number|tostring))[0:11]')
         MULTIDEVS=$(drainpipe_exec "terminus multidev:list --format json ${{ inputs.site-name }} | jq --raw-output 'keys | .[]'")
         for MULTIDEV in $MULTIDEVS; do
-          if echo "$PULL_NUMBERS" | grep -q "^${MULTIDEV}$"; then
+          if echo "$PULL_NUMBERS" | grep -Fxq "$MULTIDEV"; then
             echo "Found open PR for $MULTIDEV"
           # if $MULTIDEV starts with "pr-"
           elif [[ $MULTIDEV == pr-* ]]; then
