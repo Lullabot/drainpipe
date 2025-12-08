@@ -52,5 +52,12 @@ runs:
         path: drainpipe
 
     - run: |
-        echo "NODE_MAJOR=$([ -f .nvmrc ] && cat .nvmrc || cat drainpipe/.nvmrc | tr -d '[:space:]')" >> $GITHUB_ENV
+        if [[ -f .nvmrc ]]; then
+            NODE_VERSION_RAW=$(cat .nvmrc)
+        else
+            NODE_VERSION_RAW=$(cat drainpipe/.nvmrc)
+        fi
+        NODE_MAJOR=$(echo "${NODE_VERSION_RAW}" | tr -d '[:space:]')
+        echo "NODE_MAJOR=${NODE_MAJOR}" >> "$GITHUB_ENV"
+
       shell: bash
