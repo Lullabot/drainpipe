@@ -94,8 +94,8 @@ upstream dependencies e.g. https://github.com/go-task/task/releases
 ### Tugboat
 
 The Tugboat configuration file is not a static file; it is dynamically generated
-based on your `.ddev/config` file. To see the implementation details, check
-[/src/ScaffoldInstallerPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/ScaffoldInstallerPlugin.php#L451).
+based on your `.ddev/config.yaml` file. To see the implementation details, check
+[/src/TugboatConfigPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/TugboatConfigPlugin.php).
 
 ### Node JS
 
@@ -790,25 +790,52 @@ Add the following to `composer.json` to add Tugboat configuration:
 }
 ```
 
+Then, run `ddev composer install` to generate:
+- `.tugboat/config.yml` - Complete Tugboat configuration
+- `.tugboat/scripts/` - Helper scripts (if needed)
+- `web/sites/default/settings.tugboat.php` - Drupal settings for Tugboat
+
 The following will be autodetected based on your `.ddev/config.yml`:
 - Web server (nginx or apache)
 - PHP version
 - Database type and version
-- nodejs version
+- Nodejs version
 - Redis (Obtained with `ddev get ddev/ddev-redis`)
+- Solr (Obtained with `ddev get ddev/ddev-solr`)
 
-Additionally, Pantheon Terminus can be added:
+Additionally, Pantheon integration can be added:
 ```json
 {
     "extra": {
         "drainpipe": {
             "tugboat": {
-              "terminus": true
+              "pantheon": true
             }
         }
     }
 }
 ```
+
+### Custom Templates
+
+For the main `php` service, you can override any build phase template by copying
+it to `.tugboat/drainpipe-templates/`. Example:
+
+```
+mkdir -p .tugboat/drainpipe-templates
+cp vendor/lullabot/drainpipe/scaffold/tugboat/templates/php-init.yml.twig \
+   .tugboat/drainpipe-templates/
+```
+
+Edit `.tugboat/drainpipe-templates/php-init.yml.twig` to add, remove, or modify
+commands, then regenerate the Tugboat configuration file with `ddev composer install`.
+
+Available Templates:
+
+- `php-init.yml.twig` - Init phase commands
+- `php-update.yml.twig` - Update phase commands
+- `php-build.yml.twig` - Build phase commands
+- `config.yml.twig` - Complete Tugboat configuration (advanced)
 
 ### Tasks
 
@@ -857,8 +884,20 @@ task to your `Taskfile.yml` for the first time).
 configuration.
 >>>
 
-You can hook into the `init` step of images by adding them to your
-`Taskfile.yml`, e.g.
+#### Custom init commands
+
+You can hook into the `init` step of any service by adding them to your
+`Taskfile.yml`. These additional commands will be run at the end of the
+init phase for the specific Tugboat service.
+
+Supported services:
+
+- Webserver: `tugboat:php:init`
+- Database: `tugboat:mysql:init` / `tugboat:mariadb:init` / `tugboat:postgres:init`
+- Memory cache: `tugboat:redis:init` / `tugboat:memcached:init`
+- Search: `tugboat:solr:init` / `tugboat:elasticsearch:init`
+
+Example:
 
 ```
 tugboat:php:init:
@@ -867,8 +906,21 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-You can also add an `online` step by adding a task named `online:tugboat`
-and re-running `composer install`.
+If using MySQL, you should add an init task to install the MySQL client:
+
+```
+tugboat:mysql:init:
+  desc: "Install MySQL client"
+  cmds:
+    - ./.tugboat/scripts/install-mysql-client.sh
+```
+
+#### Custom online commands
+
+You can also add an `online` step to the `php` service by adding a task
+named `online:tugboat` and re-running `composer install`.
+
+### Additional Tugboat keys
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
 it. The following keys can be added to your `config.yml` via a
@@ -880,11 +932,8 @@ php:
   screenshot:
   visualdiff:
 solr:
-  commands:
   checkout:
   depends:
-  aliases:
-  urls:
   volumes:
   environment:
 ```
