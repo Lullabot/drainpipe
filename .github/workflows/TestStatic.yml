@@ -87,7 +87,7 @@ jobs:
           ddev task test:untracked
 
       - name: Run Static Tests
-        run: ddev task test:static format=junit
+        run: ddev task test:static
 
       - name: Confirm custom directories are scanned
         run: |
