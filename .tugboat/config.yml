@@ -38,9 +38,8 @@ services:
           apt-get install -y imagemagick
           yes '' | pecl install -f redis
           echo 'extension=redis.so' > /usr/local/etc/php/conf.d/redis.ini
-#drainpipe-start
-# This is necessary for testing as this repository doesn't hold a Drupal site.
-        - |
+          #drainpipe-start
+          # This is necessary for testing as this repository doesn't hold a Drupal site.
           shopt -s dotglob
           rm -rf /var/www/html/*
           composer create-project drupal/recommended-project /var/www/html
@@ -56,7 +55,6 @@ services:
           composer config minimum-stability dev
           composer require lullabot/drainpipe --with-all-dependencies
           cp web/sites/default/default.settings.php web/sites/default/settings.php
-        - |
           #drainpipe-end
           mkdir -p "${DOCROOT}/sites/default/files"
           chmod 777 "${DOCROOT}/sites/default/files"
@@ -79,28 +77,28 @@ services:
           sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d ${TASKFILE} -b /usr/local/bin
       update:
         - |
-#drainpipe-start
+          #drainpipe-start
           cd /var/www/html
-#drainpipe-end
+          #drainpipe-end
           composer install
           chmod 755 ${DOCROOT}/sites/default
           chgrp -R www-data "${DOCROOT}/sites/default/files"
           find "${DOCROOT}/sites/default/files" -type d -exec chmod 2775 {} \;
           find "${DOCROOT}/sites/default/files" -type f -exec chmod 0664 {} \;
-#drainpipe-start
+          #drainpipe-start
           ./vendor/bin/drush config:export --yes
-#drainpipe-end
+          #drainpipe-end
           task update
       build:
         - |
-#drainpipe-start
+          #drainpipe-start
           cd /var/www/html
-#drainpipe-end
+          #drainpipe-end
           task build
           task update
-#drainpipe-start
+          #drainpipe-start
           task tugboat:drush-uli-ready
-#drainpipe-end
+          #drainpipe-end
       online:
         - task online:tugboat
     aliases:
