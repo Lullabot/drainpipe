@@ -90,8 +90,13 @@ services:
           TASKFILE=$(cat ${TUGBOAT_ROOT}/vendor/lullabot/drainpipe/.taskfile)
           sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d ${TASKFILE} -b /usr/local/bin
       update:
+#drainpipe-start
+        - cd /var/www/html
+#drainpipe-end
         - composer install
+#drainpipe-start
         - task sync
+#drainpipe-end
         - |
           chmod 755 ${DOCROOT}/sites/default
         - |
@@ -103,12 +108,18 @@ services:
 #drainpipe-end
         - task update
       build:
+#drainpipe-start
+        - cd /var/www/html
+#drainpipe-end
         - task build
         - task update
 #drainpipe-start
         - task tugboat:drush-uli-ready
 #drainpipe-end
       online:
+#drainpipe-start
+        - cd /var/www/html
+#drainpipe-end
         - task online:tugboat
     aliases:
       - foo
