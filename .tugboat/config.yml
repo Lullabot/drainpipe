@@ -57,7 +57,7 @@ services:
           composer require lullabot/drainpipe --with-all-dependencies
           cp web/sites/default/default.settings.php web/sites/default/settings.php
         - |
-#drainpipe-end
+          #drainpipe-end
           mkdir -p "${DOCROOT}/sites/default/files"
           chmod 777 "${DOCROOT}/sites/default/files"
           chgrp -R www-data "${DOCROOT}/sites/default/files"
