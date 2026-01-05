@@ -39,7 +39,7 @@ services:
           yes '' | pecl install -f redis
           echo 'extension=redis.so' > /usr/local/etc/php/conf.d/redis.ini
 #drainpipe-start
-# This is necessary for testing as this repository doesn't hold a Drupal site.
+          # This is necessary for testing as this repository doesn't hold a Drupal site.
           shopt -s dotglob
           rm -rf /var/www/html/*
           composer create-project drupal/recommended-project /var/www/html
