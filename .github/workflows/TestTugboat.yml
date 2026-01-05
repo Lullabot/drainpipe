@@ -68,6 +68,7 @@ jobs:
       # preview - they should be the same.
       - name: Test Generated Files
         run: |
+          sed -i '/#drainpipe-start/,/#drainpipe-end/d' drainpipe/.tugboat/config.yml
           diff -up drainpipe/.tugboat/config.yml .tugboat/config.yml
 
           # Run the online task to generate drush/drush.yml.
