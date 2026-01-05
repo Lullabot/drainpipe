@@ -30,7 +30,7 @@
         "vincentlanglet/twig-cs-fixer": "^3.11.0"
     },
     "require-dev": {
-        "composer/composer": "^2.9.2"
+        "composer/composer": "^2.9.3"
     },
     "extra": {
         "class": [
