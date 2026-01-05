@@ -228,8 +228,6 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         // Copy MySQL client script if needed
         if ($dbType === 'mysql') {
             $this->installScript('install-mysql-client.sh');
-            $services['database']['commands']['init'] = 1;
-            $this->io->warning("🪠 [Drainpipe] MySQL database detected. Remember to add a tugboat:mysql:init task to call .tugboat/scripts/install-mysql-client.sh");
         }
 
         return $services;

@@ -906,15 +906,6 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-If using MySQL, you should add an init task to install the MySQL client:
-
-```
-tugboat:mysql:init:
-  desc: "Install MySQL client"
-  cmds:
-    - ./.tugboat/scripts/install-mysql-client.sh
-```
-
 #### Custom online commands
 
 You can also add an `online` step to the `php` service by adding a task
