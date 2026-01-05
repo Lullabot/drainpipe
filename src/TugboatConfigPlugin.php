@@ -113,7 +113,8 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
 
         // Check if DDEV configuration exists
         if (!file_exists('./.ddev/config.yaml')) {
-            $this->io->warning('🪠 [Drainpipe] DDEV configuration not found. Tugboat integration requires DDEV.');
+            $this->io->warning('🪠 [Drainpipe] DDEV configuration not found. Generating settings.php file, assuming Mariadb.');
+            $this->generateSettingsFile(['database' => ['type' => 'mariadb']]);
             return;
         }
 

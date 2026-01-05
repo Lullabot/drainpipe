@@ -1,5 +1,6 @@
-- task build
-- task update
+- |
+  task build
+  task update
 {% if services.php.commands.build is defined and services.php.commands.build %}
-- task {{ services.php.commands.build }}
+  task {{ services.php.commands.build }}
 {% endif %}

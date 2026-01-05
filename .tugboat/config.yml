@@ -29,25 +29,17 @@ services:
         - |
           apt-get update
           apt-get install -y mariadb-client
-        - |
           ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
-        - |
           docker-php-ext-install opcache
-        - |
           apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev
-        - |
           apt-get install -y libwebp-dev libwebp7 webp libmagickwand-dev
-        - |
           docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
           docker-php-ext-install gd
-        - |
           apt-get install -y imagemagick
-        - |
           yes '' | pecl install -f redis
           echo 'extension=redis.so' > /usr/local/etc/php/conf.d/redis.ini
 #drainpipe-start
 # This is necessary for testing as this repository doesn't hold a Drupal site.
-        - |
           shopt -s dotglob
           rm -rf /var/www/html/*
           composer create-project drupal/recommended-project /var/www/html
@@ -64,57 +56,49 @@ services:
           composer require lullabot/drainpipe --with-all-dependencies
           cp web/sites/default/default.settings.php web/sites/default/settings.php
 #drainpipe-end
-        - |
           mkdir -p "${DOCROOT}/sites/default/files"
           chmod 777 "${DOCROOT}/sites/default/files"
           chgrp -R www-data "${DOCROOT}/sites/default/files"
-        - composer install
-        - |
+          composer install
           apt-get install -y ca-certificates gnupg
           mkdir -p /etc/apt/keyrings
           curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
           NODE_MAJOR=$(cat ${TUGBOAT_ROOT}/.nvmrc)
           echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-        - |
           echo 'Package: *' > /etc/apt/preferences.d/nodesource-nodejs
           echo 'Pin: origin deb.nodesource.com' >> /etc/apt/preferences.d/nodesource-nodejs
           echo 'Pin-Priority: 1001' >> /etc/apt/preferences.d/nodesource-nodejs
-        - apt-get update
-        - apt-get -qq install nodejs
-        - apt-get clean
-        - |
+          apt-get update
+          apt-get -qq install nodejs
+          apt-get clean
           corepack enable
-        - |
           nodejs -v | grep -q v$NODE_MAJOR
-        - |
           TASKFILE=$(cat ${TUGBOAT_ROOT}/vendor/lullabot/drainpipe/.taskfile)
           sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d ${TASKFILE} -b /usr/local/bin
       update:
-#drainpipe-start
-        - cd /var/www/html
-#drainpipe-end
-        - composer install
-#drainpipe-start
-        - task sync
-#drainpipe-end
         - |
+#drainpipe-start
+          cd /var/www/html
+#drainpipe-end
+          composer install
+          task sync
           chmod 755 ${DOCROOT}/sites/default
-        - |
           chgrp -R www-data "${DOCROOT}/sites/default/files"
           find "${DOCROOT}/sites/default/files" -type d -exec chmod 2775 {} \;
           find "${DOCROOT}/sites/default/files" -type f -exec chmod 0664 {} \;
 #drainpipe-start
-        - ./vendor/bin/drush config:export --yes
+          ./vendor/bin/drush config:export --yes
 #drainpipe-end
-        - task update
+          task update
       build:
+        - |
 #drainpipe-start
-        - cd /var/www/html
+          cd /var/www/html
 #drainpipe-end
-        - task build
-        - task update
+          task build
+          task update
 #drainpipe-start
-        - task tugboat:drush-uli-ready
+          task tugboat:drush-uli-ready
 #drainpipe-end
       online:
 #drainpipe-start
