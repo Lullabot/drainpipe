@@ -26,17 +26,17 @@ services:
 {% endfor %}
     commands:
       init:
-{{ include('php-init.yml.twig')|indent(8)|raw }}
+{{ include('php-init.yml.twig')|no_comments|trim|indent(8)|raw }}
       update:
-{{ include('php-update.yml.twig')|indent(8)|raw }}
+{{ include('php-update.yml.twig')|no_comments|trim|indent(8)|raw }}
       build:
-{{ include('php-build.yml.twig')|indent(8)|raw }}
+{{ include('php-build.yml.twig')|no_comments|trim|indent(8)|raw }}
 {% if services.php.commands.online is defined and services.php.commands.online %}
       online:
         - task {{ services.php.commands.online }}
 {% endif %}
 {% if services.php.overrides|length > 0 %}
-{{ services.php.overrides|yaml_encode|indent(4)|raw }}
+{{ services.php.overrides|yaml_encode|trim|indent(4)|raw }}
 {% endif %}
 
   {{ services.database.type }}:
@@ -68,6 +68,6 @@ services:
         - ./.tugboat/scripts/custom-init-command.sh {{ services.search.type }}
 {% endif %}
 {% if services.search.type == 'solr' and services.search.overrides|length > 0 %}
-{{ services.search.overrides|yaml_encode|indent(4)|raw }}
+{{ services.search.overrides|yaml_encode|trim|indent(4)|raw }}
 {% endif %}
 {% endif %}

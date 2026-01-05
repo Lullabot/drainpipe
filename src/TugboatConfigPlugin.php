@@ -490,7 +490,7 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         return $services;
     }
 
-    private function initTwigLoader(Environment &$twig = null): Environment
+    private function initTwigLoader(): Environment
     {
         $vendor = $this->config->get('vendor-dir');
         $scaffoldPath = $vendor . '/lullabot/drainpipe/scaffold/tugboat/templates';
@@ -510,9 +510,13 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
             return Yaml::dump($value, 4, 2);
         }));
 
-        $twig->addFilter(new \Twig\TwigFilter('indent', function (string $text, int $spaces = 4): string {
+        $twig->addFilter(new TwigFilter('indent', function (string $text, int $spaces = 4): string {
             $pad = str_repeat(' ', max(0, $spaces));
             return preg_replace('/^/m', $pad, $text);
+        }));
+
+        $twig->addFilter(new TwigFilter('no_comments', function (string $text): string {
+            return preg_replace('/^[ \t]*#.*$\n?/m', '', $text);
         }));
 
         return $twig;
@@ -556,6 +560,7 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         $scaffoldPath = $vendor . '/lullabot/drainpipe/scaffold/tugboat/templates';
         $loader = new FilesystemLoader($scaffoldPath);
         $twig = new Environment($loader);
+        $twig = $this->initTwigLoader();
 
         $templateVars = [
             'services' => $services,
