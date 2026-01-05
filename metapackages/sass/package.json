@@ -3,7 +3,7 @@
   "version": "0.1.4",
   "bin": "./gulp.js",
   "dependencies": {
-    "autoprefixer": "^10.4.22",
+    "autoprefixer": "^10.4.23",
     "cssnano": "^7.1.2",
     "gulp": "^5.0.1",
     "gulp-postcss": "^10.0.0",
@@ -12,7 +12,7 @@
     "gulp-sourcemaps": "^3.0.0",
     "modern-normalize": "^3.0.1",
     "postcss": "^8.5.6",
-    "sass": "^1.95.1",
+    "sass": "^1.97.1",
     "yargs": "^18.0.0"
   },
   "repository": {
