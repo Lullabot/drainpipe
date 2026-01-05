@@ -102,6 +102,9 @@ services:
           task tugboat:drush-uli-ready
           #drainpipe-end
       online:
+        #drainpipe-start
+        - alias task='cd /var/www/html && command task'
+        #drainpipe-end
         - task online:tugboat
     aliases:
       - foo
