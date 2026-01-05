@@ -83,7 +83,6 @@ services:
           cd /var/www/html
 #drainpipe-end
           composer install
-          task sync
           chmod 755 ${DOCROOT}/sites/default
           chgrp -R www-data "${DOCROOT}/sites/default/files"
           find "${DOCROOT}/sites/default/files" -type d -exec chmod 2775 {} \;
@@ -103,9 +102,6 @@ services:
           task tugboat:drush-uli-ready
 #drainpipe-end
       online:
-#drainpipe-start
-        - cd /var/www/html
-#drainpipe-end
         - task online:tugboat
     aliases:
       - foo
