@@ -30,6 +30,7 @@ services:
           apt-get update
           apt-get install -y mariadb-client
         - |
+          mkdir -p "${TUGBOAT_ROOT}/web"
           ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
         - |
           docker-php-ext-install opcache

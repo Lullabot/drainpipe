@@ -13,6 +13,7 @@
   # Link the document root to the expected path. Tugboat uses /docroot
   # by default. So, if Drupal is located at any other path in your git
   # repository, change that here. This example links /web to the docroot
+  mkdir -p "${TUGBOAT_ROOT}/web"
   ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
 - |
   # Install the PHP opcache as it's not included by default and needed for
