@@ -39,7 +39,8 @@ services:
           yes '' | pecl install -f redis
           echo 'extension=redis.so' > /usr/local/etc/php/conf.d/redis.ini
 #drainpipe-start
-          # This is necessary for testing as this repository doesn't hold a Drupal site.
+# This is necessary for testing as this repository doesn't hold a Drupal site.
+        - |
           shopt -s dotglob
           rm -rf /var/www/html/*
           composer create-project drupal/recommended-project /var/www/html
@@ -55,6 +56,7 @@ services:
           composer config minimum-stability dev
           composer require lullabot/drainpipe --with-all-dependencies
           cp web/sites/default/default.settings.php web/sites/default/settings.php
+        - |
 #drainpipe-end
           mkdir -p "${DOCROOT}/sites/default/files"
           chmod 777 "${DOCROOT}/sites/default/files"
