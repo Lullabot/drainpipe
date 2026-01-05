@@ -79,6 +79,8 @@ services:
         - |
           #drainpipe-start
           cd /var/www/html
+          composer install
+          task sync
           #drainpipe-end
           composer install
           chmod 755 ${DOCROOT}/sites/default
