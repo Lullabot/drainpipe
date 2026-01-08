@@ -41,7 +41,7 @@
   mkdir -p "${DOCROOT}/sites/default/files"
   chmod 777 "${DOCROOT}/sites/default/files"
   chgrp -R www-data "${DOCROOT}/sites/default/files"
-  composer install
+  composer install --ignore-platform-reqs
   # Install node
   apt-get install -y ca-certificates gnupg
   mkdir -p /etc/apt/keyrings
@@ -67,7 +67,7 @@
 {% endif %}
 {% if pantheon %}
   curl --fail -sSL https://github.com/pantheon-systems/terminus/releases/download/$(curl -L --fail --silent "https://api.github.com/repos/pantheon-systems/terminus/releases/latest" | perl -nle'print $& while m{"tag_name": "\K.*?(?=")"}g')/terminus.phar --output /usr/local/bin/terminus
-  chmod 777 /usr/local/bin/terminus
+  chmod 755 /usr/local/bin/terminus
 {% endif %}
 {% if services.php.commands.init|default(false) %}
   task tugboat:php:init
