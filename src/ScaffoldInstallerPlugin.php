@@ -285,11 +285,25 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     private function writeJsonFile(string $path, array $data): void
     {
-        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        try {
+            $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $this->io->warning(sprintf('Failed to encode JSON for file "%s": %s', $path, $e->getMessage()));
+            return;
+        }
+
         $json = preg_replace_callback('/^ +/m', function ($m) {
             return str_repeat(' ', strlen($m[0]) / 2);
         }, $json);
-        file_put_contents($path, $json . PHP_EOL);
+
+        if ($json === null) {
+            $this->io->warning(sprintf('Failed to process JSON for file "%s" (preg_replace_callback error).', $path));
+            return;
+        }
+
+        if (file_put_contents($path, $json . PHP_EOL) === false) {
+            $this->io->warning(sprintf('Failed to write to file: %s', $path));
+        }
     }
 
     /**
