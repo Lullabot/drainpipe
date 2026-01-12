@@ -447,7 +447,7 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         // Only presentational properties are allowed
         $allowedOverrides = [
             'php' => ['aliases', 'visualdiff', 'screenshot', 'urls'],
-            'solr' => ['checkout', 'depends', 'volumes', 'environment'],
+            'solr' => ['checkout', 'depends', 'volumes', 'environment', 'aliases', 'urls'],
         ];
 
         foreach ($overrideConfig as $serviceName => $overrides) {
