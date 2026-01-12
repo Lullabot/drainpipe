@@ -371,6 +371,8 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         $tasks = $taskfile['tasks'] ?? [];
 
         // Services that can have a custom init task
+        // Search services are not allowed to add init commands like this, and
+        // instead should override 'commands' in 'config.drainpipe-overrides.yml'
         $initTasks = [
             'php',
             'mysql',
@@ -378,8 +380,6 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
             'postgres',
             'redis',
             'memcached',
-            'solr',
-            'elasticsearch',
         ];
 
         // Check for service-specific init tasks
@@ -391,9 +391,6 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
                 }
                 elseif (in_array($service, ['redis', 'memcached'])) {
                     $commands['memory_cache']['init'] = true;
-                }
-                elseif (in_array($service, ['solr', 'elasticsearch'])) {
-                    $commands['search']['init'] = true;
                 }
                 else {
                     $commands[$service]['init'] = true;
@@ -446,8 +443,8 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         // Define allowed override keys per service
         // Only presentational properties are allowed
         $allowedOverrides = [
-            'php' => ['aliases', 'visualdiff', 'screenshot', 'urls'],
-            'solr' => ['checkout', 'depends', 'volumes', 'environment', 'aliases', 'urls'],
+            'php' => ['aliases', 'lighthouse', 'visualdiff', 'screenshot', 'urls'],
+            'solr' => ['checkout', 'commands', 'depends', 'volumes', 'environment', 'aliases', 'urls'],
         ];
 
         foreach ($overrideConfig as $serviceName => $overrides) {

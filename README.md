@@ -835,6 +835,7 @@ Available Templates:
 - `php-init.yml.twig` - Init phase commands
 - `php-update.yml.twig` - Update phase commands
 - `php-build.yml.twig` - Build phase commands
+- `php-online.yml.twig` - Online phase commands
 - `config.yml.twig` - Complete Tugboat configuration (advanced)
 
 ### Tasks
@@ -895,7 +896,6 @@ Supported services:
 - Webserver: `tugboat:php:init`
 - Database: `tugboat:mysql:init` / `tugboat:mariadb:init` / `tugboat:postgres:init`
 - Memory cache: `tugboat:redis:init` / `tugboat:memcached:init`
-- Search: `tugboat:solr:init` / `tugboat:elasticsearch:init`
 
 Example:
 

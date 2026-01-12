@@ -33,10 +33,8 @@ services:
 {{ include('php-update.yml.twig')|no_comments|trim|indent(8)|raw }}
       build:
 {{ include('php-build.yml.twig')|no_comments|trim|indent(8)|raw }}
-{% if services.php.commands.online is defined and services.php.commands.online %}
       online:
-        - task {{ services.php.commands.online }}
-{% endif %}
+{{ include('php-online.yml.twig')|no_comments|trim|indent(8)|raw }}
 {% if services.php.overrides|length > 0 %}
 {{ services.php.overrides|yaml_encode|trim|indent(4)|raw }}
 {% endif %}
@@ -63,12 +61,6 @@ services:
 
   {{ services.search.type }}:
     image: {{ services.search.image }}
-{% if services.search.commands.init|default(false) %}
-    checkout: true
-    commands:
-      init:
-        - ./.tugboat/scripts/custom-init-command.sh {{ services.search.type }}
-{% endif %}
 {% if services.search.type == 'solr' and services.search.overrides|length > 0 %}
 {{ services.search.overrides|yaml_encode|trim|indent(4)|raw }}
 {% endif %}
