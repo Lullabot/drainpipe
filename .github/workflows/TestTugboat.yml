@@ -122,7 +122,7 @@ jobs:
           ddev exec --raw echo "16" > .nvmrc
           ddev composer require lullabot/drainpipe --with-all-dependencies
 
-      - name: Test NODE_MAJOR is correct
+      - name: Test NODE_MAJOR override works as expected
         run: |
           export TUGBOAT_ROOT=. && \
             eval "$(grep 'NODE_MAJOR=' .tugboat/config.yml)" && \
