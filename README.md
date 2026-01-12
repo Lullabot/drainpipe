@@ -809,7 +809,7 @@ Additionally, Pantheon integration can be added:
     "extra": {
         "drainpipe": {
             "tugboat": {
-              "pantheon": true
+                "pantheon": true
             }
         }
     }
