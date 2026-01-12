@@ -803,7 +803,7 @@ Additionally, Pantheon Terminus can be added:
     "extra": {
         "drainpipe": {
             "tugboat": {
-              "terminus": true
+                "pantheon": true
             }
         }
     }
