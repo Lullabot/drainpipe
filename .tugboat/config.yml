@@ -104,6 +104,7 @@ services:
           task tugboat:drush-uli-ready
           #drainpipe-end
       online:
+        - echo "Running online commands"
         - task online:tugboat
     aliases:
       - foo
