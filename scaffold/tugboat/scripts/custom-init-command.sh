@@ -12,12 +12,12 @@ if [[ -z "$type" ]]; then
 fi
 
 # Install Taskfile
-TASKFILE=$(cat ${TUGBOAT_ROOT}/vendor/lullabot/drainpipe/.taskfile)
+TASKFILE=v3.46.4
 sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d ${TASKFILE} -b /usr/local/bin
 
 # Install YQ
-YQ_VERSION=v4.50.1
-wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+YQ=v4.50.1
+wget https://github.com/mikefarah/yq/releases/download/${YQ}/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
 
 # Ensure includes are not executed
 yq -i 'del(."includes")' Taskfile.yml

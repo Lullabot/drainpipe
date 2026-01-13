@@ -42,7 +42,6 @@ services:
   {{ services.database.type }}:
     image: {{ services.database.image }}
 {% if services.database.commands.init|default(false) %}
-    checkout: true
     commands:
       init:
         - ./.tugboat/scripts/custom-init-command.sh {{ services.database.type }}
@@ -52,7 +51,6 @@ services:
   {{ services.memory_cache.type }}:
     image: {{ services.memory_cache.image }}
 {% if services.memory_cache.commands.init|default(false) %}
-    checkout: true
     commands:
       init:
         - ./.tugboat/scripts/custom-init-command.sh {{ services.memory_cache.type }}
