@@ -334,6 +334,14 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
             case 'database':
                 // $subtype is the database type (mariadb, mysql, postgres)
                 $dbType = $subtype ?? 'mariadb';
+
+                // When DDEV uses MySQL, allow using Percona image in Tugboat
+                $isPercona = isset($this->extra['drainpipe']['tugboat']['percona']) &&
+                          $this->extra['drainpipe']['tugboat']['percona'];
+                if ($subtype === 'mysql' && $isPercona) {
+                    $dbType = 'percona';
+                }
+
                 return "tugboatqa/$dbType:$version";
 
             case 'redis':

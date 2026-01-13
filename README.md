@@ -816,6 +816,20 @@ Additionally, Pantheon integration can be added:
 }
 ```
 
+When using MySQL as the database engine in DDEV, Tugboat can be configured to
+use the `percona` Docker image instead of `mysql`:
+```json
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {
+                "percona": true
+            }
+        }
+    }
+}
+```
+
 ### Custom Templates
 
 For the main `php` service, you can override any build phase template by copying
