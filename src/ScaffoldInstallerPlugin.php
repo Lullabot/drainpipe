@@ -229,7 +229,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     'config:recommended'
                 ]
             ];
-            file_put_contents($renovateConfigPath, json_encode($baseConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+            $this->writeJsonFile($renovateConfigPath, $baseConfig);
         }
 
         // Read and parse the existing renovate.json
@@ -270,8 +270,39 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'description' => 'Managed by Drainpipe',
             ];
 
-            file_put_contents($renovateConfigPath, json_encode($renovateConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+            $this->writeJsonFile($renovateConfigPath, $renovateConfig);
             $this->io->write('<info>Updated renovate.json to ignore Drainpipe managed dependencies</info>');
+        }
+    }
+
+    /**
+     * Writes JSON data to a file with 2-space indentation.
+     *
+     * @param string $path
+     *   The file path.
+     * @param array $data
+     *   The data to encode.
+     */
+    private function writeJsonFile(string $path, array $data): void
+    {
+        try {
+            $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $this->io->warning(sprintf('Failed to encode JSON for file "%s": %s', $path, $e->getMessage()));
+            return;
+        }
+
+        $json = preg_replace_callback('/^ +/m', function ($m) {
+            return str_repeat(' ', strlen($m[0]) / 2);
+        }, $json);
+
+        if ($json === null) {
+            $this->io->warning(sprintf('Failed to process JSON for file "%s" (preg_replace_callback error).', $path));
+            return;
+        }
+
+        if (file_put_contents($path, $json . PHP_EOL) === false) {
+            $this->io->warning(sprintf('Failed to write to file: %s', $path));
         }
     }
 
