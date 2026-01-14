@@ -937,10 +937,13 @@ php:
   screenshot:
   visualdiff:
 solr:
+  commands:
   checkout:
   depends:
   volumes:
   environment:
+  aliases:
+  urls:
 ```
 
 ### Mail Configuration

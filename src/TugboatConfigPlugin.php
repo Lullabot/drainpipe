@@ -560,10 +560,6 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
      */
     private function generateSettingsFile(array $services): void
     {
-        $vendor = $this->config->get('vendor-dir');
-        $scaffoldPath = $vendor . '/lullabot/drainpipe/scaffold/tugboat/templates';
-        $loader = new FilesystemLoader($scaffoldPath);
-        $twig = new Environment($loader);
         $twig = $this->initTwigLoader();
 
         $templateVars = [

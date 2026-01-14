@@ -59,7 +59,7 @@ services:
           cp web/sites/default/default.settings.php web/sites/default/settings.php
           #drainpipe-end
           mkdir -p "${DOCROOT}/sites/default/files"
-          chmod 777 "${DOCROOT}/sites/default/files"
+          chmod 775 "${DOCROOT}/sites/default/files"
           chgrp -R www-data "${DOCROOT}/sites/default/files"
           composer install --ignore-platform-reqs
           apt-get install -y ca-certificates gnupg
@@ -71,7 +71,7 @@ services:
           echo 'Pin: origin deb.nodesource.com' >> /etc/apt/preferences.d/nodesource-nodejs
           echo 'Pin-Priority: 1001' >> /etc/apt/preferences.d/nodesource-nodejs
           apt-get update
-          apt-get -qq install nodejs
+          apt-get -y install nodejs
           apt-get clean
           corepack enable
           nodejs -v | grep -q v$NODE_MAJOR

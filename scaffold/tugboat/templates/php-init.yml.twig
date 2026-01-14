@@ -39,7 +39,7 @@
   # Create the Drupal private and public files directories if they aren't
   # already present.
   mkdir -p "${DOCROOT}/sites/default/files"
-  chmod 777 "${DOCROOT}/sites/default/files"
+  chmod 775 "${DOCROOT}/sites/default/files"
   chgrp -R www-data "${DOCROOT}/sites/default/files"
   composer install --ignore-platform-reqs
   # Install node
@@ -53,7 +53,7 @@
   echo 'Pin: origin deb.nodesource.com' >> /etc/apt/preferences.d/nodesource-nodejs
   echo 'Pin-Priority: 1001' >> /etc/apt/preferences.d/nodesource-nodejs
   apt-get update
-  apt-get -qq install nodejs
+  apt-get -y install nodejs
   apt-get clean
   # This only works for node > 16, but that version is unsupported now anyway.
   corepack enable
