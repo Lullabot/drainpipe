@@ -37,6 +37,13 @@
     },
     {
       "matchPackageNames": [
+        "phpunit/pnpunit"
+      ],
+      "allowedVersions": "^9 || ^10 || ^11",
+      "rangeStrategy": "widen"
+    },
+    {
+      "matchPackageNames": [
         "/^symfony//"
       ],
       "allowedVersions": "^6 || ^7",
