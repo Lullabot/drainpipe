@@ -20,7 +20,7 @@
     },
     "require-dev": {
         "composer/composer": "^2.9.3",
-        "phpunit/phpunit": "^9.6.21"
+        "phpunit/phpunit": "^9.6.31"
     },
     "extra": {
         "class": [
