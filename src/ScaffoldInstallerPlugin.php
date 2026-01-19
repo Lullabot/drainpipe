@@ -611,10 +611,10 @@ EOT;
         }
         $tugboatConfig = [
             'nodejs_version' => '$(cat ${TUGBOAT_ROOT}/.nvmrc)',
-            'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm-bookworm',
+            'webserver_image' => 'tugboatqa/php-nginx:8.2-fpm-bookworm',
             'database_type' => 'mariadb',
             'database_version' => '10.11',
-            'php_version' => '8.1',
+            'php_version' => '8.2',
             'sync_command' => 'sync',
             'build_command' => 'build',
             'update_command' => 'drupal:update',
