@@ -44,6 +44,14 @@
     },
     {
       "matchPackageNames": [
+        "mglaman/phpstan-drupal",
+        "phpstan/phpstan-deprecation-rules"
+      ],
+      "allowedVersions": "^1 || ^2",
+      "rangeStrategy": "widen"
+    },
+    {
+      "matchPackageNames": [
         "/^symfony//"
       ],
       "allowedVersions": "^6 || ^7",
