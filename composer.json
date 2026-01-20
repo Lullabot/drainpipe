@@ -25,7 +25,8 @@
     "extra": {
         "class": [
             "\\Lullabot\\Drainpipe\\TaskfileInstallerPlugin",
-            "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin"
+            "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin",
+            "\\Lullabot\\Drainpipe\\TugboatConfigPlugin"
         ],
         "drupal-scaffold": {
             "gitignore": true,

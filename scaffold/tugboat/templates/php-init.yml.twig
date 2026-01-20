@@ -1,0 +1,74 @@
+- |
+  # Install mysql or mariadb client.
+  apt-get update
+{% if services.database.type == 'mysql' %}
+  # mysql was replaced by mariadb in Debian, so we have to install it manually.
+  # https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/#repo-qg-apt-repo-manual-setup
+  # apt-key is also deprecated, so here we install the key manually.
+  ./.tugboat/scripts/install-mysql-client.sh
+{% else %}
+  apt-get install -y {{ services.database.type }}-client
+{% endif %}
+  # Link the document root to the expected path. Tugboat uses /docroot
+  # by default. So, if Drupal is located at any other path in your git
+  # repository, change that here. This example links /web to the docroot
+  ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"
+  # Install the PHP opcache as it's not included by default and needed for
+  # decent performance.
+  docker-php-ext-install opcache
+  # GD dependencies.
+  apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev
+  # WebP dependencies.
+  apt-get install -y libwebp-dev libwebp7 webp libmagickwand-dev
+  # Build and install gd.
+  docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
+  docker-php-ext-install gd
+  # Install ImageMagick. This is recommended by both Acquia and Pantheon instead
+  # of GD. Lullabot will likely be publishing an ADR recommending it too.
+  apt-get install -y imagemagick
+{% if services.memory_cache.type == "memcached" %}
+  # Install the PHP memcache extension.
+  apt-get install -y zlib1g-dev
+  yes '' | pecl install -f memcache
+  echo 'extension=memcache.so' > /usr/local/etc/php/conf.d/memcache.ini
+{% elseif services.memory_cache.type == "redis" %}
+  # Install the PHP redis extension.
+  yes '' | pecl install -f redis
+  echo 'extension=redis.so' > /usr/local/etc/php/conf.d/redis.ini
+{% endif %}
+  # Create the Drupal private and public files directories if they aren't
+  # already present.
+  mkdir -p "${DOCROOT}/sites/default/files"
+  chmod 775 "${DOCROOT}/sites/default/files"
+  chgrp -R www-data "${DOCROOT}/sites/default/files"
+  composer install --ignore-platform-reqs
+  # Install node
+  apt-get install -y ca-certificates gnupg
+  mkdir -p /etc/apt/keyrings
+  curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+  NODE_MAJOR=$(cat ${TUGBOAT_ROOT}/.nvmrc)
+  echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+  # Ensure we use nodesource packages, even if Debian ships newer major versions.
+  echo 'Package: *' > /etc/apt/preferences.d/nodesource-nodejs
+  echo 'Pin: origin deb.nodesource.com' >> /etc/apt/preferences.d/nodesource-nodejs
+  echo 'Pin-Priority: 1001' >> /etc/apt/preferences.d/nodesource-nodejs
+  apt-get update
+  apt-get -y install nodejs
+  apt-get clean
+  # This only works for node > 16, but that version is unsupported now anyway.
+  corepack enable
+  # Validate we have the right nodejs version.
+  nodejs -v | grep -q v$NODE_MAJOR
+  # Install task
+  TASKFILE=$(cat ${TUGBOAT_ROOT}/vendor/lullabot/drainpipe/.taskfile)
+  sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d ${TASKFILE} -b /usr/local/bin
+{% if services.php.type == 'apache-fpm' %}
+  a2enmod headers rewrite
+{% endif %}
+{% if pantheon %}
+  curl --fail -sSL https://github.com/pantheon-systems/terminus/releases/download/$(curl -L --fail --silent "https://api.github.com/repos/pantheon-systems/terminus/releases/latest" | perl -nle'print $& while m{"tag_name": "\K.*?(?=")"}g')/terminus.phar --output /usr/local/bin/terminus
+  chmod 755 /usr/local/bin/terminus
+{% endif %}
+{% if services.php.commands.init|default(false) %}
+  task tugboat:php:init
+{% endif %}
