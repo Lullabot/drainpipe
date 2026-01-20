@@ -42,7 +42,6 @@ jobs:
 
       - name: Build Project
         run:  |
-          ddev composer install --no-plugins
           ddev composer install
 
       - name: Run Security Checks
@@ -119,7 +118,6 @@ jobs:
 
       - name: Build Project
         run:  |
-          ddev composer install --no-plugins
           ddev composer install
 
       - name: Run composer audit
