@@ -61,7 +61,7 @@
   nodejs -v | grep -q v$NODE_MAJOR
   # Install task
   TASKFILE=$(cat ${TUGBOAT_ROOT}/vendor/lullabot/drainpipe/.taskfile)
-  sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d ${TASKFILE} -b /usr/local/bin
+  sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -b /usr/local/bin -d ${TASKFILE}
 {% if services.php.type == 'apache-fpm' %}
   a2enmod headers rewrite
 {% endif %}
