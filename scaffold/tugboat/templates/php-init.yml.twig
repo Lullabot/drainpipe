@@ -61,12 +61,12 @@
   nodejs -v | grep -q v$NODE_MAJOR
   # Install task
   TASKFILE=$(cat ${TUGBOAT_ROOT}/vendor/lullabot/drainpipe/.taskfile)
-  sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d ${TASKFILE} -b /usr/local/bin
+  sh -c "$(curl --location --fail --silent https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin "${TASKFILE}"
 {% if services.php.type == 'apache-fpm' %}
   a2enmod headers rewrite
 {% endif %}
 {% if pantheon %}
-  curl --fail -sSL https://github.com/pantheon-systems/terminus/releases/download/$(curl -L --fail --silent "https://api.github.com/repos/pantheon-systems/terminus/releases/latest" | perl -nle'print $& while m{"tag_name": "\K.*?(?=")"}g')/terminus.phar --output /usr/local/bin/terminus
+  curl --fail -sSL https://github.com/pantheon-systems/terminus/releases/download/$(curl -L --fail --silent "https://api.github.com/repos/pantheon-systems/terminus/releases/latest" | perl -nle 'print $1 if /"tag_name":\s*"([^"]+)"/')/terminus.phar --output /usr/local/bin/terminus
   chmod 755 /usr/local/bin/terminus
 {% endif %}
 {% if services.php.commands.init|default(false) %}

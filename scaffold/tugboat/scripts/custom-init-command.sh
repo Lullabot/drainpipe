@@ -13,7 +13,7 @@ fi
 
 # Install Taskfile
 TASKFILE=v3.46.4
-sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -b /usr/local/bin -d ${TASKFILE}
+sh -c "$(curl --location --fail --silent https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin "${TASKFILE}"
 
 # Install YQ
 YQ=v4.50.1
