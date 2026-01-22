@@ -13,10 +13,10 @@
         "php": "^8.2",
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
-        "drush/drush": "^11|^12|^13",
-        "symfony/yaml": "^6|^7",
+        "drush/drush": "^11||^12||^13",
+        "symfony/yaml": "^6||^7",
         "twig/twig": "^3",
-        "vlucas/phpdotenv": "^4|^5"
+        "vlucas/phpdotenv": "^4||^5"
     },
     "require-dev": {
         "composer/composer": "^2.9.4",
