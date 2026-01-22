@@ -37,7 +37,7 @@
     },
     {
       "matchPackageNames": [
-        "phpunit/pnpunit"
+        "phpunit/phpunit"
       ],
       "allowedVersions": "^9 || ^10 || ^11",
       "rangeStrategy": "widen"
@@ -52,7 +52,14 @@
     },
     {
       "matchPackageNames": [
-        "/^symfony//"
+        "vlucas/phpdotenv"
+      ],
+      "allowedVersions": "^4 || ^5",
+      "rangeStrategy": "widen"
+    },
+    {
+      "matchPackageNames": [
+        "/^symfony\//"
       ],
       "allowedVersions": "^6 || ^7",
       "rangeStrategy": "widen"

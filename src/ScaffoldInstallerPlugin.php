@@ -527,12 +527,18 @@ EOT;
             return;
         }
 
+        // Install GitHub actions
         $fs->ensureDirectoryExists('./.github/actions');
         $fs->copy("$scaffoldPath/github/actions/common", './.github/actions/drainpipe');
+
+        // Install base GitHub workflows
+        $fs->ensureDirectoryExists('./.github/workflows');
+        $fs->copy("$scaffoldPath/github/workflows/TestRenovate.yml", './.github/workflows/TestRenovate.yml');
+
+        // Install configurable GitHub workflows
         foreach ($this->extra['drainpipe']['github'] as $github) {
             if ($github === 'PantheonReviewApps' || $github === 'PantheonReviewAppsManual') {
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
                 $pantheon_review_apps = ($github === 'PantheonReviewApps') ? 'PantheonReviewApps' : 'PantheonReviewAppsManual';
                 if (file_exists('./.ddev/config.yaml')) {
@@ -546,24 +552,19 @@ EOT;
             }
             else if ($github === 'acquia') {
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
                 $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
             }
             else if ($github === 'ComposerLockDiff') {
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
             }
             else if ($github === 'Security') {
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
             }
             else if ($github === 'TestStatic') {
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/TestStatic.yml", './.github/workflows/TestStatic.yml');
             }
             else if ($github === 'TestFunctional') {
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/TestFunctional.yml", './.github/workflows/TestFunctional.yml');
             }
         }
