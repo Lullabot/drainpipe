@@ -361,7 +361,7 @@ EOT;
                 $data = [];
             }
             $data['nodejs_version'] = 'auto';
-            file_put_contents('./.ddev/config.yaml', Yaml::dump($data, 10, 4, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE));
+            file_put_contents('./.ddev/config.yaml', Yaml::dump($data, 10, 2, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE));
         }
     }
 
