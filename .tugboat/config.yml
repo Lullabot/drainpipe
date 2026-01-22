@@ -76,7 +76,7 @@ services:
           corepack enable
           nodejs -v | grep -q v$NODE_MAJOR
           TASKFILE=$(cat ${TUGBOAT_ROOT}/vendor/lullabot/drainpipe/.taskfile)
-          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -b /usr/local/bin -d ${TASKFILE}
+          sh -c "$(curl --location --fail --silent https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin "${TASKFILE}"
       update:
         - |
           #drainpipe-start
