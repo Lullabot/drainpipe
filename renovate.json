@@ -78,7 +78,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
+      "managerFilePatterns": [
         "^\\.taskfile$",
         "scaffold/tugboat/scripts/custom-init-command\\.sh$"
       ],
