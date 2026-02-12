@@ -12,7 +12,7 @@ if [[ -z "$type" ]]; then
 fi
 
 # Install Taskfile
-TASKFILE=v3.46.4
+TASKFILE=v3.48.0
 sh -c "$(curl --location --fail --silent https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin "${TASKFILE}"
 
 # Install YQ
