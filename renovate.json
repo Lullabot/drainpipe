@@ -68,6 +68,26 @@
       "matchDatasources": ["node-version"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "enabled": false
+    },
+    {
+      "matchPackageNames": ["go-task/task"],
+      "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+$/",
+      "groupName": "Taskfile"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^\\.taskfile$",
+        "scaffold/tugboat/scripts/custom-init-command\\.sh$"
+      ],
+      "matchStrings": [
+        "(?:TASKFILE=|^)v(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s*$"
+      ],
+      "depNameTemplate": "go-task/task",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
     }
   ]
 }
