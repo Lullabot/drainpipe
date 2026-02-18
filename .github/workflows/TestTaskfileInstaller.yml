@@ -1,4 +1,4 @@
-name: Test Binary Installer
+name: Test Taskfile Installer
 on:
   push:
     branches:
@@ -11,26 +11,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Test-Binary-Installer:
+  Test-Taskfile-Installer:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        php-version: [ 8.1, 8.2, 8.3, 8.4 ]
+        php-version: [ 8.2, 8.3, 8.4, 8.5 ]
         include:
-          - php-version: 8.1
-            drupal-version: ":^10"
           - php-version: 8.2
             drupal-version: ":^10"
           - php-version: 8.3
             drupal-version: ":^10"
           - php-version: 8.4
             drupal-version: ":^10"
+          - php-version: 8.5
+            drupal-version: ":^10"
     steps:
 
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           path: drainpipe
 
@@ -63,11 +63,6 @@ jobs:
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
 
-      - name: Simulate failure
-        run: |
-          ddev exec touch /var/www/html/composer-cache/files/lullabot/drainpipe/bin/task/3.45.4/task_linux_amd64.tar
-          ddev composer install
-
       - name: Test installing without composer cache
         run: |
           ddev composer install --no-cache
@@ -80,6 +75,13 @@ jobs:
           rm -rf vendor
           ddev composer install --no-cache
           test -x vendor/bin/task
+
+      - name: Test installing an old version
+        run: |
+          echo "v3.44.1" > vendor/lullabot/drainpipe/.taskfile
+          rm vendor/bin/task
+          ddev composer install
+          [[ "$(ddev task --version)" == "3.44.1" ]]
 
       - name: Prove we can upgrade task within task
         run: |

@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -33,6 +33,10 @@ jobs:
             ${{ runner.os }}-composer-
 
       - uses: ./.github/actions/drainpipe/set-env
+
+      - uses: ./.github/actions/drainpipe/validate-terminus-timeout
+        with:
+          terminus_timeout_limit: ${{ vars.TERMINUS_TIMEOUT_LIMIT }}
 
       - uses: ./.github/actions/drainpipe/setup-git
         with:
@@ -68,3 +72,5 @@ jobs:
           site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
           lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+          clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
+          terminus-timeout-limit: ${{ env.TERMINUS_TIMEOUT_LIMIT }}
