@@ -70,7 +70,11 @@ runs:
         # Infer type from filename when not explicitly provided.
         TYPE="$LOCKFILE_TYPE"
         if [[ -z "$TYPE" ]]; then
-          [[ "$(basename "$LOCKFILE_PATH")" == "yarn.lock" ]] && TYPE="yarn" || TYPE="npm"
+          if [[ "$(basename "$LOCKFILE_PATH")" == "yarn.lock" ]]; then
+            TYPE="yarn"
+          else
+            TYPE="npm"
+          fi
         fi
 
         OUTPUT=$(node \
@@ -81,11 +85,12 @@ runs:
           --collapse-threshold  "$COLLAPSE_THRESHOLD" \
           --deps-dir            "$LOCKFILE_DIFF_DEPS")
 
-        # Safely write multi-line output using a heredoc delimiter.
+        # Safely write multi-line output using a randomised delimiter.
+        EOF_DELIM=$(dd if=/dev/urandom bs=15 count=1 2>/dev/null | base64)
         {
-          echo "body<<LOCKFILE_DIFF_EOF"
+          echo "body<<${EOF_DELIM}"
           echo "$OUTPUT"
-          echo "LOCKFILE_DIFF_EOF"
+          echo "${EOF_DELIM}"
         } >> "$GITHUB_OUTPUT"
 
         # Read downgrade flag written to disk by the script.
