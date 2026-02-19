@@ -45,15 +45,6 @@ runs:
         echo "Clone-from environment validated: $CLONE_FROM"
       shell: bash
 
-    - name: Calculate truncated multidev name
-      run: |
-        # Pantheon multidev names are limited to 11 characters
-        MULTIDEV_NAME="pr-$DRAINPIPE_PR_NUMBER"
-        TRUNCATED_MULTIDEV_NAME="${MULTIDEV_NAME:0:11}"
-        echo "TRUNCATED_MULTIDEV_NAME=$TRUNCATED_MULTIDEV_NAME" >> $GITHUB_ENV
-        echo "::notice::Multidev name: $MULTIDEV_NAME (truncated to: $TRUNCATED_MULTIDEV_NAME)"
-      shell: bash
-
     - name: Trust all drush.in hosts
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
@@ -67,7 +58,7 @@ runs:
             https://api.github.com/repos/$GITHUB_REPOSITORY/deployments \
             -H 'Accept: application/vnd.github.v3+json' \
             -H "Authorization: token ${{ inputs.github-token }}" \
-            -d "{\"ref\": \"$DRAINPIPE_SHA\", \"auto_merge\": false, \"environment\": \"pantheon-$TRUNCATED_MULTIDEV_NAME\", \"transient_environment\": true, \"required_contexts\": [], \"description\": \"Pantheon Multidev for Pull Request #$DRAINPIPE_PR_NUMBER\"}" \
+            -d "{\"ref\": \"$DRAINPIPE_SHA\", \"auto_merge\": false, \"environment\": \"pantheon-pr-$DRAINPIPE_PR_NUMBER\", \"transient_environment\": true, \"required_contexts\": [], \"description\": \"Pantheon Multidev for Pull Request #$DRAINPIPE_PR_NUMBER\"}" \
         )
         export GITHUB_DEPLOYMENT_ID=$(echo $GITHUB_DEPLOYMENT | jq '.id')
         echo "GITHUB_DEPLOYMENT_ID=$GITHUB_DEPLOYMENT_ID" >> $GITHUB_ENV
@@ -86,8 +77,8 @@ runs:
             -H 'Accept: application/vnd.github.v3+json' \
             -H "Authorization: token ${{ inputs.github-token }}" \
         )
-        # Generate truncated PR names (Pantheon truncates to 11 chars)
-        PULL_NUMBERS=$(echo $PULLS | jq -r '.[] | ("pr-" + (.number|tostring))[0:11]')
+        # Truncate PR names to 11 chars to match Pantheon's multidev name limit.
+        PULL_NUMBERS=$(echo $PULLS | jq -r '.[] | "pr-" + (.number|tostring)' | cut -c1-11)
         MULTIDEVS=$(drainpipe_exec "terminus multidev:list --format json ${{ inputs.site-name }} | jq --raw-output 'keys | .[]'")
         for MULTIDEV in $MULTIDEVS; do
           if echo "$PULL_NUMBERS" | grep -Fxq "$MULTIDEV"; then
@@ -112,15 +103,22 @@ runs:
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "terminus auth:login --machine-token=\"${{ inputs.terminus-token }}\""
-        JQ_COMMAND="'.[] | select(.id == \"$TRUNCATED_MULTIDEV_NAME\") | .id'"
+        REQUESTED_NAME="pr-$DRAINPIPE_PR_NUMBER"
+        JQ_COMMAND="'.[] | select(.id == \"$REQUESTED_NAME\") | .id'"
         ENVIRONMENT_EXISTS=$(drainpipe_exec "terminus multidev:list --format json ${{ inputs.site-name }} | jq --raw-output $JQ_COMMAND")
-        if [ "$ENVIRONMENT_EXISTS" == "$TRUNCATED_MULTIDEV_NAME" ]; then
-          drainpipe_exec "terminus env:wipe ${{ inputs.site-name }}.$TRUNCATED_MULTIDEV_NAME --yes"
+        if [ "$ENVIRONMENT_EXISTS" == "$REQUESTED_NAME" ]; then
+          drainpipe_exec "terminus env:wipe ${{ inputs.site-name }}.$REQUESTED_NAME --yes"
+          MULTIDEV_NAME="$REQUESTED_NAME"
         else
-          drainpipe_exec "terminus multidev:create ${{ inputs.site-name }}.${{ inputs.clone-from }} $TRUNCATED_MULTIDEV_NAME --no-db --no-files --yes"
+          drainpipe_exec "terminus multidev:create ${{ inputs.site-name }}.${{ inputs.clone-from }} $REQUESTED_NAME --no-db --no-files --yes"
+          # Query Pantheon for the actual environment name, which may have been
+          # truncated to 11 characters by the platform.
+          MULTIDEV_NAME=$(drainpipe_exec "terminus multidev:list --format json ${{ inputs.site-name }} | jq --raw-output 'keys | .[] | select(startswith(\"${REQUESTED_NAME:0:11}\"))'")
+          echo "::notice::Requested multidev name: $REQUESTED_NAME — Pantheon created: $MULTIDEV_NAME"
         fi
+        echo "MULTIDEV_NAME=$MULTIDEV_NAME" >> $GITHUB_ENV
         if [ "${{ inputs.run-installer }}" != "true" ]; then
-            drainpipe_exec "terminus env:clone-content ${{ inputs.site-name }}.${{ inputs.clone-from }} $TRUNCATED_MULTIDEV_NAME --yes"
+            drainpipe_exec "terminus env:clone-content ${{ inputs.site-name }}.${{ inputs.clone-from }} $MULTIDEV_NAME --yes"
         fi
       shell: bash
 
@@ -128,8 +126,8 @@ runs:
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
         SITE_ID=$(drainpipe_exec "terminus site:lookup ${{ inputs.site-name }}")
-        drainpipe_exec "terminus connection:set  ${{ inputs.site-name }}.$TRUNCATED_MULTIDEV_NAME git --yes"
-        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=$TRUNCATED_MULTIDEV_NAME remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\" site=${{ inputs.site-name }}.$TRUNCATED_MULTIDEV_NAME"
+        drainpipe_exec "terminus connection:set  ${{ inputs.site-name }}.$MULTIDEV_NAME git --yes"
+        drainpipe_exec "./vendor/bin/task deploy:git directory=/tmp/release branch=$MULTIDEV_NAME remote=ssh://codeserver.dev.$SITE_ID@codeserver.dev.$SITE_ID.drush.in:2222/~/repository.git message=\"${{ inputs.commit-message }}\" site=${{ inputs.site-name }}.$MULTIDEV_NAME"
       shell: bash
 
     - name: Deploy to Pantheon
@@ -137,21 +135,21 @@ runs:
         source .github/actions/drainpipe/set-env/bash_aliases
 
         echo "::notice::Waiting ${{ inputs.terminus-timeout-limit }} seconds for Pantheon to sync..."
-        drainpipe_exec "terminus workflow:wait -vv --max ${{ inputs.terminus-timeout-limit }} -- ${{ inputs.site-name }}.$TRUNCATED_MULTIDEV_NAME"
+        drainpipe_exec "terminus workflow:wait -vv --max ${{ inputs.terminus-timeout-limit }} -- ${{ inputs.site-name }}.$MULTIDEV_NAME"
 
         drainpipe_exec "terminus aliases --only ${{ inputs.site-name }} --yes"
         if [ "${{ inputs.run-installer }}" == "true" ]; then
-          drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.$TRUNCATED_MULTIDEV_NAME --yes site:install --existing-config"
+          drainpipe_exec "./vendor/bin/drush @${{ inputs.site-name }}.$MULTIDEV_NAME --yes site:install --existing-config"
         elif drainpipe_exec "./vendor/bin/task -l | grep '* update: '"; then
-          drainpipe_exec "./vendor/bin/task update site=@${{ inputs.site-name }}.$TRUNCATED_MULTIDEV_NAME"
+          drainpipe_exec "./vendor/bin/task update site=@${{ inputs.site-name }}.$MULTIDEV_NAME"
         else
-          drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.$TRUNCATED_MULTIDEV_NAME"
+          drainpipe_exec "./vendor/bin/task drupal:update site=@${{ inputs.site-name }}.$MULTIDEV_NAME"
         fi
-        ENVIRONMENT_URL="https://$TRUNCATED_MULTIDEV_NAME-${{ inputs.site-name }}.pantheonsite.io"
+        ENVIRONMENT_URL="https://$MULTIDEV_NAME-${{ inputs.site-name }}.pantheonsite.io"
         # Lock Environment.
         if [ "${{ inputs.lock-username }}" != "" ] && [ "${{ inputs.lock-password }}" != "" ]; then
-          drainpipe_exec "terminus lock:enable ${{ inputs.site-name }}.$TRUNCATED_MULTIDEV_NAME ${{ inputs.lock-username }} ${{ inputs.lock-password }}"
-          ENVIRONMENT_URL="https://${{ inputs.lock-username }}:${{ inputs.lock-password }}@$TRUNCATED_MULTIDEV_NAME-${{ inputs.site-name }}.pantheonsite.io"
+          drainpipe_exec "terminus lock:enable ${{ inputs.site-name }}.$MULTIDEV_NAME ${{ inputs.lock-username }} ${{ inputs.lock-password }}"
+          ENVIRONMENT_URL="https://${{ inputs.lock-username }}:${{ inputs.lock-password }}@$MULTIDEV_NAME-${{ inputs.site-name }}.pantheonsite.io"
         fi
         curl -f -H "Authorization: token ${{ inputs.github-token }}" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"success\", \"environment_url\": \"$ENVIRONMENT_URL\"}"
       shell: bash
