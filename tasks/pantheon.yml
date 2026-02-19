@@ -5,9 +5,9 @@ tasks:
     desc: "Authenticates with Pantheon"
     silent: true
     cmds:
-      - if [ -z "$PANTHEON_TOKEN" ]; then echo "❌ PANTHEON_TOKEN is not set. Please add it to your .env file."; exit 1; fi
-      - echo "⚡ Authorising with Pantheon..."
-      - terminus auth:login --machine-token="$PANTHEON_TOKEN" >/dev/null 2>&1 || { echo "❌ Authentication failed. Your PANTHEON_TOKEN value is likely incorrect or expired. Please verify it in your .env file."; exit 1; }
+      - if [ -z "$PANTHEON_TOKEN" ]; then echo "❌ PANTHEON_TOKEN is not set. Add it to ~/.ddev/global_config.yaml (web-environment) or your project .env file."; exit 1; fi
+      - echo "⚡ Authorizing with Pantheon..."
+      - terminus auth:login --machine-token="$PANTHEON_TOKEN" >/dev/null 2>&1 || { echo "❌ Authentication failed. Check PANTHEON_TOKEN in ~/.ddev/global_config.yaml or your project .env file."; exit 1; }
       - echo "✅ Authentication successful."
 
   fetch-db:
