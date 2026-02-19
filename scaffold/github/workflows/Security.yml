@@ -42,7 +42,6 @@ jobs:
 
       - name: Build Project
         run:  |
-          ddev composer install --no-plugins
           ddev composer install
 
       - name: Run Security Checks
@@ -116,6 +115,10 @@ jobs:
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
+
+      - name: Build Project
+        run:  |
+          ddev composer install
 
       - name: Run composer audit
         run: ddev exec bash ./vendor/lullabot/drainpipe/scripts/composer-audit.sh

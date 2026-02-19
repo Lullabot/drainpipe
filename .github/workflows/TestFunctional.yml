@@ -86,7 +86,7 @@ jobs:
         run: zip -r /tmp/drainpipe.zip ./
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
           path: /tmp/drainpipe.zip
@@ -98,7 +98,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-npm-${{ matrix.drupal-version }}
           path: test_result
@@ -146,7 +146,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -188,7 +188,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-yarn-classic-${{ matrix.drupal-version }}
           path: test_result
@@ -200,7 +200,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -239,7 +239,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-yarn3-nl-${{ matrix.drupal-version }}
           path: test_result
@@ -251,7 +251,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -291,7 +291,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-yarn4-nl-${{ matrix.drupal-version }}
           path: test_result
@@ -303,7 +303,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -348,7 +348,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-yarn3-${{ matrix.drupal-version }}
           path: test_result
@@ -360,7 +360,7 @@ jobs:
       matrix:
         drupal-version: [ 10, 11 ]
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: test-functional-build-${{ matrix.drupal-version }}
 
@@ -406,7 +406,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-yarn4-${{ matrix.drupal-version }}
           path: test_result

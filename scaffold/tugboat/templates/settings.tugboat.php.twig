@@ -16,7 +16,7 @@ if (getenv('TUGBOAT_REPO')) {
     'username' => 'tugboat',
     'password' => 'tugboat',
     'prefix' => '',
-    'host' => '{{ database_type }}',
+    'host' => '{{ services.database.type }}',
     'port' => '3306',
     'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
     'driver' => 'mysql',
