@@ -79,11 +79,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostInstallCmd(Event $event)
     {
+        $this->installNvmRc();
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
         $this->installHostingProviderSupport();
         $this->installCICommands($event->getComposer());
+        $this->configureRenovateIgnore();
         $this->installEnvSupport();
         if ($this->hasPantheonConfigurationFiles()) {
             $this->checkPantheonSystemDrupalIntegrations($event->getComposer());
@@ -97,15 +99,38 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public function onPostUpdateCmd(Event $event)
     {
+        $this->installNvmRc();
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
         $this->installHostingProviderSupport();
         $this->installCICommands($event->getComposer());
+        $this->configureRenovateIgnore();
         $this->installEnvSupport();
         if ($this->hasPantheonConfigurationFiles()) {
             $this->pantheonSystemDrupalIntegrationsWarning();
         }
+    }
+
+    /**
+     * Copies .nvmrc from Drainpipe root directory if it doesn't yet exist.
+     */
+    private function installNvmRc(): void
+    {
+        $vendor = $this->config->get('vendor-dir');
+        $nvmrcPath = $vendor.'/lullabot/drainpipe/.nvmrc';
+
+        if (!file_exists('./.nvmrc')) {
+            $this->io->write('<info>Creating initial .nvmrc file...</info>');
+            $fs = new Filesystem();
+            $fs->copy(
+                $nvmrcPath,
+                './.nvmrc'
+            );
+        } else {
+            $this->io->write('<info>.nvmrc file already present, skipping...</info>');
+        }
+
     }
 
     /**
@@ -188,6 +213,100 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
+     * Configures Renovate to ignore dependencies managed by Drainpipe.
+     */
+    private function configureRenovateIgnore(): void
+    {
+        $renovateConfigPath = './renovate.json';
+        $fs = new Filesystem();
+
+        // Create base renovate.json if it doesn't exist
+        if (!file_exists($renovateConfigPath)) {
+            $this->io->write('<info>Creating initial renovate.json file...</info>');
+            $baseConfig = [
+                '$schema' => 'https://docs.renovatebot.com/renovate-schema.json',
+                'extends' => [
+                    'config:recommended'
+                ]
+            ];
+            $this->writeJsonFile($renovateConfigPath, $baseConfig);
+        }
+
+        // Read and parse the existing renovate.json
+        $renovateConfigJson = file_get_contents($renovateConfigPath);
+        $renovateConfig = json_decode($renovateConfigJson, true);
+
+        if ($renovateConfig === null) {
+            $this->io->warning('Unable to parse renovate.json - skipping Renovate configuration');
+            return;
+        }
+
+        // Initialize packageRules if it doesn't exist
+        if (!isset($renovateConfig['packageRules']) || !is_array($renovateConfig['packageRules'])) {
+            $renovateConfig['packageRules'] = [];
+        }
+
+        // Check if the rule already exists
+        $ruleExists = false;
+        foreach ($renovateConfig['packageRules'] as $rule) {
+            if (isset($rule['matchPackageNames'])
+                && is_array($rule['matchPackageNames'])
+                && in_array('marocchino/sticky-pull-request-comment', $rule['matchPackageNames'])
+                && isset($rule['matchManagers'])
+                && is_array($rule['matchManagers'])
+                && in_array('github-actions', $rule['matchManagers'])
+            ) {
+                $ruleExists = true;
+                break;
+            }
+        }
+
+        // Add the rule if it doesn't exist
+        if (!$ruleExists) {
+            $renovateConfig['packageRules'][] = [
+                'matchManagers' => ['github-actions'],
+                'matchPackageNames' => ['marocchino/sticky-pull-request-comment'],
+                'enabled' => false,
+                'description' => 'Managed by Drainpipe',
+            ];
+
+            $this->writeJsonFile($renovateConfigPath, $renovateConfig);
+            $this->io->write('<info>Updated renovate.json to ignore Drainpipe managed dependencies</info>');
+        }
+    }
+
+    /**
+     * Writes JSON data to a file with 2-space indentation.
+     *
+     * @param string $path
+     *   The file path.
+     * @param array $data
+     *   The data to encode.
+     */
+    private function writeJsonFile(string $path, array $data): void
+    {
+        try {
+            $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $this->io->warning(sprintf('Failed to encode JSON for file "%s": %s', $path, $e->getMessage()));
+            return;
+        }
+
+        $json = preg_replace_callback('/^ +/m', function ($m) {
+            return str_repeat(' ', strlen($m[0]) / 2);
+        }, $json);
+
+        if ($json === null) {
+            $this->io->warning(sprintf('Failed to process JSON for file "%s" (preg_replace_callback error).', $path));
+            return;
+        }
+
+        if (file_put_contents($path, $json . PHP_EOL) === false) {
+            $this->io->warning(sprintf('Failed to write to file: %s', $path));
+        }
+    }
+
+    /**
      * Install .env support.
      */
     private function installEnvSupport(): void
@@ -209,19 +328,22 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     }
 
     /**
-     *
+     * Installs DDEV custom task command and settings.php file.
      */
     private function installDdevCommand(): void
     {
         if (file_exists('./.ddev/config.yaml')) {
             $vendor = $this->config->get('vendor-dir');
-            $ddevCommandPath = $vendor . '/lullabot/drainpipe/scaffold/ddev/task-command.sh';
+            $ddevScaffoldDir = $vendor . '/lullabot/drainpipe/scaffold/ddev/';
             $fs = new Filesystem();
             $fs->ensureDirectoryExists('./.ddev/commands/web');
-            $fs->copy($ddevCommandPath, './.ddev/commands/web/task');
+            $fs->copy($ddevScaffoldDir . 'task-command.sh', './.ddev/commands/web/task');
+            $fs->ensureDirectoryExists('./.ddev/web-build');
+            $fs->copy($ddevScaffoldDir . 'drainpipe.Dockerfile', './.ddev/web-build/Dockerfile.drainpipe');
+            $fs->copy($vendor . '/lullabot/drainpipe/.taskfile', './.ddev/web-build/taskfile');
             if (file_exists('./web/sites/default/settings.ddev.php')) {
                 $settings = file_get_contents('./web/sites/default/settings.ddev.php');
-                if (strpos($settings, 'environment-indicator') === false) {
+                if (str_contains($settings, 'environment_indicator.indicator')) {
                     $include = <<<'EOT'
 // See https://architecture.lullabot.com/adr/20210609-environment-indicator/
 $config['environment_indicator.indicator']['name'] = 'Local';
@@ -231,6 +353,15 @@ EOT;
                     file_put_contents('./web/sites/default/settings.ddev.php', $include . PHP_EOL, FILE_APPEND);
                 }
             }
+
+            // Configure DDEV to use NodeJS version set in .nvmrc
+            $data = Yaml::parseFile('./.ddev/config.yaml', Yaml::PARSE_OBJECT_FOR_MAP);
+            $data = json_decode(json_encode($data), true);
+            if (!is_array($data)) {
+                $data = [];
+            }
+            $data['nodejs_version'] = 'auto';
+            file_put_contents('./.ddev/config.yaml', Yaml::dump($data, 10, 2, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE));
         }
     }
 
@@ -271,7 +402,6 @@ EOT;
         $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
         $this->installGitlabCI($scaffoldPath, $composer);
         $this->installGitHubActions($scaffoldPath, $composer);
-        $this->installTugboat($scaffoldPath);
     }
 
     /**
@@ -397,12 +527,18 @@ EOT;
             return;
         }
 
+        // Install GitHub actions
         $fs->ensureDirectoryExists('./.github/actions');
         $fs->copy("$scaffoldPath/github/actions/common", './.github/actions/drainpipe');
+
+        // Install base GitHub workflows
+        $fs->ensureDirectoryExists('./.github/workflows');
+        $fs->copy("$scaffoldPath/github/workflows/TestRenovate.yml", './.github/workflows/TestRenovate.yml');
+
+        // Install configurable GitHub workflows
         foreach ($this->extra['drainpipe']['github'] as $github) {
             if ($github === 'PantheonReviewApps' || $github === 'PantheonReviewAppsManual') {
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
                 $pantheon_review_apps = ($github === 'PantheonReviewApps') ? 'PantheonReviewApps' : 'PantheonReviewAppsManual';
                 if (file_exists('./.ddev/config.yaml')) {
@@ -416,24 +552,19 @@ EOT;
             }
             else if ($github === 'acquia') {
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
                 $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
             }
             else if ($github === 'ComposerLockDiff') {
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
             }
             else if ($github === 'Security') {
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
             }
             else if ($github === 'TestStatic') {
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/TestStatic.yml", './.github/workflows/TestStatic.yml');
             }
             else if ($github === 'TestFunctional') {
-                $fs->ensureDirectoryExists('./.github/workflows');
                 $fs->copy("$scaffoldPath/github/workflows/TestFunctional.yml", './.github/workflows/TestFunctional.yml');
             }
         }
@@ -442,273 +573,4 @@ EOT;
             // TODO: Add Acquia related GitHub Actions.
         }
     }
-
-    /**
-     * Installs Tugboat if defined in composer.json.
-     *
-     * @param string $scaffoldPath
-     */
-    private function installTugboat(string $scaffoldPath): void {
-        $fs = new Filesystem();
-
-        if (!isset($this->extra['drainpipe']['tugboat']) || !is_array($this->extra['drainpipe']['tugboat'])) {
-            return;
-        }
-
-        // Look for a config override file before we wipe the directory.
-        $tugboatConfigOverride = [];
-        $tugboatConfigOverridePath = './.tugboat/config.drainpipe-override.yml';
-        if (file_exists($tugboatConfigOverridePath)) {
-            $tugboatConfigOverride = Yaml::parseFile($tugboatConfigOverridePath);
-            $tugboatConfigOverrideFile = file_get_contents($tugboatConfigOverridePath);
-        }
-
-        // Wipe the Tugboat directory and define base config.
-        $filesToRemove = [
-            './.tugboat/config.drainpipe-override.yml',
-            './.tugboat/config.yml',
-            './.tugboat/steps/1-init.sh',
-            './.tugboat/steps/2-update.sh',
-            './.tugboat/steps/3-build.sh',
-            './.tugboat/steps/4-online.sh',
-            './.tugboat/scripts/install-mysql-client.sh',
-        ];
-        foreach ($filesToRemove as $file) {
-            if (file_exists($file)) {
-                $fs->remove($file);
-            }
-        }
-        $binaryInstallerPlugin = new BinaryInstallerPlugin();
-        $tugboatConfig = [
-            'nodejs_version' => '18',
-            'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm-bookworm',
-            'database_type' => 'mariadb',
-            'database_version' => '10.11',
-            'php_version' => '8.1',
-            'sync_command' => 'sync',
-            'build_command' => 'build',
-            'update_command' => 'drupal:update',
-            'init' => [],
-            'task_version' => $binaryInstallerPlugin->getBinaryVersion('task'),
-            'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
-            'overrides' => ['php' => '', 'solr' => ''],
-        ];
-
-        // Read DDEV config.
-        if (file_exists('./.ddev/config.yaml')) {
-            $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
-            $tugboatConfig['database_type'] = $ddevConfig['database']['type'];
-            $tugboatConfig['database_version'] = $ddevConfig['database']['version'];
-            $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm-bookworm';
-
-            if (!empty($ddevConfig['nodejs_version'])) {
-                $tugboatConfig['nodejs_version'] = $ddevConfig['nodejs_version'];
-            }
-            if (!empty($ddevConfig['webserver_type']) && $ddevConfig['webserver_type'] === 'apache-fpm') {
-                $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache-bookworm';
-            }
-        }
-
-        // Process PHP config overrides.
-        $tugboatConfig['overrides']['php'] = $this->processTugboatOverride(
-            $tugboatConfigOverride,
-            'php',
-            ['aliases', 'urls', 'visualdiff', 'screenshot']
-        );
-
-        // Extract Solr image configuration before filtering for service detection
-        $solrOverrideImage = null;
-        if (!empty($tugboatConfigOverride['solr']) && is_array($tugboatConfigOverride['solr'])) {
-            $solrOverrideImage = $tugboatConfigOverride['solr']['image'] ?? null;
-        }
-
-        // Process Solr config overrides.
-        $tugboatConfig['overrides']['solr'] = $this->processTugboatOverride(
-            $tugboatConfigOverride,
-            'solr',
-            ['commands', 'depends', 'aliases', 'urls', 'volumes', 'environment', 'checkout']
-        );
-
-        // Add Redis service.
-        if (file_exists('./.ddev/docker-compose.redis.yaml')) {
-            $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
-            $image = $redisConfig['services']['redis']['image'] ?? '';
-
-            $version = self::extractRedisImageVersion($image);
-            $tugboatConfig['memory_cache_type'] = 'redis';
-            $tugboatConfig['memory_cache_version'] = $version;
-        }
-
-        // Add search service (mutually exclusive).
-        // Priority: Solr override -> Solr DDEV -> Elasticsearch DDEV
-        if (!empty($solrOverrideImage)) {
-            $solrImage = explode(':', $solrOverrideImage);
-            $tugboatConfig['search_type'] = 'solr';
-            $tugboatConfig['search_version'] = array_pop($solrImage);
-        }
-        // Fall back to DDEV docker-compose configuration if not specified in override
-        elseif (file_exists('./.ddev/docker-compose.solr.yaml')) {
-            $solrConfig = Yaml::parseFile('.ddev/docker-compose.solr.yaml');
-            $solrImage = explode(':',
-                $solrConfig['services']['solr']['image']);
-            $tugboatConfig['search_type'] = 'solr';
-            $tugboatConfig['search_version'] = array_pop($solrImage);
-        }
-        elseif (file_exists('./.ddev/docker-compose.elasticsearch.yaml')) {
-            $esConfig = Yaml::parseFile('.ddev/docker-compose.elasticsearch.yaml');
-            $esImage = explode(':',
-                $esConfig['services']['elasticsearch']['image']);
-            $tugboatConfig['search_type'] = 'elasticsearch';
-            $tugboatConfig['search_version'] = array_pop($esImage);
-        }
-
-        // Add commands to Task.
-        if (file_exists('Taskfile.yml')) {
-            // Get steps out of the Taskfile.
-            $taskfile = Yaml::parseFile('./Taskfile.yml');
-            if (isset($taskfile['tasks']['sync:tugboat'])) {
-                $tugboatConfig['sync_command'] = 'sync:tugboat';
-            }
-            if (isset($taskfile['tasks']['build:tugboat'])) {
-                $tugboatConfig['build_command'] = 'build:tugboat';
-            }
-            if (isset($taskfile['tasks']['update'])) {
-                $tugboatConfig['update_command'] = 'update';
-            }
-            if (isset($taskfile['tasks']['update:tugboat'])) {
-                $tugboatConfig['update_command'] = 'update:tugboat';
-            }
-            if (isset($taskfile['tasks']['online:tugboat'])) {
-                $tugboatConfig['online_command'] = 'online:tugboat';
-            }
-            if (isset($taskfile['tasks']['tugboat:php:init'])) {
-                $tugboatConfig['init']['php'] = TRUE;
-            }
-            if (isset($taskfile['tasks']['tugboat:mysql:init'])) {
-                $tugboatConfig['init']['mysql'] = TRUE;
-            }
-            if (isset($taskfile['tasks']['tugboat:redis:init'])) {
-                $tugboatConfig['init']['redis'] = TRUE;
-            }
-            if (isset($taskfile['tasks']['tugboat:solr:init'])) {
-                $tugboatConfig['init']['solr'] = TRUE;
-            }
-        }
-
-        // Write the config.yml and settings.tugboat.php files.
-        if (count($tugboatConfig) > 0) {
-            $fs->ensureDirectoryExists('./.tugboat');
-            $fs->ensureDirectoryExists('./.tugboat/steps');
-            $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
-            $twig = new Environment($loader);
-            // Reinstate the override file.
-            if (isset($tugboatConfigOverrideFile)) {
-                file_put_contents('./.tugboat/config.drainpipe-override.yml',
-                    $tugboatConfigOverrideFile);
-            }
-            file_put_contents('./.tugboat/config.yml',
-                $twig->render('config.yml.twig', $tugboatConfig));
-            file_put_contents('./.tugboat/steps/1-init.sh',
-                $twig->render('steps/1-init.sh.twig', $tugboatConfig));
-            file_put_contents('./.tugboat/steps/2-update.sh',
-                $twig->render('steps/2-update.sh.twig', $tugboatConfig));
-            file_put_contents('./.tugboat/steps/3-build.sh',
-                $twig->render('steps/3-build.sh.twig', $tugboatConfig));
-            chmod('./.tugboat/steps/1-init.sh', 0755);
-            chmod('./.tugboat/steps/2-update.sh', 0755);
-            chmod('./.tugboat/steps/3-build.sh', 0755);
-            if (!empty($tugboatConfig['online_command'])) {
-                file_put_contents('./.tugboat/steps/4-online.sh',
-                    $twig->render('steps/4-online.sh.twig',
-                        $tugboatConfig));
-                chmod('./.tugboat/steps/4-online.sh', 0755);
-            }
-
-            if ($tugboatConfig['database_type'] === 'mysql') {
-                $fs->ensureDirectoryExists('./.tugboat/scripts');
-                $fs->copy("$scaffoldPath/tugboat/scripts/install-mysql-client.sh",
-                    './.tugboat/scripts/install-mysql-client.sh');
-                chmod('./.tugboat/scripts/install-mysql-client.sh', 0755);
-            }
-
-            file_put_contents('./web/sites/default/settings.tugboat.php',
-                $twig->render('settings.tugboat.php.twig', $tugboatConfig));
-            if (file_exists('./web/sites/default/settings.php')) {
-                $settings = file_get_contents('./web/sites/default/settings.php');
-                if (strpos($settings, 'settings.tugboat.php') === FALSE) {
-                    $include = <<<'EOT'
-include __DIR__ . "/settings.tugboat.php";
-EOT;
-                    file_put_contents('./web/sites/default/settings.php',
-                        $include . PHP_EOL,
-                        FILE_APPEND);
-                }
-            }
-        }
-    }
-
-    /**
-     * Processes Tugboat service configuration overrides.
-     *
-     * @param array $configOverride The configuration override array.
-     * @param string $service The service name (e.g., 'php', 'solr').
-     * @param array $allowedKeys The keys allowed for this service override.
-     * @return string The formatted YAML string for the overrides.
-     */
-    private function processTugboatOverride(array $configOverride, string $service, array $allowedKeys): string
-    {
-        if (empty($configOverride[$service]) || !is_array($configOverride[$service])) {
-            return '';
-        }
-
-        $filteredOverride = array_filter($configOverride[$service],
-            function($key) use ($allowedKeys) {
-                return in_array($key, $allowedKeys);
-            },
-            ARRAY_FILTER_USE_KEY);
-
-        $overrideOutput = [];
-        foreach (explode(PHP_EOL, Yaml::dump($filteredOverride, 2, 2)) as $line) {
-            $overrideOutput[] = str_repeat(' ', 4) . $line;
-        }
-
-        return rtrim(implode("\n", $overrideOutput));
-    }
-
-    /**
-     * Extracts the Redis version tag from a Docker image string.
-     *
-     * Supports formats using environment variable fallbacks such as:
-     *   - ${REDIS_DOCKER_IMAGE:-redis:7}
-     *   - redis:${REDIS_TAG:-6-bullseye}
-     * As well as direct image values like:
-     *   - redis:7-alpine
-     *   - tugboatqa/redis:bookworm
-     *
-     * @param string $image The raw or interpolated image string from docker-compose.redis.yaml.
-     *
-     * @return string The extracted Redis version/tag (e.g. "7", "6-bullseye", "bookworm").
-     *
-     * @throws \RuntimeException If the version tag cannot be extracted.
-     */
-    public static function extractRedisImageVersion(string $image): string
-    {
-        // Normalize image from possible environment syntax.
-        // Example: $image = '${REDIS_DOCKER_IMAGE:-redis:7}'.
-        if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
-            $image = $matches[1];
-        // Example: $image = 'redis:${REDIS_TAG:-6-bullseye}'.
-        } elseif (preg_match('/^([^:]+):\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
-            $image = "{$matches[1]}:{$matches[2]}";
-        }
-
-        // Extract the version/tag from the image string.
-        // Example: $image = 'redis:6-bullseye' → $version = '6-bullseye'
-        if (!preg_match('/:([a-zA-Z0-9._-]+)$/', $image, $versionMatch)) {
-            throw new \RuntimeException("Unable to extract Redis version from image: {$image}");
-        }
-
-        return $versionMatch[1];
-    }
-
 }

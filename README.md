@@ -23,15 +23,19 @@ and if using DDEV, restart to enable the added features:
 ddev restart
 ```
 
-The Tugboat configuration file is not a static file; it is dynamically generated based on your `.ddev/config` file. See [/src/ScaffoldInstallerPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/ScaffoldInstallerPlugin.php#L451) for the implementation details.
+### Taskfile
 
-This will scaffold out various files, most importantly a `Taskfile.yml` in the
-root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool that aims to be
-simpler and easier to use than, for example, GNU Make. Since it's written in Go,
-Task is just a single binary and has no other dependencies. It's also
-cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
+Drainpipe will scaffold out various files, most importantly a `Taskfile.yml` in
+the root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool
+that aims to be simpler and easier to use than, for example, GNU Make. Since
+it's written in Go, Task is just a single binary and has no other dependencies.
+It's also cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
 
-You can see what tasks are available after installation by running
+Drainpipe installs the Task binary for you, no matter if you are using DDEV or
+not. If you already have Task installed system-wide and are not using DDEV, your
+installed binary will be linked from the `vendor/bin` directory.
+
+You can see which tasks are available after installation by running
 `./vendor/bin/task --list` or `ddev task --list` if you're running DDEV. To get
 more information on a specific task e.g. what parameters it takes, you can run
 `task [task name] --summary`.
@@ -44,11 +48,6 @@ npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
 
 See [`.github/workflows/ValidateTaskfile.yml`](.github/workflows/ValidateTaskfile.yml)
 for an example of this in use.
-
-```
-💡 If your docroot is not the standard `web/` path, you must create a symlink to it
-ln -s web/ docroot
-```
 
 ### Overriding files provided by drainpipe
 
@@ -91,6 +90,19 @@ You can override the platform and processor with environment variables `DRAINPIP
 and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `windows`,
 and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
 upstream dependencies e.g. https://github.com/go-task/task/releases
+
+### Tugboat
+
+The Tugboat configuration file is not a static file; it is dynamically generated
+based on your `.ddev/config.yaml` file. To see the implementation details, check
+[/src/TugboatConfigPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/TugboatConfigPlugin.php).
+
+### Node JS
+
+All Drainpipe components (DDEV, Github Actions, Tugboat) are configured to use
+the same Node JS major version. This is set in the `.nvmrc` file, which is
+scaffolded from the Drainpipe's root directory, but can be overriden to use a
+different Node version.
 
 ## Renovate Presets
 
@@ -554,6 +566,27 @@ workflows for testing.
 Runs security checks for composer packages and Drupal contrib, as well as posting
 a diff of `composer.lock` as a review comment.
 
+Security checks rely on `composer audit`. This means `test:security` task will
+exit with error if your dependencies have known vulnerabilities. Sometimes, this
+is not desirable: think of a component which is required by Drupal core - you
+can not upgrade it directly, because it is pinned to a specific version by Drupal
+in the first place. To prevent these kind of situations from failing the security
+check, you can configure `composer audit` to ignore specific vulnerabilities
+when scanning your dependencies. To do so, the simplest way is to modify your
+`composer.json` file to add a list of vulnerabilities that should not trigger an
+error when running `test:security`:
+
+```json
+"config": {
+    "audit": {
+        "ignore": ["CVE-1234", "GHSA-xx", "PKSA-yy"]
+    }
+}
+```
+
+For more details about how to configure the ignore feature for `composer audit`,
+check the [Composer docs](https://getcomposer.org/doc/06-config.md#ignore).
+
 ### Composer Lock Diff (Deprecated)
 
 **This is now provided as part of the Security workflow**
@@ -585,6 +618,8 @@ To enable deployment of Pantheon Review Apps:
 - Add the following [variables to your GitHub repository](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository):
     - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
     - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
+    - `TERMINUS_TIMEOUT_LIMIT` (optional) Number of seconds that terminus will wait until timeout. Defaults to 600
+    - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
@@ -755,25 +790,67 @@ Add the following to `composer.json` to add Tugboat configuration:
 }
 ```
 
+Then, run `ddev composer install` to generate:
+- `.tugboat/config.yml` - Complete Tugboat configuration
+- `.tugboat/scripts/` - Helper scripts (if needed)
+- `web/sites/default/settings.tugboat.php` - Drupal settings for Tugboat
+
 The following will be autodetected based on your `.ddev/config.yml`:
 - Web server (nginx or apache)
 - PHP version
 - Database type and version
-- nodejs version
+- Nodejs version
 - Redis (Obtained with `ddev get ddev/ddev-redis`)
+- Solr (Obtained with `ddev get ddev/ddev-solr`)
 
-Additionally, Pantheon Terminus can be added:
+Additionally, Pantheon integration can be added:
 ```json
 {
     "extra": {
         "drainpipe": {
             "tugboat": {
-              "terminus": true
+                "pantheon": true
             }
         }
     }
 }
 ```
+
+When using MySQL as the database engine in DDEV, Tugboat can be configured to
+use the `percona` Docker image instead of `mysql`:
+```json
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {
+                "percona": true
+            }
+        }
+    }
+}
+```
+
+### Custom Templates
+
+For the main `php` service, you can override any build phase template by copying
+it to `.tugboat/drainpipe-templates/`. Example:
+
+```
+mkdir -p .tugboat/drainpipe-templates
+cp vendor/lullabot/drainpipe/scaffold/tugboat/templates/php-init.yml.twig \
+   .tugboat/drainpipe-templates/
+```
+
+Edit `.tugboat/drainpipe-templates/php-init.yml.twig` to add, remove, or modify
+commands, then regenerate the Tugboat configuration file with `ddev composer install`.
+
+Available Templates:
+
+- `php-init.yml.twig` - Init phase commands
+- `php-update.yml.twig` - Update phase commands
+- `php-build.yml.twig` - Build phase commands
+- `php-online.yml.twig` - Online phase commands
+- `config.yml.twig` - Complete Tugboat configuration (advanced)
 
 ### Tasks
 
@@ -822,8 +899,19 @@ task to your `Taskfile.yml` for the first time).
 configuration.
 >>>
 
-You can hook into the `init` step of images by adding them to your
-`Taskfile.yml`, e.g.
+#### Custom init commands
+
+You can hook into the `init` step of any service by adding them to your
+`Taskfile.yml`. These additional commands will be run at the end of the
+init phase for the specific Tugboat service.
+
+Supported services:
+
+- Webserver: `tugboat:php:init`
+- Database: `tugboat:mysql:init` / `tugboat:mariadb:init` / `tugboat:postgres:init`
+- Memory cache: `tugboat:redis:init` / `tugboat:memcached:init`
+
+Example:
 
 ```
 tugboat:php:init:
@@ -832,8 +920,12 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-You can also add an `online` step by adding a task named `online:tugboat`
-and re-running `composer install`.
+#### Custom online commands
+
+You can also add an `online` step to the `php` service by adding a task
+named `online:tugboat` and re-running `composer install`.
+
+### Additional Tugboat keys
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
 it. The following keys can be added to your `config.yml` via a
@@ -848,10 +940,36 @@ solr:
   commands:
   checkout:
   depends:
-  aliases:
-  urls:
   volumes:
   environment:
+  aliases:
+  urls:
+```
+
+### Mail Configuration
+
+By default, Drainpipe configures Tugboat environments to capture email using Tugboat's built-in mail capture service. This automatically configures:
+- The core mail system to use `php_mail`
+- The Mail System module (if installed) to use `php_mail` as the sender
+- Symfony Mailer (if installed) to send mail through Tugboat's SMTP service
+
+If you need to use a different mail configuration (e.g., for testing with a specific mail service or module), you can override these settings in your custom settings file (typically `web/sites/default/settings.tugboat.php` or `web/sites/default/settings.php`).
+
+For example, to use a different mail backend:
+
+```php
+// Override the default Drainpipe mail configuration.
+// This should come after including settings.tugboat.php
+if (getenv('TUGBOAT_REPO')) {
+  // Example: Use a custom mail transport
+  $config['system.mail']['interface']['default'] = 'my_custom_mailer';
+
+  // Example: Configure Symfony Mailer differently
+  $config['symfony_mailer.settings']['default_transport'] = 'custom_transport';
+  $config['symfony_mailer.mailer_transport.custom_transport']['plugin'] = 'smtp';
+  $config['symfony_mailer.mailer_transport.custom_transport']['configuration']['host'] = 'custom.smtp.example.com';
+  $config['symfony_mailer.mailer_transport.custom_transport']['configuration']['port'] = '587';
+}
 ```
 
 ## Contributor Docs
