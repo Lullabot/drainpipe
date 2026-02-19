@@ -72,7 +72,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-phpunit-functional-${{ matrix.drupal-version }}
           path: test_result
@@ -145,7 +145,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-phpunit-dtt-${{ matrix.drupal-version }}
           path: test_result
@@ -213,7 +213,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-phpunit-static-${{ matrix.drupal-version }}
           path: test_result

@@ -1,0 +1,14 @@
+- |
+  composer install
+{% if services.php.commands.sync is defined and services.php.commands.sync %}
+  task {{ services.php.commands.sync }}
+{% endif %}
+  # Ensure the sites/default directory is writable.
+  chmod 755 ${DOCROOT}/sites/default
+  # Set file permissions such that Drupal will not complain.
+  chgrp -R www-data "${DOCROOT}/sites/default/files"
+  find "${DOCROOT}/sites/default/files" -type d -exec chmod 2775 {} \;
+  find "${DOCROOT}/sites/default/files" -type f -exec chmod 0664 {} \;
+{% if services.php.commands.update is defined and services.php.commands.update %}
+  task {{ services.php.commands.update }}
+{% endif %}
