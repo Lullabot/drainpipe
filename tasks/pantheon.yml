@@ -1,23 +1,33 @@
 version: '3'
 
 tasks:
+  auth:
+    desc: "Authenticates with Pantheon"
+    silent: true
+    cmds:
+      - if [ -z "$PANTHEON_TOKEN" ]; then echo "❌ PANTHEON_TOKEN is not set. Please add it to your .env file."; exit 1; fi
+      - echo "⚡ Authorising with Pantheon..."
+      - terminus auth:login --machine-token="$PANTHEON_TOKEN" >/dev/null 2>&1 || { echo "❌ Authentication failed. Your PANTHEON_TOKEN value is likely incorrect or expired. Please verify it in your .env file."; exit 1; }
+      - echo "✅ Authentication successful."
+
   fetch-db:
     desc: "Fetches a database from Pantheon"
+    silent: true
     env:
       DB_DIR: '{{default "/var/www/html/files/db" .DB_DIR}}'
       ENVIRONMENT: '{{default "live" .ENVIRONMENT}}'
     cmds:
+      - if [ -z "$PANTHEON_SITE_ID" ]; then echo "❌ PANTHEON_SITE_ID is not set. Please add it to your .env file."; exit 1; fi
       - rm -f $DB_DIR/db.sql.gz $DB_DIR/db.sql
-      # Check if required .env variables are set first
-      - if [ -z "$PANTHEON_TOKEN" ]; then echo "❌ PANTHEON_TOKEN is not set. Please add it to your .env file."; exit 1; fi
-      - if [ -z "{{.PANTHEON_SITE_ID}}" ]; then echo "❌ PANTHEON_SITE_ID is not set. Please add it to your .env file."; exit 1; fi
-
-      # Authenticate with failure check, silencing the original Terminus output
-      - echo "⚡ Authorising with Pantheon..."
-      - terminus auth:login --machine-token="${PANTHEON_TOKEN}" >/dev/null 2>&1 || { echo "❌ Authentication failed. Your PANTHEON_TOKEN value is likely incorrect or expired. Please verify it in your .env file."; exit 1; }
-      - echo "✅ Authentication successful."
-
-      # Fetch database with failure check, silencing only the error output to preserve the progress bar
+      - task: auth
       - echo "⚡ Fetching database from Pantheon..."
-      - terminus backup:get {{.PANTHEON_SITE_ID}}.$ENVIRONMENT --element=db --to=$DB_DIR/db.sql.gz 2>/dev/null || { echo "❌ Database fetch failed. Please check your PANTHEON_SITE_ID and ensure the token has permission for this site."; exit 1; }
+      - |
+        TMPFILE=$(mktemp)
+        terminus backup:get "${PANTHEON_SITE_ID}.${ENVIRONMENT}" --element=db --to=$DB_DIR/db.sql.gz 2>"$TMPFILE" || {
+          echo "❌ Database fetch failed."
+          echo "Details: $(cat "$TMPFILE")"
+          rm -f "$TMPFILE"
+          exit 1
+        }
+        rm -f "$TMPFILE"
       - echo "✅ Database fetch complete."
