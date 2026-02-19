@@ -9,7 +9,9 @@ includes:
   sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
-  tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+  tugboat:
+    taskfile: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+    optional: true
   test:
     taskfile: ./vendor/lullabot/drainpipe-dev/tasks/test.yml
     optional: true
