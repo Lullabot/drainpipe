@@ -1,0 +1,115 @@
+name: Lockfile Diff Comment
+description: >
+  Computes a human-readable diff between the base branch and HEAD versions of a
+  lockfile (yarn.lock or package-lock.json) and posts/updates a sticky PR comment
+  via marocchino/sticky-pull-request-comment.
+
+inputs:
+  token:
+    description: GitHub token with pull-requests:write and contents:read permissions.
+    required: true
+  lockfile:
+    description: Path to the lockfile relative to the repository root.
+    required: true
+  lockfile-type:
+    description: Lockfile format. Must be "yarn" or "npm".
+    required: false
+    default: ''
+  fail-on-downgrade:
+    description: Fail the action when a dependency downgrade is detected. The comment is still posted.
+    required: false
+    default: 'false'
+  collapse-threshold:
+    description: >
+      Total number of changed packages above which the comment body is wrapped in a
+      <details> block to keep the PR page readable.
+    required: false
+    default: '25'
+
+runs:
+  using: composite
+  steps:
+    - name: Install lockfile parsing dependencies
+      shell: bash
+      run: |
+        DEPS_DIR="${RUNNER_TEMP}/lockfile-diff-deps"
+        mkdir -p "$DEPS_DIR"
+        npm install --prefix "$DEPS_DIR" \
+          @yarnpkg/lockfile@^1.1.0 \
+          --no-save --no-package-lock --loglevel error
+        echo "LOCKFILE_DIFF_DEPS=$DEPS_DIR" >> "$GITHUB_ENV"
+
+    - name: Extract base lockfile
+      shell: bash
+      env:
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        LOCKFILE_PATH: ${{ inputs.lockfile }}
+      run: |
+        BASE_FILE="${RUNNER_TEMP}/base.lock"
+
+        if git show "${BASE_SHA}:${LOCKFILE_PATH}" > "$BASE_FILE" 2>/dev/null; then
+          echo "Base lockfile found at ${BASE_SHA}:${LOCKFILE_PATH}"
+        else
+          # Lockfile is new in this PR — treat base as empty.
+          echo "" > "$BASE_FILE"
+          echo "No base lockfile found; treating as newly added."
+        fi
+
+        echo "BASE_LOCK_FILE=$BASE_FILE"                           >> "$GITHUB_ENV"
+        echo "HEAD_LOCK_FILE=${GITHUB_WORKSPACE}/${LOCKFILE_PATH}" >> "$GITHUB_ENV"
+
+    - name: Compute diff
+      id: diff
+      shell: bash
+      env:
+        LOCKFILE_TYPE: ${{ inputs.lockfile-type }}
+        LOCKFILE_PATH: ${{ inputs.lockfile }}
+        COLLAPSE_THRESHOLD: ${{ inputs.collapse-threshold }}
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        # Infer type from filename when not explicitly provided.
+        TYPE="$LOCKFILE_TYPE"
+        if [[ -z "$TYPE" ]]; then
+          if [[ "$(basename "$LOCKFILE_PATH")" == "yarn.lock" ]]; then
+            TYPE="yarn"
+          else
+            TYPE="npm"
+          fi
+        fi
+
+        OUTPUT=$(node \
+          "$ACTION_PATH/diff.mjs" \
+          --type                "$TYPE" \
+          --base                "$BASE_LOCK_FILE" \
+          --head                "$HEAD_LOCK_FILE" \
+          --collapse-threshold  "$COLLAPSE_THRESHOLD" \
+          --deps-dir            "$LOCKFILE_DIFF_DEPS")
+
+        # Safely write multi-line output using a randomised delimiter.
+        EOF_DELIM=$(dd if=/dev/urandom bs=15 count=1 2>/dev/null | base64)
+        {
+          echo "body<<${EOF_DELIM}"
+          echo "$OUTPUT"
+          echo "${EOF_DELIM}"
+        } >> "$GITHUB_OUTPUT"
+
+        # Read downgrade flag written to disk by the script.
+        DOWNGRADE_FILE="${RUNNER_TEMP}/lockfile-diff-downgrade"
+        HAS_DOWNGRADE="false"
+        [[ -f "$DOWNGRADE_FILE" ]] && HAS_DOWNGRADE=$(cat "$DOWNGRADE_FILE")
+
+        echo "has_downgrade=$HAS_DOWNGRADE" >> "$GITHUB_OUTPUT"
+
+    - name: Post sticky PR comment
+      uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2.9.4
+      with:
+        header: lockfile-diff
+        GITHUB_TOKEN: ${{ inputs.token }}
+        message: ${{ steps.diff.outputs.body }}
+
+    - name: Fail on downgrade
+      if: ${{ inputs.fail-on-downgrade == 'true' && steps.diff.outputs.has_downgrade == 'true' }}
+      shell: bash
+      run: |
+        echo "::error::Dependency downgrade(s) detected. See the PR comment for details."
+        exit 1
