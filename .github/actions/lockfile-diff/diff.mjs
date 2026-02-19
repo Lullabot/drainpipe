@@ -100,7 +100,7 @@ function parseNpm(content) {
 
 // Semver comparison (major.minor.patch — sufficient for diff purposes)
 function compareVersions(a, b) {
-  const nums = (v) => String(v).replace(/^[^0-9]*/, '').split('.').map(Number);
+  const nums = (v) => String(v).split('-')[0].replace(/^[^0-9]*/, '').split('.').map(Number);
   const [aMaj = 0, aMin = 0, aPat = 0] = nums(a);
   const [bMaj = 0, bMin = 0, bPat = 0] = nums(b);
   return aMaj !== bMaj ? aMaj - bMaj
