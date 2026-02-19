@@ -21,12 +21,18 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import { createRequire } from 'module';
 import { env } from 'process';
+import { parseArgs } from 'util';
 
 // Argument parsing
-const args = {};
-for (let i = 2; i < process.argv.length; i += 2) {
-  args[process.argv[i].replace(/^--/, '')] = process.argv[i + 1];
-}
+const { values: args } = parseArgs({
+  options: {
+    type: { type: 'string' },
+    base: { type: 'string' },
+    head: { type: 'string' },
+    'collapse-threshold': { type: 'string' },
+    'deps-dir': { type: 'string' },
+  },
+});
 
 const TYPE               = args['type']               ?? 'yarn';
 const BASE_PATH          = args['base'];

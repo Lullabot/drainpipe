@@ -41,38 +41,44 @@ runs:
 
     - name: Extract base lockfile
       shell: bash
+      env:
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        LOCKFILE_PATH: ${{ inputs.lockfile }}
       run: |
         BASE_FILE="${RUNNER_TEMP}/base.lock"
-        BASE_SHA="${{ github.event.pull_request.base.sha }}"
-        LOCKFILE="${{ inputs.lockfile }}"
 
-        if git show "${BASE_SHA}:${LOCKFILE}" > "$BASE_FILE" 2>/dev/null; then
-          echo "Base lockfile found at ${BASE_SHA}:${LOCKFILE}"
+        if git show "${BASE_SHA}:${LOCKFILE_PATH}" > "$BASE_FILE" 2>/dev/null; then
+          echo "Base lockfile found at ${BASE_SHA}:${LOCKFILE_PATH}"
         else
           # Lockfile is new in this PR — treat base as empty.
           echo "" > "$BASE_FILE"
           echo "No base lockfile found; treating as newly added."
         fi
 
-        echo "BASE_LOCK_FILE=$BASE_FILE"                      >> "$GITHUB_ENV"
-        echo "HEAD_LOCK_FILE=${GITHUB_WORKSPACE}/${LOCKFILE}" >> "$GITHUB_ENV"
+        echo "BASE_LOCK_FILE=$BASE_FILE"                           >> "$GITHUB_ENV"
+        echo "HEAD_LOCK_FILE=${GITHUB_WORKSPACE}/${LOCKFILE_PATH}" >> "$GITHUB_ENV"
 
     - name: Compute diff
       id: diff
       shell: bash
+      env:
+        LOCKFILE_TYPE: ${{ inputs.lockfile-type }}
+        LOCKFILE_PATH: ${{ inputs.lockfile }}
+        COLLAPSE_THRESHOLD: ${{ inputs.collapse-threshold }}
+        ACTION_PATH: ${{ github.action_path }}
       run: |
         # Infer type from filename when not explicitly provided.
-        TYPE="${{ inputs.lockfile-type }}"
+        TYPE="$LOCKFILE_TYPE"
         if [[ -z "$TYPE" ]]; then
-          [[ "$(basename '${{ inputs.lockfile }}')" == "yarn.lock" ]] && TYPE="yarn" || TYPE="npm"
+          [[ "$(basename "$LOCKFILE_PATH")" == "yarn.lock" ]] && TYPE="yarn" || TYPE="npm"
         fi
 
         OUTPUT=$(node \
-          "${{ github.action_path }}/diff.mjs" \
+          "$ACTION_PATH/diff.mjs" \
           --type                "$TYPE" \
           --base                "$BASE_LOCK_FILE" \
           --head                "$HEAD_LOCK_FILE" \
-          --collapse-threshold  "${{ inputs.collapse-threshold }}" \
+          --collapse-threshold  "$COLLAPSE_THRESHOLD" \
           --deps-dir            "$LOCKFILE_DIFF_DEPS")
 
         # Safely write multi-line output using a heredoc delimiter.
