@@ -1,5 +1,5 @@
 const path = require('path');
-const fs = require('fs');
+const { fileURLToPath } = require('url');
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers')
 const { src, dest, task, watch, series } = require('gulp');
@@ -30,14 +30,15 @@ const srcs = files
 console.log('🪠 Autoprefixer info:');
 console.log(autoprefixer.info());
 
-// Compile once with dart Sass directly to get a list of includes/partials.
+// Compile once with dart Sass (modern API) to get a list of includes/partials for watching.
 const includes = Object.keys(srcs)
   .map(file => {
-    const result = dartSass.renderSync({
-      file: file,
-      includePaths: [modernNormalizePath],
+    const result = dartSass.compile(file, {
+      loadPaths: [modernNormalizePath],
     });
-    return result.stats.includedFiles.filter(file => typeof file === "string");
+    return result.loadedUrls
+      .filter(url => url.protocol === 'file:')
+      .map(url => fileURLToPath(url));
   })
   .reduce((prev, curr) => prev.concat(curr), []);
 
@@ -46,8 +47,8 @@ task('sass', function() {
     .pipe(sourcemaps.init())
     .pipe(sassGlob())
     .pipe(sass.sync({
-      outputStyle: 'compressed',
-      includePaths: [modernNormalizePath],
+      style: 'compressed',
+      loadPaths: [modernNormalizePath],
     }).on('error', sass.logError))
     .pipe(postcss([
       autoprefixer(),
@@ -67,8 +68,8 @@ task('development', function() {
     .pipe(sourcemaps.init())
     .pipe(sassGlob())
     .pipe(sass.sync({
-      outputStyle: 'expanded',
-      includePaths: [modernNormalizePath],
+      style: 'expanded',
+      loadPaths: [modernNormalizePath],
     }).on('error', sass.logError))
     .pipe(postcss([
       autoprefixer(),
