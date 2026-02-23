@@ -17,7 +17,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: drainpipe
 
@@ -60,7 +60,7 @@ jobs:
         run: zip -r /tmp/drainpipe.zip ./
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: test-metapackage-build
           path: /tmp/drainpipe.zip
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -145,7 +145,7 @@ jobs:
      runs-on: ubuntu-24.04
      needs: Build
      steps:
-       - uses: actions/download-artifact@v7
+       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
          with:
            name: test-metapackage-build
 
@@ -181,7 +181,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -219,7 +219,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -254,7 +254,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -293,7 +293,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -330,7 +330,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
