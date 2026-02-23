@@ -4,7 +4,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-permissions: {}
+permissions:
+  deployments: write
+  contents: read
 
 jobs:
   Test-Acquia:
