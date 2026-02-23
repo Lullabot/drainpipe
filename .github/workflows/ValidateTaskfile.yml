@@ -10,14 +10,14 @@ jobs:
   Validate-Example-Taskfile:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '22.19.0'
+          node-version-file: '.nvmrc'
 
       - name: Validate Taskfile.yml
-        # Also update src/BinaryInstallPlugin.php if changing version
         run: |
-          curl -O https://raw.githubusercontent.com/go-task/task/v3.45.4/website/src/public/schema.json
+          curl -sL https://taskfile.dev/install.sh | sh -s -- -d $(cat .taskfile) -b /usr/local/bin
+          curl -O https://raw.githubusercontent.com/go-task/task/$(cat .taskfile)/website/src/public/schema.json
           npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml

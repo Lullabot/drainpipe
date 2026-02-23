@@ -1,0 +1,18 @@
+name: 'Validate TERMINUS_TIMEOUT_LIMIT'
+description: 'Validates and sets the TERMINUS_TIMEOUT_LIMIT environment variable'
+inputs:
+  terminus_timeout_limit:
+    description: 'Timeout in seconds for Terminus'
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Validate TERMINUS_TIMEOUT_LIMIT
+      shell: bash
+      run: |
+        TIMEOUT_LIMIT="${{ inputs.terminus_timeout_limit || '600' }}"
+        if ! [[ "$TIMEOUT_LIMIT" =~ ^[0-9]+$ ]]; then
+          echo "::error::TERMINUS_TIMEOUT_LIMIT must be a number. It represents the number of seconds that terminus will wait until timeout. Current value: $TIMEOUT_LIMIT"
+          exit 1
+        fi
+        echo "TERMINUS_TIMEOUT_LIMIT=$TIMEOUT_LIMIT" >> "$GITHUB_ENV"

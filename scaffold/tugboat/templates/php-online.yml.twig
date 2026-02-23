@@ -1,0 +1,4 @@
+- echo "Running online commands"
+{% if services.php.commands.online is defined and services.php.commands.online %}
+- task {{ services.php.commands.online }}
+{% endif %}

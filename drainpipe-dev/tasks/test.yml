@@ -1,12 +1,19 @@
 version: '3'
 
 vars:
-  YAML_DIRS: '{{ default "web/**/*.yml" .YAML_DIRS }}'
-  TWIG_DIRS: '{{ default "web/modules/custom web/profiles web/themes/custom" .TWIG_DIRS }}'
+  WEBROOT:
+    sh: |
+      if [ -d "docroot" ] && [ -d "docroot/modules" ] && [ -d "docroot/themes" ] && [ -f "docroot/index.php" ]; then
+        echo "docroot"
+      else
+        echo "web"
+      fi
+  YAML_DIRS: '{{ default (printf "%s/**/*.yml" .WEBROOT) .YAML_DIRS }}'
+  TWIG_DIRS: '{{ default (printf "%s/modules/custom %s/profiles %s/themes/custom" .WEBROOT .WEBROOT .WEBROOT) .TWIG_DIRS }}'
   # These directories are configured in phpcs.xml. However, phpcs will fail if
   # those directories do not exist, so we create them with the assumption that
   # every Drupal site will eventually have these directories.
-  TEST_DIRS: '{{ default "web/modules/custom web/themes/custom web/sites" .TEST_DIRS }}'
+  TEST_DIRS: '{{ default (printf "%s/modules/custom %s/themes/custom %s/sites" .WEBROOT .WEBROOT .WEBROOT) .TEST_DIRS }}'
   NIGHTWATCH_TEST_DIRS: '{{ default "test" .NIGHTWATCH_TEST_DIRS }}'
   FUNC_ENSURE_DIRS: |
     DIRS_ARR=({{.TEST_DIRS}})
@@ -28,23 +35,14 @@ tasks:
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
-      - cmd: |
-          if [ "{{.format}}" == "junit" ]; then
-            mkdir -p test_result
-            ./vendor/bin/local-php-security-checker --format=json > test_result/local-php-security-checker.json
-          fi
-        ignore_error: true
       - |
         if [ "{{.format}}" == "junit" ]; then
-          RESULT=$(cat test_result/local-php-security-checker.json)
-          ./vendor/bin/drainpipe-convert-to-junit-xml convert:sensiolabs-security-check "$RESULT" > test_result/local-php-security-checker.xml
-          if [ "$RESULT" != "{}" ]; then
-            exit 1
-          fi
+          composer global config allow-plugins.nedbase/composer-audit-common-report-formats-plugin true
+          composer global require nedbase/composer-audit-common-report-formats-plugin
+          composer audit:junit
         else
-          ./vendor/bin/local-php-security-checker
+          composer audit
         fi
-      - composer audit
       - |
         ./vendor/bin/composer-lock-diff --from {{ shellQuote (.composer_lock_diff_from | default "main") }} --md
         if [ "" != {{ shellQuote (.composer_lock_diff | default "") }} ]; then
@@ -118,9 +116,9 @@ tasks:
     desc: Runs PHPUnit unit tests
     cmds:
       - |
-        CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
+        CONFIG="$(pwd)/phpunit.xml"
         if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
+          CONFIG="$(pwd)/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result/phpunit
@@ -131,9 +129,9 @@ tasks:
     desc: Runs PHPUnit functional tests
     cmds:
       - |
-        CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit.xml"
+        CONFIG="$(pwd)/phpunit.xml"
         if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="$(pwd)/vendor/lullabot/drainpipe/scaffold/phpunit-testtraits.xml"
+          CONFIG="$(pwd)/phpunit-testtraits.xml"
         fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result/phpunit

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         bootstrap="../../../../web/core/tests/bootstrap.php"
+         bootstrap="{% DOCROOT %}/core/tests/bootstrap.php"
          colors="true"
          beStrictAboutTestsThatDoNotTestAnything="true"
          beStrictAboutOutputDuringTests="true"
@@ -11,8 +11,7 @@
          displayDetailsOnTestsThatTriggerWarnings="true"
          displayDetailsOnTestsThatTriggerDeprecations="true"
          cacheResult="false"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
-         cacheDirectory=".phpunit.cache">
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd">
   <php>
     <!-- Set error reporting to E_ALL. -->
     <ini name="error_reporting" value="32767"/>
@@ -55,29 +54,28 @@
   </extensions>
   <testsuites>
     <testsuite name="unit">
-
-      <directory>../../../../web/modules/custom/*/tests/src/Unit</directory>
-      <directory>../../../../web/modules/custom/*/*/tests/src/Unit</directory>
-      <directory>../../../../web/modules/custom/*/modules/*/tests/src/Unit</directory>
-      <directory>../../../../test/phpunit/*/Unit</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/tests/src/Unit</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/*/tests/src/Unit</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/modules/*/tests/src/Unit</directory>
+      <directory>test/phpunit/*/Unit</directory>
     </testsuite>
     <testsuite name="kernel">
-      <directory>../../../../web/modules/custom/*/tests/src/Kernel</directory>
-      <directory>../../../../web/modules/custom/*/*/tests/src/Kernel</directory>
-      <directory>../../../../web/modules/custom/*/modules/*/tests/src/Kernel</directory>
-      <directory>../../../../test/phpunit/*/Kernel</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/tests/src/Kernel</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/*/tests/src/Kernel</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/modules/*/tests/src/Kernel</directory>
+      <directory>test/phpunit/*/Kernel</directory>
     </testsuite>
     <testsuite name="functional">
-      <directory>../../../../web/modules/custom/*/tests/src/Functional</directory>
-      <directory>../../../../web/modules/custom/*/*/tests/src/Functional</directory>
-      <directory>../../../../web/modules/custom/*/modules/*/tests/src/Functional</directory>
-      <directory>../../../../test/phpunit/*/Functional</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/tests/src/Functional</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/*/tests/src/Functional</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/modules/*/tests/src/Functional</directory>
+      <directory>test/phpunit/*/Functional</directory>
     </testsuite>
     <testsuite name="functional-javascript">
-      <directory>../../../../web/modules/custom/*/tests/src/FunctionalJavaScript</directory>
-      <directory>../../../../web/modules/custom/*/*/tests/src/FunctionalJavaScript</directory>
-      <directory>../../../../web/modules/custom/*/modules/*/tests/src/FunctionalJavaScript</directory>
-      <directory>../../../../test/phpunit/*/FunctionalJavaScript</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/tests/src/FunctionalJavaScript</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/*/tests/src/FunctionalJavaScript</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/modules/*/tests/src/FunctionalJavaScript</directory>
+      <directory>test/phpunit/*/FunctionalJavaScript</directory>
     </testsuite>
   </testsuites>
 </phpunit>

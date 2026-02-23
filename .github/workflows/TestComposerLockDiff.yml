@@ -18,7 +18,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           path: drainpipe
 
@@ -44,6 +44,7 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
           ddev composer require lullabot/drainpipe --with-all-dependencies
+          ddev restart
 
       - name: Commit current state
         run: |
@@ -78,7 +79,7 @@ jobs:
 
       - name: Upload artifact
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: processed-descriptions-${{ matrix.drupal-version }}
           path: |

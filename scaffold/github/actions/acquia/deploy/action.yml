@@ -38,7 +38,6 @@ runs:
     - name: Install packages from Composer
       shell: bash
       run: |
-        ddev composer install --no-plugins
         ddev composer install
 
     - name: Install and configure Acquia CLI

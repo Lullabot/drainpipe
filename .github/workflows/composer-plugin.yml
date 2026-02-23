@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        php-version: [ 8.1, 8.2, 8.3, 8.4 ]
+        php-version: [ 8.2, 8.3, 8.4, 8.5 ]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: shivammathur/setup-php@20529878ed81ef8e78ddf08b480401e6101a850f # 2.35.3
         with:
@@ -29,7 +29,7 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}

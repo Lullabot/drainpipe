@@ -23,7 +23,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           path: drainpipe
 
@@ -72,7 +72,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-phpunit-functional-${{ matrix.drupal-version }}
           path: test_result
@@ -96,7 +96,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           path: drainpipe
 
@@ -145,7 +145,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-phpunit-dtt-${{ matrix.drupal-version }}
           path: test_result
@@ -169,7 +169,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           path: drainpipe
 
@@ -213,7 +213,7 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test_result-phpunit-static-${{ matrix.drupal-version }}
           path: test_result

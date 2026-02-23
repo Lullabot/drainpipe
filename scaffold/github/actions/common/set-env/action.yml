@@ -46,3 +46,18 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+
+    - uses: actions/checkout@v6
+      with:
+        path: drainpipe
+
+    - run: |
+        if [[ -f .nvmrc ]]; then
+            NODE_FILE=.nvmrc
+        else
+            NODE_FILE=drainpipe/.nvmrc
+        fi
+        NODE_MAJOR=$(tr -d '[:space:]' < "$NODE_FILE")
+        echo "NODE_MAJOR=${NODE_MAJOR}" >> "$GITHUB_ENV"
+
+      shell: bash

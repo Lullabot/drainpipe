@@ -20,7 +20,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           path: drainpipe
 
@@ -64,3 +64,6 @@ jobs:
 
       - name: Test DDEV Settings Generated
         run: test -f web/sites/default/settings.ddev.php
+
+      - name: Ensure task if available
+        run: ddev task --help

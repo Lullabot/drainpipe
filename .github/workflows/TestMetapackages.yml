@@ -17,7 +17,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           path: drainpipe
 
@@ -35,7 +35,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "22"
+          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
           ddev config --corepack-enable
           ddev start
           ddev exec --raw composer config extra.drupal-scaffold.gitignore true
@@ -60,7 +60,7 @@ jobs:
         run: zip -r /tmp/drainpipe.zip ./
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-metapackage-build
           path: /tmp/drainpipe.zip
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: test-metapackage-build
 
@@ -89,7 +89,9 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: ddev start
+        run: |
+          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
+          ddev start
 
       - name: Setup Sass
         run: |
@@ -103,7 +105,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: test-metapackage-build
 
@@ -123,13 +125,15 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: ddev start
+        run: |
+          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
+          ddev start
 
       - name: Setup Sass
         run: |
           ddev exec corepack disable
           ddev exec npm i -g yarn@1.22.1
-          ddev exec 'rm /usr/local/bin/yarn'
+          ddev exec 'rm -f /usr/local/bin/yarn'
           ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
           ddev exec yarn init -y
           ddev exec yarn add file:./drainpipe/metapackages/sass --dev
@@ -141,7 +145,7 @@ jobs:
      runs-on: ubuntu-24.04
      needs: Build
      steps:
-       - uses: actions/download-artifact@v5
+       - uses: actions/download-artifact@v7
          with:
            name: test-metapackage-build
 
@@ -177,7 +181,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: test-metapackage-build
 
@@ -215,7 +219,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: test-metapackage-build
 
@@ -250,7 +254,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: test-metapackage-build
 
@@ -276,7 +280,7 @@ jobs:
         run: |
           ddev exec corepack disable
           ddev exec npm i -g yarn@1.22.1
-          ddev exec 'rm /usr/local/bin/yarn'
+          ddev exec 'rm -f /usr/local/bin/yarn'
           ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
           ddev exec yarn init -y
           ddev exec yarn add focus-trap@^6.7.3
@@ -289,7 +293,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: test-metapackage-build
 
@@ -326,7 +330,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: test-metapackage-build
 
