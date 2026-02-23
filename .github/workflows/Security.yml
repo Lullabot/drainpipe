@@ -21,7 +21,22 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+
+      - name: Install Zizmor
+        run: pip install zizmor==1.22.0
+
       - name: Run Zizmor
-        uses: zizmorcore/zizmor-action@0dce2577a4760a2749d8cfb7a84b7d5585ebcb7d # v0.5.0
+        id: zizmor
+        run: zizmor --format sarif .github drainpipe-dev/.github > zizmor.sarif
+        continue-on-error: true
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@45580472a5bb82c4681c4ac726cfdb60060c2ee1 # v3.32.4
         with:
-          inputs: .github drainpipe-dev/.github
+          sarif_file: zizmor.sarif
+          category: zizmor
+
+      - name: Fail on findings
+        if: steps.zizmor.outcome == 'failure'
+        run: exit 1
