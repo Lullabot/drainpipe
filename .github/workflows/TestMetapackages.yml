@@ -10,6 +10,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   Build:
     runs-on: ubuntu-24.04
@@ -20,6 +22,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: drainpipe
+          persist-credentials: false
 
       - name: Setup drainpipe-dev
         run: mv drainpipe/drainpipe-dev .
@@ -35,7 +38,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
+          ddev config --nodejs-version "$NODE_MAJOR"
           ddev config --corepack-enable
           ddev start
           ddev exec --raw composer config extra.drupal-scaffold.gitignore true
@@ -90,7 +93,7 @@ jobs:
 
       - name: Start DDEV
         run: |
-          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
+          ddev config --nodejs-version "$NODE_MAJOR"
           ddev start
 
       - name: Setup Sass
@@ -126,7 +129,7 @@ jobs:
 
       - name: Start DDEV
         run: |
-          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
+          ddev config --nodejs-version "$NODE_MAJOR"
           ddev start
 
       - name: Setup Sass

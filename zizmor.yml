@@ -1,5 +1,4 @@
 rules:
-  excessive-permissions:
+  dangerous-triggers:
     ignore:
-      - "TestFunctional.yml"
-
+      - "repo-lockdown.yml"

@@ -4,11 +4,16 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions: {}
+
 jobs:
   clone-pantheon:
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Install dependencies
         run: |
@@ -54,7 +59,9 @@ jobs:
           git config --global user.name "GitHub Actions"
 
       - name: Clone Pantheon repo
-        run: git clone "${{ steps.gitinfo.outputs.git_url }}" -b master pantheon
+        env:
+          GIT_URL: ${{ steps.gitinfo.outputs.git_url }}
+        run: git clone "$GIT_URL" -b master pantheon
 
       - name: Create empty commit and push to environment branch
         run: |
@@ -65,8 +72,9 @@ jobs:
   deploy:
     needs: clone-pantheon
     runs-on: ubuntu-latest
+    permissions: {}
     container:
-      image: lastcallmedia/terminus-safe-deploy:latest
+      image: lastcallmedia/terminus-safe-deploy@sha256:867cd6f6c1787d3474b32dbe503b69146f54a31497102d15026ea008465eeee8
     steps:
       - name: Configure SSH for Pantheon
         env:
