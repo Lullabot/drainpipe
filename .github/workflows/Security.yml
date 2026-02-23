@@ -1,10 +1,12 @@
-name: Security Analysis with Zizmor
+name: Security
 
 on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["**"]
+
+permissions: {}
 
 jobs:
   zizmor:
