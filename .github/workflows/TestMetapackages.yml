@@ -10,6 +10,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   Build:
     runs-on: ubuntu-24.04
@@ -17,9 +19,10 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: drainpipe
+          persist-credentials: false
 
       - name: Setup drainpipe-dev
         run: mv drainpipe/drainpipe-dev .
@@ -35,7 +38,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
+          ddev config --nodejs-version "$NODE_MAJOR"
           ddev config --corepack-enable
           ddev start
           ddev exec --raw composer config extra.drupal-scaffold.gitignore true
@@ -60,7 +63,7 @@ jobs:
         run: zip -r /tmp/drainpipe.zip ./
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: test-metapackage-build
           path: /tmp/drainpipe.zip
@@ -69,7 +72,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -90,7 +93,7 @@ jobs:
 
       - name: Start DDEV
         run: |
-          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
+          ddev config --nodejs-version "$NODE_MAJOR"
           ddev start
 
       - name: Setup Sass
@@ -105,7 +108,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -126,7 +129,7 @@ jobs:
 
       - name: Start DDEV
         run: |
-          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
+          ddev config --nodejs-version "$NODE_MAJOR"
           ddev start
 
       - name: Setup Sass
@@ -145,7 +148,7 @@ jobs:
      runs-on: ubuntu-24.04
      needs: Build
      steps:
-       - uses: actions/download-artifact@v7
+       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
          with:
            name: test-metapackage-build
 
@@ -181,7 +184,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -219,7 +222,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -254,7 +257,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -293,7 +296,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 
@@ -330,7 +333,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: test-metapackage-build
 

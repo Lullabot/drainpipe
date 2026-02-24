@@ -14,7 +14,9 @@ jobs:
     name: Push branch to drainpipe-dev
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - uses: ./scaffold/github/actions/common/setup-git
         with:
@@ -22,7 +24,7 @@ jobs:
           git-email: no-reply@example.com
 
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd #v0.9.1
         with:
           ssh-private-key: ${{ secrets.DRAINPIPE_DEV_DEPLOY_KEY }}
           log-public-key: false
@@ -31,12 +33,16 @@ jobs:
         working-directory: drainpipe-dev
         run: |
           git init
-          git branch -m ${{ github.event.ref }}
+          git branch -m ${GH_EVENT_REF}
           git remote add origin git@github.com:Lullabot/drainpipe-dev.git
           git fetch origin
-          git reset --mixed origin/${{ github.event.ref }}
+          git reset --mixed origin/${GH_EVENT_REF}
+        env:
+          GH_EVENT_REF: ${{ github.event.ref }}
 
       - name: Delete ref from drainpipe-dev
         working-directory: drainpipe-dev
         run: |
-          git push origin --delete ${{ github.event.ref }}
+          git push origin --delete ${GH_EVENT_REF}
+        env:
+          GH_EVENT_REF: ${{ github.event.ref }}

@@ -1,0 +1,42 @@
+name: Security
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["**"]
+
+permissions: {}
+
+jobs:
+  zizmor:
+    name: Run Zizmor Security Analysis
+    runs-on: ubuntu-24.04
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Zizmor
+        run: pip install zizmor==1.22.0
+
+      - name: Run Zizmor
+        id: zizmor
+        run: zizmor --format sarif .github drainpipe-dev/.github > zizmor.sarif
+        continue-on-error: true
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@45580472a5bb82c4681c4ac726cfdb60060c2ee1 # v3.32.4
+        with:
+          sarif_file: zizmor.sarif
+          category: zizmor
+
+      - name: Fail on findings
+        if: steps.zizmor.outcome == 'failure'
+        run: exit 1
