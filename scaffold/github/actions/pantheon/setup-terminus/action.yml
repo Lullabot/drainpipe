@@ -10,12 +10,15 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: |
+    - env:
+        INPUT_PANTHEON_TOKEN: ${{ inputs.pantheon-token }}
+        INPUT_TERMINUS_PLUGINS: ${{ inputs.terminus-plugins }}
+      run: |
         echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >> ~/.ssh/config
         mkdir ~/terminus
         curl -L https://github.com/pantheon-systems/terminus/releases/download/4.1.1/terminus.phar --output ~/terminus/terminus
         chmod +x ~/terminus/terminus
         ln -s ~/terminus/terminus /usr/local/bin/terminus
-        echo "${{ inputs.terminus-plugins }}" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
-        terminus auth:login --machine-token="${{ inputs.pantheon-token }}"
+        echo "$INPUT_TERMINUS_PLUGINS" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
+        terminus auth:login --machine-token="$INPUT_PANTHEON_TOKEN"
       shell: bash

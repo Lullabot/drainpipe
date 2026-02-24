@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Zizmor
         id: zizmor
-        run: zizmor --format sarif .github drainpipe-dev/.github > zizmor.sarif
+        run: zizmor --format sarif .github drainpipe-dev/.github scaffold/github > zizmor.sarif
         continue-on-error: true
 
       - name: Upload SARIF
