@@ -587,6 +587,14 @@ error when running `test:security`:
 For more details about how to configure the ignore feature for `composer audit`,
 check the [Composer docs](https://getcomposer.org/doc/06-config.md#ignore).
 
+The Security workflow also includes a [Zizmor](https://woodruffw.github.io/zizmor/)
+static analysis job (`ZizmorAnalysis`) that scans your GitHub Actions workflow
+files for security issues. Zizmor results are uploaded to GitHub's code scanning
+dashboard, which requires [Code Security](https://docs.github.com/en/code-security/getting-started/github-security-features)
+to be enabled for your repository. If it is not enabled, the `ZizmorAnalysis`
+job will fail with: _"Code Security must be enabled for this repository to use
+code scanning."_
+
 ### Composer Lock Diff (Deprecated)
 
 **This is now provided as part of the Security workflow**
