@@ -70,4 +70,3 @@ runs:
         echo "✅ Acquia Code-switch complete."
 
       shell: bash
-
