@@ -11,11 +11,13 @@ rules:
   brackets:
     max-spaces-inside: 1
     max-spaces-inside-empty: 1
+  comments:
+    min-spaces-from-content: 1
   document-start:
     present: false
   empty-lines:
     max: 1
-  line-length: disable
   indentation:
     spaces: 2
+  line-length: disable
   truthy: disable
