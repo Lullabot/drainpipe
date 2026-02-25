@@ -145,40 +145,40 @@ jobs:
         run: ddev task sass
 
   Test-Sass-Yarn-3:
-     runs-on: ubuntu-24.04
-     needs: Build
-     steps:
-       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-         with:
-           name: test-metapackage-build
+    runs-on: ubuntu-24.04
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: test-metapackage-build
 
-       - name: Restore Workspace
-         run: |
-           cd ../
-           mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
-           unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
-           cd ${{ github.workspace }}
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
 
-       - uses: ./drainpipe/scaffold/github/actions/common/set-env
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
 
-       - name: Install DDEV
-         uses: ./drainpipe/scaffold/github/actions/common/ddev
-         with:
-           git-name: Drainpipe Bot
-           git-email: no-reply@example.com#
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
 
-       - name: Start DDEV
-         run: ddev start
+      - name: Start DDEV
+        run: ddev start
 
-       - name: Setup Sass
-         run: |
-           ddev yarn set version berry
-           ddev yarn set version 3
-           ddev yarn init -y
-           ddev yarn add ./drainpipe/metapackages/sass --dev
+      - name: Setup Sass
+        run: |
+          ddev yarn set version berry
+          ddev yarn set version 3
+          ddev yarn init -y
+          ddev yarn add ./drainpipe/metapackages/sass --dev
 
-       - name: Compile Sass
-         run: ddev task sass
+      - name: Compile Sass
+        run: ddev task sass
 
   Test-Sass-Yarn-4:
     runs-on: ubuntu-24.04
