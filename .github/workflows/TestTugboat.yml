@@ -131,4 +131,3 @@ jobs:
           export TUGBOAT_ROOT=. && \
             eval "$(grep 'NODE_MAJOR=' .tugboat/config.yml)" && \
             echo $NODE_MAJOR | grep -q 16
-

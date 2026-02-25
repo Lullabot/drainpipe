@@ -45,7 +45,7 @@ jobs:
           ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 
       - name: Build Project
-        run:  |
+        run: |
           ddev composer install
 
       - name: Run Security Checks
@@ -121,7 +121,7 @@ jobs:
           git-email: no-reply@example.com
 
       - name: Build Project
-        run:  |
+        run: |
           ddev composer install
 
       - name: Run composer audit
