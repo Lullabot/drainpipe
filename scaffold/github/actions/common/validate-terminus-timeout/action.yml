@@ -9,8 +9,10 @@ runs:
   steps:
     - name: Validate TERMINUS_TIMEOUT_LIMIT
       shell: bash
-      run: |
-        TIMEOUT_LIMIT="${{ inputs.terminus_timeout_limit || '600' }}"
+      env:
+        INPUT_TIMEOUT_LIMIT: ${{ inputs.terminus_timeout_limit || '600' }}
+      run: | # zizmor: ignore[github-env]
+        TIMEOUT_LIMIT="$INPUT_TIMEOUT_LIMIT"
         if ! [[ "$TIMEOUT_LIMIT" =~ ^[0-9]+$ ]]; then
           echo "::error::TERMINUS_TIMEOUT_LIMIT must be a number. It represents the number of seconds that terminus will wait until timeout. Current value: $TIMEOUT_LIMIT"
           exit 1

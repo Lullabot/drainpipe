@@ -20,22 +20,28 @@ runs:
   using: "composite"
   steps:
     - name: Clone Environment
+      env:
+        INPUT_TERMINUS_TOKEN: ${{ inputs.terminus-token }}
+        INPUT_SOURCE_SITE: ${{ inputs.source-site-name }}
+        INPUT_SOURCE_ENV: ${{ inputs.source-environment }}
+        INPUT_TARGET_SITE: ${{ inputs.target-site-name }}
+        INPUT_TARGET_ENV: ${{ inputs.target-environment }}
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "terminus auth:login --machine-token=\"${{ inputs.terminus-token }}\""
-        if [ "${{ inputs.source-site-name }}" == "${{ inputs.target-site-name }}" ]; then
-          drainpipe_exec "terminus -y env:clone-content ${{ inputs.source-site-name }}.${{ inputs.source-environment }} ${{ inputs.target-environment }}"
+        drainpipe_exec "terminus auth:login --machine-token=\"$INPUT_TERMINUS_TOKEN\""
+        if [ "$INPUT_SOURCE_SITE" == "$INPUT_TARGET_SITE" ]; then
+          drainpipe_exec "terminus -y env:clone-content $INPUT_SOURCE_SITE.$INPUT_SOURCE_ENV $INPUT_TARGET_ENV"
         else
-          drainpipe_exec "terminus backup:create ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=database"
-          drainpipe_exec "terminus backup:create ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=files"
-          TARGET_SITE_ID=$(drainpipe_exec "terminus site:lookup ${{ inputs.target-site-name }}")
-          DATABASE_URL=$(drainpipe_exec "terminus backup:get ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=database")
+          drainpipe_exec "terminus backup:create $INPUT_SOURCE_SITE.$INPUT_SOURCE_ENV --element=database"
+          drainpipe_exec "terminus backup:create $INPUT_SOURCE_SITE.$INPUT_SOURCE_ENV --element=files"
+          TARGET_SITE_ID=$(drainpipe_exec "terminus site:lookup $INPUT_TARGET_SITE")
+          DATABASE_URL=$(drainpipe_exec "terminus backup:get $INPUT_SOURCE_SITE.$INPUT_SOURCE_ENV --element=database")
           # Cannot pass the URL on the command line directly because it has weird characters.
           echo $DATABASE_URL > db.env
-          drainpipe_exec "terminus -y import:database ${{ inputs.target-site-name }}.${{ inputs.target-environment }} \"\$(cat db.env)\""
+          drainpipe_exec "terminus -y import:database $INPUT_TARGET_SITE.$INPUT_TARGET_ENV \"\$(cat db.env)\""
           rm db.env
-          curl -o files.tar.gz $(drainpipe_exec "terminus backup:get ${{ inputs.source-site-name }}.${{ inputs.source-environment }} --element=files")
+          curl -o files.tar.gz $(drainpipe_exec "terminus backup:get $INPUT_SOURCE_SITE.$INPUT_SOURCE_ENV --element=files")
           tar -xf files.tar.gz
-          drainpipe_exec "rsync -rLvz --delete --size-only --checksum --ipv4 --progress -e 'ssh -p 2222' ./files_${{ inputs.source-environment }}/. --temp-dir=~/tmp/ ${{ inputs.target-environment }}.$TARGET_SITE_ID@appserver.${{ inputs.target-environment }}.$TARGET_SITE_ID.drush.in:files"
+          drainpipe_exec "rsync -rLvz --delete --size-only --checksum --ipv4 --progress -e 'ssh -p 2222' ./files_$INPUT_SOURCE_ENV/. --temp-dir=~/tmp/ $INPUT_TARGET_ENV.$TARGET_SITE_ID@appserver.$INPUT_TARGET_ENV.$TARGET_SITE_ID.drush.in:files"
         fi
       shell: bash
