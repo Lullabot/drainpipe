@@ -36,6 +36,7 @@ const includes = Object.keys(srcs)
     const result = dartSass.renderSync({
       file: file,
       includePaths: [modernNormalizePath],
+      silenceDeprecations: ['legacy-js-api'],
     });
     return result.stats.includedFiles.filter(file => typeof file === "string");
   })
@@ -48,6 +49,7 @@ task('sass', function() {
     .pipe(sass.sync({
       outputStyle: 'compressed',
       includePaths: [modernNormalizePath],
+      silenceDeprecations: ['legacy-js-api'],
     }).on('error', sass.logError))
     .pipe(postcss([
       autoprefixer(),
