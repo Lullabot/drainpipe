@@ -52,8 +52,8 @@ jobs:
         if: steps.detect.outputs.lockfile != ''
         uses: ./.github/actions/lockfile-diff
         with:
-          token:              ${{ secrets.GITHUB_TOKEN }}
-          lockfile:           ${{ steps.detect.outputs.lockfile }}
-          lockfile-type:      ${{ steps.detect.outputs.type }}
-          fail-on-downgrade:  'false'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          lockfile: ${{ steps.detect.outputs.lockfile }}
+          lockfile-type: ${{ steps.detect.outputs.type }}
+          fail-on-downgrade: 'false'
           collapse-threshold: '25'
