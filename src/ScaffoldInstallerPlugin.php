@@ -558,6 +558,9 @@ EOT;
             else if ($github === 'ComposerLockDiff') {
                 $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
             }
+            else if ($github === 'LockfileDiff') {
+                $fs->copy("$scaffoldPath/github/workflows/LockfileDiff.yml", './.github/workflows/LockfileDiff.yml');
+            }
             else if ($github === 'Security') {
                 $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
             }
