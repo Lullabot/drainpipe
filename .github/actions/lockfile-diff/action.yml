@@ -36,6 +36,7 @@ runs:
         mkdir -p "$DEPS_DIR"
         npm install --prefix "$DEPS_DIR" \
           @yarnpkg/lockfile@^1.1.0 \
+          @yarnpkg/parsers \
           --no-save --no-package-lock --loglevel error
         echo "LOCKFILE_DIFF_DEPS=$DEPS_DIR" >> "$GITHUB_ENV"
 
