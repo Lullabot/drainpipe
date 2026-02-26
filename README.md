@@ -595,6 +595,19 @@ to be enabled for your repository. If it is not enabled, the `ZizmorAnalysis`
 job will fail with: _"Code Security must be enabled for this repository to use
 code scanning."_
 
+### NPM & Yarn Lockfile Diff
+
+Post a sticky comment in the Pull Request with a markdown table of any changes
+detected in `yarn.lock` or `package-lock.json` files.
+
+```json
+"extra": {
+    "drainpipe": {
+        "github": ["LockfileDiff"]
+    }
+}
+```
+
 ### Composer Lock Diff (Deprecated)
 
 **This is now provided as part of the Security workflow**
