@@ -160,6 +160,8 @@ const lockfileLabel = TYPE === 'yarn' ? 'yarn.lock' : 'package-lock.json';
 const shortSha      = (env.GITHUB_SHA ?? '').slice(0, 7) || 'unknown';
 const timestamp     = new Date().toISOString();
 
+const escape = (s) => String(s).replace(/`/g, "'").replace(/[|\\$]/g, '\\$&').replace(/[\r\n]/g, ' ');
+
 // Markdown output
 function buildTables() {
   let out = '';
@@ -167,14 +169,14 @@ function buildTables() {
   if (added.length) {
     out += `### ➕ Added (${added.length})\n\n`;
     out += `| Package | Version |\n|---|---|\n`;
-    for (const { name, version } of added) out += `| \`${name}\` | \`${version}\` |\n`;
+    for (const { name, version } of added) out += `| \`${escape(name)}\` | \`${escape(version)}\` |\n`;
     out += '\n';
   }
 
   if (removed.length) {
     out += `### ➖ Removed (${removed.length})\n\n`;
     out += `| Package | Version |\n|---|---|\n`;
-    for (const { name, version } of removed) out += `| \`${name}\` | \`${version}\` |\n`;
+    for (const { name, version } of removed) out += `| \`${escape(name)}\` | \`${escape(version)}\` |\n`;
     out += '\n';
   }
 
@@ -182,7 +184,7 @@ function buildTables() {
     out += `### 🔄 Updated (${updated.length})\n\n`;
     out += `| Package | From | To | Note |\n|---|---|---|---|\n`;
     for (const { name, from, to, downgrade } of updated) {
-      out += `| \`${name}\` | \`${from}\` | \`${to}\` | ${downgrade ? '⚠️ downgrade' : ''} |\n`;
+      out += `| \`${escape(name)}\` | \`${escape(from)}\` | \`${escape(to)}\` | ${downgrade ? '⚠️ downgrade' : ''} |\n`;
     }
     out += '\n';
   }
