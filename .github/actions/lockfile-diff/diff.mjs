@@ -82,8 +82,8 @@ function parseYarn(content) {
   const map = new Map();
   for (const [key, entry] of entries) {
     const firstName = key.split(',')[0].trim();
-    const atIndex   = firstName.lastIndexOf('@');
-    const name      = atIndex > 0 ? firstName.slice(0, atIndex) : firstName;
+    const nameMatch = firstName.match(/^(@[^/]+\/[^@]+|[^@]+)/);
+    const name      = nameMatch ? nameMatch[0] : firstName;
     // Keep the highest version if the same package appears under multiple specifier groups.
     if (!map.has(name) || compareVersions(entry.version, map.get(name)) > 0) {
       map.set(name, entry.version);
