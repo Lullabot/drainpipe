@@ -49,7 +49,7 @@ runs:
         LOCKFILE_PATH: ${{ inputs.lockfile }}
       run: |
         if [[ "$LOCKFILE_PATH" == *".."* || "$LOCKFILE_PATH" == /* ]]; then
-          echo "::error::Invalid lockfile path: $LOCKFILE_PATH"
+          echo "::error::Invalid lockfile path"
           exit 1
         fi
 

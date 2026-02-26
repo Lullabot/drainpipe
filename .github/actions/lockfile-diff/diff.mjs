@@ -160,7 +160,7 @@ const lockfileLabel = TYPE === 'yarn' ? 'yarn.lock' : 'package-lock.json';
 const shortSha      = (env.GITHUB_SHA ?? '').slice(0, 7) || 'unknown';
 const timestamp     = new Date().toISOString();
 
-const escape = (s) => String(s).replace(/[`|\\$]/g, '\\$&').replace(/\n/g, ' ');
+const escape = (s) => String(s).replace(/`/g, "'").replace(/[|\\$]/g, '\\$&').replace(/[\r\n]/g, ' ');
 
 // Markdown output
 function buildTables() {
