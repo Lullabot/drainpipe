@@ -48,6 +48,11 @@ runs:
         BASE_SHA: ${{ github.event.pull_request.base.sha }}
         LOCKFILE_PATH: ${{ inputs.lockfile }}
       run: |
+        if [[ "$LOCKFILE_PATH" == *".."* || "$LOCKFILE_PATH" == /* ]]; then
+          echo "::error::Invalid lockfile path: $LOCKFILE_PATH"
+          exit 1
+        fi
+
         BASE_FILE="${RUNNER_TEMP}/base.lock"
 
         if git show "${BASE_SHA}:${LOCKFILE_PATH}" > "$BASE_FILE" 2>/dev/null; then
