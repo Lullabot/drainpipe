@@ -7,6 +7,7 @@
  *
  * Supported formats:
  *   - yarn.lock v1 (classic) via @yarnpkg/lockfile
+ *   - yarn.lock v2+ (Berry) via @yarnpkg/parsers
  *   - package-lock.json v1/v2/v3 (npm 5+) via JSON.parse
  *
  * CLI args:
@@ -48,30 +49,41 @@ if (!BASE_PATH || !HEAD_PATH) {
 // Parsers — each returns Map<packageName, resolvedVersion>
 
 /**
- * Yarn classic v1.
+ * Yarn lockfile parser — supports both Classic v1 and Berry (v2+).
  *
- * A createRequire() anchored inside DEPS_DIR ensures @yarnpkg/lockfile and
- * its own transitive requires resolve correctly regardless of where this
- * script lives in the repository.
+ * Berry lockfiles contain a "__metadata:" block; Classic ones do not.
+ * Classic is parsed with @yarnpkg/lockfile; Berry with @yarnpkg/parsers.
  *
- * Key format examples:
+ * Key format examples (both formats):
  *   react@^18.0.0:
  *   "react@^18.0.0, react@^18.2.0":
+ *   "@babel/core@npm:^7.0.0":
  */
 function parseYarn(content) {
   if (!DEPS_DIR) throw new Error('--deps-dir is required for yarn lockfile parsing');
 
-  const depsRequire   = createRequire(new URL(`file://${resolve(DEPS_DIR)}/sentinel.js`));
-  const classicParser = depsRequire('@yarnpkg/lockfile');
+  const depsRequire = createRequire(new URL(`file://${resolve(DEPS_DIR)}/sentinel.js`));
 
-  const result = classicParser.parse(content);
-  if (result.type !== 'success') throw new Error('Failed to parse yarn.lock');
+  // Berry (v2+) lockfiles begin with an __metadata block; Classic ones do not.
+  const isBerry = /^__metadata:/m.test(content);
+
+  let entries;
+  if (isBerry) {
+    const { parseSyml } = depsRequire('@yarnpkg/parsers');
+    const parsed = parseSyml(content);
+    entries = Object.entries(parsed).filter(([key]) => key !== '__metadata');
+  } else {
+    const classicParser = depsRequire('@yarnpkg/lockfile');
+    const result = classicParser.parse(content);
+    if (result.type !== 'success') throw new Error('Failed to parse yarn.lock');
+    entries = Object.entries(result.object);
+  }
 
   const map = new Map();
-  for (const [key, entry] of Object.entries(result.object)) {
+  for (const [key, entry] of entries) {
     const firstName = key.split(',')[0].trim();
-    const atIndex   = firstName.lastIndexOf('@');
-    const name      = atIndex > 0 ? firstName.slice(0, atIndex) : firstName;
+    const nameMatch = firstName.match(/^(@[^/]+\/[^@]+|[^@]+)/);
+    const name      = nameMatch ? nameMatch[0] : firstName;
     // Keep the highest version if the same package appears under multiple specifier groups.
     if (!map.has(name) || compareVersions(entry.version, map.get(name)) > 0) {
       map.set(name, entry.version);

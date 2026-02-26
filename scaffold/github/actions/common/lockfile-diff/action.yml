@@ -30,16 +30,19 @@ runs:
   using: composite
   steps:
     - name: Install lockfile parsing dependencies
+      id: install-deps
       shell: bash
       run: |
         DEPS_DIR="${RUNNER_TEMP}/lockfile-diff-deps"
         mkdir -p "$DEPS_DIR"
         npm install --prefix "$DEPS_DIR" \
           @yarnpkg/lockfile@^1.1.0 \
+          @yarnpkg/parsers \
           --no-save --no-package-lock --loglevel error
-        echo "LOCKFILE_DIFF_DEPS=$DEPS_DIR" >> "$GITHUB_ENV"
+        echo "deps_dir=$DEPS_DIR" >> "$GITHUB_OUTPUT"
 
     - name: Extract base lockfile
+      id: extract-base
       shell: bash
       env:
         BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -55,8 +58,8 @@ runs:
           echo "No base lockfile found; treating as newly added."
         fi
 
-        echo "BASE_LOCK_FILE=$BASE_FILE"                           >> "$GITHUB_ENV"
-        echo "HEAD_LOCK_FILE=${GITHUB_WORKSPACE}/${LOCKFILE_PATH}" >> "$GITHUB_ENV"
+        echo "base_lock_file=$BASE_FILE"                           >> "$GITHUB_OUTPUT"
+        echo "head_lock_file=${GITHUB_WORKSPACE}/${LOCKFILE_PATH}" >> "$GITHUB_OUTPUT"
 
     - name: Compute diff
       id: diff
@@ -66,6 +69,9 @@ runs:
         LOCKFILE_PATH: ${{ inputs.lockfile }}
         COLLAPSE_THRESHOLD: ${{ inputs.collapse-threshold }}
         ACTION_PATH: ${{ github.action_path }}
+        BASE_LOCK_FILE: ${{ steps.extract-base.outputs.base_lock_file }}
+        HEAD_LOCK_FILE: ${{ steps.extract-base.outputs.head_lock_file }}
+        LOCKFILE_DIFF_DEPS: ${{ steps.install-deps.outputs.deps_dir }}
       run: |
         # Infer type from filename when not explicitly provided.
         TYPE="$LOCKFILE_TYPE"
