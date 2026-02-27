@@ -842,13 +842,11 @@ This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat e
 ```
   sync:tugboat:
     desc: "Fetches a database from Pantheon and imports it in Tugboat"
+    vars:
+      DB_DIR: /var/lib/tugboat/files/db
     cmds:
       - task: pantheon:fetch-db
-        vars:
-          DB_DIR: /var/lib/tugboat/files/db
       - task: drupal:import-db
-        vars:
-          DB_DIR: /var/lib/tugboat/files/db
 ```
 
 Similarly, Acquia integration can be added:
@@ -869,13 +867,11 @@ This will install [Acquia CLI (acli)](https://docs.acquia.com/acquia-cloud-platf
 ```
   sync:tugboat:
     desc: "Fetches a database from Acquia and imports it in Tugboat"
+    vars:
+      DB_DIR: /var/lib/tugboat/files/db
     cmds:
       - task: acquia:fetch-db
-        vars:
-          DB_DIR: /var/lib/tugboat/files/db
       - task: drupal:import-db
-        vars:
-          DB_DIR: /var/lib/tugboat/files/db
 ```
 
 When using MySQL as the database engine in DDEV, Tugboat can be configured to
