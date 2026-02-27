@@ -69,6 +69,10 @@
   curl --fail -sSL https://github.com/pantheon-systems/terminus/releases/download/$(curl -L --fail --silent "https://api.github.com/repos/pantheon-systems/terminus/releases/latest" | perl -nle 'print $1 if /"tag_name":\s*"([^"]+)"/')/terminus.phar --output /usr/local/bin/terminus
   chmod 755 /usr/local/bin/terminus
 {% endif %}
+{% if acquia %}
+  curl --fail -sSL https://github.com/acquia/cli/releases/latest/download/acli.phar --output /usr/local/bin/acli
+  chmod 755 /usr/local/bin/acli
+{% endif %}
 {% if services.php.commands.init|default(false) %}
   task tugboat:php:init
 {% endif %}
