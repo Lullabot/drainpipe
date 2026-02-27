@@ -162,11 +162,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     'Taskfile.yml has either been customized or requires review. Currently the following includes are missing:'
                 );
                 foreach ($missingIncludes as $include) {
+                    $value = $scaffoldTaskFile['includes'][$include];
+                    $valueString = is_array($value) ? Yaml::dump($value, 0) : $value;
                     $this->io->warning(
                         sprintf(
                             '  - %s: %s',
                             $include,
-                            $scaffoldTaskFile['includes'][$include]
+                            $valueString
                         )
                     );
                 }
