@@ -837,7 +837,7 @@ Additionally, Pantheon integration can be added:
 }
 ```
 
-This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add a `sync:tugboat` task to your `Taskfile.yml` to fetch the database during Tugboat preview builds:
+This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `PANTHEON_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
 
 ```
   sync:tugboat:
