@@ -797,6 +797,81 @@ include which will give you helpers that you can include and reference for tasks
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
 
+## Bitbucket Pipelines Integration
+
+Add the following to `composer.json` to enable Bitbucket Pipelines support:
+
+```json
+"extra": {
+  "drainpipe": {
+    "bitbucket": []
+  }
+}
+```
+
+### Acquia Review Apps
+
+Acquia Review Apps create an [Acquia Cloud Development Environment (CDE)](https://docs.acquia.com/acquia-cloud-platform/manage-apps/dev-env/) for every pull request, equivalent to Pantheon Multidev environments.
+
+To enable Acquia Review Apps on Bitbucket:
+
+- Add the following to `composer.json`:
+  ```json
+  "extra": {
+      "drainpipe": {
+          "bitbucket": ["AcquiaReviewApps"],
+          "acquia": { "settings": true }
+      }
+  }
+  ```
+- Run `composer install` to scaffold the following files into your project:
+  - `.drainpipe/bitbucket/scripts/common.sh` — shared helper functions
+  - `.drainpipe/bitbucket/scripts/deploy.sh` — PR deploy script
+  - `.drainpipe/bitbucket/scripts/cleanup.sh` — stale CDE cleanup script
+  - `bitbucket-pipelines.yml` — created at the repository root (a warning is shown if it already exists; in that case, manually merge the pipeline definitions from `vendor/lullabot/drainpipe/scaffold/bitbucket/AcquiaReviewApps.yml`)
+
+**How it works**
+
+- When a pull request is opened or updated, the `pull-requests` pipeline runs `deploy.sh`, which:
+  1. Creates the CDE (named `PR-{N}`) if it doesn't already exist
+  2. Copies the database from the source environment (default: `prod`) unless `ACQUIA_REVIEW_RUN_INSTALLER` is set
+  3. Builds the project (`composer install`, `task build`, `task snapshot:directory`)
+  4. Pushes code to Acquia via `task deploy:git` and waits for the code switch to complete
+  5. Downloads Drush aliases and runs site updates (`task update` or `task drupal:update`) or a fresh install
+  6. Posts the environment URL as a Bitbucket commit status
+- Stale CDEs are **not** deleted automatically on PR close. See [Scheduling the cleanup pipeline](#scheduling-the-cleanup-pipeline) below.
+
+**Bitbucket repository variables**
+
+Add these in your Bitbucket repository settings under **Repository variables**:
+
+| Variable | Secured | Description |
+|---|---|---|
+| `ACQUIA_API_KEY` | Yes | Acquia API Key |
+| `ACQUIA_API_SECRET` | Yes | Acquia API Secret |
+| `ACQUIA_SSH_PRIVATE_KEY` | Yes | SSH private key (base64-encoded) with Acquia Git access |
+| `ACQUIA_APP_UUID` | No | Application UUID from the Acquia Cloud console |
+| `ACQUIA_SITE_GROUP` | No | Application/site group name (e.g. `mysite` from `mysite.dev`) |
+| `BITBUCKET_USERNAME` | No | Bitbucket username — required for commit status and cleanup API calls |
+| `BITBUCKET_APP_PASSWORD` | Yes | Bitbucket App Password with `pullrequest:read` scope — required for commit status and cleanup |
+| `ACQUIA_SOURCE_ENVIRONMENT` | No | Environment to copy the database from (default: `dev`) |
+| `ACQUIA_REVIEW_RUN_INSTALLER` | No | Set to `"true"` to run `drush site:install --existing-config` instead of copying the database |
+
+> Note: `BITBUCKET_WORKSPACE`, `BITBUCKET_REPO_SLUG`, `BITBUCKET_COMMIT`, and `BITBUCKET_PR_ID` are injected automatically by Bitbucket Pipelines and do not need to be set manually.
+
+**Scheduling the cleanup pipeline**
+
+Bitbucket does not trigger pipelines on PR close. To avoid accumulating stale CDEs, schedule the `acquia-review-apps-cleanup` custom pipeline:
+
+1. In your Bitbucket repository, go to **Repository settings → Pipelines → Schedules**
+2. Add a new schedule for the `acquia-review-apps-cleanup` custom pipeline (e.g., daily at midnight)
+
+**Known limitations**
+
+- No DDEV support — the pipeline uses a native PHP image. A DDEV variant may be added in a future release once Bitbucket Pipelines Runtime v3 support is confirmed.
+- No automatic cancel-in-progress — multiple commits to the same PR will queue rather than cancel prior runs.
+- Extra credentials required — `BITBUCKET_USERNAME` and `BITBUCKET_APP_PASSWORD` must be set manually, unlike GitHub where `GITHUB_TOKEN` is injected automatically.
+
 ## Tugboat
 
 Add the following to `composer.json` to add Tugboat configuration:

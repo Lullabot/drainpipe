@@ -1,0 +1,38 @@
+image: php:8.5-cli
+
+clone:
+  depth: full
+
+options:
+  max-time: 60
+
+definitions:
+  caches:
+    composer:
+      key:
+        files:
+          - composer.lock
+      path: ~/.composer/cache
+
+pipelines:
+  pull-requests:
+    "**":
+      - step:
+          name: "Acquia Review App: Deploy"
+          caches:
+            - composer
+          script:
+            - bash .drainpipe/bitbucket/scripts/deploy.sh
+          after-script:
+            - |
+              if [ "$BITBUCKET_EXIT_CODE" -eq 1 ]; then
+                source .drainpipe/bitbucket/scripts/common.sh
+                drainpipe_post_commit_status "FAILED" "" "Deployment failed for PR #$BITBUCKET_PR_ID"
+              fi
+
+  custom:
+    acquia-review-apps-cleanup:
+      - step:
+          name: "Acquia Review Apps: Cleanup stale CDEs"
+          script:
+            - bash .drainpipe/bitbucket/scripts/cleanup.sh

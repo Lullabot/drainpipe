@@ -402,6 +402,7 @@ EOT;
         $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
         $this->installGitlabCI($scaffoldPath, $composer);
         $this->installGitHubActions($scaffoldPath, $composer);
+        $this->installBitbucketPipelines($scaffoldPath);
     }
 
     /**
@@ -574,6 +575,41 @@ EOT;
 
         if (isset($this->extra['drainpipe']['acquia'])) {
             // TODO: Add Acquia related GitHub Actions.
+        }
+    }
+
+    /**
+     * Install Bitbucket Pipelines configuration if defined in composer.json.
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
+     */
+    private function installBitbucketPipelines(string $scaffoldPath): void {
+        $fs = new Filesystem();
+        $fs->removeDirectory('./.drainpipe/bitbucket');
+
+        if (!isset($this->extra['drainpipe']['bitbucket']) || !is_array($this->extra['drainpipe']['bitbucket'])) {
+            return;
+        }
+
+        foreach ($this->extra['drainpipe']['bitbucket'] as $pipeline) {
+            if ($pipeline === 'AcquiaReviewApps') {
+                $fs->ensureDirectoryExists('./.drainpipe/bitbucket/scripts');
+                foreach (['common.sh', 'deploy.sh', 'cleanup.sh'] as $script) {
+                    $fs->copy("$scaffoldPath/bitbucket/scripts/$script", "./.drainpipe/bitbucket/scripts/$script");
+                    $this->io->write("🪠 [Drainpipe] .drainpipe/bitbucket/scripts/$script installed");
+                }
+                if (!file_exists('./bitbucket-pipelines.yml')) {
+                    $fs->copy("$scaffoldPath/bitbucket/AcquiaReviewApps.yml", './bitbucket-pipelines.yml');
+                    $this->io->write('🪠 [Drainpipe] bitbucket-pipelines.yml created');
+                } else {
+                    $this->io->warning(
+                        '🪠 [Drainpipe] bitbucket-pipelines.yml already exists. Manually merge the Acquia Review Apps pipeline sections from: ' .
+                        "$scaffoldPath/bitbucket/AcquiaReviewApps.yml"
+                    );
+                }
+            } else {
+                $this->io->warning("🪠 [Drainpipe] Unknown Bitbucket pipeline: $pipeline");
+            }
         }
     }
 }
