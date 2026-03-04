@@ -537,16 +537,14 @@ EOT;
 
         // Install configurable GitHub workflows
         foreach ($this->extra['drainpipe']['github'] as $github) {
-            if ($github === 'PantheonReviewApps' || $github === 'PantheonReviewAppsManual') {
+            if ($github === 'PantheonReviewApps') {
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
                 $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
-                $pantheon_review_apps = ($github === 'PantheonReviewApps') ? 'PantheonReviewApps' : 'PantheonReviewAppsManual';
                 if (file_exists('./.ddev/config.yaml')) {
-                    $pantheon_review_apps_ddev = $pantheon_review_apps . 'DDEV';
-                    $fs->copy("$scaffoldPath/github/workflows/$pantheon_review_apps_ddev.yml", './.github/workflows/PantheonReviewApps.yml');
+                    $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
                 }
                 else {
-                    $fs->copy("$scaffoldPath/github/workflows/$pantheon_review_apps.yml", './.github/workflows/PantheonReviewApps.yml');
+                    $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                 }
                 $this->checkPantheonSystemDrupalIntegrations($composer);
             }
