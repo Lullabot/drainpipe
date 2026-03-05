@@ -872,6 +872,84 @@ Bitbucket does not trigger pipelines on PR close. To avoid accumulating stale CD
 - No automatic cancel-in-progress — multiple commits to the same PR will queue rather than cancel prior runs.
 - Extra credentials required — `BITBUCKET_USERNAME` and `BITBUCKET_APP_PASSWORD` must be set manually, unlike GitHub where `GITHUB_TOKEN` is injected automatically.
 
+### Acquia Deploy
+
+Acquia Deploy triggers a deployment to the Acquia `dev` environment whenever a PR is merged to `main`, equivalent to the GitHub Actions `AcquiaDeploy` workflow.
+
+To enable Acquia Deploy on Bitbucket:
+
+- Add the following to `composer.json`:
+  ```json
+  "extra": {
+      "drainpipe": {
+          "bitbucket": ["AcquiaDeploy"],
+          "acquia": { "settings": true }
+      }
+  }
+  ```
+  If your main branch is named `master` (or anything other than `main`), set `bitbucketDeployBranch`:
+  ```json
+  "extra": {
+      "drainpipe": {
+          "bitbucket": ["AcquiaDeploy"],
+          "bitbucketDeployBranch": "master",
+          "acquia": { "settings": true }
+      }
+  }
+  ```
+  If you are using both Acquia Review Apps and Acquia Deploy, list them together:
+  ```json
+  "bitbucket": ["AcquiaReviewApps", "AcquiaDeploy"]
+  ```
+- Run `composer install` to scaffold the following files into your project:
+  - `.drainpipe/bitbucket/scripts/deploy-dev.sh` — dev environment deploy script
+  - `bitbucket-pipelines.yml` — created at the repository root with a `branches.main` pipeline (a warning is shown if it already exists; in that case, manually merge the pipeline definitions from `vendor/lullabot/drainpipe/scaffold/bitbucket/AcquiaDeploy.yml`)
+
+**How it works**
+
+When a PR is merged to `main` the `branches.main` pipeline runs `deploy-dev.sh`, which:
+
+1. Runs `composer install` then `task acquia:deploy:before` (or `task build` if the hook is not defined)
+2. Snapshots the build to a temporary directory (`task snapshot:directory`)
+3. Resolves the VCS branch and remote URL that the Acquia `dev` environment tracks
+4. Pushes code via `task deploy:git` and waits for the Acquia code switch to complete
+5. Downloads Drush aliases and runs `task acquia:deploy:after` (if defined), then `task update` or `task drupal:update`
+6. Clears caches on all domains in the `dev` environment
+
+**User-defined hooks**
+
+Add these tasks to your project's `Taskfile.yml` as needed:
+
+```yaml
+tasks:
+  acquia:deploy:before:
+    desc: "Runs before the Acquia deploy snapshot — typically calls 'task build'"
+    cmds:
+      - task: build
+
+  acquia:deploy:after:
+    desc: "Runs after code is switched on Acquia — typically calls 'task drupal:update'"
+    cmds:
+      - task: drupal:update
+        vars:
+          CLI_ARGS: "{{.CLI_ARGS}}"
+```
+
+**Bitbucket repository variables**
+
+Add these in your Bitbucket repository settings under **Repository variables**:
+
+| Variable | Secured | Description |
+|---|---|---|
+| `ACQUIA_API_KEY` | Yes | Acquia API Key |
+| `ACQUIA_API_SECRET` | Yes | Acquia API Secret |
+| `ACQUIA_SSH_PRIVATE_KEY` | Yes | SSH private key (base64-encoded) with Acquia Git access |
+| `ACQUIA_SITE_GROUP` | No | Application/site group name (e.g. `mysite` from `mysite.dev`) |
+
+> Note: `BITBUCKET_COMMIT` is injected automatically by Bitbucket Pipelines and does not need to be set manually.
+
+> Note: When both `AcquiaReviewApps` and `AcquiaDeploy` are configured, `composer install` will install all scripts cleanly. If `bitbucket-pipelines.yml` already exists, a warning will appear and you will need to manually merge the `branches.main` section from `vendor/lullabot/drainpipe/scaffold/bitbucket/AcquiaDeploy.yml`.
+
 ## Tugboat
 
 Add the following to `composer.json` to add Tugboat configuration:

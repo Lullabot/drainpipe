@@ -607,6 +607,22 @@ EOT;
                         "$scaffoldPath/bitbucket/AcquiaReviewApps.yml"
                     );
                 }
+            } elseif ($pipeline === 'AcquiaDeploy') {
+                $fs->ensureDirectoryExists('./.drainpipe/bitbucket/scripts');
+                $fs->copy("$scaffoldPath/bitbucket/scripts/deploy-dev.sh", './.drainpipe/bitbucket/scripts/deploy-dev.sh');
+                $this->io->write("🪠 [Drainpipe] .drainpipe/bitbucket/scripts/deploy-dev.sh installed");
+                if (!file_exists('./bitbucket-pipelines.yml')) {
+                    $deployBranch = $this->extra['drainpipe']['bitbucketDeployBranch'] ?? 'main';
+                    $pipelineContent = file_get_contents("$scaffoldPath/bitbucket/AcquiaDeploy.yml");
+                    $pipelineContent = str_replace("\n    main:\n", "\n    $deployBranch:\n", $pipelineContent);
+                    file_put_contents('./bitbucket-pipelines.yml', $pipelineContent);
+                    $this->io->write('🪠 [Drainpipe] bitbucket-pipelines.yml created');
+                } else {
+                    $this->io->warning(
+                        '🪠 [Drainpipe] bitbucket-pipelines.yml already exists. Manually merge the Acquia Deploy pipeline sections from: ' .
+                        "$scaffoldPath/bitbucket/AcquiaDeploy.yml"
+                    );
+                }
             } else {
                 $this->io->warning("🪠 [Drainpipe] Unknown Bitbucket pipeline: $pipeline");
             }

@@ -1,0 +1,25 @@
+image: php:8.5-cli
+
+clone:
+  depth: full
+
+options:
+  max-time: 60
+
+definitions:
+  caches:
+    composer:
+      key:
+        files:
+          - composer.lock
+      path: ~/.composer/cache
+
+pipelines:
+  branches:
+    main:
+      - step:
+          name: "Acquia Dev: Deploy"
+          caches:
+            - composer
+          script:
+            - bash .drainpipe/bitbucket/scripts/deploy-dev.sh
