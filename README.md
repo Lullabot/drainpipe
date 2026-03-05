@@ -834,7 +834,7 @@ To enable Acquia Review Apps on Bitbucket:
 
 - When a pull request is opened or updated, the `pull-requests` pipeline runs `deploy.sh`, which:
   1. Creates the CDE (named `PR-{N}`) if it doesn't already exist
-  2. Copies the database from the source environment (default: `prod`) unless `ACQUIA_REVIEW_RUN_INSTALLER` is set
+  2. Copies the database from the source environment (default: `dev`) unless `ACQUIA_REVIEW_RUN_INSTALLER` is set
   3. Builds the project (`composer install`, `task build`, `task snapshot:directory`)
   4. Pushes code to Acquia via `task deploy:git` and waits for the code switch to complete
   5. Downloads Drush aliases and runs site updates (`task update` or `task drupal:update`) or a fresh install
@@ -948,7 +948,7 @@ Add these in your Bitbucket repository settings under **Repository variables**:
 
 > Note: `BITBUCKET_COMMIT` is injected automatically by Bitbucket Pipelines and does not need to be set manually.
 
-> Note: When both `AcquiaReviewApps` and `AcquiaDeploy` are configured, `composer install` will install all scripts cleanly. If `bitbucket-pipelines.yml` already exists, a warning will appear and you will need to manually merge the `branches.main` section from `vendor/lullabot/drainpipe/scaffold/bitbucket/AcquiaDeploy.yml`.
+> Note: When both `AcquiaReviewApps` and `AcquiaDeploy` are configured, `composer install` automatically creates a single merged `bitbucket-pipelines.yml` containing all pipeline sections. If the file already exists, a warning will appear listing the scaffold files to merge from manually.
 
 ## Tugboat
 

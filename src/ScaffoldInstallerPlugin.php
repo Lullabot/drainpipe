@@ -591,41 +591,66 @@ EOT;
             return;
         }
 
-        foreach ($this->extra['drainpipe']['bitbucket'] as $pipeline) {
+        $requested = $this->extra['drainpipe']['bitbucket'];
+
+        // Install scripts for each requested pipeline.
+        foreach ($requested as $pipeline) {
             if ($pipeline === 'AcquiaReviewApps') {
                 $fs->ensureDirectoryExists('./.drainpipe/bitbucket/scripts');
                 foreach (['common.sh', 'deploy.sh', 'cleanup.sh'] as $script) {
                     $fs->copy("$scaffoldPath/bitbucket/scripts/$script", "./.drainpipe/bitbucket/scripts/$script");
                     $this->io->write("🪠 [Drainpipe] .drainpipe/bitbucket/scripts/$script installed");
                 }
-                if (!file_exists('./bitbucket-pipelines.yml')) {
-                    $fs->copy("$scaffoldPath/bitbucket/AcquiaReviewApps.yml", './bitbucket-pipelines.yml');
-                    $this->io->write('🪠 [Drainpipe] bitbucket-pipelines.yml created');
-                } else {
-                    $this->io->warning(
-                        '🪠 [Drainpipe] bitbucket-pipelines.yml already exists. Manually merge the Acquia Review Apps pipeline sections from: ' .
-                        "$scaffoldPath/bitbucket/AcquiaReviewApps.yml"
-                    );
-                }
             } elseif ($pipeline === 'AcquiaDeploy') {
                 $fs->ensureDirectoryExists('./.drainpipe/bitbucket/scripts');
                 $fs->copy("$scaffoldPath/bitbucket/scripts/deploy-dev.sh", './.drainpipe/bitbucket/scripts/deploy-dev.sh');
                 $this->io->write("🪠 [Drainpipe] .drainpipe/bitbucket/scripts/deploy-dev.sh installed");
-                if (!file_exists('./bitbucket-pipelines.yml')) {
-                    $deployBranch = $this->extra['drainpipe']['bitbucketDeployBranch'] ?? 'main';
-                    $pipelineContent = file_get_contents("$scaffoldPath/bitbucket/AcquiaDeploy.yml");
-                    $pipelineContent = str_replace("\n    main:\n", "\n    $deployBranch:\n", $pipelineContent);
-                    file_put_contents('./bitbucket-pipelines.yml', $pipelineContent);
-                    $this->io->write('🪠 [Drainpipe] bitbucket-pipelines.yml created');
-                } else {
-                    $this->io->warning(
-                        '🪠 [Drainpipe] bitbucket-pipelines.yml already exists. Manually merge the Acquia Deploy pipeline sections from: ' .
-                        "$scaffoldPath/bitbucket/AcquiaDeploy.yml"
-                    );
-                }
             } else {
                 $this->io->warning("🪠 [Drainpipe] Unknown Bitbucket pipeline: $pipeline");
             }
         }
+
+        // Determine which known pipelines were requested, in a stable order.
+        $known = ['AcquiaReviewApps', 'AcquiaDeploy'];
+        $active = array_values(array_intersect($known, $requested));
+
+        if (empty($active)) {
+            return;
+        }
+
+        if (file_exists('./bitbucket-pipelines.yml')) {
+            $sources = implode(', ', array_map(
+                fn($p) => "$scaffoldPath/bitbucket/$p.yml",
+                $active
+            ));
+            $this->io->warning(
+                "🪠 [Drainpipe] bitbucket-pipelines.yml already exists. Manually merge the pipeline sections from: $sources"
+            );
+            return;
+        }
+
+        // Parse each scaffold YAML and merge the pipelines sections into one file.
+        $deployBranch = $this->extra['drainpipe']['bitbucketDeployBranch'] ?? 'main';
+        $merged = null;
+        foreach ($active as $pipeline) {
+            if ($pipeline === 'AcquiaDeploy') {
+                $raw = file_get_contents("$scaffoldPath/bitbucket/AcquiaDeploy.yml");
+                $raw = preg_replace('/(^\s+)main:/m', "\$1$deployBranch:", $raw);
+                $parsed = Yaml::parse($raw);
+            } else {
+                $parsed = Yaml::parseFile("$scaffoldPath/bitbucket/$pipeline.yml");
+            }
+            if ($merged === null) {
+                $merged = $parsed;
+            } else {
+                $merged['pipelines'] = array_merge(
+                    $merged['pipelines'] ?? [],
+                    $parsed['pipelines'] ?? []
+                );
+            }
+        }
+
+        file_put_contents('./bitbucket-pipelines.yml', Yaml::dump($merged, 10, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+        $this->io->write('🪠 [Drainpipe] bitbucket-pipelines.yml created');
     }
 }

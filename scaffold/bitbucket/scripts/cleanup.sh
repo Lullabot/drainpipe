@@ -40,13 +40,20 @@ echo "Found CDEs:"
 echo "${CDE_LABELS}"
 
 # ---------------------------------------------------------------------------
-# 3. Fetch open PR IDs from Bitbucket
+# 3. Fetch open PR IDs from Bitbucket (all pages)
 # ---------------------------------------------------------------------------
 echo "Fetching open PRs from Bitbucket..."
-OPEN_PR_IDS=$(curl -sf \
-  -u "${BITBUCKET_USERNAME}:${BITBUCKET_APP_PASSWORD}" \
-  "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO_SLUG}/pullrequests?state=OPEN&pagelen=50" \
-  | jq -r '.values[].id')
+OPEN_PR_IDS=""
+NEXT_URL="https://api.bitbucket.org/2.0/repositories/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO_SLUG}/pullrequests?state=OPEN&pagelen=50"
+
+while [ -n "${NEXT_URL}" ]; do
+  RESPONSE=$(curl -sf \
+    -u "${BITBUCKET_USERNAME}:${BITBUCKET_APP_PASSWORD}" \
+    "${NEXT_URL}")
+  PAGE_IDS=$(echo "${RESPONSE}" | jq -r '.values[].id')
+  OPEN_PR_IDS="${OPEN_PR_IDS}${PAGE_IDS}"$'\n'
+  NEXT_URL=$(echo "${RESPONSE}" | jq -r '.next // empty')
+done
 
 echo "Open PR IDs: ${OPEN_PR_IDS:-none}"
 

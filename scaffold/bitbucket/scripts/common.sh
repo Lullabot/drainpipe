@@ -21,7 +21,7 @@ drainpipe_setup_tools() {
 
   # yq
   if ! command -v yq &>/dev/null; then
-    YQ_VERSION="v4.44.3"
+    YQ_VERSION="v4.52.4"
     curl -sSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" \
       -o /usr/local/bin/yq
     chmod +x /usr/local/bin/yq
@@ -76,15 +76,16 @@ drainpipe_post_commit_status() {
 
   local API_URL="https://api.bitbucket.org/2.0/repositories/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO_SLUG}/commit/${BITBUCKET_COMMIT}/statuses/build"
 
+  local PAYLOAD
+  PAYLOAD=$(jq -n \
+    --arg state       "${STATE}" \
+    --arg url         "${URL}" \
+    --arg description "${DESCRIPTION}" \
+    '{state: $state, key: "drainpipe-acquia-review-app", name: "Acquia Review App", url: $url, description: $description}')
+
   curl -s -f -X POST \
     -u "${BITBUCKET_USERNAME}:${BITBUCKET_APP_PASSWORD}" \
     -H "Content-Type: application/json" \
-    --data "{
-      \"state\": \"${STATE}\",
-      \"key\": \"drainpipe-acquia-review-app\",
-      \"name\": \"Acquia Review App\",
-      \"url\": \"${URL}\",
-      \"description\": \"${DESCRIPTION}\"
-    }" \
+    --data "${PAYLOAD}" \
     "${API_URL}" || echo "Warning: failed to post commit status to Bitbucket."
 }

@@ -105,6 +105,6 @@ echo "Clearing caches on all domains..."
 HOSTNAMES=$(acli api:environments:domain-list --no-interaction "${ENV_ALIAS}" \
   | jq -r '[.[].hostname] | join(" ")')
 # shellcheck disable=SC2086
-acli api:environments:clear-caches --no-interaction "${ENV_ALIAS}" ${HOSTNAMES}
+acli api:environments:clear-caches --no-interaction "${ENV_ALIAS}" "${HOSTNAMES}"
 
 echo "Deployment complete."
