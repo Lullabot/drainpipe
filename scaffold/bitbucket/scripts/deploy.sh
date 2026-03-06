@@ -52,10 +52,41 @@ BUILD_BRANCH="${ENV_NAME}-build"
 CDE_ALIAS="${ACQUIA_SITE_GROUP}.${ENV_NAME}"
 
 # ---------------------------------------------------------------------------
-# 4. Create or reuse CDE
+# 4. Resolve Acquia Git remote and add to known_hosts
+# ---------------------------------------------------------------------------
+echo "Resolving Acquia VCS URL..."
+ENV_INFO=$(acli api:environments:find --no-interaction "${ACQUIA_SITE_GROUP}.dev")
+
+VCS_TYPE=$(echo "${ENV_INFO}" | jq -r '.vcs.type')
+if [ "${VCS_TYPE}" != "git" ]; then
+  echo "ERROR: Unrecognised VCS type '${VCS_TYPE}' — expected 'git'."
+  exit 1
+fi
+
+ACQUIA_GIT_REMOTE=$(echo "${ENV_INFO}" | jq -r '.vcs.url')
+REMOTE_HOST=$(echo "${ACQUIA_GIT_REMOTE}" | awk -F'[@:]' '{print $2}')
+REMOTE_SSH_HOST=$(echo "${ENV_INFO}" | jq -r '.ssh_url' | awk -F'[@:]' '{print $2}')
+
+echo "Adding ${REMOTE_HOST} to known_hosts..."
+ssh-keyscan -H "${REMOTE_HOST}" >> ~/.ssh/known_hosts || true
+echo "Adding ${REMOTE_SSH_HOST} to known_hosts..."
+ssh-keyscan -H "${REMOTE_SSH_HOST}" >> ~/.ssh/known_hosts || true
+
+# ---------------------------------------------------------------------------
+# 5. Push code to Acquia (must happen before CDE creation so the branch exists)
+# ---------------------------------------------------------------------------
+echo "Pushing code to Acquia (branch: ${BUILD_BRANCH})..."
+./vendor/bin/task deploy:git \
+  directory=/tmp/release \
+  branch="${BUILD_BRANCH}" \
+  remote="${ACQUIA_GIT_REMOTE}" \
+  message="${BITBUCKET_COMMIT}"
+
+# ---------------------------------------------------------------------------
+# 6. Create or reuse CDE
 # ---------------------------------------------------------------------------
 echo "Checking whether CDE '${ENV_LABEL}' already exists..."
-EXISTING_ENV=$(acli api:environments:list --no-interaction "${ACQUIA_APP_UUID}" \
+EXISTING_ENV=$(acli api:applications:environment-list --no-interaction "${ACQUIA_APP_UUID}" \
   | jq -r --arg label "${ENV_LABEL}" '.[] | select(.label == $label) | .name' || true)
 
 if [ -z "${EXISTING_ENV}" ]; then
@@ -67,7 +98,7 @@ if [ -z "${EXISTING_ENV}" ]; then
   ATTEMPTS=0
   MAX_ATTEMPTS=12
   while [ "${ATTEMPTS}" -lt "${MAX_ATTEMPTS}" ]; do
-    STATUS=$(acli api:environments:list --no-interaction "${ACQUIA_APP_UUID}" \
+    STATUS=$(acli api:applications:environment-list --no-interaction "${ACQUIA_APP_UUID}" \
       | jq -r --arg label "${ENV_LABEL}" '.[] | select(.label == $label) | .status' || true)
     echo "  Status: ${STATUS} (attempt $((ATTEMPTS + 1))/${MAX_ATTEMPTS})"
     if [ "${STATUS}" = "normal" ]; then
@@ -92,37 +123,6 @@ if [ -z "${EXISTING_ENV}" ]; then
 else
   echo "CDE '${ENV_LABEL}' already exists — will update."
 fi
-
-# ---------------------------------------------------------------------------
-# 5. Resolve Acquia Git remote and add to known_hosts
-# ---------------------------------------------------------------------------
-echo "Resolving Acquia VCS URL..."
-ENV_INFO=$(acli api:environments:find --no-interaction "${ACQUIA_SITE_GROUP}.dev")
-
-VCS_TYPE=$(echo "${ENV_INFO}" | jq -r '.vcs.type')
-if [ "${VCS_TYPE}" != "git" ]; then
-  echo "ERROR: Unrecognised VCS type '${VCS_TYPE}' — expected 'git'."
-  exit 1
-fi
-
-ACQUIA_GIT_REMOTE=$(echo "${ENV_INFO}" | jq -r '.vcs.url')
-REMOTE_HOST=$(echo "${ACQUIA_GIT_REMOTE}" | awk -F'[@:]' '{print $2}')
-REMOTE_SSH_HOST=$(echo "${ENV_INFO}" | jq -r '.ssh_url' | awk -F'[@:]' '{print $2}')
-
-echo "Adding ${REMOTE_HOST} to known_hosts..."
-ssh-keyscan -H "${REMOTE_HOST}" >> ~/.ssh/known_hosts || true
-echo "Adding ${REMOTE_SSH_HOST} to known_hosts..."
-ssh-keyscan -H "${REMOTE_SSH_HOST}" >> ~/.ssh/known_hosts || true
-
-# ---------------------------------------------------------------------------
-# 6. Push code to Acquia
-# ---------------------------------------------------------------------------
-echo "Pushing code to Acquia (branch: ${BUILD_BRANCH})..."
-./vendor/bin/task deploy:git \
-  directory=/tmp/release \
-  branch="${BUILD_BRANCH}" \
-  remote="${ACQUIA_GIT_REMOTE}" \
-  message="${BITBUCKET_COMMIT}"
 
 # ---------------------------------------------------------------------------
 # 7. Wait for Acquia to sync the new code
