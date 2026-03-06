@@ -13,6 +13,7 @@ drainpipe_setup_tools() {
   if ! command -v composer &>/dev/null; then
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
   fi
+  export COMPOSER_ALLOW_SUPERUSER=1
 
   # Task (Taskfile runner)
   if ! command -v task &>/dev/null; then

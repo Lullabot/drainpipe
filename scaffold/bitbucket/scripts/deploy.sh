@@ -36,7 +36,7 @@ git config --global user.email "no-reply@example.com"
 # ---------------------------------------------------------------------------
 # 2. Build
 # ---------------------------------------------------------------------------
-composer install --no-interaction --prefer-dist
+composer install --no-interaction --prefer-dist --ignore-platform-reqs
 ./vendor/bin/task build
 ./vendor/bin/task snapshot:directory directory=/tmp/release
 
