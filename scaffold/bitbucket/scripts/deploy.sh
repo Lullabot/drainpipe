@@ -37,7 +37,9 @@ git config --global user.email "no-reply@example.com"
 # 2. Build
 # ---------------------------------------------------------------------------
 composer install --no-interaction --prefer-dist
-./vendor/bin/task build
+if ./vendor/bin/task -l 2>/dev/null | grep -q '^\* acquia:deploy:before: '; then
+  ./vendor/bin/task acquia:deploy:before
+fi
 ./vendor/bin/task snapshot:directory directory=/tmp/release
 
 # ---------------------------------------------------------------------------

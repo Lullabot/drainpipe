@@ -30,8 +30,6 @@ composer install --no-interaction --prefer-dist
 
 if ./vendor/bin/task -l 2>/dev/null | grep -q '^\* acquia:deploy:before: '; then
   ./vendor/bin/task acquia:deploy:before
-else
-  ./vendor/bin/task build
 fi
 
 ./vendor/bin/task snapshot:directory directory=/tmp/release

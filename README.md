@@ -909,7 +909,7 @@ To enable Acquia Deploy on Bitbucket:
 
 When a PR is merged to `main` the `branches.main` pipeline runs `deploy-dev.sh`, which:
 
-1. Runs `composer install` then `task acquia:deploy:before` (or `task build` if the hook is not defined)
+1. Runs `composer install` then `task acquia:deploy:before` (if defined)
 2. Snapshots the build to a temporary directory (`task snapshot:directory`)
 3. Resolves the VCS branch and remote URL that the Acquia `dev` environment tracks
 4. Pushes code via `task deploy:git` and waits for the Acquia code switch to complete
@@ -923,7 +923,7 @@ Add these tasks to your project's `Taskfile.yml` as needed:
 ```yaml
 tasks:
   acquia:deploy:before:
-    desc: "Runs before the Acquia deploy snapshot — typically calls 'task build'"
+    desc: "Runs before the Acquia deploy snapshot — compile assets, etc. Do NOT call drupal:composer:production here."
     cmds:
       - task: build
 
