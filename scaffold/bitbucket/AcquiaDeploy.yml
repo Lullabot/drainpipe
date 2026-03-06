@@ -22,4 +22,26 @@ pipelines:
           caches:
             - composer
           script:
-            - bash .drainpipe/bitbucket/scripts/deploy-dev.sh
+            # Install system dependencies and configure SSH
+            - |
+              apt-get update -qq && apt-get install -y -qq git curl jq unzip libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev
+              docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
+              docker-php-ext-install -j"$(nproc)" gd
+              if ! command -v composer &>/dev/null; then
+                curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+              fi
+              mkdir -p ~/.ssh && chmod 700 ~/.ssh
+              echo "${ACQUIA_SSH_PRIVATE_KEY}" | base64 -d > ~/.ssh/id_rsa
+              chmod 600 ~/.ssh/id_rsa
+              git config --global user.name "Drainpipe Bot"
+              git config --global user.email "no-reply@example.com"
+            # Install packages from Composer
+            - COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction --prefer-dist
+            # Install and configure Acquia CLI
+            - ./vendor/bin/task bitbucket:acquia:setup
+            # Build
+            - ./vendor/bin/task bitbucket:acquia:build
+            # Push code to Acquia dev
+            - ./vendor/bin/task bitbucket:acquia:push-dev
+            # Run site updates
+            - ./vendor/bin/task bitbucket:acquia:update-dev
