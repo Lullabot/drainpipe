@@ -98,11 +98,21 @@ fi
 # ---------------------------------------------------------------------------
 echo "Resolving Acquia VCS URL..."
 ENV_INFO=$(acli api:environments:find --no-interaction "${ACQUIA_SITE_GROUP}.dev")
+
+VCS_TYPE=$(echo "${ENV_INFO}" | jq -r '.vcs.type')
+if [ "${VCS_TYPE}" != "git" ]; then
+  echo "ERROR: Unrecognised VCS type '${VCS_TYPE}' — expected 'git'."
+  exit 1
+fi
+
 ACQUIA_GIT_REMOTE=$(echo "${ENV_INFO}" | jq -r '.vcs.url')
 REMOTE_HOST=$(echo "${ACQUIA_GIT_REMOTE}" | awk -F'[@:]' '{print $2}')
+REMOTE_SSH_HOST=$(echo "${ENV_INFO}" | jq -r '.ssh_url' | awk -F'[@:]' '{print $2}')
 
 echo "Adding ${REMOTE_HOST} to known_hosts..."
 ssh-keyscan -H "${REMOTE_HOST}" >> ~/.ssh/known_hosts || true
+echo "Adding ${REMOTE_SSH_HOST} to known_hosts..."
+ssh-keyscan -H "${REMOTE_SSH_HOST}" >> ~/.ssh/known_hosts || true
 
 # ---------------------------------------------------------------------------
 # 6. Push code to Acquia
@@ -129,6 +139,11 @@ acli remote:aliases:download --no-interaction "${ACQUIA_SITE_GROUP}"
 
 # Fix drush9 paths issue (see acquia/update action).
 yq eval '(.** | .paths) = {}' -i "drush/sites/${ACQUIA_SITE_GROUP}.site.yml"
+
+if ./vendor/bin/task -l 2>/dev/null | grep -q '^\* acquia:deploy:after: '; then
+  echo "Running task acquia:deploy:after..."
+  ./vendor/bin/task acquia:deploy:after "site=@${CDE_ALIAS}"
+fi
 
 if [ "${ACQUIA_REVIEW_RUN_INSTALLER:-}" = "true" ]; then
   echo "Running site installer..."

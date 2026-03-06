@@ -41,18 +41,28 @@ ENV_ALIAS="${ACQUIA_SITE_GROUP}.dev"
 
 echo "Resolving Acquia VCS URL for '${ENV_ALIAS}'..."
 ENV_INFO=$(acli api:environments:find --no-interaction "${ENV_ALIAS}")
+
+VCS_TYPE=$(echo "${ENV_INFO}" | jq -r '.vcs.type')
+if [ "${VCS_TYPE}" != "git" ]; then
+  echo "ERROR: Unrecognised VCS type '${VCS_TYPE}' — expected 'git'."
+  exit 1
+fi
+
 BRANCH=$(echo "${ENV_INFO}" | jq -r '.vcs.path')
 ACQUIA_GIT_REMOTE=$(echo "${ENV_INFO}" | jq -r '.vcs.url')
 REMOTE_HOST=$(echo "${ACQUIA_GIT_REMOTE}" | awk -F'[@:]' '{print $2}')
+REMOTE_SSH_HOST=$(echo "${ENV_INFO}" | jq -r '.ssh_url' | awk -F'[@:]' '{print $2}')
 
 echo "Branch: ${BRANCH}"
 echo "Remote: ${ACQUIA_GIT_REMOTE}"
 
 # ---------------------------------------------------------------------------
-# 4. Add Acquia Git host to known_hosts
+# 4. Add Acquia hosts to known_hosts
 # ---------------------------------------------------------------------------
 echo "Adding ${REMOTE_HOST} to known_hosts..."
 ssh-keyscan -H "${REMOTE_HOST}" >> ~/.ssh/known_hosts || true
+echo "Adding ${REMOTE_SSH_HOST} to known_hosts..."
+ssh-keyscan -H "${REMOTE_SSH_HOST}" >> ~/.ssh/known_hosts || true
 
 # ---------------------------------------------------------------------------
 # 5. Push code to Acquia
