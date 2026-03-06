@@ -9,6 +9,13 @@ drainpipe_setup_tools() {
   apt-get update -qq
   apt-get install -y -qq git curl jq unzip
 
+  # PHP extensions required by Drupal core that are absent from the php:*-cli base image.
+  if ! php -m 2>/dev/null | grep -q '^gd$'; then
+    apt-get install -y -qq libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev
+    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
+    docker-php-ext-install -j"$(nproc)" gd
+  fi
+
   # Composer
   if ! command -v composer &>/dev/null; then
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
