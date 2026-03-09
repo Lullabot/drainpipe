@@ -931,7 +931,7 @@ tasks:
     cmds:
       - task: drupal:update
         vars:
-          CLI_ARGS: "{{.CLI_ARGS}}"
+          site: "{{.site}}"
 ```
 
 **Bitbucket repository variables**
@@ -944,6 +944,8 @@ Add these in your Bitbucket repository settings under **Repository variables**:
 | `ACQUIA_API_SECRET` | Yes | Acquia API Secret |
 | `ACQUIA_SSH_PRIVATE_KEY` | Yes | SSH private key (base64-encoded) with Acquia Git access |
 | `ACQUIA_SITE_GROUP` | No | Application/site group name (e.g. `mysite` from `mysite.dev`) |
+| `BITBUCKET_USERNAME` | No | Bitbucket username — required for commit status API calls |
+| `BITBUCKET_APP_PASSWORD` | Yes | Bitbucket App Password with `pullrequest:read` scope — required for commit status |
 
 > Note: `BITBUCKET_COMMIT` is injected automatically by Bitbucket Pipelines and does not need to be set manually.
 

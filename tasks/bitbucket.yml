@@ -18,6 +18,7 @@ tasks:
           --key="${ACQUIA_API_KEY}" \
           --secret="${ACQUIA_API_SECRET}" \
           --no-interaction
+        mkdir -p ~/.ssh
         echo "StrictHostKeyChecking no" >> ~/.ssh/config
 
   "acquia:build":
@@ -208,10 +209,6 @@ tasks:
           | jq -r '[.[].hostname] | join(" ")')
         # shellcheck disable=SC2086
         vendor/bin/acli api:environments:clear-caches --no-interaction "${ENV_ALIAS}" ${HOSTNAMES}
-
-        ./vendor/bin/task bitbucket:acquia:post-commit-status \
-          STATE=SUCCESSFUL \
-          "DESCRIPTION=Deployed to Acquia dev"
 
   "acquia:cleanup":
     desc: "Delete stale Acquia CDEs for closed Bitbucket PRs"
