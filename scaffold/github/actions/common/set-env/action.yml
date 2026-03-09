@@ -10,7 +10,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: |
+    - run: | # zizmor: ignore[github-env]
         echo "Setting Drainpipe environment variables:"
         echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
         echo "GITHUB_REF: $GITHUB_REF"
@@ -32,6 +32,10 @@ runs:
           DRAINPIPE_SHA=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)
         fi
 
+        # Sanitize: PR number must be numeric, SHA must be hex characters
+        DRAINPIPE_PR_NUMBER=$(echo "$DRAINPIPE_PR_NUMBER" | tr -cd '0-9')
+        DRAINPIPE_SHA=$(echo "$DRAINPIPE_SHA" | tr -cd '0-9a-f')
+
         echo "DRAINPIPE_PR_NUMBER=$DRAINPIPE_PR_NUMBER" >> $GITHUB_ENV
 
         if [ -z "$DRAINPIPE_SHA" ] || [ "$DRAINPIPE_SHA" = "null" ]; then
@@ -47,10 +51,19 @@ runs:
       env:
         GH_TOKEN: ${{ github.token }}
 
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         path: drainpipe
+        persist-credentials: false
 
-    - run: |
-        echo "NODE_MAJOR=$([ -f .nvmrc ] && cat .nvmrc || cat drainpipe/.nvmrc | tr -d '[:space:]')" >> $GITHUB_ENV
+    - run: | # zizmor: ignore[github-env]
+        if [[ -f .nvmrc ]]; then
+            NODE_FILE=.nvmrc
+        else
+            NODE_FILE=drainpipe/.nvmrc
+        fi
+        # Sanitize: strip whitespace then keep only numeric characters
+        NODE_MAJOR=$(tr -d '[:space:]' < "$NODE_FILE" | tr -cd '0-9')
+        echo "NODE_MAJOR=${NODE_MAJOR}" >> "$GITHUB_ENV"
+
       shell: bash

@@ -8,6 +8,7 @@ parameters:
         - *default.settings.php
         - *sites/*/files/*
         - *settings.ddev.php
+        - *sites/default/settings.php
         - */node_modules/*
     # PHPStan Level 1
     level: 1

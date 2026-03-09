@@ -38,11 +38,13 @@ runs:
     - name: Install packages from Composer
       shell: bash
       run: |
-        ddev composer install --no-plugins
         ddev composer install
 
     - name: Install and configure Acquia CLI
       shell: bash
+      env:
+        INPUT_API_KEY: ${{ inputs.api-key }}
+        INPUT_API_SECRET: ${{ inputs.api-secret }}
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
 
@@ -55,13 +57,15 @@ runs:
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
 
         # Log in to Acquia Cloud.
-        drainpipe_exec "ACQUIA_API_KEY=${{ inputs.api-key }} ACQUIA_API_SECRET=${{ inputs.api-secret }} ./vendor/bin/task acquia:auth"
+        drainpipe_exec "ACQUIA_API_KEY=$INPUT_API_KEY ACQUIA_API_SECRET=$INPUT_API_SECRET ./vendor/bin/task acquia:auth"
 
     - name: Validate environment alias by running `drush status`
       shell: bash
+      env:
+        INPUT_ENVIRONMENT: ${{ inputs.environment }}
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "vendor/bin/acli remote:drush ${{ inputs.environment }} -- status"
+        drainpipe_exec "vendor/bin/acli remote:drush $INPUT_ENVIRONMENT -- status"
 
     - name: Build
       shell: bash
@@ -79,11 +83,13 @@ runs:
 
     - name: Configure remote aliases
       shell: bash
-      run: |
+      env:
+        INPUT_ENVIRONMENT: ${{ inputs.environment }}
+      run: | # zizmor: ignore[github-env]
 
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        ENVIRONMENT="${{ inputs.environment }}"
+        ENVIRONMENT="$INPUT_ENVIRONMENT"
         APPLICATION=${ENVIRONMENT%.*}
         ALIAS_DIR_DESTINATION="$(drainpipe_exec \"pwd\")/drush/sites"
         drainpipe_exec "vendor/bin/acli remote:aliases:download --no-interaction $APPLICATION"
@@ -97,8 +103,9 @@ runs:
         aliases_yml="${ALIAS_DIR_DESTINATION}/${APPLICATION}.site.yml"
         ALIASES_YML_CONTENT=$(drainpipe_exec "cat $ALIASES_YML")
 
-        # Extract the environment.uri value
-        echo "acquia_env_uri=$(echo "$ALIASES_YML_CONTENT" | yq e '.${ENVIRONMENT}.uri' -)" >> $GITHUB_ENV
+        # Extract the environment.uri value and strip newlines to prevent injection
+        ACQUIA_ENV_URI=$(echo "$ALIASES_YML_CONTENT" | yq e ".${ENVIRONMENT}.uri" - | tr -d '\n\r')
+        echo "acquia_env_uri=$ACQUIA_ENV_URI" >> "$GITHUB_ENV"
 
     - name: Push to Acquia
       uses: ./.github/actions/drainpipe/acquia/push
@@ -119,17 +126,19 @@ runs:
 
     - name: Clear External Caches
       shell: bash
+      env:
+        INPUT_ENVIRONMENT: ${{ inputs.environment }}
       run: |
 
         source .github/actions/drainpipe/set-env/bash_aliases
         # Get the domains on the environment as a JSON array.
-        DOMAINS_JSON=$(drainpipe_exec "acli api:environments:domain-list --no-interaction \"${{ inputs.environment }}\"")
+        DOMAINS_JSON=$(drainpipe_exec "acli api:environments:domain-list --no-interaction \"$INPUT_ENVIRONMENT\"")
 
         # Convert the JSON array into a bash array.
         DOMAINS_HOSTNAMES=$(echo "$DOMAINS_JSON" | jq -r '[.[].hostname] | join(" ")')
 
         # Clear the external caches.
-        drainpipe_exec "acli api:environments:clear-caches --no-interaction ${{ inputs.environment }} $DOMAINS_HOSTNAMES"
+        drainpipe_exec "acli api:environments:clear-caches --no-interaction $INPUT_ENVIRONMENT $DOMAINS_HOSTNAMES"
 
     - name: Set Deployment Status
       uses: ./.github/actions/drainpipe/deployment-status

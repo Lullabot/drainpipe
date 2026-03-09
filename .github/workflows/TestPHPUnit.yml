@@ -10,6 +10,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   Test-PHPUnit-Functional:
     runs-on: ubuntu-24.04
@@ -23,9 +25,10 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: drainpipe
+          persist-credentials: false
 
       - name: Setup drainpipe-dev
         run: mv drainpipe/drainpipe-dev .
@@ -72,13 +75,13 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: test_result-phpunit-functional-${{ matrix.drupal-version }}
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@v2.4
+        uses: GuillaumeFalourd/assert-command-line-output@63ad23408d758ee7f09b4557cc0901d6ae4f3f76 # v2.4
         with:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
           contains: 6
@@ -96,9 +99,10 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: drainpipe
+          persist-credentials: false
 
       - name: Setup drainpipe-dev
         run: mv drainpipe/drainpipe-dev .
@@ -145,13 +149,13 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: test_result-phpunit-dtt-${{ matrix.drupal-version }}
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@v2
+        uses: GuillaumeFalourd/assert-command-line-output@63ad23408d758ee7f09b4557cc0901d6ae4f3f76 # v2.4
         with:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
           contains: 9
@@ -169,9 +173,10 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: drainpipe
+          persist-credentials: false
 
       - name: Setup drainpipe-dev
         run: mv drainpipe/drainpipe-dev .
@@ -213,13 +218,13 @@ jobs:
 
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: test_result-phpunit-static-${{ matrix.drupal-version }}
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@v2
+        uses: GuillaumeFalourd/assert-command-line-output@63ad23408d758ee7f09b4557cc0901d6ae4f3f76 # v2.4
         with:
           command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
           contains: 12

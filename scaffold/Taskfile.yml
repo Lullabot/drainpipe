@@ -8,9 +8,11 @@ includes:
   github: ./vendor/lullabot/drainpipe/tasks/github.yml
   sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
-  test: ./vendor/lullabot/drainpipe/tasks/test.yml
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
   tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+  test:
+    taskfile: ./vendor/lullabot/drainpipe-dev/tasks/test.yml
+    optional: true
 
 output: prefixed
 silent: true
@@ -20,11 +22,11 @@ silent: true
 # @see https://github.com/go-task/task/issues/812
 run: once
 
-#vars:
-#  DRAINPIPE_SASS: |
-#    web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
-#  DRAINPIPE_JAVASCRIPT: |
-#    web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
+# vars:
+#   DRAINPIPE_SASS: |
+#     web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
+#   DRAINPIPE_JAVASCRIPT: |
+#     web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
 
 tasks:
   sync:
@@ -40,7 +42,7 @@ tasks:
     deps: [drupal:composer:production]
     cmds:
       - echo "Nothing to do"
-      #- task: assets
+      # - task: assets
 
   build:dev:
     desc: "Builds the project for development"
@@ -77,4 +79,3 @@ tasks:
 # assets:watch:
 #   desc: "Builds assets such as CSS & JS, and watches them for changes"
 #   deps: [sass:watch, javascript:watch]
-

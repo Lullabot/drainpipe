@@ -1,0 +1,60 @@
+name: Lockfile Diff
+
+on:
+  pull_request:
+    paths:
+      - 'yarn.lock'
+      - 'package-lock.json'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  lockfile-diff:
+    name: Comment lockfile changes
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Detect lockfile
+        id: detect
+        shell: bash
+        run: |
+          if [[ -f "yarn.lock" ]]; then
+            echo "lockfile=yarn.lock" >> "$GITHUB_OUTPUT"
+            echo "type=yarn"          >> "$GITHUB_OUTPUT"
+            echo "Detected: yarn.lock"
+          elif [[ -f "package-lock.json" ]]; then
+            echo "lockfile=package-lock.json" >> "$GITHUB_OUTPUT"
+            echo "type=npm"                   >> "$GITHUB_OUTPUT"
+            echo "Detected: package-lock.json"
+          else
+            echo "lockfile=" >> "$GITHUB_OUTPUT"
+            echo "type="     >> "$GITHUB_OUTPUT"
+            echo "::warning::No supported lockfile found (yarn.lock or package-lock.json). Skipping diff."
+          fi
+
+      - name: Run lockfile diff
+        if: steps.detect.outputs.lockfile != ''
+        uses: ./.github/actions/drainpipe/lockfile-diff
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          lockfile: ${{ steps.detect.outputs.lockfile }}
+          lockfile-type: ${{ steps.detect.outputs.type }}
+          fail-on-downgrade: 'false'
+          collapse-threshold: '25'

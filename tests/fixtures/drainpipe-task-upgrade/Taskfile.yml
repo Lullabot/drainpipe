@@ -8,17 +8,27 @@ includes:
   github: ./vendor/lullabot/drainpipe/tasks/github.yml
   sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
-  test: ./vendor/lullabot/drainpipe/tasks/test.yml
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
+  tugboat:
+    taskfile: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+    optional: true
+  test:
+    taskfile: ./vendor/lullabot/drainpipe-dev/tasks/test.yml
+    optional: true
 
 output: prefixed
 silent: true
 
-#vars:
-#  DRAINPIPE_SASS: |
-#    web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
-#  DRAINPIPE_JAVASCRIPT: |
-#    web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
+# Only allow tasks to be run once per task invocation. This ensures that
+# multiple dependencies on the same task are only run once.
+# @see https://github.com/go-task/task/issues/812
+run: once
+
+# vars:
+#   DRAINPIPE_SASS: |
+#     web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
+#   DRAINPIPE_JAVASCRIPT: |
+#     web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
 
 tasks:
   sync:
@@ -34,7 +44,7 @@ tasks:
     deps: [drupal:composer:production]
     cmds:
       - echo "Nothing to do"
-      #- task: assets
+      # - task: assets
 
   build:dev:
     desc: "Builds the project for development"
@@ -57,6 +67,10 @@ tasks:
     cmds:
       - task: drupal:update
 
+  online:tugboat:
+    cmds:
+      - task: tugboat:drush-uli-ready
+
 # assets:
 #   desc: "Builds assets such as CSS & JS"
 #   cmds:
@@ -67,4 +81,3 @@ tasks:
 # assets:watch:
 #   desc: "Builds assets such as CSS & JS, and watches them for changes"
 #   deps: [sass:watch, javascript:watch]
-

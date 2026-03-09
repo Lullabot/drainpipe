@@ -23,15 +23,19 @@ and if using DDEV, restart to enable the added features:
 ddev restart
 ```
 
-The Tugboat configuration file is not a static file; it is dynamically generated based on your `.ddev/config` file. See [/src/ScaffoldInstallerPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/ScaffoldInstallerPlugin.php#L451) for the implementation details.
+### Taskfile
 
-This will scaffold out various files, most importantly a `Taskfile.yml` in the
-root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool that aims to be
-simpler and easier to use than, for example, GNU Make. Since it's written in Go,
-Task is just a single binary and has no other dependencies. It's also
-cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
+Drainpipe will scaffold out various files, most importantly a `Taskfile.yml` in
+the root of your repository. [Task](https://taskfile.dev/) is a task runner / build tool
+that aims to be simpler and easier to use than, for example, GNU Make. Since
+it's written in Go, Task is just a single binary and has no other dependencies.
+It's also cross-platform with everything running through the same [shell interpreter](https://github.com/mvdan/sh).
 
-You can see what tasks are available after installation by running
+Drainpipe installs the Task binary for you, no matter if you are using DDEV or
+not. If you already have Task installed system-wide and are not using DDEV, your
+installed binary will be linked from the `vendor/bin` directory.
+
+You can see which tasks are available after installation by running
 `./vendor/bin/task --list` or `ddev task --list` if you're running DDEV. To get
 more information on a specific task e.g. what parameters it takes, you can run
 `task [task name] --summary`.
@@ -44,11 +48,6 @@ npx ajv-cli validate -s schema.json -d scaffold/Taskfile.yml
 
 See [`.github/workflows/ValidateTaskfile.yml`](.github/workflows/ValidateTaskfile.yml)
 for an example of this in use.
-
-```
-💡 If your docroot is not the standard `web/` path, you must create a symlink to it
-ln -s web/ docroot
-```
 
 ### Overriding files provided by drainpipe
 
@@ -91,6 +90,12 @@ You can override the platform and processor with environment variables `DRAINPIP
 and `DRAINPIPE_PROCESSOR`. Valid platform values are `linux`, `darwin`, or `windows`,
 and processors are `386`, `amd64`, or `arm64`. These correspond to builds of
 upstream dependencies e.g. https://github.com/go-task/task/releases
+
+### Tugboat
+
+The Tugboat configuration file is not a static file; it is dynamically generated
+based on your `.ddev/config.yaml` file. To see the implementation details, check
+[/src/TugboatConfigPlugin.php](https://github.com/Lullabot/drainpipe/blob/main/src/TugboatConfigPlugin.php).
 
 ### Node JS
 
@@ -561,6 +566,48 @@ workflows for testing.
 Runs security checks for composer packages and Drupal contrib, as well as posting
 a diff of `composer.lock` as a review comment.
 
+Security checks rely on `composer audit`. This means `test:security` task will
+exit with error if your dependencies have known vulnerabilities. Sometimes, this
+is not desirable: think of a component which is required by Drupal core - you
+can not upgrade it directly, because it is pinned to a specific version by Drupal
+in the first place. To prevent these kind of situations from failing the security
+check, you can configure `composer audit` to ignore specific vulnerabilities
+when scanning your dependencies. To do so, the simplest way is to modify your
+`composer.json` file to add a list of vulnerabilities that should not trigger an
+error when running `test:security`:
+
+```json
+"config": {
+    "audit": {
+        "ignore": ["CVE-1234", "GHSA-xx", "PKSA-yy"]
+    }
+}
+```
+
+For more details about how to configure the ignore feature for `composer audit`,
+check the [Composer docs](https://getcomposer.org/doc/06-config.md#ignore).
+
+The Security workflow also includes a [Zizmor](https://woodruffw.github.io/zizmor/)
+static analysis job (`ZizmorAnalysis`) that scans your GitHub Actions workflow
+files for security issues. Zizmor results are uploaded to GitHub's code scanning
+dashboard, which requires [Code Security](https://docs.github.com/en/code-security/getting-started/github-security-features)
+to be enabled for your repository. If it is not enabled, the `ZizmorAnalysis`
+job will fail with: _"Code Security must be enabled for this repository to use
+code scanning."_
+
+### NPM & Yarn Lockfile Diff
+
+Post a sticky comment in the Pull Request with a markdown table of any changes
+detected in `yarn.lock` or `package-lock.json` files.
+
+```json
+"extra": {
+    "drainpipe": {
+        "github": ["LockfileDiff"]
+    }
+}
+```
+
 ### Composer Lock Diff (Deprecated)
 
 **This is now provided as part of the Security workflow**
@@ -764,25 +811,67 @@ Add the following to `composer.json` to add Tugboat configuration:
 }
 ```
 
+Then, run `ddev composer install` to generate:
+- `.tugboat/config.yml` - Complete Tugboat configuration
+- `.tugboat/scripts/` - Helper scripts (if needed)
+- `web/sites/default/settings.tugboat.php` - Drupal settings for Tugboat
+
 The following will be autodetected based on your `.ddev/config.yml`:
 - Web server (nginx or apache)
 - PHP version
 - Database type and version
-- nodejs version
+- Nodejs version
 - Redis (Obtained with `ddev get ddev/ddev-redis`)
+- Solr (Obtained with `ddev get ddev/ddev-solr`)
 
-Additionally, Pantheon Terminus can be added:
+Additionally, Pantheon integration can be added:
 ```json
 {
     "extra": {
         "drainpipe": {
             "tugboat": {
-              "terminus": true
+                "pantheon": true
             }
         }
     }
 }
 ```
+
+When using MySQL as the database engine in DDEV, Tugboat can be configured to
+use the `percona` Docker image instead of `mysql`:
+```json
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {
+                "percona": true
+            }
+        }
+    }
+}
+```
+
+### Custom Templates
+
+For the main `php` service, you can override any build phase template by copying
+it to `.tugboat/drainpipe-templates/`. Example:
+
+```
+mkdir -p .tugboat/drainpipe-templates
+cp vendor/lullabot/drainpipe/scaffold/tugboat/templates/php-init.yml.twig \
+   .tugboat/drainpipe-templates/
+```
+
+Edit `.tugboat/drainpipe-templates/php-init.yml.twig` to add, remove, or modify
+commands, then regenerate the Tugboat configuration file with `ddev composer install`.
+
+Available Templates:
+
+- `php-init.yml.twig` - Init phase commands
+- `php-update.yml.twig` - Update phase commands
+- `php-build.yml.twig` - Build phase commands
+- `php-online.yml.twig` - Online phase commands
+- `config.yml.twig` - Complete Tugboat configuration (advanced)
 
 ### Tasks
 
@@ -831,8 +920,19 @@ task to your `Taskfile.yml` for the first time).
 configuration.
 >>>
 
-You can hook into the `init` step of images by adding them to your
-`Taskfile.yml`, e.g.
+#### Custom init commands
+
+You can hook into the `init` step of any service by adding them to your
+`Taskfile.yml`. These additional commands will be run at the end of the
+init phase for the specific Tugboat service.
+
+Supported services:
+
+- Webserver: `tugboat:php:init`
+- Database: `tugboat:mysql:init` / `tugboat:mariadb:init` / `tugboat:postgres:init`
+- Memory cache: `tugboat:redis:init` / `tugboat:memcached:init`
+
+Example:
 
 ```
 tugboat:php:init:
@@ -841,8 +941,12 @@ tugboat:php:init:
     - docker-php-ext-install ldap
 ```
 
-You can also add an `online` step by adding a task named `online:tugboat`
-and re-running `composer install`.
+#### Custom online commands
+
+You can also add an `online` step to the `php` service by adding a task
+named `online:tugboat` and re-running `composer install`.
+
+### Additional Tugboat keys
 
 Drainpipe will fully manage your `.tugboat/config.yml` file, you should not edit
 it. The following keys can be added to your `config.yml` via a
@@ -857,10 +961,10 @@ solr:
   commands:
   checkout:
   depends:
-  aliases:
-  urls:
   volumes:
   environment:
+  aliases:
+  urls:
 ```
 
 ### Mail Configuration

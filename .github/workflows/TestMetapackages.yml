@@ -10,6 +10,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   Build:
     runs-on: ubuntu-24.04
@@ -17,9 +19,10 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: drainpipe
+          persist-credentials: false
 
       - name: Setup drainpipe-dev
         run: mv drainpipe/drainpipe-dev .
@@ -35,7 +38,7 @@ jobs:
       - name: Setup Project
         run: |
           ddev config --auto
-          ddev config --nodejs-version "${{ env.NODE_MAJOR }}"
+          ddev config --nodejs-version "$NODE_MAJOR"
           ddev config --corepack-enable
           ddev start
           ddev exec --raw composer config extra.drupal-scaffold.gitignore true
@@ -60,7 +63,7 @@ jobs:
         run: zip -r /tmp/drainpipe.zip ./
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: test-metapackage-build
           path: /tmp/drainpipe.zip
@@ -69,7 +72,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: test-metapackage-build
 
@@ -89,7 +92,9 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: ddev start
+        run: |
+          ddev config --nodejs-version "$NODE_MAJOR"
+          ddev start
 
       - name: Setup Sass
         run: |
@@ -103,7 +108,47 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: test-metapackage-build
+
+      - name: Restore Workspace
+        run: |
+          cd ../
+          mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
+          unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
+          cd ${{ github.workspace }}
+
+      - uses: ./drainpipe/scaffold/github/actions/common/set-env
+
+      - name: Install DDEV
+        uses: ./drainpipe/scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com#
+
+      - name: Start DDEV
+        run: |
+          ddev config --nodejs-version "$NODE_MAJOR"
+          ddev start
+
+      - name: Setup Sass
+        run: |
+          ddev exec corepack disable
+          ddev exec npm i -g yarn@1.22.1
+          ddev exec 'rm -f /usr/local/bin/yarn'
+          ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
+          ddev exec yarn init -y
+          ddev exec yarn add file:./drainpipe/metapackages/sass --dev
+
+      - name: Compile Sass
+        run: ddev task sass
+
+  Test-Sass-Yarn-3:
+    runs-on: ubuntu-24.04
+    needs: Build
+    steps:
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: test-metapackage-build
 
@@ -127,57 +172,19 @@ jobs:
 
       - name: Setup Sass
         run: |
-          ddev exec corepack disable
-          ddev exec npm i -g yarn@1.22.1
-          ddev exec 'rm /usr/local/bin/yarn'
-          ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
-          ddev exec yarn init -y
-          ddev exec yarn add file:./drainpipe/metapackages/sass --dev
+          ddev yarn set version berry
+          ddev yarn set version 3
+          ddev yarn init -y
+          ddev yarn add ./drainpipe/metapackages/sass --dev
 
       - name: Compile Sass
         run: ddev task sass
-
-  Test-Sass-Yarn-3:
-     runs-on: ubuntu-24.04
-     needs: Build
-     steps:
-       - uses: actions/download-artifact@v6
-         with:
-           name: test-metapackage-build
-
-       - name: Restore Workspace
-         run: |
-           cd ../
-           mv ${{ github.workspace }}/drainpipe.zip /tmp/drainpipe.zip
-           unzip -o /tmp/drainpipe.zip -d ${{ github.workspace }}
-           cd ${{ github.workspace }}
-
-       - uses: ./drainpipe/scaffold/github/actions/common/set-env
-
-       - name: Install DDEV
-         uses: ./drainpipe/scaffold/github/actions/common/ddev
-         with:
-           git-name: Drainpipe Bot
-           git-email: no-reply@example.com#
-
-       - name: Start DDEV
-         run: ddev start
-
-       - name: Setup Sass
-         run: |
-           ddev yarn set version berry
-           ddev yarn set version 3
-           ddev yarn init -y
-           ddev yarn add ./drainpipe/metapackages/sass --dev
-
-       - name: Compile Sass
-         run: ddev task sass
 
   Test-Sass-Yarn-4:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: test-metapackage-build
 
@@ -215,7 +222,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: test-metapackage-build
 
@@ -250,7 +257,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: test-metapackage-build
 
@@ -276,7 +283,7 @@ jobs:
         run: |
           ddev exec corepack disable
           ddev exec npm i -g yarn@1.22.1
-          ddev exec 'rm /usr/local/bin/yarn'
+          ddev exec 'rm -f /usr/local/bin/yarn'
           ddev exec 'ln -s $(npm root -g)/yarn/bin/yarn /usr/local/bin/yarn'
           ddev exec yarn init -y
           ddev exec yarn add focus-trap@^6.7.3
@@ -289,7 +296,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: test-metapackage-build
 
@@ -326,7 +333,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: Build
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: test-metapackage-build
 

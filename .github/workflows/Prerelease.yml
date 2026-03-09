@@ -1,0 +1,48 @@
+name: Pre-release Tests
+
+on:
+  pull_request:
+    branches:
+      - stable
+    types: [opened, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  prerelease-tests:
+    name: Pre-release checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR is from main branch
+        id: check
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          echo "Base branch: $BASE_REF"
+          echo "Head branch: $HEAD_REF"
+          if [[ "$HEAD_REF" == "main" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout code
+        if: steps.check.outputs.should_run == 'true'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install DDEV
+        uses: ./scaffold/github/actions/common/ddev
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - name: Test Drainpipe can be installed to a new project
+        if: steps.check.outputs.should_run == 'true'
+        run: bash tests/prerelease.sh new
+
+      - name: Test Drainpipe can be updated in a project already using it
+        if: steps.check.outputs.should_run == 'true'
+        run: bash tests/prerelease.sh update
