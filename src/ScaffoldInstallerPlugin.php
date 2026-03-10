@@ -8,6 +8,7 @@ use Composer\Composer;
 use Composer\Config;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
+use Composer\Json\JsonManipulator;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
@@ -38,6 +39,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     protected $extra;
 
     /**
+     * Composer autoload-dev configuration.
+     *
+     * @var array
+     */
+    protected $autoloadDev;
+
+    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
@@ -45,6 +53,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->io = $io;
         $this->config = $composer->getConfig();
         $this->extra = $composer->getPackage()->getExtra();
+        $this->autoloadDev = $composer->getPackage()->getDevAutoload();
     }
 
     /**
@@ -332,12 +341,17 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if (!is_file('./.env.defaults')) {
             $fs->copy($vendor . '/lullabot/drainpipe/scaffold/env/env.defaults', './.env.defaults');
         }
-        // There has to be a better way of doing this?
         $vendorRelative = str_replace(getcwd() . DIRECTORY_SEPARATOR, '', $vendor);
-        $composerJson = file_get_contents('composer.json');
-        $composerFullConfig = json_decode($composerJson, true);
-        if (empty($composerFullConfig['autoload-dev']['files']) || !in_array("$vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php", $composerFullConfig['autoload-dev']['files'])) {
-            $this->io->warning("🪠 [Drainpipe] $vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php' missing from autoload-dev files");
+        $dotenvFile = "$vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php";
+        $files = $this->autoloadDev['files'] ?? [];
+
+        if (!in_array($dotenvFile, $files)) {
+            $files[] = $dotenvFile;
+            $composerFile = $this->config->getConfigSource()->getName();
+            $manipulator = new JsonManipulator(file_get_contents($composerFile));
+            $manipulator->addSubNode('autoload-dev', 'files', $files);
+            file_put_contents($composerFile, $manipulator->getContents());
+            $this->io->write('<info>🪠 [Drainpipe] Added dotenv.php to autoload-dev files in composer.json</info>');
         }
     }
 

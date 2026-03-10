@@ -151,9 +151,12 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         $isPantheon = isset($this->extra['drainpipe']['tugboat']['pantheon']) &&
                       $this->extra['drainpipe']['tugboat']['pantheon'];
 
+        // Check for Acquia integration
+        $isAcquia = isset($this->extra['drainpipe']['tugboat']['acquia']) &&
+                    $this->extra['drainpipe']['tugboat']['acquia'];
 
         // Generate Tugboat config.yml
-        $this->generateConfigYml($services, $isPantheon);
+        $this->generateConfigYml($services, $isPantheon, $isAcquia);
 
         // Generate settings.tugboat.php
         $this->generateSettingsFile($services);
@@ -531,8 +534,9 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
      *
      * @param array $services The services configuration
      * @param bool $isPantheon Whether Pantheon integration is enabled
+     * @param bool $isAcquia Whether Acquia integration is enabled
      */
-    private function generateConfigYml(array $services, bool $isPantheon): void
+    private function generateConfigYml(array $services, bool $isPantheon, bool $isAcquia): void
     {
         $fs = new Filesystem();
         $fs->ensureDirectoryExists('./.tugboat');
@@ -544,6 +548,7 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         $templateVars = [
             'services' => $services,
             'pantheon' => $isPantheon,
+            'acquia' => $isAcquia,
         ];
 
         // Generate config.yml

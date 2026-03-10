@@ -19,6 +19,7 @@ tasks:
       PANTHEON_SITE_ID: '{{.PANTHEON_SITE_ID}}'
     cmds:
       - if [ -z "$PANTHEON_SITE_ID" ]; then echo "❌ PANTHEON_SITE_ID is not set. Please add it to your .env file."; exit 1; fi
+      - mkdir -p $DB_DIR
       - rm -f $DB_DIR/db.sql.gz $DB_DIR/db.sql
       - task: auth
       - echo "⚡ Fetching database from Pantheon..."
