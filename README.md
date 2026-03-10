@@ -838,6 +838,43 @@ Additionally, Pantheon integration can be added:
 }
 ```
 
+This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `PANTHEON_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
+
+```
+  sync:tugboat:
+    desc: "Fetches a database from Pantheon and imports it in Tugboat"
+    vars:
+      DB_DIR: /var/lib/tugboat/files/db
+    cmds:
+      - task: pantheon:fetch-db
+      - task: drupal:import-db
+```
+
+Similarly, Acquia integration can be added:
+```json
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {
+                "acquia": true
+            }
+        }
+    }
+}
+```
+
+This will install [Acquia CLI (acli)](https://docs.acquia.com/acquia-cloud-platform/add-ons/acquia-cli/start) in the Tugboat environment. Add `ACQUIA_API_KEY` and `ACQUIA_API_SECRET` as [Tugboat environment variables](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `ACQUIA_ENVIRONMENT_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task:
+
+```
+  sync:tugboat:
+    desc: "Fetches a database from Acquia and imports it in Tugboat"
+    vars:
+      DB_DIR: /var/lib/tugboat/files/db
+    cmds:
+      - task: acquia:fetch-db
+      - task: drupal:import-db
+```
+
 When using MySQL as the database engine in DDEV, Tugboat can be configured to
 use the `percona` Docker image instead of `mysql`:
 ```json
