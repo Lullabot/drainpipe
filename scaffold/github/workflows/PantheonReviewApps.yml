@@ -75,3 +75,4 @@ jobs:
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
           clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
           terminus-timeout-limit: ${{ env.TERMINUS_TIMEOUT_LIMIT }}
+          skip-wipe-multidev: ${{ vars.PANTHEON_SKIP_WIPE_MULTIDEV }}
