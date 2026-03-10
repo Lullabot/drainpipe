@@ -39,13 +39,25 @@ runs:
   steps:
     - uses: ./.github/actions/drainpipe/set-env
 
+    - name: Validate site-name parameter
+      env:
+        INPUT_SITE_NAME: ${{ inputs.site-name }}
+      run: |
+        SITE_NAME="$INPUT_SITE_NAME"
+        if ! [[ "$SITE_NAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+          echo "::error::site-name parameter must contain only alphanumeric characters, underscores, and hyphens."
+          exit 1
+        fi
+        echo "Site name validated: $SITE_NAME"
+      shell: bash
+
     - name: Validate clone-from parameter
       env:
         INPUT_CLONE_FROM: ${{ inputs.clone-from }}
       run: |
         CLONE_FROM="$INPUT_CLONE_FROM"
         if ! [[ "$CLONE_FROM" =~ ^[a-zA-Z0-9._-]+$ ]]; then
-          echo "::error::clone-from parameter must contain only alphanumeric characters, periods, underscores, and hyphens. Current value: $CLONE_FROM"
+          echo "::error::clone-from parameter must contain only alphanumeric characters, periods, underscores, and hyphens."
           exit 1
         fi
         echo "Clone-from environment validated: $CLONE_FROM"
