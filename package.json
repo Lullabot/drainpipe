@@ -2,7 +2,7 @@
   "name": "@lullabot/drainpipe",
   "packageManager": "yarn@4.12.0",
   "engines": {
-    "node": "<25.0.0"
+    "node": ">=24.0.0 <25.0.0"
   },
   "workspaces": [
     "metapackages/*"
