@@ -70,7 +70,6 @@
     },
     {
       "matchDatasources": ["node-version"],
-      "matchUpdateTypes": ["major"],
       "rangeStrategy": "replace"
     },
     {
