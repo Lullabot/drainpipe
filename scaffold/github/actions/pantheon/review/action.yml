@@ -30,6 +30,10 @@ inputs:
     description: "The number of seconds that terminus will wait until timeout. Defaults to 600."
     required: false
     default: "600"
+  skip-wipe-multidev:
+    description: "Whether or not to skip wiping the multidev on each push. Defaults to false."
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -107,12 +111,13 @@ runs:
         done
       shell: bash
 
-    - name: Create Multidev or Wipe existing Multidev
+    - name: Create or Update Multidev
       env:
         INPUT_TERMINUS_TOKEN: ${{ inputs.terminus-token }}
         INPUT_SITE_NAME: ${{ inputs.site-name }}
         INPUT_CLONE_FROM: ${{ inputs.clone-from }}
         INPUT_RUN_INSTALLER: ${{ inputs.run-installer }}
+        INPUT_SKIP_WIPE_MULTIDEV: ${{ inputs.skip-wipe-multidev }}
       run: | # zizmor: ignore[github-env]
         source .github/actions/drainpipe/set-env/bash_aliases
         drainpipe_exec "terminus auth:login --machine-token=\"$INPUT_TERMINUS_TOKEN\""
@@ -120,17 +125,23 @@ runs:
         JQ_COMMAND="'.[] | select(.id == \"$REQUESTED_NAME\") | .id'"
         ENVIRONMENT_EXISTS=$(drainpipe_exec "terminus multidev:list --format json $INPUT_SITE_NAME | jq --raw-output $JQ_COMMAND")
         if [ "$ENVIRONMENT_EXISTS" == "$REQUESTED_NAME" ]; then
-          drainpipe_exec "terminus env:wipe $INPUT_SITE_NAME.$REQUESTED_NAME --yes"
+          if [ "$INPUT_SKIP_WIPE_MULTIDEV" != "true" ]; then
+             drainpipe_exec "terminus env:wipe $INPUT_SITE_NAME.$REQUESTED_NAME --yes"
+          fi
           MULTIDEV_NAME="$REQUESTED_NAME"
         else
-          drainpipe_exec "terminus multidev:create $INPUT_SITE_NAME.$INPUT_CLONE_FROM $REQUESTED_NAME --no-db --no-files --yes"
+          if [ "$INPUT_SKIP_WIPE_MULTIDEV" != "true" ]; then
+            drainpipe_exec "terminus multidev:create $INPUT_SITE_NAME.$INPUT_CLONE_FROM $REQUESTED_NAME --no-db --no-files --yes"
+          else
+            drainpipe_exec "terminus multidev:create $INPUT_SITE_NAME.$INPUT_CLONE_FROM $REQUESTED_NAME --yes"
+          fi
           # Query Pantheon for the actual environment name, which may have been
           # truncated to 11 characters by the platform.
           MULTIDEV_NAME=$(drainpipe_exec "terminus multidev:list --format json $INPUT_SITE_NAME | jq --raw-output 'keys | .[] | select(startswith(\"${REQUESTED_NAME:0:11}\"))'")
           echo "::notice::Requested multidev name: $REQUESTED_NAME — Pantheon created: $MULTIDEV_NAME"
         fi
         echo "MULTIDEV_NAME=$MULTIDEV_NAME" >> $GITHUB_ENV
-        if [ "$INPUT_RUN_INSTALLER" != "true" ]; then
+        if [ "$INPUT_RUN_INSTALLER" != "true" ] && [ "$INPUT_SKIP_WIPE_MULTIDEV" != "true" ]; then
             drainpipe_exec "terminus env:clone-content $INPUT_SITE_NAME.$INPUT_CLONE_FROM $MULTIDEV_NAME --yes"
         fi
       shell: bash

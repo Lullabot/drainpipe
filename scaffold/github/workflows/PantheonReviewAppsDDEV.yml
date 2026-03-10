@@ -60,3 +60,4 @@ jobs:
           run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}
           clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
           terminus-timeout-limit: ${{ env.TERMINUS_TIMEOUT_LIMIT }}
+          skip-wipe-multidev: ${{ vars.PANTHEON_SKIP_WIPE_MULTIDEV }}
