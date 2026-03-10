@@ -160,19 +160,33 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         } else {
             $scaffoldTaskFile = Yaml::parseFile($taskfilePath);
             $projectTaskfile = Yaml::parseFile('./Taskfile.yml');
+            $missingIncludes = [];
             foreach ($scaffoldTaskFile['includes'] as $key => $value) {
                 if (empty($projectTaskfile['includes'][$key]) || $projectTaskfile['includes'][$key] !== $value) {
-                    $this->io->warning(
-                        'Taskfile.yml has either been customized or requires review.'
-                    );
+                    $missingIncludes[] = $key;
+                }
+            }
+            if (!empty($missingIncludes)) {
+                $this->io->warning(
+                    'Taskfile.yml has either been customized or requires review. Currently the following includes are missing or outdated:'
+                );
+                foreach ($missingIncludes as $include) {
+                    $value = $scaffoldTaskFile['includes'][$include];
+                    $valueString = is_array($value) ? Yaml::dump($value, 0) : $value;
                     $this->io->warning(
                         sprintf(
-                            'Compare Taskfile.yml includes in the root of your repository with %s and update as needed.',
-                            $taskfilePath
+                            '  - %s: %s',
+                            $include,
+                            $valueString
                         )
                     );
-                    break;
                 }
+                $this->io->warning(
+                    sprintf(
+                        'Compare Taskfile.yml includes in the root of your repository with %s and update as needed.',
+                        $taskfilePath
+                    )
+                );
             }
             if (empty($projectTaskfile['tasks']['sync'])) {
                 $this->io->warning(
