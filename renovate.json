@@ -3,7 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "rangeStrategy": "bump",
+  "rangeStrategy": "widen",
   "ignoreDeps": [
     "drainpipe"
   ],
@@ -12,7 +12,7 @@
       "matchPackageNames": [
         "drush/drush",
         "phpunit/phpunit",
-        "symfony/php-unit-bridge",
+        "symfony/phpunit-bridge",
         "symfony/yaml",
         "twig/twig",
         "vlucas/phpdotenv"
@@ -32,37 +32,41 @@
       "matchPackageNames": [
         "drush/drush"
       ],
-      "allowedVersions": "^11 || ^12 || ^13",
-      "rangeStrategy": "widen"
+      "allowedVersions": "^11 || ^12 || ^13"
     },
     {
       "matchPackageNames": [
         "phpunit/phpunit"
       ],
-      "allowedVersions": "^9 || ^10 || ^11",
-      "rangeStrategy": "widen"
+      "allowedVersions": "^9"
+    },
+    {
+      "matchPackageNames": [
+        "phpunit/phpunit"
+      ],
+      "matchFileNames": [
+        "drainpipe-dev/composer.json"
+      ],
+      "allowedVersions": "^9 || ^10 || ^11"
     },
     {
       "matchPackageNames": [
         "mglaman/phpstan-drupal",
         "phpstan/phpstan-deprecation-rules"
       ],
-      "allowedVersions": "^1 || ^2",
-      "rangeStrategy": "widen"
+      "allowedVersions": "^1 || ^2"
     },
     {
       "matchPackageNames": [
         "vlucas/phpdotenv"
       ],
-      "allowedVersions": "^4 || ^5",
-      "rangeStrategy": "widen"
+      "allowedVersions": "^4 || ^5"
     },
     {
       "matchPackageNames": [
         "/^symfony\//"
       ],
-      "allowedVersions": "^6 || ^7",
-      "rangeStrategy": "widen"
+      "allowedVersions": "^6 || ^7"
     },
     {
       "matchDatasources": ["node-version"],
@@ -71,8 +75,35 @@
     },
     {
       "matchPackageNames": ["go-task/task"],
-      "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+$/",
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
+      "rangeStrategy": "replace",
       "groupName": "Taskfile"
+    },
+    {
+      "matchPackageNames": ["mikefarah/yq"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
+      "rangeStrategy": "replace"
+    },
+    {
+      "matchPackageNames": ["zizmor"],
+      "rangeStrategy": "replace"
+    },
+    {
+      "matchPackageNames": ["yarn"],
+      "matchFileNames": [
+        ".github/workflows/TestMetapackages.yml",
+        ".github/workflows/TestFunctional.yml"
+      ],
+      "allowedVersions": "^1",
+      "rangeStrategy": "replace"
+    },
+    {
+      "matchPackageNames": ["yarn"],
+      "matchFileNames": [
+        "package.json"
+      ],
+      "allowedVersions": "^4",
+      "rangeStrategy": "replace"
     }
   ],
   "customManagers": [
@@ -88,6 +119,41 @@
       "depNameTemplate": "go-task/task",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "scaffold/tugboat/scripts/custom-init-command\\.sh$"
+      ],
+      "matchStrings": [
+        "YQ=v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "mikefarah/yq",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "\\.github/workflows/Security\\.yml$"
+      ],
+      "matchStrings": [
+        "zizmor==(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "zizmor",
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "\\.github/workflows/TestMetapackages\\.yml$",
+        "\\.github/workflows/TestFunctional\\.yml$"
+      ],
+      "matchStrings": [
+        "yarn@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "yarn",
+      "datasourceTemplate": "npm"
     }
   ]
 }
