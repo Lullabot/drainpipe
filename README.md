@@ -646,6 +646,7 @@ To enable deployment of Pantheon Review Apps:
     - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
     - `TERMINUS_TIMEOUT_LIMIT` (optional) Number of seconds that terminus will wait until timeout. Defaults to 600
     - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
+    - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to 'true' to skip wiping the multidev environment on each push, preserving its database state. Defaults to 'false'
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
@@ -842,6 +843,43 @@ Additionally, Pantheon integration can be added:
         }
     }
 }
+```
+
+This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `PANTHEON_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
+
+```
+  sync:tugboat:
+    desc: "Fetches a database from Pantheon and imports it in Tugboat"
+    vars:
+      DB_DIR: /var/lib/tugboat/files/db
+    cmds:
+      - task: pantheon:fetch-db
+      - task: drupal:import-db
+```
+
+Similarly, Acquia integration can be added:
+```json
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {
+                "acquia": true
+            }
+        }
+    }
+}
+```
+
+This will install [Acquia CLI (acli)](https://docs.acquia.com/acquia-cloud-platform/add-ons/acquia-cli/start) in the Tugboat environment. Add `ACQUIA_API_KEY` and `ACQUIA_API_SECRET` as [Tugboat environment variables](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `ACQUIA_ENVIRONMENT_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task:
+
+```
+  sync:tugboat:
+    desc: "Fetches a database from Acquia and imports it in Tugboat"
+    vars:
+      DB_DIR: /var/lib/tugboat/files/db
+    cmds:
+      - task: acquia:fetch-db
+      - task: drupal:import-db
 ```
 
 When using MySQL as the database engine in DDEV, Tugboat can be configured to
