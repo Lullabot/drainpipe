@@ -636,6 +636,11 @@ To enable deployment of Pantheon Review Apps:
   }
   ```
 - Run `composer install` to install the workflow to `.github/workflows`
+- [Create a `build multidev` label](https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/managing-labels#creating-a-label)
+  in your GitHub repository. The workflow triggers when this label is added to a pull request,
+  and re-runs on subsequent commits while the label is present.
+  - If you want the multidev build to run on **every** pull request automatically, add the
+    `build multidev` label to your [pull request template](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository).
 - Add the following [variables to your GitHub repository](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository):
     - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
     - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
@@ -646,8 +651,9 @@ To enable deployment of Pantheon Review Apps:
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`
-    - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth local
+    - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
+    - `PANTHEON_REVIEW_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
 
 ### Acquia
 
@@ -767,30 +773,31 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 
 ### Pantheon
 
-```json
-"extra": {
-    "drainpipe": {
-        "gitlab": ["Pantheon", "Pantheon Review Apps"]
-    }
-}
-```
+To enable deployment of Pantheon Review Apps:
 
-- Add the following the composer.json to enable deployment of Pantheon Review Apps
+- Add the following to `composer.json`
   ```json
   "extra": {
       "drainpipe": {
-          "github": ["PantheonReviewApps"]
+          "gitlab": ["Pantheon", "PantheonReviewApps"]
       }
   }
   ```
-- Run `composer install`
-- Add your Pantheon `site-name` to the last job in the new
-  workflow file at `.github/workflows/PantheonReviewApps.yml`
+- Run `composer install` to install the CI files to `.drainpipe/gitlab/`. If no `.gitlab-ci.yml`
+  exists, an example one will be created for you.
 - Add the following [variables to your GitLab repository](https://docs.gitlab.com/ee/ci/variables/#for-a-project):
+  - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
+  - `PANTHEON_SITE_ID` The Pantheon site UUID, used to construct the SSH remote URL
+  - `PANTHEON_GIT_REMOTE` The Pantheon git remote URL e.g. `ssh://codeserver.dev.$PANTHEON_SITE_ID@codeserver.dev.$PANTHEON_SITE_ID.drush.in:2222/~/repository.git`
   - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
-  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`  (enable the _Mask variable_ checkbox)
-  - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
+  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in` (enable the _Mask variable_ checkbox)
+  - `GIT_EMAIL` Email address to use for git commits
+  - `GIT_USERNAME` Username to use for git commits
+  - `GITLAB_ACCESS_TOKEN` A GitLab access token with `api` scope, used by the scheduled multidev cleanup job
+  - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
+  - `REVIEW_APP_BASIC_AUTH` (optional) Basic auth credentials prepended to the review app URL e.g. `user:password@`
+  - `PANTHEON_MULTIDEV_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
 [scaffold/gitlab/gitlab-ci.example.yml] for an example. You can also just
