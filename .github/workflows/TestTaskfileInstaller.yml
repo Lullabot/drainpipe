@@ -93,7 +93,7 @@ jobs:
           cd drainpipe-task-upgrade
           ddev start
           ddev composer install
-          ddev task drupal:composer
+          ddev task drupal:composer:development
           cp composer-upgraded.json composer.json
           cp composer-upgraded.lock composer.lock
-          ddev task drupal:composer
+          ddev task drupal:composer:development
