@@ -1,15 +1,23 @@
 version: '3'
 
 tasks:
-  composer:development:
+  composer:
     desc: Install composer dependencies
     summary: |
-      This command is typically used when a developer updates their local after
-      pulling new changes from source control. Generally when bootstrapping a
-      fresh clone of the site from git, you'll need to run `composer install`
-      anyway to get task and drainpipe.
+      Runs composer install with the COMPOSER_NO_DEV environment variable to
+      control whether dev dependencies are included.
+
+      Set COMPOSER_NO_DEV=1 for production builds (no dev dependencies).
+      Set COMPOSER_NO_DEV=0 for development builds (includes dev dependencies).
+      When not set, composer uses its default behavior (dev dependencies
+      included) and the status check only verifies that dependencies are
+      installed.
+
+      See https://getcomposer.org/doc/03-cli.md#composer-no-dev
     cmds:
-      - composer install --optimize-autoloader
+      - |
+        export COMPOSER_NO_DEV={{.COMPOSER_NO_DEV}}
+        composer install --optimize-autoloader
     sources:
       - composer.json
       - composer.lock
@@ -18,20 +26,25 @@ tasks:
       - ./vendor/autoload.php
     status:
       - >
-        test -f ./vendor/composer/installed.json && grep -q '"dev": true' ./vendor/composer/installed.json
-  composer:production:
-    desc: Install composer dependencies without devDependencies
-    cmds:
-      - composer install --no-dev --optimize-autoloader
-    sources:
-      - composer.json
-      - composer.lock
-    generates:
-      - ./vendor/composer/installed.json
-      - ./vendor/autoload.php
-    status:
-      - >
+        {{if eq .COMPOSER_NO_DEV "1"}}
         test -f ./vendor/composer/installed.json && grep -q '"dev": false' ./vendor/composer/installed.json
+        {{else if eq .COMPOSER_NO_DEV "0"}}
+        test -f ./vendor/composer/installed.json && grep -q '"dev": true' ./vendor/composer/installed.json
+        {{else}}
+        test -f ./vendor/composer/installed.json
+        {{end}}
+  composer:development:
+    desc: "Install composer dependencies (alias for composer with COMPOSER_NO_DEV=0)"
+    cmds:
+      - task: composer
+        vars:
+          COMPOSER_NO_DEV: "0"
+  composer:production:
+    desc: "Install composer dependencies without devDependencies (alias for composer with COMPOSER_NO_DEV=1)"
+    cmds:
+      - task: composer
+        vars:
+          COMPOSER_NO_DEV: "1"
   install:
     desc: "Runs the site installer"
     cmds:
@@ -56,6 +69,7 @@ tasks:
       - ./vendor/bin/drush {{.site }} sql:dump --gzip --result-file=$DB_DIR/db.sql
   update:
     desc: Run Drupal update tasks after deploying new code
+    deps: [composer]
     cmds:
       # See https://www.drush.org/12.x/deploycommand/
       # See https://architecture.lullabot.com/adr/20230929-drupal-build-steps/
