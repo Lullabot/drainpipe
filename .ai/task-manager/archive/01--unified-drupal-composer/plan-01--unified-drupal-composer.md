@@ -199,3 +199,57 @@ This change integrates directly into the existing `tasks/drupal.yml` task defini
 ### Change Log
 - 2026-03-13: Initial plan created
 - 2026-03-13: Refined status check to three-way conditional (Option C) to prevent `drupal:update` dep from undoing production composer installs. Updated architecture diagram, added production CI flow analysis, kept some test fixtures on old alias names for BC validation.
+- 2026-03-13: Generated tasks and execution blueprint
+
+## Task Dependency Diagram
+
+```mermaid
+graph TD
+    T1["Task 01: Unified composer task + aliases + update dep"] --> T2["Task 02: Update scaffold Taskfile"]
+    T1 --> T3["Task 03: Update test fixtures & CI"]
+    T2 --> T4["Task 04: Commit & create draft PR"]
+    T3 --> T4
+```
+
+## Execution Blueprint
+
+**Validation Gates:**
+- Reference: `/config/hooks/POST_PHASE.md`
+
+### ✅ Phase 1: Core Implementation
+**Parallel Tasks:**
+- ✔️ Task 01: Implement unified drupal:composer task with BC aliases and update dependency
+
+### ✅ Phase 2: Downstream Updates
+**Parallel Tasks:**
+- ✔️ Task 02: Update scaffold Taskfile to use unified composer task (depends on: 01)
+- ✔️ Task 03: Update test fixtures and CI workflows (depends on: 01)
+
+### ✅ Phase 3: CI Validation
+**Parallel Tasks:**
+- ✔️ Task 04: Commit changes and create draft PR (depends on: 02, 03)
+
+### Execution Summary
+- Total Phases: 3
+- Total Tasks: 4
+- Maximum Parallelism: 2 tasks (in Phase 2)
+- Critical Path Length: 3 phases
+
+## Execution Summary
+
+**Status**: ✅ Completed Successfully
+**Completed Date**: 2026-03-13
+
+### Results
+- Unified `drupal:composer` task implemented in `tasks/drupal.yml` with three-way status check
+- BC aliases (`composer:development`, `composer:production`) retained as thin wrappers
+- `drupal:update` now depends on `composer` (no-op when vendor exists)
+- Scaffold and test fixtures updated; BC test fixtures preserved
+- Draft PR created: https://github.com/Lullabot/drainpipe/pull/1162
+
+### Noteworthy Events
+No significant issues encountered. All changes were straightforward implementations of the refined plan.
+
+### Recommendations
+- Monitor CI workflow results on PR #1162 and iterate if any tests fail
+- Once CI passes, convert from draft to ready-for-review
