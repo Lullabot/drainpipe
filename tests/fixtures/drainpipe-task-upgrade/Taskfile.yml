@@ -41,14 +41,19 @@ tasks:
 
   build:
     desc: "Builds the project for production"
-    deps: [drupal:composer:production]
     cmds:
+      - task: drupal:composer
+        vars:
+          COMPOSER_NO_DEV: "1"
       - echo "Nothing to do"
       # - task: assets
 
   build:dev:
     desc: "Builds the project for development"
-    deps: [drupal:composer:development]
+    deps:
+      - task: drupal:composer
+        vars:
+          COMPOSER_NO_DEV: "0"
     cmds:
       # @see https://architecture.lullabot.com/adr/20211026-one-time-login-first-drupal-user-account/
       - ./vendor/bin/drush user:unblock --uid=1
