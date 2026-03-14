@@ -1,0 +1,282 @@
+version: '3'
+
+tasks:
+  "acquia:setup":
+    desc: "Install Acquia CLI and helper tools; authenticate with Acquia Cloud"
+    cmds:
+      - |
+        set -euo pipefail
+        curl -OL https://github.com/acquia/cli/releases/latest/download/acli.phar
+        chmod +x acli.phar
+        mv acli.phar vendor/bin/acli
+        if ! command -v yq &>/dev/null; then
+          curl -sSL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64" \
+            -o /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+        fi
+        vendor/bin/acli auth:login \
+          --key="${ACQUIA_API_KEY}" \
+          --secret="${ACQUIA_API_SECRET}" \
+          --no-interaction
+        mkdir -p ~/.ssh
+        echo "StrictHostKeyChecking no" >> ~/.ssh/config
+
+  "acquia:build":
+    desc: "Run the pre-deploy build hook if defined"
+    cmds:
+      - |
+        if ./vendor/bin/task -l 2>/dev/null | grep -q '^\* acquia:deploy:before: '; then
+          ./vendor/bin/task acquia:deploy:before
+        fi
+
+  "acquia:push-cde":
+    desc: "Push code to Acquia and create or update the PR Cloud Development Environment"
+    cmds:
+      - |
+        set -euo pipefail
+        SOURCE_ENV="${ACQUIA_SOURCE_ENVIRONMENT:-dev}"
+        ENV_LABEL="PR-${BITBUCKET_PR_ID}"
+        ENV_NAME="pr-${BITBUCKET_PR_ID}"
+        BUILD_BRANCH="${ENV_NAME}-build"
+        CDE_ALIAS="${ACQUIA_SITE_GROUP}.${ENV_NAME}"
+
+        echo "Resolving Acquia VCS URL..."
+        ENV_INFO=$(vendor/bin/acli api:environments:find --no-interaction "${ACQUIA_SITE_GROUP}.dev")
+        VCS_TYPE=$(echo "${ENV_INFO}" | jq -r '.vcs.type')
+        if [ "${VCS_TYPE}" != "git" ]; then
+          echo "ERROR: Unrecognised VCS type '${VCS_TYPE}' — expected 'git'."
+          exit 1
+        fi
+        ACQUIA_GIT_REMOTE=$(echo "${ENV_INFO}" | jq -r '.vcs.url')
+        REMOTE_HOST=$(echo "${ACQUIA_GIT_REMOTE}" | awk -F'[@:]' '{print $2}')
+        REMOTE_SSH_HOST=$(echo "${ENV_INFO}" | jq -r '.ssh_url' | awk -F'[@:]' '{print $2}')
+
+        echo "Adding ${REMOTE_HOST} to known_hosts..."
+        ssh-keyscan -H "${REMOTE_HOST}" >> ~/.ssh/known_hosts || true
+        echo "Adding ${REMOTE_SSH_HOST} to known_hosts..."
+        ssh-keyscan -H "${REMOTE_SSH_HOST}" >> ~/.ssh/known_hosts || true
+
+        ./vendor/bin/task snapshot:directory directory=/tmp/release
+
+        echo "Pushing code to Acquia (branch: ${BUILD_BRANCH})..."
+        ./vendor/bin/task deploy:git \
+          directory=/tmp/release \
+          branch="${BUILD_BRANCH}" \
+          remote="${ACQUIA_GIT_REMOTE}" \
+          message="${BITBUCKET_COMMIT}"
+
+        echo "Checking whether CDE '${ENV_LABEL}' already exists..."
+        EXISTING_ENV=$(vendor/bin/acli api:applications:environment-list --no-interaction "${ACQUIA_APP_UUID}" \
+          | jq -r --arg label "${ENV_LABEL}" '.[] | select(.label == $label) | .name' || true)
+
+        if [ -z "${EXISTING_ENV}" ]; then
+          echo "CDE '${ENV_LABEL}' not found — creating..."
+          vendor/bin/acli env:create "${ENV_LABEL}" "${BUILD_BRANCH}" "${ACQUIA_APP_UUID}" --no-interaction
+          echo "Waiting for CDE to provision..."
+          ATTEMPTS=0
+          MAX_ATTEMPTS=12
+          while [ "${ATTEMPTS}" -lt "${MAX_ATTEMPTS}" ]; do
+            STATUS=$(vendor/bin/acli api:applications:environment-list --no-interaction "${ACQUIA_APP_UUID}" \
+              | jq -r --arg label "${ENV_LABEL}" '.[] | select(.label == $label) | .status' || true)
+            echo "  Status: ${STATUS} (attempt $((ATTEMPTS + 1))/${MAX_ATTEMPTS})"
+            if [ "${STATUS}" = "normal" ]; then
+              echo "CDE is ready."
+              break
+            fi
+            ATTEMPTS=$((ATTEMPTS + 1))
+            sleep 10
+          done
+          if [ "${ATTEMPTS}" -eq "${MAX_ATTEMPTS}" ]; then
+            echo "ERROR: CDE did not become ready within the expected time."
+            exit 1
+          fi
+          if [ "${ACQUIA_REVIEW_RUN_INSTALLER:-}" != "true" ]; then
+            echo "Copying database from '${SOURCE_ENV}' to '${CDE_ALIAS}'..."
+            vendor/bin/acli api:environments:database-copy --no-interaction \
+              "${ACQUIA_SITE_GROUP}.${SOURCE_ENV}" "${CDE_ALIAS}" "${ACQUIA_SITE_GROUP}"
+          fi
+        else
+          echo "CDE '${ENV_LABEL}' already exists — will update."
+        fi
+
+        echo "Switching code on '${CDE_ALIAS}' to branch '${BUILD_BRANCH}'..."
+        vendor/bin/acli api:environments:code-switch --task-wait --no-interaction "${CDE_ALIAS}" "${BUILD_BRANCH}"
+        echo "Code switch complete."
+
+  "acquia:update-cde":
+    desc: "Run site updates on the Acquia CDE and post deployment status"
+    cmds:
+      - |
+        set -euo pipefail
+        ENV_NAME="pr-${BITBUCKET_PR_ID}"
+        CDE_ALIAS="${ACQUIA_SITE_GROUP}.${ENV_NAME}"
+
+        vendor/bin/acli remote:aliases:download --no-interaction "${ACQUIA_SITE_GROUP}"
+        yq eval '(.** | .paths) = {}' -i "drush/sites/${ACQUIA_SITE_GROUP}.site.yml"
+
+        if ./vendor/bin/task -l 2>/dev/null | grep -q '^\* acquia:deploy:after: '; then
+          echo "Running task acquia:deploy:after..."
+          ./vendor/bin/task acquia:deploy:after "site=@${CDE_ALIAS}"
+        fi
+
+        if [ "${ACQUIA_REVIEW_RUN_INSTALLER:-}" = "true" ]; then
+          echo "Running site installer..."
+          ./vendor/bin/drush "@${CDE_ALIAS}" --yes site:install --existing-config
+        elif ./vendor/bin/task -l 2>/dev/null | grep -q '^\* update: '; then
+          echo "Running task update..."
+          ./vendor/bin/task update "site=@${CDE_ALIAS}"
+        else
+          echo "Running task drupal:update..."
+          ./vendor/bin/task drupal:update "site=@${CDE_ALIAS}"
+        fi
+
+        echo "Retrieving environment URL..."
+        CDE_INFO=$(vendor/bin/acli api:environments:find --no-interaction "${CDE_ALIAS}")
+        ENV_DOMAIN=$(echo "${CDE_INFO}" | jq -r '.domains[0]')
+        ENV_URL="https://${ENV_DOMAIN}"
+
+        echo "Environment URL: ${ENV_URL}"
+        ./vendor/bin/task bitbucket:acquia:post-commit-status \
+          STATE=SUCCESSFUL \
+          URL="${ENV_URL}" \
+          "DESCRIPTION=Acquia CDE for PR #${BITBUCKET_PR_ID}"
+
+  "acquia:push-dev":
+    desc: "Push code to the Acquia dev environment"
+    cmds:
+      - |
+        set -euo pipefail
+        ENV_ALIAS="${ACQUIA_SITE_GROUP}.dev"
+
+        echo "Resolving Acquia VCS URL for '${ENV_ALIAS}'..."
+        ENV_INFO=$(vendor/bin/acli api:environments:find --no-interaction "${ENV_ALIAS}")
+        VCS_TYPE=$(echo "${ENV_INFO}" | jq -r '.vcs.type')
+        if [ "${VCS_TYPE}" != "git" ]; then
+          echo "ERROR: Unrecognised VCS type '${VCS_TYPE}' — expected 'git'."
+          exit 1
+        fi
+        BRANCH=$(echo "${ENV_INFO}" | jq -r '.vcs.path')
+        ACQUIA_GIT_REMOTE=$(echo "${ENV_INFO}" | jq -r '.vcs.url')
+        REMOTE_HOST=$(echo "${ACQUIA_GIT_REMOTE}" | awk -F'[@:]' '{print $2}')
+        REMOTE_SSH_HOST=$(echo "${ENV_INFO}" | jq -r '.ssh_url' | awk -F'[@:]' '{print $2}')
+
+        echo "Branch: ${BRANCH}"
+        echo "Remote: ${ACQUIA_GIT_REMOTE}"
+
+        echo "Adding ${REMOTE_HOST} to known_hosts..."
+        ssh-keyscan -H "${REMOTE_HOST}" >> ~/.ssh/known_hosts || true
+        echo "Adding ${REMOTE_SSH_HOST} to known_hosts..."
+        ssh-keyscan -H "${REMOTE_SSH_HOST}" >> ~/.ssh/known_hosts || true
+
+        ./vendor/bin/task snapshot:directory directory=/tmp/release
+
+        echo "Pushing code to Acquia (branch: ${BRANCH})..."
+        ./vendor/bin/task deploy:git \
+          directory=/tmp/release \
+          branch="${BRANCH}" \
+          remote="${ACQUIA_GIT_REMOTE}" \
+          message="${BITBUCKET_COMMIT}"
+
+        echo "Switching code on '${ENV_ALIAS}' to branch '${BRANCH}'..."
+        vendor/bin/acli api:environments:code-switch --task-wait --no-interaction "${ENV_ALIAS}" "${BRANCH}"
+        echo "Code switch complete."
+
+  "acquia:update-dev":
+    desc: "Run site updates on Acquia dev, clear external caches, and post deployment status"
+    cmds:
+      - |
+        set -euo pipefail
+        ENV_ALIAS="${ACQUIA_SITE_GROUP}.dev"
+
+        vendor/bin/acli remote:aliases:download --no-interaction "${ACQUIA_SITE_GROUP}"
+        yq eval '(.** | .paths) = {}' -i "drush/sites/${ACQUIA_SITE_GROUP}.site.yml"
+
+        if ./vendor/bin/task -l 2>/dev/null | grep -q '^\* acquia:deploy:after: '; then
+          echo "Running task acquia:deploy:after..."
+          ./vendor/bin/task acquia:deploy:after "site=@${ENV_ALIAS}"
+        fi
+
+        if ./vendor/bin/task -l 2>/dev/null | grep -q '^\* update: '; then
+          echo "Running task update..."
+          ./vendor/bin/task update "site=@${ENV_ALIAS}"
+        else
+          echo "Running task drupal:update..."
+          ./vendor/bin/task drupal:update "site=@${ENV_ALIAS}"
+        fi
+
+        echo "Clearing caches on all domains..."
+        HOSTNAMES=$(vendor/bin/acli api:environments:domain-list --no-interaction "${ENV_ALIAS}" \
+          | jq -r '[.[].hostname] | join(" ")')
+        # shellcheck disable=SC2086
+        vendor/bin/acli api:environments:clear-caches --no-interaction "${ENV_ALIAS}" ${HOSTNAMES}
+
+  "acquia:cleanup":
+    desc: "Delete stale Acquia CDEs for closed Bitbucket PRs"
+    deps: ["acquia:setup"]
+    cmds:
+      - |
+        set -euo pipefail
+        echo "Fetching CDEs from Acquia..."
+        CDE_LABELS=$(vendor/bin/acli api:applications:environment-list --no-interaction "${ACQUIA_APP_UUID}" \
+          | jq -r '.[] | select(.label | test("^PR-[0-9]+$")) | .label')
+
+        if [ -z "${CDE_LABELS}" ]; then
+          echo "No PR CDEs found — nothing to clean up."
+          exit 0
+        fi
+
+        echo "Found CDEs:"
+        echo "${CDE_LABELS}"
+
+        echo "Fetching open PRs from Bitbucket..."
+        OPEN_PR_IDS=""
+        NEXT_URL="https://api.bitbucket.org/2.0/repositories/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO_SLUG}/pullrequests?state=OPEN&pagelen=50"
+        while [ -n "${NEXT_URL}" ]; do
+          RESPONSE=$(curl -sf \
+            -u "${BITBUCKET_USERNAME}:${BITBUCKET_APP_PASSWORD}" \
+            "${NEXT_URL}")
+          PAGE_IDS=$(echo "${RESPONSE}" | jq -r '.values[].id')
+          OPEN_PR_IDS="${OPEN_PR_IDS}${PAGE_IDS}"$'\n'
+          NEXT_URL=$(echo "${RESPONSE}" | jq -r '.next // empty')
+        done
+
+        echo "Open PR IDs: ${OPEN_PR_IDS:-none}"
+
+        while IFS= read -r CDE_LABEL; do
+          [ -z "${CDE_LABEL}" ] && continue
+          PR_NUM="${CDE_LABEL#PR-}"
+          if echo "${OPEN_PR_IDS}" | grep -qw "${PR_NUM}"; then
+            echo "PR #${PR_NUM} is still open — keeping CDE '${CDE_LABEL}'."
+          else
+            echo "PR #${PR_NUM} is closed — deleting CDE '${CDE_LABEL}'..."
+            vendor/bin/acli env:delete "${ACQUIA_SITE_GROUP}.pr-${PR_NUM}" --no-interaction || true
+            echo "Deleted '${ACQUIA_SITE_GROUP}.pr-${PR_NUM}'."
+          fi
+        done <<< "${CDE_LABELS}"
+
+        echo "Cleanup complete."
+
+  "acquia:post-commit-status":
+    desc: "Post a build status to the Bitbucket commit statuses API"
+    vars:
+      STATE: '{{.STATE}}'
+      URL: '{{default "" .URL}}'
+      DESCRIPTION: '{{.DESCRIPTION}}'
+    cmds:
+      - |
+        set -euo pipefail
+        if [ -z "${BITBUCKET_USERNAME:-}" ] || [ -z "${BITBUCKET_APP_PASSWORD:-}" ]; then
+          echo "BITBUCKET_USERNAME or BITBUCKET_APP_PASSWORD not set — skipping commit status post."
+          exit 0
+        fi
+        PAYLOAD=$(jq -n \
+          --arg state       "{{.STATE}}" \
+          --arg url         "{{.URL}}" \
+          --arg description "{{.DESCRIPTION}}" \
+          '{state: $state, key: "drainpipe-acquia-review-app", name: "Acquia Review App", url: $url, description: $description}')
+        curl -s -f -X POST \
+          -u "${BITBUCKET_USERNAME}:${BITBUCKET_APP_PASSWORD}" \
+          -H "Content-Type: application/json" \
+          --data "${PAYLOAD}" \
+          "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO_SLUG}/commit/${BITBUCKET_COMMIT}/statuses/build" \
+          || echo "Warning: failed to post commit status to Bitbucket."

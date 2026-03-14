@@ -430,6 +430,7 @@ EOT;
         $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
         $this->installGitlabCI($scaffoldPath, $composer);
         $this->installGitHubActions($scaffoldPath, $composer);
+        $this->installBitbucketPipelines($scaffoldPath);
     }
 
     /**
@@ -601,5 +602,81 @@ EOT;
         if (isset($this->extra['drainpipe']['acquia'])) {
             // TODO: Add Acquia related GitHub Actions.
         }
+    }
+
+    /**
+     * Install Bitbucket Pipelines configuration if defined in composer.json.
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
+     */
+    private function installBitbucketPipelines(string $scaffoldPath): void {
+        $fs = new Filesystem();
+        $fs->removeDirectory('./.drainpipe/bitbucket');
+
+        if (!isset($this->extra['drainpipe']['bitbucket']) || !is_array($this->extra['drainpipe']['bitbucket'])) {
+            return;
+        }
+
+        $requested = $this->extra['drainpipe']['bitbucket'];
+
+        // Warn about unknown pipelines.
+        $known = ['AcquiaReviewApps', 'AcquiaDeploy'];
+        foreach ($requested as $pipeline) {
+            if (!in_array($pipeline, $known)) {
+                $this->io->warning("🪠 [Drainpipe] Unknown Bitbucket pipeline: $pipeline");
+            }
+        }
+
+        // Ensure the bitbucket task namespace is included in Taskfile.yml.
+        if (file_exists('./Taskfile.yml')) {
+            $taskfileContent = file_get_contents('./Taskfile.yml');
+            if (!str_contains($taskfileContent, 'bitbucket:')) {
+                $updated = preg_replace(
+                    '/^(includes:[ \t]*\n)/m',
+                    "$1  bitbucket: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml\n",
+                    $taskfileContent
+                );
+                if ($updated !== null && $updated !== $taskfileContent) {
+                    file_put_contents('./Taskfile.yml', $updated);
+                    $this->io->write("🪠 [Drainpipe] Added 'bitbucket' include to Taskfile.yml");
+                } else {
+                    $this->io->warning(
+                        "🪠 [Drainpipe] Could not auto-inject 'bitbucket' include into Taskfile.yml. " .
+                        "Add 'bitbucket: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml' under 'includes:' manually."
+                    );
+                }
+            }
+        }
+
+        // Determine which known pipelines were requested, in a stable order.
+        $active = array_values(array_intersect($known, $requested));
+
+        if (empty($active)) {
+            return;
+        }
+
+        // Parse each scaffold YAML and merge the pipelines sections into one file.
+        $deployBranch = $this->extra['drainpipe']['bitbucketDeployBranch'] ?? 'main';
+        $merged = null;
+        foreach ($active as $pipeline) {
+            if ($pipeline === 'AcquiaDeploy') {
+                $raw = file_get_contents("$scaffoldPath/bitbucket/AcquiaDeploy.yml");
+                $raw = preg_replace('/(^\s+)main:/m', "\$1$deployBranch:", $raw);
+                $parsed = Yaml::parse($raw);
+            } else {
+                $parsed = Yaml::parseFile("$scaffoldPath/bitbucket/$pipeline.yml");
+            }
+            if ($merged === null) {
+                $merged = $parsed;
+            } else {
+                $merged['pipelines'] = array_merge(
+                    $merged['pipelines'] ?? [],
+                    $parsed['pipelines'] ?? []
+                );
+            }
+        }
+
+        file_put_contents('./bitbucket-pipelines.yml', Yaml::dump($merged, 10, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+        $this->io->write('🪠 [Drainpipe] bitbucket-pipelines.yml updated');
     }
 }
