@@ -242,10 +242,26 @@ All the below static code analysis tests can be run with `task test:static`
 |-----------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Security  | task test:security       | Runs security checks for composer packages against the [FriendsOfPHP Security Advisory Database](https://github.com/FriendsOfPHP/security-advisories) and Drupal core and contributed modules against [Drupal's Security Advisories](https://www.drupal.org/security). |
 | Lint      | task test:lint           | - YAML lint on `.yml` files in the `web` directory<br />- Twig lint on files in `web/modules`, `web/profiles`, and `web/themes`<br />- `composer validate`<br />These cannot currently be customised. See [#9](https://github.com/Lullabot/drainpipe-dev/issues/9).    |
-| PHPStan   | task test:phpstan        | Runs [PHPStan](https://phpstan.org/) with [mglaman/phpstan-drupal](https://github.com/mglaman/phpstan-drupal) on`web/modules/custom`, `web/themes/custom`, and `web/sites`.                                                                                            |
+| PHPStan   | task test:phpstan        | Runs [PHPStan](https://phpstan.org/) with [mglaman/phpstan-drupal](https://github.com/mglaman/phpstan-drupal) on`web/modules/custom`, `web/themes/custom`, and `web/sites` at level 6.                                                                                 |
 | PHPUnit   | task test:phpunit:static | Runs Unit tests in `web/modules/custom/**/tests/src/Unit` and `test/phpunit/**/Unit`                                                                                                                                                                                   |
 | PHPCS     | task test:phpcs          | Runs PHPCS with Drupal coding standards provided by [Coder module](https://www.drupal.org/project/coder                                                                                                                                                                |
 
+
+#### PHPStan Baseline for Existing Codebases
+
+Projects with pre-existing violations can generate a baseline file to suppress
+them, so CI only fails on new code:
+
+```
+task test:phpstan:generate-baseline
+git add phpstan.neon phpstan-baseline.neon
+git commit -m "Add PHPStan level 6 baseline"
+```
+
+This creates `phpstan-baseline.neon` (the suppressed violations) and
+`phpstan.neon` (which includes both `phpstan.neon.dist` and the baseline).
+Commit both files. The baseline can be regenerated at any time as legacy
+violations are resolved.
 
 #### Altering PHP_CodeSniffer Configuration
 
