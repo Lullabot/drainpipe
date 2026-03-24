@@ -64,7 +64,38 @@ jobs:
           composer config minimum-stability dev
           composer require "lullabot/drainpipe @dev" --with-all-dependencies
 
-      - name: Run static tests
+      - name: Run production build via alias
         run: |
           cd ../drupal
           ./vendor/bin/task build
+
+      - name: Verify unified task is no-op after production build
+        run: |
+          cd ../drupal
+          # After a production build, calling drupal:composer with COMPOSER_NO_DEV=1
+          # should be a no-op (status check passes, task is skipped).
+          ./vendor/bin/task drupal:composer COMPOSER_NO_DEV=1 2>&1 | tee /tmp/task-output.txt
+          # Task prints nothing when skipped via status check, so verify
+          # composer install was NOT run again.
+          if grep -q "Installing\|Updating\|Nothing to install" /tmp/task-output.txt; then
+            echo "FAIL: composer ran again when it should have been skipped"
+            exit 1
+          fi
+
+      - name: Verify passthrough status check does not undo production build
+        run: |
+          cd ../drupal
+          # Calling drupal:composer without COMPOSER_NO_DEV (the empty/passthrough
+          # case) should be a no-op because installed.json exists. This is the
+          # scenario when drupal:update depends on drupal:composer.
+          ./vendor/bin/task drupal:composer 2>&1 | tee /tmp/task-output.txt
+          if grep -q "Installing\|Updating\|Nothing to install" /tmp/task-output.txt; then
+            echo "FAIL: composer ran again when it should have been skipped"
+            exit 1
+          fi
+          # Verify vendor is still in production mode (no dev packages).
+          if [ -f "vendor/lullabot/drainpipe-dev/composer.json" ]; then
+            echo "FAIL: dev dependencies were installed in production build"
+            exit 1
+          fi
+          grep -q '"dev": false' vendor/composer/installed.json
