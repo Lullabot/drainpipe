@@ -46,6 +46,15 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     protected $autoloadDev;
 
     /**
+     * Whether checkPantheonSystemDrupalIntegrations() has already been called.
+     *
+     * Prevents duplicate warnings during a single composer run.
+     *
+     * @var bool
+     */
+    protected $pantheonIntegrationsChecked = false;
+
+    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
@@ -92,7 +101,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
-        $this->installHostingProviderSupport();
+        $this->installHostingProviderSupport($event->getComposer());
         $this->installCICommands($event->getComposer());
         $this->configureRenovateIgnore();
         $this->installEnvSupport();
@@ -112,7 +121,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
-        $this->installHostingProviderSupport();
+        $this->installHostingProviderSupport($event->getComposer());
         $this->installCICommands($event->getComposer());
         $this->configureRenovateIgnore();
         $this->installEnvSupport();
@@ -394,32 +403,187 @@ EOT;
     }
 
     /**
-     * Install hosting provider support.
+     * Normalizes deprecated hosting provider config values in memory.
+     *
+     * Detects deprecated string-based provider values in
+     * $this->extra['drainpipe']['github'] and
+     * $this->extra['drainpipe']['gitlab'], emits deprecation warnings, and
+     * rewrites them to the new provider sub-key object form. The user's
+     * composer.json is never modified.
+     *
+     * Non-provider string values (TestStatic, Security, ComposerLockDiff,
+     * LockfileDiff, TestFunctional) are not deprecated and remain unchanged.
      */
-    private function installHostingProviderSupport(): void
+    private function normalizeHostingProviderConfig(): void
+    {
+        // Normalize github config.
+        if (isset($this->extra['drainpipe']['github']) && is_array($this->extra['drainpipe']['github'])) {
+            $github = $this->extra['drainpipe']['github'];
+
+            // Only normalize if it looks like a flat (indexed) array, i.e. the
+            // legacy string-list form. An associative array is already the new
+            // object form and must not be touched.
+            if (array_values($github) === $github) {
+                $newGithub = [];
+                foreach ($github as $value) {
+                    if ($value === 'acquia') {
+                        $this->io->warning(
+                            "The 'github: [\"acquia\"]' value is deprecated. Use 'github: {\"acquia\": [\"Deploy\"]}' instead."
+                        );
+                        $newGithub['acquia'] = array_merge($newGithub['acquia'] ?? [], ['Deploy']);
+                    }
+                    elseif ($value === 'PantheonReviewApps') {
+                        $this->io->warning(
+                            "The 'github: [\"PantheonReviewApps\"]' value is deprecated. Use 'github: {\"pantheon\": [\"ReviewApps\"]}' instead."
+                        );
+                        $newGithub['pantheon'] = array_merge($newGithub['pantheon'] ?? [], ['ReviewApps']);
+                    }
+                    elseif ($value === 'Pantheon') {
+                        $this->io->warning(
+                            "The 'github: [\"Pantheon\"]' value is deprecated and was previously a no-op. It now scaffolds Pantheon GitHub Actions. Use 'github: {\"pantheon\": [\"Actions\"]}' instead."
+                        );
+                        $newGithub['pantheon'] = array_merge($newGithub['pantheon'] ?? [], ['Actions']);
+                    }
+                    else {
+                        // Non-provider string values remain as-is (keyed by value).
+                        $newGithub[$value] = $value;
+                    }
+                }
+                $this->extra['drainpipe']['github'] = $newGithub;
+            }
+        }
+
+        // Normalize gitlab config.
+        if (isset($this->extra['drainpipe']['gitlab']) && is_array($this->extra['drainpipe']['gitlab'])) {
+            $gitlab = $this->extra['drainpipe']['gitlab'];
+
+            // Only normalize if it looks like a flat (indexed) array.
+            if (array_values($gitlab) === $gitlab) {
+                $newGitlab = [];
+                foreach ($gitlab as $value) {
+                    if ($value === 'Pantheon') {
+                        $this->io->warning(
+                            "The 'gitlab: [\"Pantheon\"]' value is deprecated. Use 'gitlab: {\"pantheon\": [\"Deploy\"]}' instead."
+                        );
+                        $newGitlab['pantheon'] = array_merge($newGitlab['pantheon'] ?? [], ['Deploy']);
+                    }
+                    elseif ($value === 'PantheonReviewApps') {
+                        $this->io->warning(
+                            "The 'gitlab: [\"PantheonReviewApps\"]' value is deprecated. Use 'gitlab: {\"pantheon\": [\"ReviewApps\"]}' instead."
+                        );
+                        $newGitlab['pantheon'] = array_merge($newGitlab['pantheon'] ?? [], ['ReviewApps']);
+                    }
+                    else {
+                        // Non-provider string values remain as-is.
+                        $newGitlab[$value] = $value;
+                    }
+                }
+                $this->extra['drainpipe']['gitlab'] = $newGitlab;
+            }
+        }
+    }
+
+    /**
+     * Returns true if any Pantheon CI configuration is present.
+     *
+     * Checks for a non-empty 'pantheon' sub-key under either
+     * $this->extra['drainpipe']['github'] or
+     * $this->extra['drainpipe']['gitlab'].
+     *
+     * @return bool
+     */
+    private function hasAnyPantheonCIConfig(): bool
+    {
+        $githubPantheon = $this->extra['drainpipe']['github']['pantheon'] ?? [];
+        $gitlabPantheon = $this->extra['drainpipe']['gitlab']['pantheon'] ?? [];
+        return !empty($githubPantheon) || !empty($gitlabPantheon);
+    }
+
+    /**
+     * Install hosting provider support.
+     *
+     * @param Composer $composer The Composer instance.
+     */
+    private function installHostingProviderSupport(Composer $composer): void
+    {
+        $this->normalizeHostingProviderConfig();
+
+        $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
+
+        if (isset($this->extra['drainpipe']['acquia'])) {
+            $this->installAcquiaSupport($scaffoldPath);
+        }
+
+        if ($this->hasAnyPantheonCIConfig()) {
+            $this->installPantheonSupport($scaffoldPath, $composer);
+        }
+    }
+
+    /**
+     * Install Acquia hosting provider support files.
+     *
+     * Copies CI-agnostic Acquia scaffold files into the project.
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
+     */
+    private function installAcquiaSupport(string $scaffoldPath): void
     {
         $fs = new Filesystem();
-        $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
-        if (isset($this->extra['drainpipe']['acquia'])) {
-            if (!file_exists('.drainpipeignore')) {
-                $fs->copy("$scaffoldPath/acquia/.drainpipeignore", '.drainpipeignore');
+        if (!file_exists('.drainpipeignore')) {
+            $fs->copy("$scaffoldPath/acquia/.drainpipeignore", '.drainpipeignore');
+        }
+        if (!empty($this->extra['drainpipe']['acquia']['settings'])) {
+            // settings.acquia.php
+            if (!file_exists('./web/sites/default/settings.acquia.php')) {
+                $fs->copy("$scaffoldPath/acquia/settings.acquia.php", './web/sites/default/settings.acquia.php');
             }
-            if (!empty($this->extra['drainpipe']['acquia']['settings'])) {
-                // settings.acquia.php
-                if (!file_exists('./web/sites/default/settings.acquia.php')) {
-                    $fs->copy("$scaffoldPath/acquia/settings.acquia.php", './web/sites/default/settings.acquia.php');
-                }
-                if (file_exists('./web/sites/default/settings.php')) {
-                    $settings = file_get_contents('./web/sites/default/settings.php');
-                    if (strpos($settings, 'settings.acquia.php') === false) {
-                        $include = <<<'EOT'
+            if (file_exists('./web/sites/default/settings.php')) {
+                $settings = file_get_contents('./web/sites/default/settings.php');
+                if (strpos($settings, 'settings.acquia.php') === false) {
+                    $include = <<<'EOT'
 include __DIR__ . "/settings.acquia.php";
 EOT;
-                        file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
-                    }
+                    file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
                 }
             }
         }
+    }
+
+    /**
+     * Install Pantheon hosting provider support files (CI-agnostic).
+     *
+     * Copies files required for Pantheon deployments regardless of which CI
+     * system the project uses.
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
+     * @param Composer $composer The Composer instance.
+     */
+    private function installPantheonSupport(string $scaffoldPath, Composer $composer): void
+    {
+        $fs = new Filesystem();
+
+        // .drainpipeignore
+        if (!file_exists('.drainpipeignore')) {
+            $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
+        }
+        else {
+            $contents = file_get_contents('./.drainpipeignore');
+            if (strpos($contents, '/web/sites/default/files') === false) {
+                $this->io->warning(
+                    sprintf(
+                        '.gitignore does not contain drainpipe ignores. Compare .drainpipeignore in the root of your repository with %s and update as needed.',
+                        "$scaffoldPath/pantheon/.drainpipeignore"
+                    )
+                );
+            }
+        }
+
+        // pantheon.yml
+        if (!file_exists('./pantheon.yml')) {
+            $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
+        }
+
+        $this->checkPantheonSystemDrupalIntegrations($composer);
     }
 
     /**
@@ -463,7 +627,39 @@ EOT;
             }
         }
 
-        foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
+        foreach ($this->extra['drainpipe']['gitlab'] as $key => $value) {
+            // Handle the pantheon provider sub-key.
+            if ($key === 'pantheon' && is_array($value)) {
+                if (in_array('Deploy', $value)) {
+                    $file = "gitlab/Pantheon.gitlab-ci.yml";
+                    if (file_exists("$scaffoldPath/$file")) {
+                        $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
+                        $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
+                    }
+                    else {
+                        $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
+                    }
+                }
+                if (in_array('ReviewApps', $value)) {
+                    $file = "gitlab/PantheonReviewApps.gitlab-ci.yml";
+                    if (file_exists("$scaffoldPath/$file")) {
+                        $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
+                        $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
+                    }
+                    else {
+                        $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
+                    }
+                }
+                continue;
+            }
+
+            // Handle non-provider feature values (ComposerLockDiff, etc.).
+            // Accept both string values (from flat-array normalization) and boolean true
+            // (from the new object form e.g. "ComposerLockDiff": true).
+            if (!is_string($value) && $value !== true) {
+                continue;
+            }
+            $gitlab = is_string($value) ? $value : $key;
             $file = "gitlab/$gitlab.gitlab-ci.yml";
             if (file_exists("$scaffoldPath/$file")) {
                 $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
@@ -472,32 +668,8 @@ EOT;
             else {
                 $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
             }
-
-            if ($gitlab === 'Pantheon') {
-                // @TODO this isn't really specific to GitLab
-                // .drainpipeignore
-                if (!file_exists('.drainpipeignore')) {
-                    $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
-                }
-                else {
-                    $contents = file_get_contents('./.drainpipeignore');
-                    if (strpos($contents, '/web/sites/default/files') === false) {
-                        $this->io->warning(
-                            sprintf(
-                                '.gitignore does not contain drainpipe ignores. Compare .drainpipeignore in the root of your repository with %s and update as needed.',
-                                "$scaffoldPath/pantheon/.drainpipeignore"
-                            )
-                        );
-                    }
-                }
-                // pantheon.yml
-                if (!file_exists('./pantheon.yml')) {
-                    $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
-                }
-
-                $this->checkPantheonSystemDrupalIntegrations($composer);
-            }
         }
+
         if (!file_exists('./.gitlab-ci.yml')) {
             $fs->copy("$scaffoldPath/gitlab/gitlab-ci.example.yml", './.gitlab-ci.yml');
         }
@@ -514,6 +686,11 @@ EOT;
      *   No return value.
      */
     private function checkPantheonSystemDrupalIntegrations(Composer $composer): void {
+        if ($this->pantheonIntegrationsChecked) {
+            return;
+        }
+        $this->pantheonIntegrationsChecked = true;
+
         $repositoryManager = $composer->getRepositoryManager();
         $localRepository = $repositoryManager->getLocalRepository();
         $package = $localRepository->findPackage('pantheon-systems/drupal-integrations', '*');
@@ -543,9 +720,10 @@ EOT;
     }
 
     /**
-     * Install GitLab CI configuration if defined in composer.json
+     * Install GitHub Actions configuration if defined in composer.json
      *
      * @param string $scaffoldPath The path to the scaffold files to copy from.
+     * @param Composer $composer The Composer instance.
      */
     private function installGitHubActions(string $scaffoldPath, Composer $composer): void {
         $fs = new Filesystem();
@@ -563,25 +741,20 @@ EOT;
         $fs->ensureDirectoryExists('./.github/workflows');
         $fs->copy("$scaffoldPath/github/workflows/TestRenovate.yml", './.github/workflows/TestRenovate.yml');
 
-        // Install configurable GitHub workflows
-        foreach ($this->extra['drainpipe']['github'] as $github) {
-            if ($github === 'PantheonReviewApps') {
-                $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
-                $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
-                if (file_exists('./.ddev/config.yaml')) {
-                    $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
-                }
-                else {
-                    $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
-                }
-                $this->checkPantheonSystemDrupalIntegrations($composer);
+        // Install configurable GitHub workflows — non-provider string values.
+        foreach ($this->extra['drainpipe']['github'] as $key => $value) {
+            // Skip provider sub-arrays (arrays); they are handled explicitly below.
+            // Accept both string values (from flat-array normalization) and boolean true
+            // (from the new object form e.g. "TestStatic": true).
+            if (is_array($value)) {
+                continue;
             }
-            else if ($github === 'acquia') {
-                $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
-                $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
-                $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
+            if (!is_string($value) && $value !== true) {
+                continue;
             }
-            else if ($github === 'ComposerLockDiff') {
+
+            $github = is_string($value) ? $value : $key;
+            if ($github === 'ComposerLockDiff') {
                 $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
             }
             else if ($github === 'LockfileDiff') {
@@ -598,8 +771,33 @@ EOT;
             }
         }
 
-        if (isset($this->extra['drainpipe']['acquia'])) {
-            // TODO: Add Acquia related GitHub Actions.
+        // Handle Pantheon GitHub Actions.
+        $pantheonOptions = $this->extra['drainpipe']['github']['pantheon'] ?? [];
+        if (!empty($pantheonOptions)) {
+            // Actions are needed for both "Actions" and "ReviewApps".
+            if (in_array('Actions', $pantheonOptions) || in_array('ReviewApps', $pantheonOptions)) {
+                $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
+                $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
+            }
+            if (in_array('ReviewApps', $pantheonOptions)) {
+                if (file_exists('./.ddev/config.yaml')) {
+                    $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
+                }
+                else {
+                    $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
+                }
+            }
+            $this->checkPantheonSystemDrupalIntegrations($composer);
+        }
+
+        // Handle Acquia GitHub Actions.
+        $acquiaOptions = $this->extra['drainpipe']['github']['acquia'] ?? [];
+        if (!empty($acquiaOptions)) {
+            if (in_array('Deploy', $acquiaOptions)) {
+                $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
+                $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
+                $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
+            }
         }
     }
 }
