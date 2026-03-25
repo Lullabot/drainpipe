@@ -3,8 +3,8 @@ const { fileURLToPath } = require('url');
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers')
 const { src, dest, task, watch, series } = require('gulp');
-const sass = require('gulp-sass')(require('sass'));
 const dartSass = require('sass');
+const gulpSass = require('gulp-sass')(dartSass);
 const sassGlob = require('gulp-sass-glob');
 const postcss = require('gulp-postcss');
 const sourcemaps = require('gulp-sourcemaps');
@@ -46,10 +46,10 @@ task('sass', function() {
   return src(Object.keys(srcs))
     .pipe(sourcemaps.init())
     .pipe(sassGlob())
-    .pipe(sass.sync({
+    .pipe(gulpSass.sync({
       style: 'compressed',
       loadPaths: [modernNormalizePath],
-    }).on('error', sass.logError))
+    }).on('error', gulpSass.logError))
     .pipe(postcss([
       autoprefixer(),
       cssnano(),
@@ -66,11 +66,11 @@ task('sass', function() {
 task('development', function() {
   return src(Object.keys(srcs))
     .pipe(sourcemaps.init())
-    .pipe(sassGlob())
-    .pipe(sass.sync({
+    .pipe(sassGlob.sync())
+    .pipe(gulpSass({
       style: 'expanded',
       loadPaths: [modernNormalizePath],
-    }).on('error', sass.logError))
+    }).on('error', gulpSass.logError))
     .pipe(postcss([
       autoprefixer(),
     ]))
