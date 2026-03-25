@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Lullabot\Drainpipe\Tests\Unit;
 
+use Composer\IO\NullIO;
 use Lullabot\Drainpipe\TugboatConfigPlugin;
 use PHPUnit\Framework\TestCase;
 
-class ScaffoldInstallerPluginTest extends TestCase
+class TugboatConfigPluginTest extends TestCase
 {
     private function extractVersionFromImage(string $image): string
     {
         $plugin = new TugboatConfigPlugin();
+        $ioProperty = new \ReflectionProperty(TugboatConfigPlugin::class, 'io');
+        $ioProperty->setAccessible(true);
+        $ioProperty->setValue($plugin, new NullIO());
         $method = new \ReflectionMethod(TugboatConfigPlugin::class, 'extractVersionFromImage');
         $method->setAccessible(true);
         return $method->invoke($plugin, $image);
@@ -44,5 +48,12 @@ class ScaffoldInstallerPluginTest extends TestCase
             ['${SOLR_BASE_IMAGE:-solr:9}-${DDEV_SITENAME}-built', '9'],
             ['${SOLR_BASE_IMAGE:-solr:latest}-${DDEV_SITENAME}-built', 'latest'],
         ];
+    }
+
+    public function testExtractImageVersionFallsBackToLatest(): void
+    {
+        // Images with no recognizable tag pattern fall back to 'latest'
+        $version = $this->extractVersionFromImage('invalidimage');
+        $this->assertSame('latest', $version);
     }
 }
