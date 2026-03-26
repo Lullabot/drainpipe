@@ -121,19 +121,18 @@ This preset provides safe automation with flexibility and control for teams main
 
 ## Database Updates
 
-The `drupal:update` command follows the same procedure as the
-['drush deploy'](https://www.drush.org/12.x/deploycommand/) command, with the
-exception that it runs the configuration import twice as in some cases the
-import can fail due to memory exhaustion before completion.
+The `drupal:update` command runs [`drush deploy`](https://www.drush.org/12.x/deploycommand/)
+directly, per the [Lullabot ADR on Drupal build steps](https://architecture.lullabot.com/adr/20260313-drupal-build-steps/).
 
 ```
-drush updatedb --no-cache-clear
-drush cache:rebuild
-drush config:import || true
-drush config:import
-drush deploy:hook
-drush cache:rebuild
+drush deploy
 ```
+
+Sites that need to customize the deploy steps (e.g. running `config:import`
+twice, or running `drush cron` after deploy) should replace the `drush deploy`
+command using a site-level Drush command file. See the
+[ADR](https://architecture.lullabot.com/adr/20260313-drupal-build-steps/) for a
+full example.
 
 ## .env support
 
