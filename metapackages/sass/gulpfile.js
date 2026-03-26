@@ -46,7 +46,7 @@ task('sass', function() {
   return src(Object.keys(srcs))
     .pipe(sourcemaps.init())
     .pipe(sassGlob())
-    .pipe(gulpSass.sync({
+    .pipe(gulpSass({
       style: 'compressed',
       loadPaths: [modernNormalizePath],
     }).on('error', gulpSass.logError))
@@ -66,7 +66,7 @@ task('sass', function() {
 task('development', function() {
   return src(Object.keys(srcs))
     .pipe(sourcemaps.init())
-    .pipe(sassGlob.sync())
+    .pipe(sassGlob())
     .pipe(gulpSass({
       style: 'expanded',
       loadPaths: [modernNormalizePath],
