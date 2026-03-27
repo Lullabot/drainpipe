@@ -1,0 +1,49 @@
+# .gitleaks.toml — Drainpipe Drupal project gitleaks configuration
+#
+# Extends the upstream gitleaks default ruleset with allowlists for
+# patterns common in Drupal projects that are not real secrets.
+#
+# Docs: https://github.com/gitleaks/gitleaks/tree/master#configuration
+# To add a new allowlist: append an [[allowlists]] block with either
+#   regexes = ["..."]  — Go regex matched against the secret value
+#   paths   = ["..."]  — Go regex matched against the file path
+#   commits = ["..."]  — exact commit SHAs to ignore
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Allow GitHub Actions secrets template expressions (not real values)"
+regexes = [
+  '''\$\{\{[^}]*secrets\.[^}]*\}\}''',
+]
+
+[[allowlists]]
+description = "Allow common placeholder and example values"
+regexes = [
+  '''(?i)example''',
+  '''(?i)replace[-_.]?me''',
+  '''(?i)your[-_.]?key[-_.]?here''',
+  '''(?i)changeme''',
+  '''(?i)placeholder''',
+  '''(?i)x{8,}''',
+  '''(?i)no-reply@''',
+]
+
+[[allowlists]]
+description = "Allow vendor and Drupal contributed code (third-party, not maintainable by this project)"
+paths = [
+  '''vendor/''',
+  '''web/core/''',
+  '''web/modules/contrib/''',
+  '''web/themes/contrib/''',
+  '''\.yarn/releases/''',
+]
+
+[[allowlists]]
+description = "Allow test fixtures and example files"
+paths = [
+  '''tests/fixtures/''',
+  '''\.example$''',
+  '''\.example\.''',
+]
