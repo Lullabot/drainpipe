@@ -595,6 +595,50 @@ to be enabled for your repository. If it is not enabled, the `ZizmorAnalysis`
 job will fail with: _"Code Security must be enabled for this repository to use
 code scanning."_
 
+The Security workflow also includes a [Gitleaks](https://github.com/gitleaks/gitleaks)
+job (`Gitleaks`) that scans every PR and push to the default branch for accidentally
+committed secrets — API keys, tokens, credentials, and similar sensitive values.
+Findings are uploaded to GitHub's code scanning dashboard under the **Gitleaks**
+category.
+
+**Suppressing false positives**: Create a `.gitleaks.toml` file at the project
+root to allowlist patterns that are not real secrets. Use `[extend]` with
+`useDefault = true` to inherit all default rules and layer your allowlists on top:
+
+```toml
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Allow example values in documentation"
+regexes = [
+  '''(?i)example''',
+  '''(?i)replace[-_.]?me''',
+]
+
+[[allowlists]]
+description = "Allow test fixtures"
+paths = [
+  '''tests/fixtures/''',
+]
+```
+
+**Recommended: one-time full history scan**: When first adopting Gitleaks, run a
+scan of your full git history to check for secrets that may already be committed:
+
+```sh
+# Ensure you have a full clone (not shallow)
+git fetch --unshallow
+
+# Scan full history and save results to a JSON report
+gitleaks detect --source . --report-format json --report-path gitleaks-history.json
+```
+
+Review `gitleaks-history.json` and for each finding: rotate any credentials that
+are still valid; for false positives, add the pattern to `.gitleaks.toml`. Note
+that rewriting git history to remove secrets is disruptive — rotating the
+credential is the most effective remediation.
+
 ### NPM & Yarn Lockfile Diff
 
 Post a sticky comment in the Pull Request with a markdown table of any changes
