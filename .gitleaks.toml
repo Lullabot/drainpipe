@@ -31,9 +31,10 @@ regexes = [
 ]
 
 [[allowlists]]
-description = "Allow vendor directory (third-party code)"
+description = "Allow vendor and bundled third-party code"
 paths = [
   '''vendor/''',
+  '''\.yarn/releases/''',
 ]
 
 [[allowlists]]

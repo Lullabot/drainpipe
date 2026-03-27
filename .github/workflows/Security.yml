@@ -47,6 +47,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -78,6 +79,35 @@ jobs:
         with:
           sarif_file: results.sarif
           category: gitleaks
+
+      - name: Generate PR comment
+        if: steps.gitleaks.outcome == 'failure' && github.event_name == 'pull_request'
+        run: |
+          {
+            echo "## :warning: Gitleaks: potential secrets detected"
+            echo ""
+            echo "The following potential secrets were detected. Please review and rotate any valid credentials."
+            echo ""
+            echo "| Rule | File |"
+            echo "|------|------|"
+            jq -r '.runs[0].results[] | "| " + .ruleId + " | `" + .locations[0].physicalLocation.artifactLocation.uri + "` |"' results.sarif
+            echo ""
+            echo "See the [Security tab]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/security/code-scanning) for full details."
+          } > gitleaks-comment.md
+
+      - name: Post PR comment
+        if: steps.gitleaks.outcome == 'failure' && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        with:
+          header: gitleaks
+          path: gitleaks-comment.md
+
+      - name: Delete PR comment if clean
+        if: steps.gitleaks.outcome == 'success' && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        with:
+          header: gitleaks
+          delete: true
 
       - name: Fail on findings
         if: steps.gitleaks.outcome == 'failure'
