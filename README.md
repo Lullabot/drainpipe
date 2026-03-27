@@ -601,12 +601,6 @@ committed secrets — API keys, tokens, credentials, and similar sensitive value
 Findings are uploaded to GitHub's code scanning dashboard under the **Gitleaks**
 category.
 
-**Private repositories**: `gitleaks/gitleaks-action` requires a paid license for
-private repositories. Add a repository or organization secret named
-`GITLEAKS_LICENSE` containing your license key. Without it, the scan is silently
-skipped. See [gitleaks.io/products.html](https://gitleaks.io/products.html) for
-licensing.
-
 **Suppressing false positives**: Create a `.gitleaks.toml` file at the project
 root to allowlist patterns that are not real secrets. Use `[extend]` with
 `useDefault = true` to inherit all default rules and layer your allowlists on top:
