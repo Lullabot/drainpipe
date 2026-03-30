@@ -102,6 +102,18 @@ jobs:
           ddev task test:static YAML_DIRS="custom-yaml-directory/*.yml" | tee static.log
           [[ $(grep '\[OK] All 1 YAML files contain valid syntax.' static.log | wc -l) -eq 1 ]]
 
+      - name: Confirm Twig CS Fixer catches violations and autofix works
+        run: |
+          set -x
+          mkdir -p web/themes/custom/test_theme/templates
+          printf '{{foo}}\n' > web/themes/custom/test_theme/templates/test.html.twig
+          # Should fail - spacing violation inside delimiters
+          ! ddev task test:lint TWIG_DIRS="web/themes/custom/test_theme/templates"
+          # Fix automatically
+          ddev task test:autofix TWIG_DIRS="web/themes/custom/test_theme/templates"
+          # Should pass now
+          ddev task test:lint TWIG_DIRS="web/themes/custom/test_theme/templates"
+
       - name: Upload test artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
