@@ -42,6 +42,10 @@ jobs:
           key: ${{ runner.os }}-composer-${{ matrix.composer-flags }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - run: composer install ${{ matrix.composer-flags }}
+      - run: composer install
+        if: ${{ !matrix.composer-flags }}
+
+      - run: composer update ${{ matrix.composer-flags }}
+        if: ${{ matrix.composer-flags }}
 
       - run: ./vendor/bin/phpunit
