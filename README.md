@@ -242,10 +242,26 @@ All the below static code analysis tests can be run with `task test:static`
 |-----------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Security  | task test:security       | Runs security checks for composer packages against the [FriendsOfPHP Security Advisory Database](https://github.com/FriendsOfPHP/security-advisories) and Drupal core and contributed modules against [Drupal's Security Advisories](https://www.drupal.org/security). |
 | Lint      | task test:lint           | - YAML lint on `.yml` files in the `web` directory<br />- Twig lint on files in `web/modules`, `web/profiles`, and `web/themes`<br />- `composer validate`<br />These cannot currently be customised. See [#9](https://github.com/Lullabot/drainpipe-dev/issues/9).    |
-| PHPStan   | task test:phpstan        | Runs [PHPStan](https://phpstan.org/) with [mglaman/phpstan-drupal](https://github.com/mglaman/phpstan-drupal) on`web/modules/custom`, `web/themes/custom`, and `web/sites`.                                                                                            |
+| PHPStan   | task test:phpstan        | Runs [PHPStan](https://phpstan.org/) with [mglaman/phpstan-drupal](https://github.com/mglaman/phpstan-drupal) on `web/modules/custom`, `web/themes/custom`, and `web/sites` at level 6.                                                                                 |
 | PHPUnit   | task test:phpunit:static | Runs Unit tests in `web/modules/custom/**/tests/src/Unit` and `test/phpunit/**/Unit`                                                                                                                                                                                   |
 | PHPCS     | task test:phpcs          | Runs PHPCS with Drupal coding standards provided by [Coder module](https://www.drupal.org/project/coder                                                                                                                                                                |
 
+
+#### PHPStan Baseline for Existing Codebases
+
+Projects with pre-existing violations can generate a baseline file to suppress
+them, so CI only fails on new code:
+
+```
+task test:phpstan:generate-baseline
+git add phpstan.neon phpstan-baseline.neon
+git commit -m "Add PHPStan level 6 baseline"
+```
+
+This creates `phpstan-baseline.neon` (the suppressed violations) and
+`phpstan.neon` (which includes both `phpstan.neon.dist` and the baseline).
+Commit both files. The baseline can be regenerated at any time as legacy
+violations are resolved.
 
 #### Altering PHP_CodeSniffer Configuration
 
@@ -595,6 +611,50 @@ to be enabled for your repository. If it is not enabled, the `ZizmorAnalysis`
 job will fail with: _"Code Security must be enabled for this repository to use
 code scanning."_
 
+The Security workflow also includes a [Gitleaks](https://github.com/gitleaks/gitleaks)
+job (`Gitleaks`) that scans every PR and push to the default branch for accidentally
+committed secrets — API keys, tokens, credentials, and similar sensitive values.
+Findings are uploaded to GitHub's code scanning dashboard under the **Gitleaks**
+category.
+
+**Suppressing false positives**: Create a `.gitleaks.toml` file at the project
+root to allowlist patterns that are not real secrets. Use `[extend]` with
+`useDefault = true` to inherit all default rules and layer your allowlists on top:
+
+```toml
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Allow example values in documentation"
+regexes = [
+  '''(?i)example''',
+  '''(?i)replace[-_.]?me''',
+]
+
+[[allowlists]]
+description = "Allow test fixtures"
+paths = [
+  '''tests/fixtures/''',
+]
+```
+
+**Recommended: one-time full history scan**: When first adopting Gitleaks, run a
+scan of your full git history to check for secrets that may already be committed:
+
+```sh
+# Ensure you have a full clone (not shallow)
+git fetch --unshallow
+
+# Scan full history and save results to a JSON report
+gitleaks detect --source . --report-format json --report-path gitleaks-history.json
+```
+
+Review `gitleaks-history.json` and for each finding: rotate any credentials that
+are still valid; for false positives, add the pattern to `.gitleaks.toml`. Note
+that rewriting git history to remove secrets is disruptive — rotating the
+credential is the most effective remediation.
+
 ### NPM & Yarn Lockfile Diff
 
 Post a sticky comment in the Pull Request with a markdown table of any changes
@@ -636,17 +696,24 @@ To enable deployment of Pantheon Review Apps:
   }
   ```
 - Run `composer install` to install the workflow to `.github/workflows`
+- [Create a `build multidev` label](https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/managing-labels#creating-a-label)
+  in your GitHub repository. The workflow triggers when this label is added to a pull request,
+  and re-runs on subsequent commits while the label is present.
+  - If you want the multidev build to run on **every** pull request automatically, add the
+    `build multidev` label to your [pull request template](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository).
 - Add the following [variables to your GitHub repository](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository):
     - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
     - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
     - `TERMINUS_TIMEOUT_LIMIT` (optional) Number of seconds that terminus will wait until timeout. Defaults to 600
     - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
+    - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to 'true' to skip wiping the multidev environment on each push, preserving its database state. Defaults to 'false'
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`
-    - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth local
+    - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
+    - `PANTHEON_REVIEW_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
 
 ### Acquia
 
@@ -766,30 +833,31 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 
 ### Pantheon
 
-```json
-"extra": {
-    "drainpipe": {
-        "gitlab": ["Pantheon", "Pantheon Review Apps"]
-    }
-}
-```
+To enable deployment of Pantheon Review Apps:
 
-- Add the following the composer.json to enable deployment of Pantheon Review Apps
+- Add the following to `composer.json`
   ```json
   "extra": {
       "drainpipe": {
-          "github": ["PantheonReviewApps"]
+          "gitlab": ["Pantheon", "PantheonReviewApps"]
       }
   }
   ```
-- Run `composer install`
-- Add your Pantheon `site-name` to the last job in the new
-  workflow file at `.github/workflows/PantheonReviewApps.yml`
+- Run `composer install` to install the CI files to `.drainpipe/gitlab/`. If no `.gitlab-ci.yml`
+  exists, an example one will be created for you.
 - Add the following [variables to your GitLab repository](https://docs.gitlab.com/ee/ci/variables/#for-a-project):
+  - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
+  - `PANTHEON_SITE_ID` The Pantheon site UUID, used to construct the SSH remote URL
+  - `PANTHEON_GIT_REMOTE` The Pantheon git remote URL e.g. `ssh://codeserver.dev.$PANTHEON_SITE_ID@codeserver.dev.$PANTHEON_SITE_ID.drush.in:2222/~/repository.git`
   - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
-  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`  (enable the _Mask variable_ checkbox)
-  - `TERMINUS_PLUGINS` Comma-separated list of Terminus plugins to be available (optional)
+  - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in` (enable the _Mask variable_ checkbox)
+  - `GIT_EMAIL` Email address to use for git commits
+  - `GIT_USERNAME` Username to use for git commits
+  - `GITLAB_ACCESS_TOKEN` A GitLab access token with `api` scope, used by the scheduled multidev cleanup job
+  - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
+  - `REVIEW_APP_BASIC_AUTH` (optional) Basic auth credentials prepended to the review app URL e.g. `user:password@`
+  - `PANTHEON_MULTIDEV_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
 [scaffold/gitlab/gitlab-ci.example.yml] for an example. You can also just
@@ -989,6 +1057,43 @@ Additionally, Pantheon integration can be added:
         }
     }
 }
+```
+
+This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `PANTHEON_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
+
+```
+  sync:tugboat:
+    desc: "Fetches a database from Pantheon and imports it in Tugboat"
+    vars:
+      DB_DIR: /var/lib/tugboat/files/db
+    cmds:
+      - task: pantheon:fetch-db
+      - task: drupal:import-db
+```
+
+Similarly, Acquia integration can be added:
+```json
+{
+    "extra": {
+        "drainpipe": {
+            "tugboat": {
+                "acquia": true
+            }
+        }
+    }
+}
+```
+
+This will install [Acquia CLI (acli)](https://docs.acquia.com/acquia-cloud-platform/add-ons/acquia-cli/start) in the Tugboat environment. Add `ACQUIA_API_KEY` and `ACQUIA_API_SECRET` as [Tugboat environment variables](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `ACQUIA_ENVIRONMENT_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task:
+
+```
+  sync:tugboat:
+    desc: "Fetches a database from Acquia and imports it in Tugboat"
+    vars:
+      DB_DIR: /var/lib/tugboat/files/db
+    cmds:
+      - task: acquia:fetch-db
+      - task: drupal:import-db
 ```
 
 When using MySQL as the database engine in DDEV, Tugboat can be configured to

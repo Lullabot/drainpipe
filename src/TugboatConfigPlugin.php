@@ -151,9 +151,12 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         $isPantheon = isset($this->extra['drainpipe']['tugboat']['pantheon']) &&
                       $this->extra['drainpipe']['tugboat']['pantheon'];
 
+        // Check for Acquia integration
+        $isAcquia = isset($this->extra['drainpipe']['tugboat']['acquia']) &&
+                    $this->extra['drainpipe']['tugboat']['acquia'];
 
         // Generate Tugboat config.yml
-        $this->generateConfigYml($services, $isPantheon);
+        $this->generateConfigYml($services, $isPantheon, $isAcquia);
 
         // Generate settings.tugboat.php
         $this->generateSettingsFile($services);
@@ -288,15 +291,18 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
      * - tugboatqa/redis:7
      * - ${VAR:-redis:7}
      * - redis:${TAG:-7}
+     * - ${VAR:-solr:9.4}-${DDEV_SITENAME}-built
      *
      * @param string $image The Docker image string
      * @return string The extracted version
      */
     private function extractVersionFromImage(string $image): string
     {
-        // Handle environment variable syntax with fallback
+        // Handle environment variable syntax with fallback.
         // Example: ${REDIS_DOCKER_IMAGE:-redis:7}
-        if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
+        // Also handles DDEV-generated built-image patterns with a suffix after
+        // the closing brace, e.g. ${SOLR_BASE_IMAGE:-solr:9.4}-${DDEV_SITENAME}-built
+        if (preg_match('/^\$\{[^:}]+:-([^}]+)\}/', $image, $matches)) {
             $image = $matches[1];
         }
         // Example: redis:${REDIS_TAG:-7-alpine}
@@ -531,8 +537,9 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
      *
      * @param array $services The services configuration
      * @param bool $isPantheon Whether Pantheon integration is enabled
+     * @param bool $isAcquia Whether Acquia integration is enabled
      */
-    private function generateConfigYml(array $services, bool $isPantheon): void
+    private function generateConfigYml(array $services, bool $isPantheon, bool $isAcquia): void
     {
         $fs = new Filesystem();
         $fs->ensureDirectoryExists('./.tugboat');
@@ -544,6 +551,7 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         $templateVars = [
             'services' => $services,
             'pantheon' => $isPantheon,
+            'acquia' => $isAcquia,
         ];
 
         // Generate config.yml

@@ -98,7 +98,7 @@ tasks:
           exit 1
         fi
   phpstan:
-    dec: Runs PHPStan with mglaman/phpstan-drupal
+    desc: Runs PHPStan with mglaman/phpstan-drupal
     cmds:
       - |
         {{ .FUNC_ENSURE_DIRS }}
@@ -108,6 +108,21 @@ tasks:
           ./vendor/bin/phpstan analyse --error-format=junit {{.TEST_DIRS}} > test_result/phpstan.xml
         else
           ./vendor/bin/phpstan analyse {{.TEST_DIRS}}
+        fi
+  phpstan:generate-baseline:
+    desc: Generates a PHPStan baseline file to suppress existing violations, allowing CI to enforce level 6 on new code only
+    cmds:
+      - |
+        {{ .FUNC_ENSURE_DIRS }}
+      - ./vendor/bin/phpstan analyse --generate-baseline phpstan-baseline.neon {{.TEST_DIRS}}
+      - |
+        if [ ! -f "phpstan.neon" ]; then
+          printf 'includes:\n    - phpstan.neon.dist\n    - phpstan-baseline.neon\n' > phpstan.neon
+          echo "Created phpstan.neon including phpstan-baseline.neon"
+          echo "Commit both phpstan.neon and phpstan-baseline.neon to your repository."
+        else
+          echo "phpstan.neon already exists."
+          echo "Add '- phpstan-baseline.neon' to the includes section of phpstan.neon, then commit both files."
         fi
   phpunit:
     desc: Runs PHPUnit

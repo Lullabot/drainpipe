@@ -18,12 +18,15 @@ jobs:
     strategy:
       matrix:
         php-version: [ 8.2, 8.3, 8.4, 8.5 ]
+        include:
+          - php-version: 8.2
+            composer-flags: --prefer-lowest --prefer-stable
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
-      - uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # 2.36.0
+      - uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
         with:
           php-version: ${{ matrix.php-version }}
           tools: composer:v2
@@ -33,12 +36,16 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Cache dependencies
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ matrix.composer-flags }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
       - run: composer install
+        if: ${{ !matrix.composer-flags }}
+
+      - run: composer update ${{ matrix.composer-flags }}
+        if: ${{ matrix.composer-flags }}
 
       - run: ./vendor/bin/phpunit
