@@ -64,12 +64,12 @@ jobs:
       - name: Run Gitleaks
         id: gitleaks
         run: |
-          gitleaks detect \
-            --source . \
+          gitleaks git \
             --config .gitleaks.toml \
             --report-format sarif \
             --report-path results.sarif \
-            --exit-code 1
+            --exit-code 1 \
+            .
         continue-on-error: true
 
       - name: Upload SARIF
