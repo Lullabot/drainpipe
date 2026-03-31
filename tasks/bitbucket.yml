@@ -6,11 +6,13 @@ tasks:
     cmds:
       - |
         set -euo pipefail
-        curl -OL https://github.com/acquia/cli/releases/latest/download/acli.phar
+        ACLI_VERSION=2.60.0
+        curl -OL "https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar"
         chmod +x acli.phar
         mv acli.phar vendor/bin/acli
         if ! command -v yq &>/dev/null; then
-          curl -sSL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64" \
+          YQ=v4.52.5
+          curl -sSL "https://github.com/mikefarah/yq/releases/download/${YQ}/yq_linux_amd64" \
             -o /usr/local/bin/yq
           chmod +x /usr/local/bin/yq
         fi

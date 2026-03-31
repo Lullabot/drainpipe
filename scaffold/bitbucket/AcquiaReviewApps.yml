@@ -28,7 +28,9 @@ pipelines:
               docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
               docker-php-ext-install -j"$(nproc)" gd
               if ! command -v composer &>/dev/null; then
-                curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+                COMPOSER_VERSION=2.9.5
+                curl -sS "https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer
+                chmod +x /usr/local/bin/composer
               fi
               mkdir -p ~/.ssh && chmod 700 ~/.ssh
               echo "${ACQUIA_SSH_PRIVATE_KEY}" | base64 -d > ~/.ssh/id_rsa
@@ -73,7 +75,9 @@ pipelines:
             - |
               apt-get update -qq && apt-get install -y -qq git curl jq unzip
               if ! command -v composer &>/dev/null; then
-                curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+                COMPOSER_VERSION=2.9.5
+                curl -sS "https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer
+                chmod +x /usr/local/bin/composer
               fi
             # Install packages from Composer
             - COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction --prefer-dist

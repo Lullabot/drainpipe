@@ -89,6 +89,16 @@
       "rangeStrategy": "replace"
     },
     {
+      "matchPackageNames": ["acquia/cli"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
+      "rangeStrategy": "replace"
+    },
+    {
+      "matchPackageNames": ["composer/composer"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
+      "rangeStrategy": "replace"
+    },
+    {
       "matchPackageNames": ["zizmor"],
       "rangeStrategy": "replace"
     },
@@ -132,7 +142,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "scaffold/tugboat/scripts/custom-init-command\\.sh$"
+        "scaffold/tugboat/scripts/custom-init-command\\.sh$",
+        "tasks/bitbucket\\.yml$"
       ],
       "matchStrings": [
         "YQ=v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -140,6 +151,30 @@
       "depNameTemplate": "mikefarah/yq",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "tasks/bitbucket\\.yml$",
+        "scaffold/github/actions/acquia/deploy/action\\.yml$"
+      ],
+      "matchStrings": [
+        "ACLI_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "acquia/cli",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "scaffold/bitbucket/AcquiaDeploy\\.yml$",
+        "scaffold/bitbucket/AcquiaReviewApps\\.yml$"
+      ],
+      "matchStrings": [
+        "COMPOSER_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "composer/composer",
+      "datasourceTemplate": "github-releases"
     },
     {
       "customType": "regex",
