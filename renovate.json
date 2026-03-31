@@ -93,6 +93,11 @@
       "rangeStrategy": "replace"
     },
     {
+      "matchPackageNames": ["gitleaks/gitleaks"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
+      "rangeStrategy": "replace"
+    },
+    {
       "matchPackageNames": ["yarn"],
       "matchFileNames": [
         ".github/workflows/TestMetapackages.yml",
@@ -146,6 +151,18 @@
       ],
       "depNameTemplate": "zizmor",
       "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "\\.github/workflows/Security\\.yml$"
+      ],
+      "matchStrings": [
+        "gitleaks_(?<currentValue>\\d+\\.\\d+\\.\\d+)_linux_x64"
+      ],
+      "depNameTemplate": "gitleaks/gitleaks",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
     },
     {
       "customType": "regex",

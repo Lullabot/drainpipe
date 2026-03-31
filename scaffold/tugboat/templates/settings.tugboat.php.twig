@@ -29,8 +29,8 @@ if (getenv('TUGBOAT_REPO')) {
   ];
 
   // See https://architecture.lullabot.com/adr/20210609-environment-indicator/
-  $config['environment_indicator.indicator']['name'] = '☑️ Tugboat';
-  $config['environment_indicator.indicator']['bg_color'] = '#990055';
+  $config['environment_indicator.indicator']['name'] = 'Tugboat: ' . getenv('TUGBOAT_PREVIEW');
+  $config['environment_indicator.indicator']['bg_color'] = '#20688C';
   $config['environment_indicator.indicator']['fg_color'] = '#ffffff';
 
   // Keep the sites/default directory writable.
