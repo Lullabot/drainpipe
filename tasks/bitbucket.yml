@@ -74,24 +74,6 @@ tasks:
         if [ -z "${EXISTING_ENV}" ]; then
           echo "CDE '${ENV_LABEL}' not found — creating..."
           vendor/bin/acli env:create "${ENV_LABEL}" "${BUILD_BRANCH}" "${ACQUIA_APP_UUID}" --no-interaction
-          echo "Waiting for CDE to provision..."
-          ATTEMPTS=0
-          MAX_ATTEMPTS=12
-          while [ "${ATTEMPTS}" -lt "${MAX_ATTEMPTS}" ]; do
-            STATUS=$(vendor/bin/acli api:applications:environment-list --no-interaction "${ACQUIA_APP_UUID}" \
-              | jq -r --arg label "${ENV_LABEL}" '.[] | select(.label == $label) | .status' || true)
-            echo "  Status: ${STATUS} (attempt $((ATTEMPTS + 1))/${MAX_ATTEMPTS})"
-            if [ "${STATUS}" = "normal" ]; then
-              echo "CDE is ready."
-              break
-            fi
-            ATTEMPTS=$((ATTEMPTS + 1))
-            sleep 10
-          done
-          if [ "${ATTEMPTS}" -eq "${MAX_ATTEMPTS}" ]; then
-            echo "ERROR: CDE did not become ready within the expected time."
-            exit 1
-          fi
           if [ "${ACQUIA_REVIEW_RUN_INSTALLER:-}" != "true" ]; then
             echo "Copying database from '${SOURCE_ENV}' to '${CDE_ALIAS}'..."
             vendor/bin/acli api:environments:database-copy --no-interaction \
