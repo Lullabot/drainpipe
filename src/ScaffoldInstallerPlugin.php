@@ -46,15 +46,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     protected $autoloadDev;
 
     /**
-     * Whether checkPantheonSystemDrupalIntegrations() has already been called.
-     *
-     * Prevents duplicate warnings during a single composer run.
-     *
-     * @var bool
-     */
-    protected $pantheonIntegrationsChecked = false;
-
-    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
@@ -105,7 +96,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installCICommands($event->getComposer());
         $this->configureRenovateIgnore();
         $this->installEnvSupport();
-        if ($this->hasPantheonConfigurationFiles()) {
+        if ($this->hasAnyPantheonCIConfig() || $this->hasPantheonConfigurationFiles()) {
             $this->checkPantheonSystemDrupalIntegrations($event->getComposer());
         }
     }
@@ -125,8 +116,8 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installCICommands($event->getComposer());
         $this->configureRenovateIgnore();
         $this->installEnvSupport();
-        if ($this->hasPantheonConfigurationFiles()) {
-            $this->pantheonSystemDrupalIntegrationsWarning();
+        if ($this->hasAnyPantheonCIConfig() || $this->hasPantheonConfigurationFiles()) {
+            $this->checkPantheonSystemDrupalIntegrations($event->getComposer());
         }
     }
 
@@ -582,8 +573,6 @@ EOT;
         if (!file_exists('./pantheon.yml')) {
             $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
         }
-
-        $this->checkPantheonSystemDrupalIntegrations($composer);
     }
 
     /**
@@ -686,11 +675,6 @@ EOT;
      *   No return value.
      */
     private function checkPantheonSystemDrupalIntegrations(Composer $composer): void {
-        if ($this->pantheonIntegrationsChecked) {
-            return;
-        }
-        $this->pantheonIntegrationsChecked = true;
-
         $repositoryManager = $composer->getRepositoryManager();
         $localRepository = $repositoryManager->getLocalRepository();
         $package = $localRepository->findPackage('pantheon-systems/drupal-integrations', '*');
@@ -787,7 +771,6 @@ EOT;
                     $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                 }
             }
-            $this->checkPantheonSystemDrupalIntegrations($composer);
         }
 
         // Handle Acquia GitHub Actions.
