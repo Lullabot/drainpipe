@@ -31,19 +31,17 @@ regexes = [
 ]
 
 [[allowlists]]
-description = "Allow vendor and Drupal contributed code (third-party, not maintainable by this project)"
+description = "Allow Composer vendor directory and committed Yarn release binaries"
 paths = [
   '''vendor/''',
-  '''web/core/''',
-  '''web/modules/contrib/''',
-  '''web/themes/contrib/''',
   '''\.yarn/releases/''',
 ]
 
 [[allowlists]]
-description = "Allow test fixtures and example files"
+description = "Allow test fixtures, example files, and Drupal custom extension test directories"
 paths = [
   '''tests/fixtures/''',
+  '''web/(?:modules|themes|profiles)/custom/[^/]+/tests/''',
   '''\.example$''',
   '''\.example\.''',
 ]
