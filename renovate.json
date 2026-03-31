@@ -167,8 +167,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "scaffold/bitbucket/AcquiaDeploy\\.yml$",
-        "scaffold/bitbucket/AcquiaReviewApps\\.yml$"
+        "scaffold/bitbucket/setup-php\\.sh$"
       ],
       "matchStrings": [
         "COMPOSER_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"

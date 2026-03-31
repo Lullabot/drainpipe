@@ -678,5 +678,9 @@ EOT;
 
         file_put_contents('./bitbucket-pipelines.yml', Yaml::dump($merged, 10, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
         $this->io->write('🪠 [Drainpipe] bitbucket-pipelines.yml updated');
+
+        $fs->ensureDirectoryExists('./.bitbucket');
+        $fs->copy("$scaffoldPath/bitbucket/setup-php.sh", './.bitbucket/setup-php.sh');
+        $this->io->write('🪠 [Drainpipe] .bitbucket/setup-php.sh updated');
     }
 }
