@@ -291,15 +291,18 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
      * - tugboatqa/redis:7
      * - ${VAR:-redis:7}
      * - redis:${TAG:-7}
+     * - ${VAR:-solr:9.4}-${DDEV_SITENAME}-built
      *
      * @param string $image The Docker image string
      * @return string The extracted version
      */
     private function extractVersionFromImage(string $image): string
     {
-        // Handle environment variable syntax with fallback
+        // Handle environment variable syntax with fallback.
         // Example: ${REDIS_DOCKER_IMAGE:-redis:7}
-        if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
+        // Also handles DDEV-generated built-image patterns with a suffix after
+        // the closing brace, e.g. ${SOLR_BASE_IMAGE:-solr:9.4}-${DDEV_SITENAME}-built
+        if (preg_match('/^\$\{[^:}]+:-([^}]+)\}/', $image, $matches)) {
             $image = $matches[1];
         }
         // Example: redis:${REDIS_TAG:-7-alpine}
