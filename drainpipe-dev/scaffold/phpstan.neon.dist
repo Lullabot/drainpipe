@@ -6,6 +6,5 @@ parameters:
         - *settings.ddev.php
         - *sites/default/settings.php
         - */node_modules/*
-    # PHPStan Level 1
-    level: 1
+    level: 6
 
