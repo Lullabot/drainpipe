@@ -242,10 +242,26 @@ All the below static code analysis tests can be run with `task test:static`
 |-----------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Security  | task test:security       | Runs security checks for composer packages against the [FriendsOfPHP Security Advisory Database](https://github.com/FriendsOfPHP/security-advisories) and Drupal core and contributed modules against [Drupal's Security Advisories](https://www.drupal.org/security). |
 | Lint      | task test:lint           | - YAML lint on `.yml` files in the `web` directory<br />- Twig lint on files in `web/modules`, `web/profiles`, and `web/themes`<br />- `composer validate`<br />These cannot currently be customised. See [#9](https://github.com/Lullabot/drainpipe-dev/issues/9).    |
-| PHPStan   | task test:phpstan        | Runs [PHPStan](https://phpstan.org/) with [mglaman/phpstan-drupal](https://github.com/mglaman/phpstan-drupal) on`web/modules/custom`, `web/themes/custom`, and `web/sites`.                                                                                            |
+| PHPStan   | task test:phpstan        | Runs [PHPStan](https://phpstan.org/) with [mglaman/phpstan-drupal](https://github.com/mglaman/phpstan-drupal) on `web/modules/custom`, `web/themes/custom`, and `web/sites` at level 6.                                                                                 |
 | PHPUnit   | task test:phpunit:static | Runs Unit tests in `web/modules/custom/**/tests/src/Unit` and `test/phpunit/**/Unit`                                                                                                                                                                                   |
 | PHPCS     | task test:phpcs          | Runs PHPCS with Drupal coding standards provided by [Coder module](https://www.drupal.org/project/coder                                                                                                                                                                |
 
+
+#### PHPStan Baseline for Existing Codebases
+
+Projects with pre-existing violations can generate a baseline file to suppress
+them, so CI only fails on new code:
+
+```
+task test:phpstan:generate-baseline
+git add phpstan.neon phpstan-baseline.neon
+git commit -m "Add PHPStan level 6 baseline"
+```
+
+This creates `phpstan-baseline.neon` (the suppressed violations) and
+`phpstan.neon` (which includes both `phpstan.neon.dist` and the baseline).
+Commit both files. The baseline can be regenerated at any time as legacy
+violations are resolved.
 
 #### Altering PHP_CodeSniffer Configuration
 
@@ -669,16 +685,37 @@ in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/com
 
 ### Pantheon
 
-To enable deployment of Pantheon Review Apps:
+To scaffold Pantheon composite actions for use in your own workflows (without a managed review app
+workflow), add `"Actions"`:
 
-- Add the following composer.json
+```json
+"extra": {
+    "drainpipe": {
+        "github": {
+            "pantheon": ["Actions"]
+        }
+    }
+}
+```
+
+This scaffolds `.github/actions/drainpipe/pantheon/` (setup-terminus, push, clone-env, update,
+review) along with `pantheon.yml` and `.drainpipeignore`, without installing any workflow file.
+Use this when you manage your own deployment workflow and want Drainpipe's composite actions as
+building blocks.
+
+To enable deployment of Pantheon Review Apps (Multidev environments per pull request):
+
+- Add the following to `composer.json`:
   ```json
   "extra": {
       "drainpipe": {
-          "github": ["PantheonReviewApps"]
+          "github": {
+              "pantheon": ["ReviewApps"]
+          }
       }
   }
   ```
+  `ReviewApps` implicitly includes `Actions` — you do not need to list both.
 - Run `composer install` to install the workflow to `.github/workflows`
 - [Create a `build multidev` label](https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/managing-labels#creating-a-label)
   in your GitHub repository. The workflow triggers when this label is added to a pull request,
@@ -699,17 +736,28 @@ To enable deployment of Pantheon Review Apps:
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
     - `PANTHEON_REVIEW_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
 
+> **Deprecated:** `"github": ["PantheonReviewApps"]` still works but is deprecated. Migrate to
+> `"github": {"pantheon": ["ReviewApps"]}`. Similarly, `"github": ["Pantheon"]` (previously a
+> no-op) is now a deprecated alias for `"github": {"pantheon": ["Actions"]}`.
+
 ### Acquia
 
-To add Acquia specific GitHub actions, add the following composer.json
+To add Acquia specific GitHub actions, add the following to `composer.json`:
   ```json
   "extra": {
       "drainpipe": {
-          "github": ["acquia"]
+          "github": {
+              "acquia": ["Deploy"]
+          }
       }
   }
   ```
-Then run `composer install`. A Deploy to Acquia workflow at `.github/workflows/AcquiaDeploy.yml` will be added (with its dependant actions).
+Then run `composer install`. A Deploy to Acquia workflow at `.github/workflows/AcquiaDeploy.yml` will be added (with its dependent actions).
+
+> **Deprecated:** `"github": ["acquia"]` still works but is deprecated. Migrate to
+> `"github": {"acquia": ["Deploy"]}`.
+
+After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
 
 After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
 
@@ -817,16 +865,20 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
 
 ### Pantheon
 
-To enable deployment of Pantheon Review Apps:
+To enable deployment of Pantheon Review Apps (Multidev environments per merge request):
 
-- Add the following to `composer.json`
+- Add the following to `composer.json`:
   ```json
   "extra": {
       "drainpipe": {
-          "gitlab": ["Pantheon", "PantheonReviewApps"]
+          "gitlab": {
+              "pantheon": ["Deploy", "ReviewApps"]
+          }
       }
   }
   ```
+  Use `"Deploy"` alone if you only want the Terminus setup helpers without the full review app
+  pipeline. Use both `"Deploy"` and `"ReviewApps"` for full Multidev support.
 - Run `composer install` to install the CI files to `.drainpipe/gitlab/`. If no `.gitlab-ci.yml`
   exists, an example one will be created for you.
 - Add the following [variables to your GitLab repository](https://docs.gitlab.com/ee/ci/variables/#for-a-project):
@@ -845,9 +897,13 @@ To enable deployment of Pantheon Review Apps:
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
 [scaffold/gitlab/gitlab-ci.example.yml] for an example. You can also just
-include which will give you helpers that you can include and reference for tasks
+include `"Deploy"` which will give you helpers that you can include and reference for tasks
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
+
+> **Deprecated:** `"gitlab": ["Pantheon", "PantheonReviewApps"]` still works but is deprecated.
+> Migrate to `"gitlab": {"pantheon": ["Deploy", "ReviewApps"]}`.`"gitlab": ["Pantheon"]` alone
+> maps to `{"pantheon": ["Deploy"]}`.
 
 ## Tugboat
 

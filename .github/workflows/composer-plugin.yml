@@ -18,6 +18,9 @@ jobs:
     strategy:
       matrix:
         php-version: [ 8.2, 8.3, 8.4, 8.5 ]
+        include:
+          - php-version: 8.2
+            composer-flags: --prefer-lowest --prefer-stable
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -36,9 +39,13 @@ jobs:
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ matrix.composer-flags }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
       - run: composer install
+        if: ${{ !matrix.composer-flags }}
+
+      - run: composer update ${{ matrix.composer-flags }}
+        if: ${{ matrix.composer-flags }}
 
       - run: ./vendor/bin/phpunit
