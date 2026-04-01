@@ -23,6 +23,24 @@ tasks:
         mkdir -p ~/.ssh
         echo "StrictHostKeyChecking no" >> ~/.ssh/config
 
+  "acquia:code-switch":
+    desc: "Switch code on an Acquia environment and poll until complete"
+    cmds:
+      - |
+        set -euo pipefail
+        NOTIFICATION_ID=$(vendor/bin/acli --no-interaction api:environments:code-switch "{{.ALIAS}}" "{{.BRANCH}}" \
+          | jq -r '.notification? // (._links.notification.href? | split("/") | last) // empty')
+        while true; do
+          vendor/bin/acli --no-interaction auth:login --key "${ACQUIA_API_KEY}" --secret "${ACQUIA_API_SECRET}"
+          DATA=$(vendor/bin/acli --no-interaction api:notifications:find "$NOTIFICATION_ID")
+          STATUS=$(echo "$DATA" | jq -r '.status')
+          case "$STATUS" in
+            completed) break ;;
+            failed) echo "$DATA" | jq; exit 1 ;;
+            *) sleep 30 ;;
+          esac
+        done
+
   "acquia:build":
     desc: "Run the pre-deploy build hook if defined"
     cmds:
@@ -84,7 +102,7 @@ tasks:
         fi
 
         echo "Switching code on '${CDE_ALIAS}' to branch '${BUILD_BRANCH}'..."
-        vendor/bin/acli api:environments:code-switch --task-wait --no-interaction "${CDE_ALIAS}" "${BUILD_BRANCH}"
+        ./vendor/bin/task bitbucket:acquia:code-switch ALIAS="${CDE_ALIAS}" BRANCH="${BUILD_BRANCH}"
         echo "Code switch complete."
 
   "acquia:update-cde":
@@ -162,7 +180,7 @@ tasks:
           message="${BITBUCKET_COMMIT}"
 
         echo "Switching code on '${ENV_ALIAS}' to branch '${BRANCH}'..."
-        vendor/bin/acli api:environments:code-switch --task-wait --no-interaction "${ENV_ALIAS}" "${BRANCH}"
+        ./vendor/bin/task bitbucket:acquia:code-switch ALIAS="${ENV_ALIAS}" BRANCH="${BRANCH}"
         echo "Code switch complete."
 
   "acquia:update-dev":
