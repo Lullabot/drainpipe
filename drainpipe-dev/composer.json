@@ -20,6 +20,7 @@
         "lullabot/drainpipe": "*",
         "lullabot/twig-cs-fixer-drupal": "^2.1.0",
         "mglaman/phpstan-drupal": "^1||^2",
+        "phpstan/extension-installer": "^1.4",
         "mikey179/vfsstream": "^1.6.12",
         "mockery/mockery": "^1.6.12",
         "phpspec/prophecy-phpunit": "^2",
@@ -50,7 +51,8 @@
         "allow-plugins": {
             "composer/package-versions-deprecated": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "lullabot/drainpipe": true
+            "lullabot/drainpipe": true,
+            "phpstan/extension-installer": true
         }
     }
 }
