@@ -729,7 +729,7 @@ To enable deployment of Pantheon Review Apps (Multidev environments per pull req
     - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
     - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to 'true' to skip wiping the multidev environment on each push, preserving its database state. Defaults to 'false'
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
-    - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
+    - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (`PANTHEON_TERMINUS_TOKEN` is also accepted for backwards compatibility)
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth
@@ -885,7 +885,7 @@ To enable deployment of Pantheon Review Apps (Multidev environments per merge re
   - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
   - `PANTHEON_SITE_ID` The Pantheon site UUID, used to construct the SSH remote URL
   - `PANTHEON_GIT_REMOTE` The Pantheon git remote URL e.g. `ssh://codeserver.dev.$PANTHEON_SITE_ID@codeserver.dev.$PANTHEON_SITE_ID.drush.in:2222/~/repository.git`
-  - `PANTHEON_TERMINUS_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
+  - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox). `PANTHEON_TERMINUS_TOKEN` is also accepted for backwards compatibility.
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
   - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in` (enable the _Mask variable_ checkbox)
   - `GIT_EMAIL` Email address to use for git commits
@@ -945,7 +945,7 @@ Additionally, Pantheon integration can be added:
 }
 ```
 
-This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `PANTHEON_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
+This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `TERMINUS_MACHINE_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) (`PANTHEON_TERMINUS_TOKEN` and `PANTHEON_TOKEN` are also accepted for backwards compatibility), and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
 
 ```
   sync:tugboat:

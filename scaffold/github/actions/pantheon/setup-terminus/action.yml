@@ -1,7 +1,7 @@
 name: 'Prepare Pantheon Environment'
 description: 'Sets up Terminus and authorises with Pantheon'
 inputs:
-  pantheon-token:
+  terminus-token:
     description: "Pantheon Terminus Token"
     required: true
   terminus-plugins:
@@ -11,7 +11,7 @@ runs:
   using: "composite"
   steps:
     - env:
-        INPUT_PANTHEON_TOKEN: ${{ inputs.pantheon-token }}
+        INPUT_TERMINUS_TOKEN: ${{ inputs.terminus-token }}
         INPUT_TERMINUS_PLUGINS: ${{ inputs.terminus-plugins }}
       run: |
         echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >> ~/.ssh/config
@@ -20,5 +20,5 @@ runs:
         chmod +x ~/terminus/terminus
         ln -s ~/terminus/terminus /usr/local/bin/terminus
         echo "$INPUT_TERMINUS_PLUGINS" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
-        terminus auth:login --machine-token="$INPUT_PANTHEON_TOKEN"
+        terminus auth:login --machine-token="$INPUT_TERMINUS_TOKEN"
       shell: bash
