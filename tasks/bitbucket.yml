@@ -37,7 +37,7 @@ tasks:
           case "$STATUS" in
             completed) break ;;
             failed) echo "$DATA" | jq; exit 1 ;;
-            *) sleep 30 ;;
+            *) echo "Code switch status: ${STATUS}. Waiting 30 seconds..."; sleep 30 ;;
           esac
         done
 
