@@ -234,6 +234,3 @@ tasks:
     desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
       - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
-  _nightwatch:vrt-report:
-    cmds:
-      - :
