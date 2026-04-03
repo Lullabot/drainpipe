@@ -3,11 +3,33 @@
   "extends": [
     "config:recommended"
   ],
-  "rangeStrategy": "widen",
+  "rangeStrategy": "replace",
   "ignoreDeps": [
     "drainpipe"
   ],
   "packageRules": [
+    {
+      "description": "Widen ranges for packages that must support both Drupal 10 and 11 simultaneously",
+      "matchPackageNames": [
+        "drush/drush",
+        "/^symfony\\//",
+        "vlucas/phpdotenv",
+        "mglaman/phpstan-drupal",
+        "phpstan/phpstan-deprecation-rules"
+      ],
+      "rangeStrategy": "widen"
+    },
+    {
+      "description": "Widen phpunit range in drainpipe-dev only (supports PHPUnit 9/10/11 for D10/D11)",
+      "matchPackageNames": [
+        "phpunit/phpunit"
+      ],
+      "matchFileNames": [
+        "drainpipe-dev/composer.json"
+      ],
+      "rangeStrategy": "widen",
+      "allowedVersions": "^9 || ^10 || ^11"
+    },
     {
       "matchPackageNames": [
         "drush/drush",
@@ -42,15 +64,6 @@
     },
     {
       "matchPackageNames": [
-        "phpunit/phpunit"
-      ],
-      "matchFileNames": [
-        "drainpipe-dev/composer.json"
-      ],
-      "allowedVersions": "^9 || ^10 || ^11"
-    },
-    {
-      "matchPackageNames": [
         "mglaman/phpstan-drupal",
         "phpstan/phpstan-deprecation-rules"
       ],
@@ -70,42 +83,29 @@
     },
     {
       "matchDatasources": ["node-version"],
-      "rangeStrategy": "replace"
-    },
-    {
-      "matchDatasources": ["node-version"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "enabled": false
     },
     {
       "matchPackageNames": ["go-task/task"],
       "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
-      "rangeStrategy": "replace",
       "groupName": "Taskfile"
     },
     {
       "matchPackageNames": ["mikefarah/yq"],
-      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
-      "rangeStrategy": "replace"
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
     },
     {
       "matchPackageNames": ["acquia/cli"],
-      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
-      "rangeStrategy": "replace"
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
     },
     {
       "matchPackageNames": ["composer/composer"],
-      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
-      "rangeStrategy": "replace"
-    },
-    {
-      "matchPackageNames": ["zizmor"],
-      "rangeStrategy": "replace"
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
     },
     {
       "matchPackageNames": ["gitleaks/gitleaks"],
-      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
-      "rangeStrategy": "replace"
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
     },
     {
       "matchPackageNames": ["yarn"],
@@ -113,16 +113,14 @@
         ".github/workflows/TestMetapackages.yml",
         ".github/workflows/TestFunctional.yml"
       ],
-      "allowedVersions": "^1",
-      "rangeStrategy": "replace"
+      "allowedVersions": "^1"
     },
     {
       "matchPackageNames": ["yarn"],
       "matchFileNames": [
         "package.json"
       ],
-      "allowedVersions": "^4",
-      "rangeStrategy": "replace"
+      "allowedVersions": "^4"
     }
   ],
   "customManagers": [
