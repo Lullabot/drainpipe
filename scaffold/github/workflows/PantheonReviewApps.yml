@@ -52,7 +52,7 @@ jobs:
 
       - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
         with:
-          pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          terminus-token: ${{ secrets.TERMINUS_MACHINE_TOKEN || secrets.PANTHEON_TERMINUS_TOKEN }}
           terminus-plugins: ${{ vars.TERMINUS_PLUGINS || secrets.TERMINUS_PLUGINS }}
 
       - uses: php-actions/composer@8a65f0d3c6a1d17ca4800491a40b5756a4c164f3 # v6.1.2
@@ -69,7 +69,7 @@ jobs:
         uses: ./.github/actions/drainpipe/pantheon/review
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          terminus-token: ${{ secrets.TERMINUS_MACHINE_TOKEN || secrets.PANTHEON_TERMINUS_TOKEN }}
           commit-message: ${{ github.sha }}
           site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
           lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}

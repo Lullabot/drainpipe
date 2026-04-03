@@ -33,7 +33,7 @@ jobs:
 
       - uses: ./scaffold/github/actions/pantheon/setup-terminus
         with:
-          pantheon-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
 
       - name: Get site Git URL and configure SSH host
         id: gitinfo
