@@ -9,6 +9,12 @@
   ],
   "packageRules": [
     {
+      "matchPackageNames": [
+        "phpunit/phpunit"
+      ],
+      "allowedVersions": "^9"
+    },
+    {
       "description": "Widen ranges for packages that must support both Drupal 10 and 11 simultaneously",
       "matchPackageNames": [
         "drush/drush",
@@ -55,12 +61,6 @@
         "drush/drush"
       ],
       "allowedVersions": "^11 || ^12 || ^13"
-    },
-    {
-      "matchPackageNames": [
-        "phpunit/phpunit"
-      ],
-      "allowedVersions": "^9"
     },
     {
       "matchPackageNames": [
