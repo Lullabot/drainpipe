@@ -14,7 +14,6 @@ vars:
   # those directories do not exist, so we create them with the assumption that
   # every Drupal site will eventually have these directories.
   TEST_DIRS: '{{ default (printf "%s/modules/custom %s/themes/custom %s/sites" .WEBROOT .WEBROOT .WEBROOT) .TEST_DIRS }}'
-  NIGHTWATCH_TEST_DIRS: '{{ default "test" .NIGHTWATCH_TEST_DIRS }}'
   FUNC_ENSURE_DIRS: |
     DIRS_ARR=({{.TEST_DIRS}})
     for DIR in "${DIRS_ARR[@]}"; do
@@ -29,7 +28,7 @@ tasks:
       - task: untracked
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
-    deps: [config, phpunit:functional, nightwatch]
+    deps: [config, phpunit:functional]
     cmds:
       - task: untracked
   security:
@@ -317,57 +316,32 @@ tasks:
     desc: "Runs the site installer for the default site"
     cmds:
       - ./vendor/bin/drush --yes site:install --existing-config
-  siteinstall:firefox:
-    desc: "Runs the site installer for the Firefox container"
+  # The following nightwatch:* tasks are deprecated no-ops retained for
+  # backwards compatibility. They will be removed in a future release.
+  nightwatch:check:
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
-      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
-  siteinstall:chrome:
-    desc: "Runs the site installer for the Chrome container"
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
+  nightwatch:setup:
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
-      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
-  siteinstall:all:
-    desc: "Runs the site installer for the default site, Chrome, and Firefox container"
-    deps: [ siteinstall:default, siteinstall:firefox, siteinstall:chrome ]
-    cmds:
-      - echo "Default, Chrome, and Firefox installed"
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
   nightwatch:siteinstall:firefox:
-    desc: "Runs the site installer for the Firefox container"
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
-      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
   nightwatch:siteinstall:chrome:
-    desc: "Runs the site installer for the Chrome container"
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
-      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
   nightwatch:siteinstall:
-    desc: "Runs the site installer for the Firefox and Chrome containers"
-    deps: [nightwatch:siteinstall:firefox, nightwatch:siteinstall:chrome]
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
+    cmds:
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
   nightwatch:
-    desc: Runs Nighwatch functional browser tests
-    deps: [nightwatch:check]
-    env:
-      NIGHTWATCH_ENV: 'firefox,chrome'
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
-      - defer: { task: _nightwatch:vrt-report }
-      - rm -rf test_result/nightwatch*
-      - |
-        if [ -f "package-lock.json" ]; then
-          npx nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
-        elif [ -f "yarn.lock" ]; then
-          yarn nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
-        else
-          echo "Unable to figure out which package manager is in use"
-          exit 1;
-        fi
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
   _nightwatch:vrt-report:
-    desc: "Moves the VRT report into the test_results folder"
     cmds:
-      - |
-        if [ -d "vrt-report" ]; then
-          mkdir -p test_result
-          mv vrt-report test_result/nightwatch-vrt-report
-          cp -R test/nightwatch/vrt test_result/nightwatch-vrt-report
-          mkdir -p test_result/nightwatch-vrt-report/test/nightwatch
-          mv test_result/nightwatch-vrt-report/vrt test_result/nightwatch-vrt-report/test/nightwatch
-          sed -i 's/\/test\/nightwatch\/vrt\//test\/nightwatch\/vrt\//g' test_result/nightwatch-vrt-report/index.html
-          echo "Nightwatch VTR report moved to test_result/nightwatch-vrt-report"
-        fi
+      - :
