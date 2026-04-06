@@ -391,7 +391,9 @@ EOT;
             if (file_exists('./web/sites/default/settings.php')) {
                 $settings = file_get_contents('./web/sites/default/settings.php');
                 if (strpos($settings, 'settings.theme_dev.php') === false) {
-                    $include = 'include __DIR__ . "/settings.theme_dev.php";';
+                    $include = <<<'EOT'
+include __DIR__ . "/settings.theme_dev.php";
+EOT;
                     file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
                 }
             }
