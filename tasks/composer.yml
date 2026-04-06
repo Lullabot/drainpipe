@@ -20,6 +20,7 @@ tasks:
       create_body_extra   JSON object literal to merge into the create request body (default: {})
     cmds:
       - |
+        set -eo pipefail
         DIFF="$(cat {{ shellQuote .diff_file }})"
         COMMENT="<!-- composer-lock-diff -->
         ## Composer Lock Diff
@@ -31,7 +32,7 @@ tasks:
         for ID in $(curl --fail -s \
           -H "{{ .auth_header }}" \
           "{{ .list_url }}" \
-          | jq -rc '.[] | select(.body | contains("<!-- composer-lock-diff -->")) | .id'); do
+          | jq -rc '.[]? | select(.body | contains("<!-- composer-lock-diff -->")) | .id'); do
           if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
             curl --fail -s \
               -X {{ default "PUT" .update_method }} \

@@ -34,7 +34,7 @@ tasks:
         vars:
           diff_file: "{{ .diff_file }}"
           auth_header: "Authorization: Bearer $GITHUB_TOKEN"
-          list_url: "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/{{ .pr_number }}/comments"
+          list_url: "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/{{ .pr_number }}/comments?per_page=100"
           comment_url: "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/comments"
           create_url: "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/{{ .pr_number }}/comments"
           update_method: PATCH

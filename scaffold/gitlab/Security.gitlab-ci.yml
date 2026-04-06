@@ -12,7 +12,7 @@ drainpipe_security:
   script:
     - git config --global user.email $GIT_EMAIL
     - git config --global user.name $GIT_USERNAME
-    - apk add jq
+    - apk add --no-cache jq
     - composer install
     - git fetch --no-tags --depth=1 origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - |
