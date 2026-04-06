@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * @file
  * Theme development mode settings.
@@ -9,6 +7,8 @@ declare(strict_types=1);
  * Set DRAINPIPE_THEME_DEV_MODE=1 in .env to enable theme development mode.
  * By default, debugging is off and caches are on.
  */
+
+declare(strict_types=1);
 
 if (getenv('DRAINPIPE_THEME_DEV_MODE')) {
   // Enable Twig debug output, disable Twig caching, and enable auto-reload so

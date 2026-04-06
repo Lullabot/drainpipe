@@ -384,7 +384,7 @@ EOT;
 
             // Scaffold settings.theme_dev.php for theme development mode support.
             $themeDevSettingsPath = './web/sites/default/settings.theme_dev.php';
-            if (!file_exists($themeDevSettingsPath)) {
+            if (is_dir('./web/sites/default') && !file_exists($themeDevSettingsPath)) {
                 $fs->copy($ddevScaffoldDir . 'settings.theme_dev.php', $themeDevSettingsPath);
                 $this->io->write('<info>🪠 [Drainpipe] Created web/sites/default/settings.theme_dev.php</info>');
             }
