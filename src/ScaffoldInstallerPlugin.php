@@ -382,6 +382,20 @@ EOT;
                 }
             }
 
+            // Scaffold settings.theme_dev.php for theme development mode support.
+            $themeDevSettingsPath = './web/sites/default/settings.theme_dev.php';
+            if (!file_exists($themeDevSettingsPath)) {
+                $fs->copy($ddevScaffoldDir . 'settings.theme_dev.php', $themeDevSettingsPath);
+                $this->io->write('<info>🪠 [Drainpipe] Created web/sites/default/settings.theme_dev.php</info>');
+            }
+            if (file_exists('./web/sites/default/settings.php')) {
+                $settings = file_get_contents('./web/sites/default/settings.php');
+                if (strpos($settings, 'settings.theme_dev.php') === false) {
+                    $include = 'include __DIR__ . "/settings.theme_dev.php";';
+                    file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
+                }
+            }
+
             // Configure DDEV to use NodeJS version set in .nvmrc
             $data = Yaml::parseFile('./.ddev/config.yaml', Yaml::PARSE_OBJECT_FOR_MAP);
             $data = json_decode(json_encode($data), true);

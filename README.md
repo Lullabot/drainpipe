@@ -158,6 +158,36 @@ This consists of:
   ```
   **You will need to restart DDEV if you make any changes to `.env` or`.env.defaults`**
 
+## Theme Development Mode
+
+When using DDEV, Drainpipe scaffolds `web/sites/default/settings.theme_dev.php`
+and adds an include for it in `settings.php`. This file is committed to your
+repository and deployed to all environments, but its settings only take effect
+when the `DRAINPIPE_THEME_DEV_MODE` environment variable is set to a truthy
+value.
+
+By default `DRAINPIPE_THEME_DEV_MODE=0` is set in `.env.defaults` (checked in),
+so caching is on and debugging is off everywhere. To enable theme development
+mode locally, add the following to your `.env` file (which is gitignored):
+
+```
+DRAINPIPE_THEME_DEV_MODE=1
+```
+
+No DDEV restart is required — the change takes effect on the next request.
+
+When enabled, the following settings are applied:
+
+- **Twig debugging** — Twig debug output is enabled, auto-reload is on, and the
+  Twig cache is disabled. Template suggestions and file paths appear in HTML
+  comments. Stepping through `.html.twig` files in IDEs via Xdebug also works
+  automatically once the Twig cache is off.
+- **Null cache bins** — The `render`, `page`, and `dynamic_page_cache` bins are
+  replaced with the null cache backend, so theme changes are visible immediately
+  without running `drush cache:rebuild`.
+- **Cache tags headers** — `X-Drupal-Cache-Tags` and related headers are added
+  to HTTP responses to help debug cacheability.
+
 ## SASS Compilation
 
 This compiles CSS assets using [Sass](https://sass-lang.com/). It also supports
