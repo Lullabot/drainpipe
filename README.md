@@ -789,14 +789,19 @@ When a deployment is made, you must run your own code _before_ and _after_ the d
         - task: build
   ```
 - **acquia:deploy:after**
+
+  Runs after the code is switched on the Acquia environment and before
+  `drupal:update` is called automatically by Drainpipe. Use this for any steps
+  that must happen between the code switch and the Drupal update, such as
+  enabling maintenance mode or syncing files from another environment.
+
   ```
     acquia:deploy:after:
       desc: "After the code is switched on the Acquia environment, run these commands"
       cmds:
-        # When using Drainpipe's deployment workflow,
-        # drupal:update runs on the Acquia environment because it sends
-        # a parameter that specifies the environment alias.
-        - task: drupal:update
+        # This task runs on the Acquia environment. The site alias is passed
+        # automatically so commands like drush run against the correct environment.
+        - task: drupal:maintenance:on
   ```
 
 ## GitLab CI Integration
