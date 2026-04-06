@@ -18,6 +18,29 @@ tasks:
           if [ "{{ .directories }}" != "" ]; then directories="{{ .directories }}"; fi
           find $directories -type f \( -iname '*.yaml' -o -iname '*.yml' \) | xargs -n1 action-validator
 
+  composerlock-diff:
+    desc: Posts a composer lock diff comment on a GitHub pull request
+    summary: |
+      Posts a composer lock diff as a GitHub PR review comment. Reads GITHUB_TOKEN and
+      GITHUB_REPOSITORY from the environment.
+
+      usage: task github:composerlock-diff diff_file=... pr_number=... sha=...
+
+      diff_file    Path to the composer-lock-diff.md output file
+      pr_number    Pull request number
+      sha          Commit SHA for the file-level review comment
+    cmds:
+      - task: :composer:composerlock-diff
+        vars:
+          diff_file: "{{ .diff_file }}"
+          auth_header: "Authorization: Bearer $GITHUB_TOKEN"
+          list_url: "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/{{ .pr_number }}/comments"
+          comment_url: "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/comments"
+          create_url: "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/{{ .pr_number }}/comments"
+          update_method: PATCH
+          create_body_extra: '{"commit_id":"{{ .sha }}","path":"composer.lock","subject_type":"file","side":"RIGHT"}'
+
+  # Deprecated: use github:composerlock-diff instead, which is now provided as part of the Security workflow.
   composer-lock-diff:
     desc: Runs composer-lock-diff on a pull request description and produces a new description
     summary: |

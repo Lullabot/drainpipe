@@ -64,6 +64,139 @@ jobs:
       - name: Add a new package
         run: ddev composer require sebastian/version:4.0.1
 
+      - name: Run Security Checks with a changed composer.lock
+        run: |
+          ddev task test:security composer_lock_diff_from=HEAD~1 composer_lock_diff=security-diff.md || true
+          if [ "$(cat security-diff.md)" == "" ]; then
+            echo "Expected non-empty composer lock diff from security task"
+            exit 1
+          fi
+          if ! grep -q "sebastian/version" security-diff.md; then
+            echo "Expected sebastian/version in security diff output"
+            exit 1
+          fi
+
+      - name: Run Security Checks with an unchanged composer.lock
+        run: |
+          ddev task test:security composer_lock_diff_from=HEAD composer_lock_diff=security-diff-empty.md || true
+          if [ "$(cat security-diff-empty.md)" != "" ]; then
+            echo "Expected empty composer lock diff when lock file has not changed"
+            exit 1
+          fi
+
+      - name: Write mock HTTP server script
+        run: |
+          cat > /tmp/mock_server.py << 'PYEOF'
+          import http.server, json, os, sys
+
+          GET_RESPONSE = os.environ.get('MOCK_GET_RESPONSE', '[]')
+          LOG_FILE = os.environ.get('MOCK_LOG_FILE', '/tmp/mock_requests.log')
+
+          class Handler(http.server.BaseHTTPRequestHandler):
+              def do_GET(self):
+                  self.send_response(200)
+                  self.send_header('Content-Type', 'application/json')
+                  self.end_headers()
+                  self.wfile.write(GET_RESPONSE.encode())
+
+              def do_request(self, method):
+                  length = int(self.headers.get('Content-Length', 0))
+                  body = self.rfile.read(length).decode() if length else ''
+                  with open(LOG_FILE, 'a') as f:
+                      f.write(f'{method} {self.path} {body}\n')
+                  self.send_response(200)
+                  self.send_header('Content-Type', 'application/json')
+                  self.end_headers()
+                  self.wfile.write(b'{"id":1,"body":"ok"}')
+
+              def do_POST(self): self.do_request('POST')
+              def do_PUT(self): self.do_request('PUT')
+              def do_PATCH(self): self.do_request('PATCH')
+              def do_DELETE(self): self.do_request('DELETE')
+
+              def log_message(self, *args): pass
+
+          server = http.server.HTTPServer(('0.0.0.0', int(sys.argv[1])), Handler)
+          server.serve_forever()
+          PYEOF
+
+      - name: "composer:composerlock-diff — creates comment when diff is non-empty"
+        run: |
+          rm -f /tmp/mock_requests.log
+          MOCK_GET_RESPONSE='[]' MOCK_LOG_FILE=/tmp/mock_requests.log python3 /tmp/mock_server.py 9876 &
+          SERVER_PID=$!
+          sleep 1
+          echo "Some dependency changes" > /tmp/test-diff-nonempty.md
+          ddev task "composer:composerlock-diff diff_file='/tmp/test-diff-nonempty.md' auth_header='Authorization: Bearer test' list_url='http://host.docker.internal:9876/comments' comment_url='http://host.docker.internal:9876/comments' create_url='http://host.docker.internal:9876/comments'"
+          kill $SERVER_PID || true
+          if ! grep -q "^POST" /tmp/mock_requests.log; then
+            echo "Expected a POST request to create the comment"
+            cat /tmp/mock_requests.log || true
+            exit 1
+          fi
+          if grep -qE "^(PUT|PATCH|DELETE)" /tmp/mock_requests.log; then
+            echo "Unexpected mutating request (expected only POST)"
+            cat /tmp/mock_requests.log
+            exit 1
+          fi
+
+      - name: "composer:composerlock-diff — no API calls when diff is empty"
+        run: |
+          rm -f /tmp/mock_requests.log
+          MOCK_GET_RESPONSE='[]' MOCK_LOG_FILE=/tmp/mock_requests.log python3 /tmp/mock_server.py 9877 &
+          SERVER_PID=$!
+          sleep 1
+          echo -n "" > /tmp/test-diff-empty.md
+          ddev task "composer:composerlock-diff diff_file='/tmp/test-diff-empty.md' auth_header='Authorization: Bearer test' list_url='http://host.docker.internal:9877/comments' comment_url='http://host.docker.internal:9877/comments' create_url='http://host.docker.internal:9877/comments'"
+          kill $SERVER_PID || true
+          if [ -s /tmp/mock_requests.log ]; then
+            echo "Expected no mutating API calls when diff is empty"
+            cat /tmp/mock_requests.log
+            exit 1
+          fi
+
+      - name: "composer:composerlock-diff — updates existing comment when diff is non-empty"
+        run: |
+          rm -f /tmp/mock_requests.log
+          MOCK_GET_RESPONSE='[{"id":42,"body":"<!-- composer-lock-diff -->\n## Composer Lock Diff\nOld content"}]' \
+            MOCK_LOG_FILE=/tmp/mock_requests.log python3 /tmp/mock_server.py 9878 &
+          SERVER_PID=$!
+          sleep 1
+          echo "Updated dependency changes" > /tmp/test-diff-update.md
+          ddev task "composer:composerlock-diff diff_file='/tmp/test-diff-update.md' auth_header='Authorization: Bearer test' list_url='http://host.docker.internal:9878/comments' comment_url='http://host.docker.internal:9878/comments' create_url='http://host.docker.internal:9878/comments'"
+          kill $SERVER_PID || true
+          if ! grep -q "^PUT /comments/42" /tmp/mock_requests.log; then
+            echo "Expected a PUT request to update comment 42"
+            cat /tmp/mock_requests.log || true
+            exit 1
+          fi
+          if grep -q "^POST" /tmp/mock_requests.log; then
+            echo "Unexpected POST — should update, not create"
+            cat /tmp/mock_requests.log
+            exit 1
+          fi
+
+      - name: "composer:composerlock-diff — deletes existing comment when diff is empty"
+        run: |
+          rm -f /tmp/mock_requests.log
+          MOCK_GET_RESPONSE='[{"id":99,"body":"<!-- composer-lock-diff -->\n## Composer Lock Diff\nOld content"}]' \
+            MOCK_LOG_FILE=/tmp/mock_requests.log python3 /tmp/mock_server.py 9879 &
+          SERVER_PID=$!
+          sleep 1
+          echo -n "" > /tmp/test-diff-delete.md
+          ddev task "composer:composerlock-diff diff_file='/tmp/test-diff-delete.md' auth_header='Authorization: Bearer test' list_url='http://host.docker.internal:9879/comments' comment_url='http://host.docker.internal:9879/comments' create_url='http://host.docker.internal:9879/comments'"
+          kill $SERVER_PID || true
+          if ! grep -q "^DELETE /comments/99" /tmp/mock_requests.log; then
+            echo "Expected a DELETE request to remove comment 99"
+            cat /tmp/mock_requests.log || true
+            exit 1
+          fi
+          if grep -qE "^(POST|PUT|PATCH)" /tmp/mock_requests.log; then
+            echo "Unexpected create/update call when diff is empty"
+            cat /tmp/mock_requests.log
+            exit 1
+          fi
+
       - name: Run Composer Lock Diff on a Renovate PR
         run: |
           ddev task "github:composer-lock-diff pull_request='drainpipe/tests/fixtures/composer-lock-diff/github/renovate.json' json_file='renovate-processed.json'"

@@ -848,7 +848,22 @@ Available variables are:
 | DRAINPIPE_DDEV_COMPOSER_CACHE_DIR | Set to "false" to disable composer cache dir, or another value to override the default location of .ddev/.drainpipe-composer-cache |
 | DRAINPIPE_DDEV_VERSION            | Install a specific version of DDEV instead of the latest                                                                           |
 
-### Composer Lock Diff
+### Security
+
+Runs `composer audit` and posts a composer lock diff as a merge request comment.
+Requires `GITLAB_ACCESS_TOKEN` variable to be set with `api` scope.
+
+```json
+"extra": {
+    "drainpipe": {
+        "gitlab": ["Security"]
+    }
+}
+```
+
+### Composer Lock Diff (Deprecated)
+
+**This is now provided as part of the Security workflow**
 
 Updates Merge Request descriptions with a markdown table of any changes detected
 in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
