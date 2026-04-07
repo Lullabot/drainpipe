@@ -103,8 +103,8 @@ jobs:
             php -S 0.0.0.0:9876 drainpipe/tests/mock-server.php &>/dev/null &
           SERVER_PID=$!
           sleep 1
-          echo "Some dependency changes" > /tmp/test-diff-nonempty.md
-          ddev task "gitlab:lock-diff diff_file='/tmp/test-diff-nonempty.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9876' access_token='test'"
+          echo "Some dependency changes" > test-diff-nonempty.md
+          ddev task "gitlab:lock-diff diff_file='test-diff-nonempty.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9876' access_token='test'"
           kill $SERVER_PID || true
           if ! grep -q "^POST" /tmp/mock_requests.log; then
             echo "Expected a POST request to create the note"
@@ -124,8 +124,8 @@ jobs:
             php -S 0.0.0.0:9877 drainpipe/tests/mock-server.php &>/dev/null &
           SERVER_PID=$!
           sleep 1
-          echo -n "" > /tmp/test-diff-empty.md
-          ddev task "gitlab:lock-diff diff_file='/tmp/test-diff-empty.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9877' access_token='test'"
+          echo -n "" > test-diff-empty.md
+          ddev task "gitlab:lock-diff diff_file='test-diff-empty.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9877' access_token='test'"
           kill $SERVER_PID || true
           if [ -s /tmp/mock_requests.log ]; then
             echo "Expected no mutating API calls when diff is empty"
@@ -141,8 +141,8 @@ jobs:
             php -S 0.0.0.0:9878 drainpipe/tests/mock-server.php &>/dev/null &
           SERVER_PID=$!
           sleep 1
-          echo "Updated dependency changes" > /tmp/test-diff-update.md
-          ddev task "gitlab:lock-diff diff_file='/tmp/test-diff-update.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9878' access_token='test'"
+          echo "Updated dependency changes" > test-diff-update.md
+          ddev task "gitlab:lock-diff diff_file='test-diff-update.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9878' access_token='test'"
           kill $SERVER_PID || true
           if ! grep -q "^PUT /projects/1/merge_requests/1/notes/42" /tmp/mock_requests.log; then
             echo "Expected a PUT request to update note 42"
@@ -163,8 +163,8 @@ jobs:
             php -S 0.0.0.0:9879 drainpipe/tests/mock-server.php &>/dev/null &
           SERVER_PID=$!
           sleep 1
-          echo -n "" > /tmp/test-diff-delete.md
-          ddev task "gitlab:lock-diff diff_file='/tmp/test-diff-delete.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9879' access_token='test'"
+          echo -n "" > test-diff-delete.md
+          ddev task "gitlab:lock-diff diff_file='test-diff-delete.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9879' access_token='test'"
           kill $SERVER_PID || true
           if ! grep -q "^DELETE /projects/1/merge_requests/1/notes/99" /tmp/mock_requests.log; then
             echo "Expected a DELETE request to remove note 99"
