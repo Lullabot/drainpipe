@@ -746,6 +746,9 @@ EOT;
             }
             else if ($github === 'Security') {
                 $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
+                if (!file_exists('./.gitleaks.toml')) {
+                    $fs->copy("$scaffoldPath/gitleaks.toml", './.gitleaks.toml');
+                }
             }
             else if ($github === 'TestStatic') {
                 $fs->copy("$scaffoldPath/github/workflows/TestStatic.yml", './.github/workflows/TestStatic.yml');
