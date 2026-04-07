@@ -32,6 +32,57 @@ tasks:
     deps: [config, phpunit:functional, nightwatch]
     cmds:
       - task: untracked
+  dtt:setup:
+    desc: Configures Chrome for Drupal Test Traits (DTT) tests
+    cmds:
+      - |
+        if [ "{{.DRUPAL_TEST_TRAITS}}" != "true" ]; then
+          echo "DRUPAL_TEST_TRAITS is not set to true in Taskfile.yml, skipping DTT setup."
+          exit 0
+        fi
+      - |
+        if ! composer show weitzman/drupal-test-traits > /dev/null 2>&1; then
+          echo "Error: weitzman/drupal-test-traits is not installed."
+          echo "Run the following commands, then commit composer.json and composer.lock:"
+          echo "  composer require weitzman/drupal-test-traits lullabot/mink-selenium2-driver --dev"
+          echo "  composer config --no-plugins allow-plugins.weitzman/drupal-test-traits true"
+          exit 1
+        fi
+      - |
+        if ! composer show lullabot/mink-selenium2-driver > /dev/null 2>&1; then
+          echo "Error: lullabot/mink-selenium2-driver is not installed."
+          echo "Run the following, then commit composer.json and composer.lock:"
+          echo "  composer require lullabot/mink-selenium2-driver --dev"
+          exit 1
+        fi
+      - |
+        cat > .ddev/docker-compose.chrome.yml << 'EOF'
+        services:
+          chrome:
+            container_name: ddev-${DDEV_SITENAME}-chrome
+            image: selenium/standalone-chromium:127.0-20240820
+            labels:
+              com.ddev.site-name: ${DDEV_SITENAME}
+              com.ddev.approot: $DDEV_APPROOT
+            shm_size: 2gb
+            environment:
+              - VIRTUAL_HOST=$DDEV_HOSTNAME
+              - HTTPS_EXPOSE=7900:7900
+              - HTTP_EXPOSE=7910:7900
+            links:
+              - web:web
+            external_links:
+              - ddev-router:${DDEV_SITENAME}.${DDEV_TLD}
+            volumes:
+              - type: bind
+                source: ../
+                target: /var/www/html
+                consistency: cached
+              - ".:/mnt/ddev_config:ro"
+              - ddev-global-cache:/mnt/ddev-global-cache
+        EOF
+        echo "DTT setup complete."
+        echo "Run 'ddev restart' to start the Chrome service, then commit .ddev/docker-compose.chrome.yml."
   security:
     desc: Runs security checks for composer packages and Drupal contrib
     cmds:
