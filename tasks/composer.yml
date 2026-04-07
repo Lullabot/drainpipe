@@ -1,58 +1,15 @@
 version: '3'
 
 tasks:
-  composerlock-diff:
-    desc: Posts a composer lock diff comment on a PR/MR, creating, updating, or removing as needed
+  lock-diff:
+    desc: Generates a composer lock diff and writes it to a file
     summary: |
-      Posts a composer lock diff as a PR/MR comment. If the diff is non-empty, creates a new
-      comment or updates the first existing one (deleting any others). If empty, deletes all
-      existing comments. Platform-specific wrappers (github:composerlock-diff and
-      gitlab:composerlock-diff) call this task with the correct parameters.
+      Runs composer-lock-diff comparing the current composer.lock against a base
+      ref and writes the markdown output to a file.
 
-      usage: task composer:composerlock-diff diff_file=... auth_header=... list_url=... comment_url=... create_url=...
+      usage: task composer:lock-diff from=main output=composer-lock-diff.md
 
-      diff_file           Path to the composer-lock-diff.md output file
-      auth_header         Auth header value for curl (e.g. "PRIVATE-TOKEN: $TOKEN")
-      list_url            URL to GET the list of existing comments (JSON array with .id and .body fields)
-      comment_url         Base URL for individual comment operations; /{id} is appended for PUT/DELETE
-      create_url          URL to POST a new comment
-      update_method       HTTP method for updating a comment (default: PUT)
-      create_body_extra   JSON object literal to merge into the create request body (default: {})
+      from    The git ref to compare against (default: main)
+      output  Path to write the markdown diff output to
     cmds:
-      - |
-        set -eo pipefail
-        DIFF="$(cat {{ shellQuote .diff_file }})"
-        COMMENT="<!-- composer-lock-diff -->
-        ## Composer Lock Diff
-        $DIFF"
-        COMMENT_JSON=$(printf '%s' "$COMMENT" | jq -Rsa .)
-        EMPTY=true
-        if [ "$DIFF" != "" ]; then EMPTY=false; fi
-        FIRST=true
-        for ID in $(curl --fail -s \
-          -H "{{ .auth_header }}" \
-          "{{ .list_url }}" \
-          | jq -rc '.[]? | select(.body | contains("<!-- composer-lock-diff -->")) | .id'); do
-          if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
-            curl --fail -s \
-              -X {{ default "PUT" .update_method }} \
-              -H "Content-Type: application/json" \
-              -H "{{ .auth_header }}" \
-              "{{ .comment_url }}/$ID" \
-              -d "{\"body\":$COMMENT_JSON}"
-          else
-            curl --fail -s -X DELETE \
-              -H "{{ .auth_header }}" \
-              "{{ .comment_url }}/$ID"
-          fi
-          if [ "$FIRST" == "true" ]; then FIRST=false; fi
-        done
-        if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
-          CREATE_BODY=$(echo "{\"body\":$COMMENT_JSON}" \
-            | jq -c '. + {{ default "{}" .create_body_extra }}')
-          curl --fail -s -X POST \
-            -H "Content-Type: application/json" \
-            -H "{{ .auth_header }}" \
-            "{{ .create_url }}" \
-            -d "$CREATE_BODY"
-        fi
+      - ./vendor/bin/composer-lock-diff --from {{ shellQuote (default "main" .from) }} --md > {{ shellQuote .output }}

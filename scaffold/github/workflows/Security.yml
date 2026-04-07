@@ -52,14 +52,29 @@ jobs:
       - name: Run Security Checks
         run: ddev task test:security composer_lock_diff_from=${{ github.base_ref }} composer_lock_diff=composer-lock-diff.md
 
-      - name: Publish Results
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Format composer lock diff comment
+        if: always()
         run: |
-          if [ "$(cat composer-lock-diff.md)" != "" ]; then
-            printf '<!-- composer-lock-diff -->\n## Composer Lock Diff\n%s\n' "$(cat composer-lock-diff.md)" >> $GITHUB_STEP_SUMMARY
+          if [ -s composer-lock-diff.md ]; then
+            printf '## Composer Lock Diff\n\n%s\n' "$(cat composer-lock-diff.md)" > composer-lock-diff-comment.md
+            printf '## Composer Lock Diff\n\n%s\n' "$(cat composer-lock-diff.md)" >> $GITHUB_STEP_SUMMARY
           fi
-          ddev task "github:composerlock-diff diff_file='composer-lock-diff.md' pr_number='$DRAINPIPE_PR_NUMBER' sha='$DRAINPIPE_SHA'"
+
+      - name: Post composer lock diff comment
+        if: hashFiles('composer-lock-diff-comment.md') != ''
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        with:
+          header: composer-lock-diff
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: composer-lock-diff-comment.md
+
+      - name: Delete composer lock diff comment
+        if: hashFiles('composer-lock-diff-comment.md') == ''
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        with:
+          header: composer-lock-diff
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          delete: true
 
   Composer-Audit:
     runs-on: ubuntu-24.04

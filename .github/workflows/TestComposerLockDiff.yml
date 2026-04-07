@@ -65,95 +65,65 @@ jobs:
           git commit -m "Initial commit"
 
       - name: Install Composer Lock Diff
-        run: ddev composer global require davidrjonas/composer-lock-diff:^1.0
+        run: ddev composer require --dev davidrjonas/composer-lock-diff:^1.0
 
       - name: Add a new package
-        run: ddev composer require sebastian/version:4.0.1
-
-      - name: Run Security Checks with a changed composer.lock
         run: |
-          ddev task test:security composer_lock_diff_from=HEAD~1 composer_lock_diff=security-diff.md || true
-          if [ "$(cat security-diff.md)" == "" ]; then
-            echo "Expected non-empty composer lock diff from security task"
+          mkdir -p drainpipe-test-package
+          echo '{"name":"drainpipe/test-package","version":"1.0.0","type":"library","description":"Test package for drainpipe CI"}' > drainpipe-test-package/composer.json
+          ddev exec --raw composer config repositories.test-package --json '{"type": "path", "url": "drainpipe-test-package", "options": {"symlink": false}}'
+          ddev composer require drainpipe/test-package:^1
+
+      - name: "composer:lock-diff — generates non-empty diff file"
+        run: |
+          ddev task "composer:lock-diff from=HEAD~1 output=lock-diff.md"
+          if [ "$(cat lock-diff.md)" == "" ]; then
+            echo "Expected non-empty composer lock diff output"
             exit 1
           fi
-          if ! grep -q "sebastian/version" security-diff.md; then
-            echo "Expected sebastian/version in security diff output"
-            exit 1
-          fi
-
-      - name: Run Security Checks with an unchanged composer.lock
-        run: |
-          ddev task test:security composer_lock_diff_from=HEAD composer_lock_diff=security-diff-empty.md || true
-          if [ "$(cat security-diff-empty.md)" != "" ]; then
-            echo "Expected empty composer lock diff when lock file has not changed"
+          if ! grep -q "drainpipe/test-package" lock-diff.md; then
+            echo "Expected drainpipe/test-package in lock diff output"
             exit 1
           fi
 
-      - name: Write mock HTTP server script
+      - name: "composer:lock-diff — generates empty diff file when lock is unchanged"
         run: |
-          cat > /tmp/mock_server.py << 'PYEOF'
-          import http.server, json, os, sys
+          ddev task "composer:lock-diff from=HEAD output=lock-diff-empty.md"
+          if [ "$(cat lock-diff-empty.md)" != "" ]; then
+            echo "Expected empty diff when composer.lock has not changed"
+            exit 1
+          fi
 
-          GET_RESPONSE = os.environ.get('MOCK_GET_RESPONSE', '[]')
-          LOG_FILE = os.environ.get('MOCK_LOG_FILE', '/tmp/mock_requests.log')
-
-          class Handler(http.server.BaseHTTPRequestHandler):
-              def do_GET(self):
-                  self.send_response(200)
-                  self.send_header('Content-Type', 'application/json')
-                  self.end_headers()
-                  self.wfile.write(GET_RESPONSE.encode())
-
-              def do_request(self, method):
-                  length = int(self.headers.get('Content-Length', 0))
-                  body = self.rfile.read(length).decode() if length else ''
-                  with open(LOG_FILE, 'a') as f:
-                      f.write(f'{method} {self.path} {body}\n')
-                  self.send_response(200)
-                  self.send_header('Content-Type', 'application/json')
-                  self.end_headers()
-                  self.wfile.write(b'{"id":1,"body":"ok"}')
-
-              def do_POST(self): self.do_request('POST')
-              def do_PUT(self): self.do_request('PUT')
-              def do_PATCH(self): self.do_request('PATCH')
-              def do_DELETE(self): self.do_request('DELETE')
-
-              def log_message(self, *args): pass
-
-          server = http.server.HTTPServer(('0.0.0.0', int(sys.argv[1])), Handler)
-          server.serve_forever()
-          PYEOF
-
-      - name: "composer:composerlock-diff — creates comment when diff is non-empty"
+      - name: "gitlab:lock-diff — creates note when diff is non-empty"
         run: |
           rm -f /tmp/mock_requests.log
-          MOCK_GET_RESPONSE='[]' MOCK_LOG_FILE=/tmp/mock_requests.log python3 /tmp/mock_server.py 9876 &
+          MOCK_GET_RESPONSE='[]' MOCK_LOG_FILE=/tmp/mock_requests.log \
+            php -S 0.0.0.0:9876 drainpipe/tests/mock-server.php &>/dev/null &
           SERVER_PID=$!
           sleep 1
           echo "Some dependency changes" > /tmp/test-diff-nonempty.md
-          ddev task "composer:composerlock-diff diff_file='/tmp/test-diff-nonempty.md' auth_header='Authorization: Bearer test' list_url='http://host.docker.internal:9876/comments' comment_url='http://host.docker.internal:9876/comments' create_url='http://host.docker.internal:9876/comments'"
+          ddev task "gitlab:lock-diff diff_file='/tmp/test-diff-nonempty.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9876' access_token='test'"
           kill $SERVER_PID || true
           if ! grep -q "^POST" /tmp/mock_requests.log; then
-            echo "Expected a POST request to create the comment"
+            echo "Expected a POST request to create the note"
             cat /tmp/mock_requests.log || true
             exit 1
           fi
-          if grep -qE "^(PUT|PATCH|DELETE)" /tmp/mock_requests.log; then
+          if grep -qE "^(PUT|DELETE)" /tmp/mock_requests.log; then
             echo "Unexpected mutating request (expected only POST)"
             cat /tmp/mock_requests.log
             exit 1
           fi
 
-      - name: "composer:composerlock-diff — no API calls when diff is empty"
+      - name: "gitlab:lock-diff — no API calls when diff is empty"
         run: |
           rm -f /tmp/mock_requests.log
-          MOCK_GET_RESPONSE='[]' MOCK_LOG_FILE=/tmp/mock_requests.log python3 /tmp/mock_server.py 9877 &
+          MOCK_GET_RESPONSE='[]' MOCK_LOG_FILE=/tmp/mock_requests.log \
+            php -S 0.0.0.0:9877 drainpipe/tests/mock-server.php &>/dev/null &
           SERVER_PID=$!
           sleep 1
           echo -n "" > /tmp/test-diff-empty.md
-          ddev task "composer:composerlock-diff diff_file='/tmp/test-diff-empty.md' auth_header='Authorization: Bearer test' list_url='http://host.docker.internal:9877/comments' comment_url='http://host.docker.internal:9877/comments' create_url='http://host.docker.internal:9877/comments'"
+          ddev task "gitlab:lock-diff diff_file='/tmp/test-diff-empty.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9877' access_token='test'"
           kill $SERVER_PID || true
           if [ -s /tmp/mock_requests.log ]; then
             echo "Expected no mutating API calls when diff is empty"
@@ -161,18 +131,19 @@ jobs:
             exit 1
           fi
 
-      - name: "composer:composerlock-diff — updates existing comment when diff is non-empty"
+      - name: "gitlab:lock-diff — updates existing note when diff is non-empty"
         run: |
           rm -f /tmp/mock_requests.log
           MOCK_GET_RESPONSE='[{"id":42,"body":"<!-- composer-lock-diff -->\n## Composer Lock Diff\nOld content"}]' \
-            MOCK_LOG_FILE=/tmp/mock_requests.log python3 /tmp/mock_server.py 9878 &
+            MOCK_LOG_FILE=/tmp/mock_requests.log \
+            php -S 0.0.0.0:9878 drainpipe/tests/mock-server.php &>/dev/null &
           SERVER_PID=$!
           sleep 1
           echo "Updated dependency changes" > /tmp/test-diff-update.md
-          ddev task "composer:composerlock-diff diff_file='/tmp/test-diff-update.md' auth_header='Authorization: Bearer test' list_url='http://host.docker.internal:9878/comments' comment_url='http://host.docker.internal:9878/comments' create_url='http://host.docker.internal:9878/comments'"
+          ddev task "gitlab:lock-diff diff_file='/tmp/test-diff-update.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9878' access_token='test'"
           kill $SERVER_PID || true
-          if ! grep -q "^PUT /comments/42" /tmp/mock_requests.log; then
-            echo "Expected a PUT request to update comment 42"
+          if ! grep -q "^PUT /projects/1/merge_requests/1/notes/42" /tmp/mock_requests.log; then
+            echo "Expected a PUT request to update note 42"
             cat /tmp/mock_requests.log || true
             exit 1
           fi
@@ -182,48 +153,24 @@ jobs:
             exit 1
           fi
 
-      - name: "composer:composerlock-diff — deletes existing comment when diff is empty"
+      - name: "gitlab:lock-diff — deletes existing note when diff is empty"
         run: |
           rm -f /tmp/mock_requests.log
           MOCK_GET_RESPONSE='[{"id":99,"body":"<!-- composer-lock-diff -->\n## Composer Lock Diff\nOld content"}]' \
-            MOCK_LOG_FILE=/tmp/mock_requests.log python3 /tmp/mock_server.py 9879 &
+            MOCK_LOG_FILE=/tmp/mock_requests.log \
+            php -S 0.0.0.0:9879 drainpipe/tests/mock-server.php &>/dev/null &
           SERVER_PID=$!
           sleep 1
           echo -n "" > /tmp/test-diff-delete.md
-          ddev task "composer:composerlock-diff diff_file='/tmp/test-diff-delete.md' auth_header='Authorization: Bearer test' list_url='http://host.docker.internal:9879/comments' comment_url='http://host.docker.internal:9879/comments' create_url='http://host.docker.internal:9879/comments'"
+          ddev task "gitlab:lock-diff diff_file='/tmp/test-diff-delete.md' project_id='1' mr_iid='1' gitlab_api_url='http://host.docker.internal:9879' access_token='test'"
           kill $SERVER_PID || true
-          if ! grep -q "^DELETE /comments/99" /tmp/mock_requests.log; then
-            echo "Expected a DELETE request to remove comment 99"
+          if ! grep -q "^DELETE /projects/1/merge_requests/1/notes/99" /tmp/mock_requests.log; then
+            echo "Expected a DELETE request to remove note 99"
             cat /tmp/mock_requests.log || true
             exit 1
           fi
-          if grep -qE "^(POST|PUT|PATCH)" /tmp/mock_requests.log; then
+          if grep -qE "^(POST|PUT)" /tmp/mock_requests.log; then
             echo "Unexpected create/update call when diff is empty"
             cat /tmp/mock_requests.log
             exit 1
           fi
-
-      - name: Run Composer Lock Diff on a Renovate PR
-        run: |
-          ddev task "github:composer-lock-diff pull_request='drainpipe/tests/fixtures/composer-lock-diff/github/renovate.json' json_file='renovate-processed.json'"
-          if [ "$(cat renovate-processed.json)" != "$(cat drainpipe/tests/fixtures/composer-lock-diff/github/renovate-after.json)" ]; then
-            echo "Expected description not produced"
-            exit 1
-          fi
-
-      - name: Run Composer Lock Diff on a PR Template
-        run: |
-          ddev task "github:composer-lock-diff pull_request='drainpipe/tests/fixtures/composer-lock-diff/github/pr-template.json' json_file='pr-template-processed.json'"
-          if [ "$(cat pr-template-processed.json)" != "$(cat drainpipe/tests/fixtures/composer-lock-diff/github/pr-template-after.json)" ]; then
-            echo "Expected description not produced"
-            exit 1
-          fi
-
-      - name: Upload artifact
-        if: ${{ always() }}
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        with:
-          name: processed-descriptions-${{ matrix.drupal-version }}
-          path: |
-            renovate-processed.json
-            pr-template-processed.json

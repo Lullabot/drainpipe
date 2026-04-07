@@ -861,23 +861,6 @@ Requires `GITLAB_ACCESS_TOKEN` variable to be set with `api` scope.
 }
 ```
 
-### Composer Lock Diff (Deprecated)
-
-**This is now provided as part of the Security workflow**
-
-Updates Merge Request descriptions with a markdown table of any changes detected
-in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
-Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
-`api` scope.
-
-```json
-"extra": {
-    "drainpipe": {
-        "gitlab": ["ComposerLockDiff"]
-    }
-}
-```
-
 ### Pantheon
 
 To enable deployment of Pantheon Review Apps (Multidev environments per merge request):
