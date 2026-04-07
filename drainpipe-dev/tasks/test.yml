@@ -43,9 +43,8 @@ tasks:
       - |
         if ! composer show weitzman/drupal-test-traits > /dev/null 2>&1; then
           echo "Error: weitzman/drupal-test-traits is not installed."
-          echo "Run the following commands, then commit composer.json and composer.lock:"
+          echo "Run the following command, then commit composer.json and composer.lock:"
           echo "  composer require weitzman/drupal-test-traits lullabot/mink-selenium2-driver --dev"
-          echo "  composer config --no-plugins allow-plugins.weitzman/drupal-test-traits true"
           exit 1
         fi
       - |

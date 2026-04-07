@@ -311,7 +311,6 @@ tests._
 
 ```bash
 composer require weitzman/drupal-test-traits lullabot/mink-selenium2-driver --dev
-composer config --no-plugins allow-plugins.weitzman/drupal-test-traits true
 ```
 
 **2. Enable DTT in `Taskfile.yml`:**
