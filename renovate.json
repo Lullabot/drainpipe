@@ -34,12 +34,7 @@
       "allowedVersions": "^9 || ^10 || ^11"
     },
     {
-      "description": "phpunit-bridge v7 removed Legacy namespace traits relied on by Drupal 10 core",
-      "matchPackageNames": ["symfony/phpunit-bridge"],
-      "rangeStrategy": "replace",
-      "allowedVersions": "^6"
-    },
-    {
+      "automerge": false,
       "matchPackageNames": [
         "drush/drush",
         "phpunit/phpunit",
@@ -88,6 +83,12 @@
         "/^symfony\//"
       ],
       "allowedVersions": "^6 || ^7"
+    },
+    {
+      "description": "phpunit-bridge v7 removed Legacy namespace traits relied on by Drupal 10 core",
+      "matchPackageNames": ["symfony/phpunit-bridge"],
+      "rangeStrategy": "replace",
+      "allowedVersions": "^6"
     },
     {
       "matchDatasources": ["node-version"],
