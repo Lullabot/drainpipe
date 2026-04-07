@@ -564,14 +564,14 @@ committed secrets — API keys, tokens, credentials, and similar sensitive value
 Findings are uploaded to GitHub's code scanning dashboard under the **Gitleaks**
 category.
 
-**Suppressing false positives**: Create a `.gitleaks.toml` file at the project
-root to allowlist patterns that are not real secrets. Use `[extend]` with
+**Suppressing false positives**: Drainpipe scaffolds a `.gitleaks.toml` at the
+project root that pre-configures allowlists for patterns common in Drupal
+projects (contributed modules, Drupal core, GitHub Actions template expressions,
+and placeholder values). Add `[[allowlists]]` blocks to that file to suppress
+additional false positives specific to your project. Use `[extend]` with
 `useDefault = true` to inherit all default rules and layer your allowlists on top:
 
 ```toml
-[extend]
-useDefault = true
-
 [[allowlists]]
 description = "Allow example values in documentation"
 regexes = [
