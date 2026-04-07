@@ -130,3 +130,75 @@ jobs:
       - name: Fail on findings
         if: steps.zizmor.outcome == 'failure'
         run: exit 1
+
+  Gitleaks:
+    name: Run Gitleaks Secret Scanning
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Gitleaks
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          sudo install gitleaks /usr/local/bin/gitleaks
+
+      - name: Run Gitleaks
+        id: gitleaks
+        run: |
+          gitleaks git \
+            --config .gitleaks.toml \
+            --report-format sarif \
+            --report-path results.sarif \
+            --exit-code 1 \
+            .
+        continue-on-error: true
+
+      - name: Upload SARIF
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@c793b717bc78562f491db7b0e93a3a178b099162 # v4.32.5
+        with:
+          sarif_file: results.sarif
+          category: gitleaks
+
+      - name: Generate PR comment
+        if: steps.gitleaks.outcome == 'failure' && github.event_name == 'pull_request'
+        run: |
+          {
+            echo "## :warning: Gitleaks: potential secrets detected"
+            echo ""
+            echo "The following potential secrets were detected. Please review and rotate any valid credentials."
+            echo ""
+            echo "| Rule | File |"
+            echo "|------|------|"
+            jq -r '.runs[0].results[] | "| " + .ruleId + " | `" + .locations[0].physicalLocation.artifactLocation.uri + "` |"' results.sarif
+            echo ""
+            echo "See the [Security tab]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/security/code-scanning) for full details."
+          } > gitleaks-comment.md
+
+      - name: Post PR comment
+        if: steps.gitleaks.outcome == 'failure' && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        with:
+          header: gitleaks
+          path: gitleaks-comment.md
+
+      - name: Delete PR comment if clean
+        if: steps.gitleaks.outcome == 'success' && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        with:
+          header: gitleaks
+          delete: true
+
+      - name: Fail on findings
+        if: steps.gitleaks.outcome == 'failure'
+        run: exit 1

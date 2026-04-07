@@ -155,7 +155,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "\\.github/workflows/Security\\.yml$"
+        "\\.github/workflows/Security\\.yml$",
+        "scaffold/github/workflows/Security\\.yml$"
       ],
       "matchStrings": [
         "gitleaks_(?<currentValue>\\d+\\.\\d+\\.\\d+)_linux_x64"
