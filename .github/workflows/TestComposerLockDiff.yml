@@ -73,8 +73,10 @@ jobs:
           echo '{"name":"drainpipe/test-package","version":"1.0.0","type":"library","description":"Test package for drainpipe CI"}' > drainpipe-test-package/composer.json
           ddev exec --raw composer config repositories.test-package --json '{"type": "path", "url": "drainpipe-test-package", "options": {"symlink": false}}'
           ddev composer require drainpipe/test-package:^1
+          git add .
+          git commit -m "Add test package"
 
-      - name: "composer:lock-diff — generates non-empty diff file"
+      - name: "composer:lock-diff - generates non-empty diff file"
         run: |
           ddev task "composer:lock-diff from=HEAD~1 output=lock-diff.md"
           if [ "$(cat lock-diff.md)" == "" ]; then
@@ -86,7 +88,7 @@ jobs:
             exit 1
           fi
 
-      - name: "composer:lock-diff — generates empty diff file when lock is unchanged"
+      - name: "composer:lock-diff - generates empty diff file when lock is unchanged"
         run: |
           ddev task "composer:lock-diff from=HEAD output=lock-diff-empty.md"
           if [ "$(cat lock-diff-empty.md)" != "" ]; then
@@ -94,7 +96,7 @@ jobs:
             exit 1
           fi
 
-      - name: "gitlab:lock-diff — creates note when diff is non-empty"
+      - name: "gitlab:lock-diff - creates note when diff is non-empty"
         run: |
           rm -f /tmp/mock_requests.log
           MOCK_GET_RESPONSE='[]' MOCK_LOG_FILE=/tmp/mock_requests.log \
@@ -115,7 +117,7 @@ jobs:
             exit 1
           fi
 
-      - name: "gitlab:lock-diff — no API calls when diff is empty"
+      - name: "gitlab:lock-diff - no API calls when diff is empty"
         run: |
           rm -f /tmp/mock_requests.log
           MOCK_GET_RESPONSE='[]' MOCK_LOG_FILE=/tmp/mock_requests.log \
@@ -131,7 +133,7 @@ jobs:
             exit 1
           fi
 
-      - name: "gitlab:lock-diff — updates existing note when diff is non-empty"
+      - name: "gitlab:lock-diff - updates existing note when diff is non-empty"
         run: |
           rm -f /tmp/mock_requests.log
           MOCK_GET_RESPONSE='[{"id":42,"body":"<!-- composer-lock-diff -->\n## Composer Lock Diff\nOld content"}]' \
@@ -148,12 +150,12 @@ jobs:
             exit 1
           fi
           if grep -q "^POST" /tmp/mock_requests.log; then
-            echo "Unexpected POST — should update, not create"
+            echo "Unexpected POST - should update, not create"
             cat /tmp/mock_requests.log
             exit 1
           fi
 
-      - name: "gitlab:lock-diff — deletes existing note when diff is empty"
+      - name: "gitlab:lock-diff - deletes existing note when diff is empty"
         run: |
           rm -f /tmp/mock_requests.log
           MOCK_GET_RESPONSE='[{"id":99,"body":"<!-- composer-lock-diff -->\n## Composer Lock Diff\nOld content"}]' \
