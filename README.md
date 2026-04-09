@@ -294,6 +294,9 @@ Runs PHPUnit tests in:
 You will need to make sure you have a working Drupal site before you're
 able to run these.
 
+> [!WARNING]
+> **Deprecated since v5.2.0:** DTT (Drupal Test Traits) support will be removed in a future major release. If you rely on `ExistingSite` or `ExistingSiteJavascript` test types, plan to migrate away from Drainpipe's built-in DTT integration.
+
 Support for [Drupal Test Traits](https://gitlab.com/weitzman/drupal-test-traits)
 is included, set this in your `Taskfile.yml` vars:
 
