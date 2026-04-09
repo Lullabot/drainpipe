@@ -3,6 +3,9 @@
   "extends": [
     "config:recommended"
   ],
+  "automerge": true,
+  "automergeType": "pr",
+  "minimumReleaseAge": "3 days",
   "rangeStrategy": "replace",
   "ignoreDeps": [
     "drainpipe"
@@ -31,10 +34,10 @@
       "allowedVersions": "^9 || ^10 || ^11"
     },
     {
+      "automerge": false,
       "matchPackageNames": [
         "drush/drush",
         "phpunit/phpunit",
-        "symfony/phpunit-bridge",
         "symfony/yaml",
         "twig/twig",
         "vlucas/phpdotenv"
@@ -80,6 +83,12 @@
         "/^symfony\//"
       ],
       "allowedVersions": "^6 || ^7"
+    },
+    {
+      "description": "phpunit-bridge v7 removed Legacy namespace traits relied on by Drupal 10 core",
+      "matchPackageNames": ["symfony/phpunit-bridge"],
+      "rangeStrategy": "replace",
+      "allowedVersions": "^6"
     },
     {
       "matchDatasources": ["node-version"],
@@ -155,7 +164,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "\\.github/workflows/Security\\.yml$"
+        "\\.github/workflows/Security\\.yml$",
+        "scaffold/github/workflows/Security\\.yml$"
       ],
       "matchStrings": [
         "gitleaks_(?<currentValue>\\d+\\.\\d+\\.\\d+)_linux_x64"
