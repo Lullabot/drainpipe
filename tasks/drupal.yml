@@ -72,16 +72,16 @@ tasks:
     deps: [composer]
     cmds:
       # See https://www.drush.org/12.x/deploycommand/
-      # See https://architecture.lullabot.com/adr/20230929-drupal-build-steps/
-      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
-      - ./vendor/bin/drush {{.site}} --yes updatedb --no-cache-clear
-      # Run config:import twice to make sure we catch any config that didn't declare
-      # a dependency correctly. This is also useful when importing large config sets
-      # as it can sometimes hit an out of memory error.
-      - ./vendor/bin/drush {{.site}} --yes config:import || true
-      - ./vendor/bin/drush {{.site}} --yes config:import
-      - ./vendor/bin/drush {{.site}} --yes deploy:hook
-      - ./vendor/bin/drush {{.site}} --yes cache:rebuild
+      # See https://architecture.lullabot.com/adr/20260313-drupal-build-steps/
+      - ./vendor/bin/drush {{.site}} --yes deploy
+      - |
+        echo "WARNING: Running drush cron as part of drupal:update is deprecated and will be removed in the next major release. Add it as a separate step in your project Taskfile.yml instead:"
+        echo ""
+        echo "  update:"
+        echo "    cmds:"
+        echo "      - task: drupal:update"
+        echo "      - ./vendor/bin/drush {{.site}} --yes cron"
+        ./vendor/bin/drush {{.site}} --yes cron
       - |
        # drush config:status --format=json is outputting notices in Pantheon even with the json format,
        # so we need to tail the last line.
@@ -91,8 +91,6 @@ tasks:
           ./vendor/bin/drush {{.site}} config:status
           exit 1;
         fi
-      # Run cron after updating to refresh items.
-      - ./vendor/bin/drush {{ .site }} core:cron --verbose
   maintenance:on:
     desc: Turn on Maintenance Mode
     cmds:
