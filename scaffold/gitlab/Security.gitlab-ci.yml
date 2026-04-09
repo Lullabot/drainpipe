@@ -1,0 +1,24 @@
+# Runs composer audit and posts a composer lock diff as a merge request comment.
+# Requires GITLAB_ACCESS_TOKEN to be set with api scope.
+drainpipe_security:
+  needs: []
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+      when: never
+    - if: '$CI_MERGE_REQUEST_IID'
+  variables:
+    GIT_STRATEGY: clone
+  interruptible: true
+  script:
+    - git config --global user.email $GIT_EMAIL
+    - git config --global user.name $GIT_USERNAME
+    - apk add --no-cache jq
+    - composer install
+    - git fetch --no-tags --depth=1 origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+    - |
+      set +e
+      ./vendor/bin/task test:security composer_lock_diff_from=FETCH_HEAD composer_lock_diff=composer-lock-diff.md
+      TASK_EXIT=$?
+      set -e
+    - ./vendor/bin/task "gitlab:lock-diff diff_file='composer-lock-diff.md' project_id='$CI_PROJECT_ID' mr_iid='$CI_MERGE_REQUEST_IID'"
+    - test $TASK_EXIT -eq 0

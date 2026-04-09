@@ -44,9 +44,12 @@ tasks:
           composer audit
         fi
       - |
-        ./vendor/bin/composer-lock-diff --from {{ shellQuote (.composer_lock_diff_from | default "main") }} --md
-        if [ "" != {{ shellQuote (.composer_lock_diff | default "") }} ]; then
-          ./vendor/bin/composer-lock-diff --from {{ shellQuote (.composer_lock_diff_from | default "main") }} --md > {{ shellQuote (.composer_lock_diff | default "") }}
+        DIFF_FROM={{ shellQuote (.composer_lock_diff_from | default "main") }}
+        DIFF_OUTPUT={{ shellQuote (.composer_lock_diff | default "") }}
+        if [ -n "$DIFF_OUTPUT" ]; then
+          ./vendor/bin/composer-lock-diff --from "$DIFF_FROM" --md | tee "$DIFF_OUTPUT"
+        else
+          ./vendor/bin/composer-lock-diff --from "$DIFF_FROM" --md
         fi
   lint:
     desc: Runs lint on composer, YAML, and Twig files
