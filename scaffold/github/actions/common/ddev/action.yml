@@ -37,20 +37,17 @@ runs:
         sudo apt install libnss3-tools -y
 
         mkdir -p .ddev/homeadditions/.ssh
+        touch .ddev/homeadditions/.ssh/config
         # Copy private key
         if [ "$INPUT_SSH_PRIVATE_KEY" != "" ]; then
           echo "$INPUT_SSH_PRIVATE_KEY" > .ddev/homeadditions/.ssh/id_drainpipe
           chmod 600 .ddev/homeadditions/.ssh/id_drainpipe
+          echo "IdentityFile ~/.ssh/id_drainpipe" >> .ddev/homeadditions/.ssh/config
         fi
         # Copy known hosts
         if [ "$INPUT_SSH_KNOWN_HOSTS" != "" ]; then
           echo "$INPUT_SSH_KNOWN_HOSTS" > .ddev/homeadditions/.ssh/known_hosts
           chmod 644 .ddev/homeadditions/.ssh/known_hosts
-        fi
-        # SSH config file
-        touch .ddev/homeadditions/.ssh/config
-        if [ "$INPUT_SSH_PRIVATE_KEY" != "" ]; then
-          echo "IdentityFile ~/.ssh/id_drainpipe" >> .ddev/homeadditions/.ssh/config
         fi
 
         # Disable strict host key checking for Pantheon as ssh-keyscan will not
@@ -60,7 +57,6 @@ runs:
         fi
 
         chmod 600 .ddev/homeadditions/.ssh/config
-
         chmod 700 .ddev/homeadditions/.ssh
 
         # Download and run the DDEV installer
