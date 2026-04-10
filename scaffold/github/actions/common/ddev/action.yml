@@ -39,8 +39,8 @@ runs:
         mkdir -p .ddev/homeadditions/.ssh
         # Copy private key
         if [ "$INPUT_SSH_PRIVATE_KEY" != "" ]; then
-          echo "$INPUT_SSH_PRIVATE_KEY" > .ddev/homeadditions/.ssh/id_rsa
-          chmod 600 .ddev/homeadditions/.ssh/id_rsa
+          echo "$INPUT_SSH_PRIVATE_KEY" > .ddev/homeadditions/.ssh/id_drainpipe
+          chmod 600 .ddev/homeadditions/.ssh/id_drainpipe
         fi
         # Copy known hosts
         if [ "$INPUT_SSH_KNOWN_HOSTS" != "" ]; then
@@ -49,6 +49,9 @@ runs:
         fi
         # SSH config file
         touch .ddev/homeadditions/.ssh/config
+        if [ "$INPUT_SSH_PRIVATE_KEY" != "" ]; then
+          echo "IdentityFile ~/.ssh/id_drainpipe" >> .ddev/homeadditions/.ssh/config
+        fi
 
         # Disable strict host key checking for Pantheon as ssh-keyscan will not
         # return a stable response.
