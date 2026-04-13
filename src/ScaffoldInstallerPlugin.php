@@ -162,10 +162,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $projectTaskfile = Yaml::parseFile('./Taskfile.yml');
             $missingIncludes = [];
             foreach ($scaffoldTaskFile['includes'] as $key => $value) {
-                $scaffoldPath = is_array($value) ? ($value['taskfile'] ?? '') : $value;
-                $projectValue = $projectTaskfile['includes'][$key] ?? null;
-                $projectPath = is_array($projectValue) ? ($projectValue['taskfile'] ?? '') : (string) $projectValue;
-                if ($scaffoldPath !== $projectPath) {
+                if (empty($projectTaskfile['includes'][$key]) || $projectTaskfile['includes'][$key] !== $value) {
                     $missingIncludes[] = $key;
                 }
             }
