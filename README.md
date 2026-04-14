@@ -118,19 +118,18 @@ This preset provides safe automation with flexibility and control for teams main
 
 ## Database Updates
 
-The `drupal:update` command follows the same procedure as the
-['drush deploy'](https://www.drush.org/12.x/deploycommand/) command, with the
-exception that it runs the configuration import twice as in some cases the
-import can fail due to memory exhaustion before completion.
+The `drupal:update` command runs [`drush deploy`](https://www.drush.org/12.x/deploycommand/)
+directly, per the [Lullabot ADR on Drupal build steps](https://architecture.lullabot.com/adr/20260313-drupal-build-steps/).
 
 ```
-drush updatedb --no-cache-clear
-drush cache:rebuild
-drush config:import || true
-drush config:import
-drush deploy:hook
-drush cache:rebuild
+drush deploy
 ```
+
+Sites that need to customize the deploy steps (e.g. running `config:import`
+twice, or running `drush cron` after deploy) should replace the `drush deploy`
+command using a site-level Drush command file. See the
+[ADR](https://architecture.lullabot.com/adr/20260313-drupal-build-steps/) for a
+full example.
 
 ## .env support
 
@@ -291,6 +290,9 @@ Runs PHPUnit tests in:
 
 You will need to make sure you have a working Drupal site before you're
 able to run these.
+
+> [!WARNING]
+> **Deprecated since v5.2.0:** DTT (Drupal Test Traits) support will be removed in a future major release. If you rely on `ExistingSite` or `ExistingSiteJavascript` test types, plan to migrate away from Drainpipe's built-in DTT integration.
 
 Support for [Drupal Test Traits](https://gitlab.com/weitzman/drupal-test-traits)
 is included, set this in your `Taskfile.yml` vars:
@@ -737,14 +739,19 @@ When a deployment is made, you must run your own code _before_ and _after_ the d
         - task: build
   ```
 - **acquia:deploy:after**
+
+  Runs after the code is switched on the Acquia environment and before
+  `drupal:update` is called automatically by Drainpipe. Use this for any steps
+  that must happen between the code switch and the Drupal update, such as
+  enabling maintenance mode or syncing files from another environment.
+
   ```
     acquia:deploy:after:
       desc: "After the code is switched on the Acquia environment, run these commands"
       cmds:
-        # When using Drainpipe's deployment workflow,
-        # drupal:update runs on the Acquia environment because it sends
-        # a parameter that specifies the environment alias.
-        - task: drupal:update
+        # This task runs on the Acquia environment. The site alias is passed
+        # automatically so commands like drush run against the correct environment.
+        - task: drupal:maintenance:on
   ```
 
 ## GitLab CI Integration
@@ -795,17 +802,15 @@ Available variables are:
 | DRAINPIPE_DDEV_COMPOSER_CACHE_DIR | Set to "false" to disable composer cache dir, or another value to override the default location of .ddev/.drainpipe-composer-cache |
 | DRAINPIPE_DDEV_VERSION            | Install a specific version of DDEV instead of the latest                                                                           |
 
-### Composer Lock Diff
+### Security
 
-Updates Merge Request descriptions with a markdown table of any changes detected
-in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
-Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
-`api` scope.
+Runs `composer audit` and posts a composer lock diff as a merge request comment.
+Requires `GITLAB_ACCESS_TOKEN` variable to be set with `api` scope.
 
 ```json
 "extra": {
     "drainpipe": {
-        "gitlab": ["ComposerLockDiff"]
+        "gitlab": ["Security"]
     }
 }
 ```
