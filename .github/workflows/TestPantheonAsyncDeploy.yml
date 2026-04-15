@@ -330,9 +330,10 @@ jobs:
         run: |
           # With no secrets, the script must fail at secret validation — not at pattern filtering.
           # Absence of "Skipping" in output proves pr-42 passed the env guard.
+          # || true prevents bash -e from aborting when PHP exits 1 at secret validation.
           output=$(QS_ENVIRONMENT="pr-42" QS_SECRETS='{}' \
             php -d auto_prepend_file=/tmp/qs_bootstrap.php \
-            scaffold/pantheon/quicksilver/drainpipe_notify_github.php 2>&1)
+            scaffold/pantheon/quicksilver/drainpipe_notify_github.php 2>&1) || true
           echo "  $output"
           if echo "$output" | grep -qi "skipping"; then
             echo "FAIL: pr-42 was incorrectly treated as a non-review-app environment"
@@ -342,24 +343,27 @@ jobs:
 
       - name: "GitHub: missing secrets cause exit 1 with error message"
         run: |
-          if QS_ENVIRONMENT="pr-42" QS_SECRETS='{}' \
+          # Capture exit code explicitly — piping to tee would mask PHP's exit code.
+          exit_code=0
+          QS_ENVIRONMENT="pr-42" QS_SECRETS='{}' \
             php -d auto_prepend_file=/tmp/qs_bootstrap.php \
-            scaffold/pantheon/quicksilver/drainpipe_notify_github.php 2>&1 | tee /tmp/qs_out.txt; then
-            echo "FAIL: expected non-zero exit for missing secrets"
-            exit 1
-          fi
+            scaffold/pantheon/quicksilver/drainpipe_notify_github.php > /tmp/qs_out.txt 2>&1 \
+            || exit_code=$?
+          [ "$exit_code" -ne 0 ] \
+            || { echo "FAIL: expected non-zero exit for missing secrets"; exit 1; }
           grep -qi "ERROR" /tmp/qs_out.txt \
             || { echo "FAIL: expected ERROR message for missing secrets"; exit 1; }
           echo "PASS"
 
       - name: "GitHub: partial secrets (token only) also cause exit 1"
         run: |
-          if QS_ENVIRONMENT="pr-42" QS_SECRETS='{"drainpipe_github_token":"tok123"}' \
+          exit_code=0
+          QS_ENVIRONMENT="pr-42" QS_SECRETS='{"drainpipe_github_token":"tok123"}' \
             php -d auto_prepend_file=/tmp/qs_bootstrap.php \
-            scaffold/pantheon/quicksilver/drainpipe_notify_github.php 2>&1 | tee /tmp/qs_out2.txt; then
-            echo "FAIL: expected non-zero exit when repo secret is missing"
-            exit 1
-          fi
+            scaffold/pantheon/quicksilver/drainpipe_notify_github.php > /tmp/qs_out2.txt 2>&1 \
+            || exit_code=$?
+          [ "$exit_code" -ne 0 ] \
+            || { echo "FAIL: expected non-zero exit when repo secret is missing"; exit 1; }
           grep -qi "ERROR" /tmp/qs_out2.txt \
             || { echo "FAIL: expected ERROR message for partial secrets"; exit 1; }
           echo "PASS"
@@ -381,7 +385,7 @@ jobs:
         run: |
           output=$(QS_ENVIRONMENT="mr-42" QS_SECRETS='{}' \
             php -d auto_prepend_file=/tmp/qs_bootstrap.php \
-            scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php 2>&1)
+            scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php 2>&1) || true
           echo "  $output"
           if echo "$output" | grep -qi "skipping"; then
             echo "FAIL: mr-42 was incorrectly treated as a non-review-app environment"
@@ -391,12 +395,13 @@ jobs:
 
       - name: "GitLab: missing secrets cause exit 1 with error message"
         run: |
-          if QS_ENVIRONMENT="mr-42" QS_SECRETS='{}' \
+          exit_code=0
+          QS_ENVIRONMENT="mr-42" QS_SECRETS='{}' \
             php -d auto_prepend_file=/tmp/qs_bootstrap.php \
-            scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php 2>&1 | tee /tmp/qs_gl_out.txt; then
-            echo "FAIL: expected non-zero exit for missing secrets"
-            exit 1
-          fi
+            scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php > /tmp/qs_gl_out.txt 2>&1 \
+            || exit_code=$?
+          [ "$exit_code" -ne 0 ] \
+            || { echo "FAIL: expected non-zero exit for missing secrets"; exit 1; }
           grep -qi "ERROR" /tmp/qs_gl_out.txt \
             || { echo "FAIL: expected ERROR message for missing secrets"; exit 1; }
           echo "PASS"
@@ -404,12 +409,13 @@ jobs:
       - name: "GitLab: partial secrets cause exit 1"
         run: |
           # Only url provided — project_id, trigger_token, and ref are missing.
-          if QS_ENVIRONMENT="mr-42" QS_SECRETS='{"drainpipe_gitlab_url":"https://gitlab.com"}' \
+          exit_code=0
+          QS_ENVIRONMENT="mr-42" QS_SECRETS='{"drainpipe_gitlab_url":"https://gitlab.com"}' \
             php -d auto_prepend_file=/tmp/qs_bootstrap.php \
-            scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php 2>&1 | tee /tmp/qs_gl_out2.txt; then
-            echo "FAIL: expected non-zero exit when most secrets are missing"
-            exit 1
-          fi
+            scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php > /tmp/qs_gl_out2.txt 2>&1 \
+            || exit_code=$?
+          [ "$exit_code" -ne 0 ] \
+            || { echo "FAIL: expected non-zero exit when most secrets are missing"; exit 1; }
           grep -qi "ERROR" /tmp/qs_gl_out2.txt \
             || { echo "FAIL: expected ERROR message for partial secrets"; exit 1; }
           echo "PASS"
