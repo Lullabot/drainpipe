@@ -729,7 +729,7 @@ To enable deployment of Pantheon Review Apps (Multidev environments per pull req
     - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
     - `TERMINUS_TIMEOUT_LIMIT` (optional) Number of seconds that terminus will wait until timeout. Defaults to 600
     - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
-    - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to 'true' to skip wiping the multidev environment on each push, preserving its database state. Defaults to 'false'
+    - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to `'true'` to skip wiping and re-cloning the multidev's database and files on each push. When the multidev does not yet exist it is still created with a full content clone from the source environment; only subsequent pushes skip the clone. Defaults to `'false'` (always wipe and re-clone). See [Multidev content cloning performance](#multidev-content-cloning-performance).
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (`PANTHEON_TERMINUS_TOKEN` is also accepted for backwards compatibility)
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
@@ -899,6 +899,7 @@ To enable deployment of Pantheon Review Apps (Multidev environments per merge re
   - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
   - `REVIEW_APP_BASIC_AUTH` (optional) Basic auth credentials prepended to the review app URL e.g. `user:password@`
   - `PANTHEON_MULTIDEV_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
+  - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to `"true"` to skip deleting and re-creating the multidev on each push, preserving its database and files state. When the multidev does not yet exist it is still created with a full content clone from the source environment; only subsequent pushes skip the clone. Defaults to `"false"` (always delete and re-create). See [Multidev content cloning performance](#multidev-content-cloning-performance).
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
 [scaffold/gitlab/gitlab-ci.example.yml] for an example. You can also just
@@ -909,6 +910,28 @@ such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 > **Deprecated:** `"gitlab": ["Pantheon", "PantheonReviewApps"]` still works but is deprecated.
 > Migrate to `"gitlab": {"pantheon": ["Deploy", "ReviewApps"]}`.`"gitlab": ["Pantheon"]` alone
 > maps to `{"pantheon": ["Deploy"]}`.
+
+### Multidev content cloning performance
+
+By default, every push to an open pull request / merge request wipes the multidev's database and
+files and re-clones them from the source environment (e.g. `live`). This guarantees that reviewers
+always see content that mirrors production, but it is the slowest part of the deployment: cloning a
+large database can add several minutes to every CI run.
+
+Set `PANTHEON_SKIP_WIPE_MULTIDEV` to `'true'` (GitHub) or `"true"` (GitLab) to change this
+behaviour:
+
+- **First push** (multidev does not exist yet): content is still cloned from the source environment
+  so the environment starts with realistic data.
+- **Subsequent pushes** (multidev already exists): the wipe / delete-and-recreate step is skipped.
+  Only code is updated. The database and files remain as they were after the previous deployment,
+  which may include data entered or modified by reviewers.
+
+**When to use it:** `PANTHEON_SKIP_WIPE_MULTIDEV=true` is a good default for projects where
+reviewers do not depend on a fresh production database for each review, or where the `live`
+database is large enough to make cloning noticeably slow. Keep it at the default `false` when it
+is important that each push reflects the current production content (e.g. for content-heavy sites
+where QA involves checking migrations or editor workflows).
 
 ## Tugboat
 

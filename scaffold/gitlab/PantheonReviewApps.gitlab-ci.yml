@@ -2,12 +2,18 @@
   script:
     - !reference [.drainpipe_pantheon_setup_terminus, script]
     - composer install
-    - terminus multidev:delete $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --delete-branch --yes || true
     - |
-      if [ "$PANTHEON_MULTIDEV_RUN_INSTALLER" == "true" ]; then
-        terminus multidev:create $PANTHEON_SITE_NAME.dev mr-$CI_MERGE_REQUEST_IID --no-db --no-files --yes
-      else
-        terminus multidev:create $PANTHEON_SITE_NAME.dev mr-$CI_MERGE_REQUEST_IID --yes
+      if [ "$PANTHEON_SKIP_WIPE_MULTIDEV" == "true" ]; then
+        MULTIDEV_EXISTS=$(terminus multidev:list $PANTHEON_SITE_NAME --format json | jq -r --arg env "mr-$CI_MERGE_REQUEST_IID" '.[] | select(.id == $env) | .id')
+      fi
+    - |
+      if [ "$PANTHEON_SKIP_WIPE_MULTIDEV" != "true" ] || [ -z "$MULTIDEV_EXISTS" ]; then
+        terminus multidev:delete $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --delete-branch --yes || true
+        if [ "$PANTHEON_MULTIDEV_RUN_INSTALLER" == "true" ]; then
+          terminus multidev:create $PANTHEON_SITE_NAME.dev mr-$CI_MERGE_REQUEST_IID --no-db --no-files --yes
+        else
+          terminus multidev:create $PANTHEON_SITE_NAME.dev mr-$CI_MERGE_REQUEST_IID --yes
+        fi
       fi
     - ./vendor/bin/task build
     - ./vendor/bin/task snapshot:directory
