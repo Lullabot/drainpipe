@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -29,8 +31,10 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Set environment variables
+        env:
+          PAYLOAD_ENVIRONMENT: ${{ github.event.client_payload.environment }}
         run: | # zizmor: ignore[github-env]
-          ENVIRONMENT="${{ github.event.client_payload.environment }}"
+          ENVIRONMENT="$PAYLOAD_ENVIRONMENT"
           PR_NUMBER=$(echo "$ENVIRONMENT" | sed 's/pr-//')
           echo "MULTIDEV_NAME=$ENVIRONMENT" >> $GITHUB_ENV
           echo "DRAINPIPE_PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV

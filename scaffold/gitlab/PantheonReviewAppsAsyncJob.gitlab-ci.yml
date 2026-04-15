@@ -101,7 +101,7 @@ drainpipe_pantheon_multidev_cleanup:
         # Check it's a number.
         if [ "$MR" -eq "$MR" ]; then
           STATE=$(curl -s --fail -H "PRIVATE-TOKEN: $GITLAB_ACCESS_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$MR" | jq -r '.state')
-          if [ $STATE != "opened" ]; then
+          if [ "$STATE" != "opened" ]; then
             echo "Deleting Pantheon Multidev for $MR"
             terminus --yes multidev:delete $PANTHEON_SITE_NAME.mr-$MR
           fi
