@@ -1,0 +1,80 @@
+name: "Pantheon Review Apps"
+
+on:
+  pull_request:
+    types: [labeled, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+# You will also need to add the secrets used below to Dependabot secrets
+# if you want this to successfully run in auto-created PRs.
+permissions:
+  deployments: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  Drainpipe-Deploy-Pantheon-Multidev:
+    if: contains(github.event.pull_request.labels.*.name, 'build multidev')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - uses: ./.github/actions/drainpipe/set-env
+
+      - uses: ./.github/actions/drainpipe/validate-terminus-timeout
+        with:
+          terminus_timeout_limit: ${{ vars.TERMINUS_TIMEOUT_LIMIT }}
+
+      - uses: ./.github/actions/drainpipe/setup-git
+        with:
+          git-name: Drainpipe Bot
+          git-email: no-reply@example.com
+
+      - uses: ./.github/actions/drainpipe/setup-ssh
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
+        with:
+          terminus-token: ${{ secrets.TERMINUS_MACHINE_TOKEN || secrets.PANTHEON_TERMINUS_TOKEN }}
+          terminus-plugins: ${{ vars.TERMINUS_PLUGINS || secrets.TERMINUS_PLUGINS }}
+
+      - uses: php-actions/composer@8a65f0d3c6a1d17ca4800491a40b5756a4c164f3 # v6.1.2
+
+      - name: Build Project
+        env:
+          directory: /tmp/release
+        run: |
+          composer install
+          task build
+          task snapshot:directory directory=/tmp/release
+
+      - name: Deploy Pantheon Review App
+        uses: ./.github/actions/drainpipe/pantheon/review
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          terminus-token: ${{ secrets.TERMINUS_MACHINE_TOKEN || secrets.PANTHEON_TERMINUS_TOKEN }}
+          commit-message: ${{ github.sha }}
+          site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
+          lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
+          lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+          clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
+          terminus-timeout-limit: ${{ env.TERMINUS_TIMEOUT_LIMIT }}
+          skip-wipe-multidev: ${{ vars.PANTHEON_SKIP_WIPE_MULTIDEV }}
+          async: 'true'

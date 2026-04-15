@@ -34,6 +34,10 @@ inputs:
     description: "Whether or not to skip wiping the multidev on each push. Defaults to false."
     required: false
     default: "false"
+  async:
+    description: "When 'true', skip the post-deploy step (terminus workflow:wait, drush update, deployment success). The Quicksilver async flow handles that in a separate job."
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -176,28 +180,31 @@ runs:
         INPUT_RUN_INSTALLER: ${{ inputs.run-installer }}
         INPUT_LOCK_USERNAME: ${{ inputs.lock-username }}
         INPUT_LOCK_PASSWORD: ${{ inputs.lock-password }}
+        INPUT_ASYNC: ${{ inputs.async }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        echo "::notice::Waiting $INPUT_TERMINUS_TIMEOUT seconds for Pantheon to sync..."
-        drainpipe_exec "terminus workflow:wait -vv --max $INPUT_TERMINUS_TIMEOUT -- $INPUT_SITE_NAME.$MULTIDEV_NAME"
+        if [ "$INPUT_ASYNC" != "true" ]; then
+          echo "::notice::Waiting $INPUT_TERMINUS_TIMEOUT seconds for Pantheon to sync..."
+          drainpipe_exec "terminus workflow:wait -vv --max $INPUT_TERMINUS_TIMEOUT -- $INPUT_SITE_NAME.$MULTIDEV_NAME"
 
-        drainpipe_exec "terminus aliases --only $INPUT_SITE_NAME --yes"
-        if [ "$INPUT_RUN_INSTALLER" == "true" ]; then
-          drainpipe_exec "./vendor/bin/drush @$INPUT_SITE_NAME.$MULTIDEV_NAME --yes site:install --existing-config"
-        elif drainpipe_exec "./vendor/bin/task -l | grep '* update: '"; then
-          drainpipe_exec "./vendor/bin/task update site=@$INPUT_SITE_NAME.$MULTIDEV_NAME"
-        else
-          drainpipe_exec "./vendor/bin/task drupal:update site=@$INPUT_SITE_NAME.$MULTIDEV_NAME"
+          drainpipe_exec "terminus aliases --only $INPUT_SITE_NAME --yes"
+          if [ "$INPUT_RUN_INSTALLER" == "true" ]; then
+            drainpipe_exec "./vendor/bin/drush @$INPUT_SITE_NAME.$MULTIDEV_NAME --yes site:install --existing-config"
+          elif drainpipe_exec "./vendor/bin/task -l | grep '* update: '"; then
+            drainpipe_exec "./vendor/bin/task update site=@$INPUT_SITE_NAME.$MULTIDEV_NAME"
+          else
+            drainpipe_exec "./vendor/bin/task drupal:update site=@$INPUT_SITE_NAME.$MULTIDEV_NAME"
+          fi
+          ENVIRONMENT_URL="https://$MULTIDEV_NAME-$INPUT_SITE_NAME.pantheonsite.io"
+          # Lock Environment.
+          if [ "$INPUT_LOCK_USERNAME" != "" ] && [ "$INPUT_LOCK_PASSWORD" != "" ]; then
+            drainpipe_exec "terminus lock:enable $INPUT_SITE_NAME.$MULTIDEV_NAME $INPUT_LOCK_USERNAME $INPUT_LOCK_PASSWORD"
+            ENVIRONMENT_URL="https://$INPUT_LOCK_USERNAME:$INPUT_LOCK_PASSWORD@$MULTIDEV_NAME-$INPUT_SITE_NAME.pantheonsite.io"
+          fi
+          curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"success\", \"environment_url\": \"$ENVIRONMENT_URL\"}"
         fi
-        ENVIRONMENT_URL="https://$MULTIDEV_NAME-$INPUT_SITE_NAME.pantheonsite.io"
-        # Lock Environment.
-        if [ "$INPUT_LOCK_USERNAME" != "" ] && [ "$INPUT_LOCK_PASSWORD" != "" ]; then
-          drainpipe_exec "terminus lock:enable $INPUT_SITE_NAME.$MULTIDEV_NAME $INPUT_LOCK_USERNAME $INPUT_LOCK_PASSWORD"
-          ENVIRONMENT_URL="https://$INPUT_LOCK_USERNAME:$INPUT_LOCK_PASSWORD@$MULTIDEV_NAME-$INPUT_SITE_NAME.pantheonsite.io"
-        fi
-        curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"success\", \"environment_url\": \"$ENVIRONMENT_URL\"}"
       shell: bash
 
     - name: Set Deployment Failure Status
