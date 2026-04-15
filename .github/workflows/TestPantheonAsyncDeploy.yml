@@ -1,0 +1,415 @@
+name: "Test Pantheon AsyncDeploy"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+
+  # -----------------------------------------------------------------------
+  # 1. Composer plugin — GitHub AsyncDeploy scaffold
+  # -----------------------------------------------------------------------
+  scaffold-github-async:
+    name: "Scaffold — GitHub AsyncDeploy"
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+
+      - name: Create test project with GitHub AsyncDeploy
+        run: |
+          mkdir /tmp/test-gh-async
+          cat > /tmp/test-gh-async/composer.json << EOF
+          {
+            "name": "test/gh-async",
+            "repositories": [{"type": "path", "url": "$GITHUB_WORKSPACE", "options": {"symlink": false}}],
+            "require": {"lullabot/drainpipe": "*"},
+            "extra": {"drainpipe": {"github": {"pantheon": ["ReviewApps", "AsyncDeploy"]}}},
+            "config": {"allow-plugins": {"lullabot/drainpipe": true}},
+            "minimum-stability": "dev",
+            "prefer-stable": true
+          }
+          EOF
+          composer install --no-interaction --working-dir=/tmp/test-gh-async
+
+      - name: Assert async review workflow is installed
+        run: |
+          test -f /tmp/test-gh-async/.github/workflows/PantheonReviewApps.yml \
+            || { echo "FAIL: PantheonReviewApps.yml not found"; exit 1; }
+          grep -q "async: 'true'" /tmp/test-gh-async/.github/workflows/PantheonReviewApps.yml \
+            || { echo "FAIL: async: 'true' not present in PantheonReviewApps.yml"; exit 1; }
+          echo "PASS"
+
+      - name: Assert post-deploy workflow is installed
+        run: |
+          test -f /tmp/test-gh-async/.github/workflows/PantheonReviewAppsPostDeploy.yml \
+            || { echo "FAIL: PantheonReviewAppsPostDeploy.yml not found"; exit 1; }
+          grep -q "pantheon-multidev-synced" /tmp/test-gh-async/.github/workflows/PantheonReviewAppsPostDeploy.yml \
+            || { echo "FAIL: repository_dispatch trigger not found"; exit 1; }
+          echo "PASS"
+
+      - name: Assert Quicksilver GitHub script is scaffolded
+        run: |
+          test -f /tmp/test-gh-async/web/private/scripts/drainpipe_notify_github.php \
+            || { echo "FAIL: drainpipe_notify_github.php not found"; exit 1; }
+          echo "PASS"
+
+      - name: Assert GitLab artifacts are NOT installed
+        run: |
+          test ! -f /tmp/test-gh-async/.drainpipe/gitlab/PantheonReviewAppsPostDeploy.gitlab-ci.yml \
+            || { echo "FAIL: GitLab post-deploy file should not be installed for GitHub config"; exit 1; }
+          test ! -f /tmp/test-gh-async/web/private/scripts/drainpipe_notify_gitlab.php \
+            || { echo "FAIL: GitLab Quicksilver script should not be installed for GitHub config"; exit 1; }
+          echo "PASS"
+
+  # -----------------------------------------------------------------------
+  # 2. Composer plugin — GitLab AsyncDeploy scaffold
+  # -----------------------------------------------------------------------
+  scaffold-gitlab-async:
+    name: "Scaffold — GitLab AsyncDeploy"
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+
+      - name: Create test project with GitLab AsyncDeploy
+        run: |
+          mkdir /tmp/test-gl-async
+          cat > /tmp/test-gl-async/composer.json << EOF
+          {
+            "name": "test/gl-async",
+            "repositories": [{"type": "path", "url": "$GITHUB_WORKSPACE", "options": {"symlink": false}}],
+            "require": {"lullabot/drainpipe": "*"},
+            "extra": {"drainpipe": {"gitlab": {"pantheon": ["Deploy", "ReviewApps", "AsyncDeploy"]}}},
+            "config": {"allow-plugins": {"lullabot/drainpipe": true}},
+            "minimum-stability": "dev",
+            "prefer-stable": true
+          }
+          EOF
+          composer install --no-interaction --working-dir=/tmp/test-gl-async
+
+      - name: Assert async GitLab review job is installed
+        run: |
+          test -f /tmp/test-gl-async/.drainpipe/gitlab/PantheonReviewApps.gitlab-ci.yml \
+            || { echo "FAIL: PantheonReviewApps.gitlab-ci.yml not found"; exit 1; }
+          grep -q 'PANTHEON_ASYNC_DEPLOY: "true"' /tmp/test-gl-async/.drainpipe/gitlab/PantheonReviewApps.gitlab-ci.yml \
+            || { echo "FAIL: PANTHEON_ASYNC_DEPLOY not set in GitLab async job"; exit 1; }
+          echo "PASS"
+
+      - name: Assert GitLab post-deploy job is installed
+        run: |
+          test -f /tmp/test-gl-async/.drainpipe/gitlab/PantheonReviewAppsPostDeploy.gitlab-ci.yml \
+            || { echo "FAIL: PantheonReviewAppsPostDeploy.gitlab-ci.yml not found"; exit 1; }
+          grep -q "PANTHEON_TRIGGERED_ENVIRONMENT" /tmp/test-gl-async/.drainpipe/gitlab/PantheonReviewAppsPostDeploy.gitlab-ci.yml \
+            || { echo "FAIL: trigger variable not found in post-deploy job"; exit 1; }
+          echo "PASS"
+
+      - name: Assert Quicksilver GitLab script is scaffolded
+        run: |
+          test -f /tmp/test-gl-async/web/private/scripts/drainpipe_notify_gitlab.php \
+            || { echo "FAIL: drainpipe_notify_gitlab.php not found"; exit 1; }
+          echo "PASS"
+
+  # -----------------------------------------------------------------------
+  # 3. Composer plugin — blocking mode unaffected by AsyncDeploy
+  # -----------------------------------------------------------------------
+  scaffold-blocking-unaffected:
+    name: "Scaffold — blocking mode unaffected"
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+
+      - name: Create test project with ReviewApps only (no AsyncDeploy)
+        run: |
+          mkdir /tmp/test-blocking
+          cat > /tmp/test-blocking/composer.json << EOF
+          {
+            "name": "test/blocking",
+            "repositories": [{"type": "path", "url": "$GITHUB_WORKSPACE", "options": {"symlink": false}}],
+            "require": {"lullabot/drainpipe": "*"},
+            "extra": {"drainpipe": {"github": {"pantheon": ["ReviewApps"]}}},
+            "config": {"allow-plugins": {"lullabot/drainpipe": true}},
+            "minimum-stability": "dev",
+            "prefer-stable": true
+          }
+          EOF
+          composer install --no-interaction --working-dir=/tmp/test-blocking
+
+      - name: Assert blocking (non-async) workflow is installed
+        run: |
+          test -f /tmp/test-blocking/.github/workflows/PantheonReviewApps.yml \
+            || { echo "FAIL: PantheonReviewApps.yml not found"; exit 1; }
+          if grep -q "async: 'true'" /tmp/test-blocking/.github/workflows/PantheonReviewApps.yml; then
+            echo "FAIL: async: 'true' should not be present in blocking mode workflow"
+            exit 1
+          fi
+          echo "PASS"
+
+      - name: Assert post-deploy workflow is NOT installed
+        run: |
+          if test -f /tmp/test-blocking/.github/workflows/PantheonReviewAppsPostDeploy.yml; then
+            echo "FAIL: PantheonReviewAppsPostDeploy.yml should not be installed without AsyncDeploy"
+            exit 1
+          fi
+          echo "PASS"
+
+      - name: Assert Quicksilver script is NOT scaffolded
+        run: |
+          if test -f /tmp/test-blocking/web/private/scripts/drainpipe_notify_github.php; then
+            echo "FAIL: drainpipe_notify_github.php should not be scaffolded without AsyncDeploy"
+            exit 1
+          fi
+          echo "PASS"
+
+  # -----------------------------------------------------------------------
+  # 4. Bash guards — review/action.yml async input and
+  #                  update/action.yml skip-workflow-wait input
+  # -----------------------------------------------------------------------
+  bash-guards:
+    name: "Bash — async and skip-workflow-wait guards"
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: "review/action.yml: async=true skips terminus workflow:wait"
+        run: |
+          CALL_LOG=$(mktemp)
+          drainpipe_exec() { echo "$1" >> "$CALL_LOG"; }
+          export -f drainpipe_exec
+
+          INPUT_ASYNC="true"
+          INPUT_SITE_NAME="mysite"
+          INPUT_TERMINUS_TIMEOUT="600"
+          MULTIDEV_NAME="pr-42"
+
+          if [ "$INPUT_ASYNC" != "true" ]; then
+            drainpipe_exec "terminus workflow:wait -vv --max $INPUT_TERMINUS_TIMEOUT -- $INPUT_SITE_NAME.$MULTIDEV_NAME"
+          fi
+
+          if grep -q "workflow:wait" "$CALL_LOG"; then
+            echo "FAIL: terminus workflow:wait was called with async=true"
+            exit 1
+          fi
+          echo "PASS"
+
+      - name: "review/action.yml: async=false calls terminus workflow:wait"
+        run: |
+          CALL_LOG=$(mktemp)
+          drainpipe_exec() { echo "$1" >> "$CALL_LOG"; }
+          export -f drainpipe_exec
+
+          INPUT_ASYNC="false"
+          INPUT_SITE_NAME="mysite"
+          INPUT_TERMINUS_TIMEOUT="600"
+          MULTIDEV_NAME="pr-42"
+
+          if [ "$INPUT_ASYNC" != "true" ]; then
+            drainpipe_exec "terminus workflow:wait -vv --max $INPUT_TERMINUS_TIMEOUT -- $INPUT_SITE_NAME.$MULTIDEV_NAME"
+          fi
+
+          grep -q "workflow:wait" "$CALL_LOG" \
+            || { echo "FAIL: terminus workflow:wait was not called with async=false"; exit 1; }
+          echo "PASS"
+
+      - name: "update/action.yml: skip-workflow-wait=true skips terminus workflow:wait"
+        run: |
+          CALL_LOG=$(mktemp)
+          drainpipe_exec() { echo "$1" >> "$CALL_LOG"; }
+          export -f drainpipe_exec
+
+          INPUT_SKIP_WORKFLOW_WAIT="true"
+          INPUT_SITE_NAME="mysite"
+          INPUT_ENVIRONMENT="pr-42"
+
+          if [ "$INPUT_SKIP_WORKFLOW_WAIT" != "true" ]; then
+            drainpipe_exec "terminus workflow:wait $INPUT_SITE_NAME.$INPUT_ENVIRONMENT"
+          fi
+
+          if grep -q "workflow:wait" "$CALL_LOG"; then
+            echo "FAIL: terminus workflow:wait was called with skip-workflow-wait=true"
+            exit 1
+          fi
+          echo "PASS"
+
+      - name: "update/action.yml: skip-workflow-wait=false calls terminus workflow:wait"
+        run: |
+          CALL_LOG=$(mktemp)
+          drainpipe_exec() { echo "$1" >> "$CALL_LOG"; }
+          export -f drainpipe_exec
+
+          INPUT_SKIP_WORKFLOW_WAIT="false"
+          INPUT_SITE_NAME="mysite"
+          INPUT_ENVIRONMENT="pr-42"
+
+          if [ "$INPUT_SKIP_WORKFLOW_WAIT" != "true" ]; then
+            drainpipe_exec "terminus workflow:wait $INPUT_SITE_NAME.$INPUT_ENVIRONMENT"
+          fi
+
+          grep -q "workflow:wait" "$CALL_LOG" \
+            || { echo "FAIL: terminus workflow:wait was not called with skip-workflow-wait=false"; exit 1; }
+          echo "PASS"
+
+  # -----------------------------------------------------------------------
+  # 5. PHP — Quicksilver script behaviour (no Pantheon required)
+  #    Tests environment pattern filtering and missing-secrets validation.
+  #    pantheon_get_secret() is mocked via auto_prepend_file.
+  # -----------------------------------------------------------------------
+  quicksilver-php:
+    name: "PHP — Quicksilver scripts"
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
+        with:
+          php-version: "8.3"
+
+      - name: Write PHP bootstrap
+        run: |
+          cat > /tmp/qs_bootstrap.php << 'EOF'
+          <?php
+          $_POST['environment'] = getenv('QS_ENVIRONMENT') ?: '';
+          $_SERVER['PANTHEON_SITE_NAME'] = 'mysite';
+          $secrets = json_decode(getenv('QS_SECRETS') ?: '{}', true);
+          function pantheon_get_secret(string $key): string {
+              global $secrets;
+              return $secrets[$key] ?? '';
+          }
+          EOF
+
+      # --- GitHub Quicksilver script ---
+
+      - name: "GitHub: non-pr environments are skipped (exit 0)"
+        run: |
+          for env in dev test live feature-branch mr-42; do
+            output=$(QS_ENVIRONMENT="$env" php -d auto_prepend_file=/tmp/qs_bootstrap.php \
+              scaffold/pantheon/quicksilver/drainpipe_notify_github.php 2>&1)
+            echo "  [$env] $output"
+            echo "$output" | grep -qi "skipping" \
+              || { echo "FAIL: expected 'Skipping' output for env '$env'"; exit 1; }
+          done
+          echo "PASS"
+
+      - name: "GitHub: pr-NNN passes pattern filter (reaches secret validation)"
+        run: |
+          # With no secrets, the script must fail at secret validation — not at pattern filtering.
+          # Absence of "Skipping" in output proves pr-42 passed the env guard.
+          output=$(QS_ENVIRONMENT="pr-42" QS_SECRETS='{}' \
+            php -d auto_prepend_file=/tmp/qs_bootstrap.php \
+            scaffold/pantheon/quicksilver/drainpipe_notify_github.php 2>&1)
+          echo "  $output"
+          if echo "$output" | grep -qi "skipping"; then
+            echo "FAIL: pr-42 was incorrectly treated as a non-review-app environment"
+            exit 1
+          fi
+          echo "PASS"
+
+      - name: "GitHub: missing secrets cause exit 1 with error message"
+        run: |
+          if QS_ENVIRONMENT="pr-42" QS_SECRETS='{}' \
+            php -d auto_prepend_file=/tmp/qs_bootstrap.php \
+            scaffold/pantheon/quicksilver/drainpipe_notify_github.php 2>&1 | tee /tmp/qs_out.txt; then
+            echo "FAIL: expected non-zero exit for missing secrets"
+            exit 1
+          fi
+          grep -qi "ERROR" /tmp/qs_out.txt \
+            || { echo "FAIL: expected ERROR message for missing secrets"; exit 1; }
+          echo "PASS"
+
+      - name: "GitHub: partial secrets (token only) also cause exit 1"
+        run: |
+          if QS_ENVIRONMENT="pr-42" QS_SECRETS='{"drainpipe_github_token":"tok123"}' \
+            php -d auto_prepend_file=/tmp/qs_bootstrap.php \
+            scaffold/pantheon/quicksilver/drainpipe_notify_github.php 2>&1 | tee /tmp/qs_out2.txt; then
+            echo "FAIL: expected non-zero exit when repo secret is missing"
+            exit 1
+          fi
+          grep -qi "ERROR" /tmp/qs_out2.txt \
+            || { echo "FAIL: expected ERROR message for partial secrets"; exit 1; }
+          echo "PASS"
+
+      # --- GitLab Quicksilver script ---
+
+      - name: "GitLab: non-mr environments are skipped (exit 0)"
+        run: |
+          for env in dev test live feature-branch pr-42; do
+            output=$(QS_ENVIRONMENT="$env" php -d auto_prepend_file=/tmp/qs_bootstrap.php \
+              scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php 2>&1)
+            echo "  [$env] $output"
+            echo "$output" | grep -qi "skipping" \
+              || { echo "FAIL: expected 'Skipping' output for env '$env'"; exit 1; }
+          done
+          echo "PASS"
+
+      - name: "GitLab: mr-NNN passes pattern filter (reaches secret validation)"
+        run: |
+          output=$(QS_ENVIRONMENT="mr-42" QS_SECRETS='{}' \
+            php -d auto_prepend_file=/tmp/qs_bootstrap.php \
+            scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php 2>&1)
+          echo "  $output"
+          if echo "$output" | grep -qi "skipping"; then
+            echo "FAIL: mr-42 was incorrectly treated as a non-review-app environment"
+            exit 1
+          fi
+          echo "PASS"
+
+      - name: "GitLab: missing secrets cause exit 1 with error message"
+        run: |
+          if QS_ENVIRONMENT="mr-42" QS_SECRETS='{}' \
+            php -d auto_prepend_file=/tmp/qs_bootstrap.php \
+            scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php 2>&1 | tee /tmp/qs_gl_out.txt; then
+            echo "FAIL: expected non-zero exit for missing secrets"
+            exit 1
+          fi
+          grep -qi "ERROR" /tmp/qs_gl_out.txt \
+            || { echo "FAIL: expected ERROR message for missing secrets"; exit 1; }
+          echo "PASS"
+
+      - name: "GitLab: partial secrets cause exit 1"
+        run: |
+          # Only url provided — project_id, trigger_token, and ref are missing.
+          if QS_ENVIRONMENT="mr-42" QS_SECRETS='{"drainpipe_gitlab_url":"https://gitlab.com"}' \
+            php -d auto_prepend_file=/tmp/qs_bootstrap.php \
+            scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php 2>&1 | tee /tmp/qs_gl_out2.txt; then
+            echo "FAIL: expected non-zero exit when most secrets are missing"
+            exit 1
+          fi
+          grep -qi "ERROR" /tmp/qs_gl_out2.txt \
+            || { echo "FAIL: expected ERROR message for partial secrets"; exit 1; }
+          echo "PASS"
