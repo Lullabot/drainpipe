@@ -796,6 +796,7 @@ EOT;
                 $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsPostDeploy.yml", './.github/workflows/PantheonReviewAppsPostDeploy.yml');
                 $fs->ensureDirectoryExists('./web/private/scripts');
                 $fs->copy("$scaffoldPath/pantheon/quicksilver/drainpipe_notify_github.php", './web/private/scripts/drainpipe_notify_github.php');
+                $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsWatchdog.yml", './.github/workflows/PantheonReviewAppsWatchdog.yml');
                 $this->io->write('🪠 [Drainpipe] Pantheon async deploy scaffolded.');
             }
         }

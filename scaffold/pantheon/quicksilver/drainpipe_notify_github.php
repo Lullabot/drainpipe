@@ -51,4 +51,14 @@ $response  = curl_exec($ch);
 $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-echo "GitHub dispatch HTTP $http_code: $response\n";
+if ($response === false || $http_code === 0) {
+    echo "ERROR: curl connection failed for $github_repo dispatch (environment: $environment).\n";
+    exit(1);
+}
+
+if ($http_code < 200 || $http_code >= 300) {
+    echo "ERROR: GitHub dispatch failed — HTTP $http_code for $github_repo (environment: $environment). Response: $response\n";
+    exit(1);
+}
+
+echo "SUCCESS: Dispatched pantheon-multidev-synced for $environment to $github_repo — HTTP $http_code.\n";

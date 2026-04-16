@@ -88,7 +88,7 @@ runs:
         echo "Created GitHub Deployment ID $GITHUB_DEPLOYMENT_ID"
         if [ -z "$GITHUB_DEPLOYMENT_ID" ] || [ "$GITHUB_DEPLOYMENT_ID" = "null" ]; then echo $GITHUB_DEPLOYMENT && exit 1; fi
         echo "GITHUB_DEPLOYMENT_ID=$GITHUB_DEPLOYMENT_ID" >> $GITHUB_ENV
-        curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d '{"state":"in_progress"}'
+        curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"in_progress\",\"log_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
       shell: bash
 
     - name: Clean Stale Environments
@@ -204,6 +204,27 @@ runs:
             ENVIRONMENT_URL="https://$INPUT_LOCK_USERNAME:$INPUT_LOCK_PASSWORD@$MULTIDEV_NAME-$INPUT_SITE_NAME.pantheonsite.io"
           fi
           curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"success\", \"environment_url\": \"$ENVIRONMENT_URL\"}"
+        else
+          SITE_UUID=$(drainpipe_exec "terminus site:info --format=json $INPUT_SITE_NAME" 2>/dev/null | jq -r '.id // ""') || SITE_UUID=""
+          PANTHEON_LOG_URL=""
+          if [ -n "$SITE_UUID" ]; then
+            PANTHEON_LOG_URL="https://dashboard.pantheon.io/sites/$SITE_UUID#$MULTIDEV_NAME/workflows"
+          fi
+          POST_DEPLOY_RUNS_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/workflows/PantheonReviewAppsPostDeploy.yml"
+          {
+            printf '\n## Pantheon Async Deploy \xe2\x80\x94 Code Pushed\n\n'
+            printf 'Code has been pushed to Pantheon multidev `%s`. The CI runner is now free.\n\n' "$MULTIDEV_NAME"
+            printf 'Pantheon will sync the code internally (typically 2\xe2\x80\x935 minutes). Once sync completes, the\n'
+            printf 'Quicksilver hook fires and triggers the **Pantheon Review Apps Post-Deploy** workflow to run\n'
+            printf 'Drupal updates and mark the deployment as ready.\n\n'
+            printf '### If the post-deploy job does not appear within 20 minutes\n\n'
+            printf '| Resource | Action |\n'
+            printf '|----------|--------|\n'
+            printf '| Pantheon workflow logs (Quicksilver output) | %s |\n' "$PANTHEON_LOG_URL"
+            printf '| GitHub Actions \xe2\x80\x94 post-deploy runs | %s |\n' "$POST_DEPLOY_RUNS_URL"
+            printf '| Local terminus diagnosis | `terminus workflow:list %s.%s` |\n' "$INPUT_SITE_NAME" "$MULTIDEV_NAME"
+            printf '\n'
+          } >> "$GITHUB_STEP_SUMMARY"
         fi
       shell: bash
 
@@ -211,6 +232,6 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
-        curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"failure\"}"
+        curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses -d "{\"state\":\"failure\",\"log_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
       if: ${{ failure() }}
       shell: bash

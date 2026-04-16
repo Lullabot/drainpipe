@@ -46,4 +46,14 @@ $response  = curl_exec($ch);
 $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-echo "GitLab trigger HTTP $http_code: $response\n";
+if ($response === false || $http_code === 0) {
+    echo "ERROR: curl connection failed for GitLab project $project_id trigger (environment: $environment).\n";
+    exit(1);
+}
+
+if ($http_code < 200 || $http_code >= 300) {
+    echo "ERROR: GitLab pipeline trigger failed — HTTP $http_code for project $project_id (environment: $environment). Response: $response\n";
+    exit(1);
+}
+
+echo "SUCCESS: Triggered GitLab pipeline for $environment (project $project_id) — HTTP $http_code.\n";

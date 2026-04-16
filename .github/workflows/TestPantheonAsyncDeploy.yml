@@ -77,6 +77,14 @@ jobs:
             || { echo "FAIL: GitLab Quicksilver script should not be installed for GitHub config"; exit 1; }
           echo "PASS"
 
+      - name: Assert watchdog workflow is installed
+        run: |
+          test -f /tmp/test-gh-async/.github/workflows/PantheonReviewAppsWatchdog.yml \
+            || { echo "FAIL: PantheonReviewAppsWatchdog.yml not found"; exit 1; }
+          grep -q 'schedule' /tmp/test-gh-async/.github/workflows/PantheonReviewAppsWatchdog.yml \
+            || { echo "FAIL: watchdog missing schedule trigger"; exit 1; }
+          echo "PASS"
+
   # -----------------------------------------------------------------------
   # 2. Composer plugin — GitLab AsyncDeploy scaffold
   # -----------------------------------------------------------------------
@@ -187,6 +195,14 @@ jobs:
         run: |
           if test -f /tmp/test-blocking/web/private/scripts/drainpipe_notify_github.php; then
             echo "FAIL: drainpipe_notify_github.php should not be scaffolded without AsyncDeploy"
+            exit 1
+          fi
+          echo "PASS"
+
+      - name: Assert watchdog is NOT installed in blocking mode
+        run: |
+          if test -f /tmp/test-blocking/.github/workflows/PantheonReviewAppsWatchdog.yml; then
+            echo "FAIL: PantheonReviewAppsWatchdog.yml should not be installed without AsyncDeploy"
             exit 1
           fi
           echo "PASS"
@@ -418,4 +434,43 @@ jobs:
             || { echo "FAIL: expected non-zero exit when most secrets are missing"; exit 1; }
           grep -qi "ERROR" /tmp/qs_gl_out2.txt \
             || { echo "FAIL: expected ERROR message for partial secrets"; exit 1; }
+          echo "PASS"
+
+      # --- HTTP error response handling ---
+
+      - name: "GitHub: non-2xx HTTP response causes exit 1 (source assertion)"
+        run: |
+          grep -qE 'http_code < 200|http_code >= 300' \
+            scaffold/pantheon/quicksilver/drainpipe_notify_github.php \
+            || { echo "FAIL: drainpipe_notify_github.php does not check HTTP response code"; exit 1; }
+          echo "PASS"
+
+      - name: "GitHub: non-2xx exit logic is correct (inline verification)"
+        run: |
+          exit_code=0
+          php -r '
+            $http_code = 403;
+            $response = "{\"message\":\"Bad credentials\"}";
+            if ($http_code === false || $http_code === 0) { echo "ERROR: curl failed\n"; exit(1); }
+            if ($http_code < 200 || $http_code >= 300) { echo "ERROR: HTTP $http_code\n"; exit(1); }
+          ' || exit_code=$?
+          [ "$exit_code" -ne 0 ] || { echo "FAIL: 403 should produce exit 1"; exit 1; }
+          echo "PASS"
+
+      - name: "GitHub: 204 success does NOT exit 1 (inline verification)"
+        run: |
+          php -r '
+            $http_code = 204;
+            $response = "";
+            if ($http_code === false || $http_code === 0) { echo "ERROR: curl failed\n"; exit(1); }
+            if ($http_code < 200 || $http_code >= 300) { echo "ERROR: HTTP $http_code\n"; exit(1); }
+            echo "SUCCESS: HTTP $http_code\n";
+          '
+          echo "PASS"
+
+      - name: "GitLab: non-2xx HTTP response causes exit 1 (source assertion)"
+        run: |
+          grep -qE 'http_code < 200|http_code >= 300' \
+            scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php \
+            || { echo "FAIL: drainpipe_notify_gitlab.php does not check HTTP response code"; exit 1; }
           echo "PASS"

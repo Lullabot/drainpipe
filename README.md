@@ -827,6 +827,46 @@ In async mode, a failure in Job 2 (e.g. `drush update` fails) will **not** block
 the review app check is set as required in branch protection. Monitor the Deployments panel on
 the PR to confirm Job 2 succeeds before merging.
 
+#### Monitoring and troubleshooting
+
+The async pipeline has six observable states. The table below explains each and where to find logs.
+
+| State | What you see | Where to look |
+|-------|-------------|---------------|
+| **Job 1 fails** (build or git push error) | PR check fails; deployment marked `failure` | Job 1 CI run — click "View deployment" in the PR Deployments panel |
+| **Pantheon sync fails** (internal error after push) | Deployment stays `in_progress`, then auto-resolved to `error` by the watchdog | Pantheon dashboard → site → multidev → Workflows tab; or run `terminus workflow:list <site>.<env>` locally |
+| **Quicksilver fires but fails** (bad secrets, network, non-2xx response) | Same as above | Pantheon dashboard → Workflows tab (Quicksilver `echo` output is in the workflow log) |
+| **Dispatch accepted but Job 2 doesn't start** | Same as above | Pantheon dashboard confirms sync succeeded; check Actions tab → PantheonReviewAppsPostDeploy runs |
+| **Job 2 fails** (drush update error, etc.) | Deployment marked `failure` | Job 2 CI run — click "View deployment" in the PR Deployments panel |
+| **Job 2 succeeds** | Deployment marked `success` with environment URL | Deployment panel shows ready; "View deployment" links to the Job 2 run |
+
+> **`log_url` on every status**: each deployment status update now carries a `log_url` pointing
+> directly to the CI run that created it. The "View deployment" link in the PR Deployments panel
+> always takes you to the relevant logs.
+
+> **Job 1 step summary**: when Job 1 exits in async mode it writes a summary to the Actions job
+> page with a direct link to the Pantheon dashboard workflow logs and the `terminus workflow:list`
+> command for local diagnosis.
+
+##### Watchdog
+
+The scaffolded `PantheonReviewAppsWatchdog.yml` workflow runs every 30 minutes and automatically
+resolves deployments stuck in `in_progress`. When a deployment has been `in_progress` longer than
+the threshold, the watchdog:
+
+1. Queries Terminus for the most recent Pantheon workflow status on that multidev
+2. If the sync **failed** → marks the deployment `error` and describes the failure
+3. If the sync **succeeded** but Job 2 never ran → marks `error` and points to the Quicksilver/dispatch path as the likely failure point
+4. If the sync is still **running** → leaves the deployment alone (not stale yet)
+
+The threshold defaults to 20 minutes and can be overridden with a repository variable:
+
+```
+PANTHEON_ASYNC_WATCHDOG_THRESHOLD_MINUTES=30
+```
+
+You can also trigger the watchdog manually via `workflow_dispatch` with a custom `threshold_minutes` input.
+
 #### Concurrency
 
 If a developer pushes twice in quick succession, a second Quicksilver event fires while Job 2 is

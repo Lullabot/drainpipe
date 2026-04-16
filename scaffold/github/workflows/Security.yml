@@ -21,11 +21,15 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Checkout base branch
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          git fetch --no-tags --depth=1 origin ${{ github.base_ref }}
-          git checkout ${{ github.base_ref }}
+          git fetch --no-tags --depth=1 origin "$BASE_REF"
+          git checkout "$BASE_REF"
           git checkout -
 
       - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
@@ -50,7 +54,9 @@ jobs:
           ddev composer install
 
       - name: Run Security Checks
-        run: ddev task test:security composer_lock_diff_from=${{ github.base_ref }} composer_lock_diff=composer-lock-diff.md
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: ddev task test:security composer_lock_diff_from="$BASE_REF" composer_lock_diff=composer-lock-diff.md
 
       - name: Format composer lock diff comment
         if: always()
@@ -84,6 +90,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:

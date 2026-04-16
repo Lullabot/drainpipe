@@ -61,6 +61,15 @@ jobs:
             | jq '[.[] | select(.statuses_url)] | .[0].id')
           echo "GITHUB_DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV
 
+      - name: Refresh GitHub Deployment to in_progress with log URL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses" \
+            -d "{\"state\":\"in_progress\",\"log_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
+
       - name: Run Drupal updates
         uses: ./.github/actions/drainpipe/pantheon/update
         with:
@@ -93,7 +102,7 @@ jobs:
           curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses" \
-            -d "{\"state\":\"success\",\"environment_url\":\"$ENVIRONMENT_URL\"}"
+            -d "{\"state\":\"success\",\"environment_url\":\"$ENVIRONMENT_URL\",\"log_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
 
       - name: Update GitHub Deployment to failure
         if: failure()
@@ -103,4 +112,4 @@ jobs:
           curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses" \
-            -d '{"state":"failure"}'
+            -d "{\"state\":\"failure\",\"log_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
