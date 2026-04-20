@@ -28,6 +28,7 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
+
       - uses: ./.github/actions/drainpipe/set-env
 
       - uses: ./.github/actions/drainpipe/validate-terminus-timeout
@@ -64,3 +65,4 @@ jobs:
           clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
           terminus-timeout-limit: ${{ env.TERMINUS_TIMEOUT_LIMIT }}
           skip-wipe-multidev: ${{ vars.PANTHEON_SKIP_WIPE_MULTIDEV }}
+          async: 'true'

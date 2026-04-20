@@ -1,0 +1,115 @@
+name: "Pantheon Review Apps Post-Deploy"
+
+on:
+  repository_dispatch:
+    types: [pantheon-multidev-synced]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.client_payload.environment }}
+  cancel-in-progress: true
+
+permissions:
+  deployments: write
+  contents: read
+
+jobs:
+  Drainpipe-PostDeploy-Pantheon-Multidev:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Set environment variables
+        env:
+          PAYLOAD_ENVIRONMENT: ${{ github.event.client_payload.environment }}
+        run: | # zizmor: ignore[github-env]
+          ENVIRONMENT="$PAYLOAD_ENVIRONMENT"
+          PR_NUMBER=$(echo "$ENVIRONMENT" | sed 's/pr-//')
+          echo "MULTIDEV_NAME=$ENVIRONMENT" >> $GITHUB_ENV
+          echo "DRAINPIPE_PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+
+      - uses: ./.github/actions/drainpipe/setup-ssh
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
+        with:
+          terminus-token: ${{ secrets.TERMINUS_MACHINE_TOKEN || secrets.PANTHEON_TERMINUS_TOKEN }}
+
+      - run: composer install
+
+      - name: Look up GitHub Deployment ID
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: | # zizmor: ignore[github-env]
+          DEPLOYMENT_ID=$(curl -sf \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/deployments?environment=pantheon-pr-$DRAINPIPE_PR_NUMBER" \
+            | jq '[.[] | select(.statuses_url)] | .[0].id')
+          echo "GITHUB_DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV
+
+      - name: Refresh GitHub Deployment to in_progress with log URL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses" \
+            -d "{\"state\":\"in_progress\",\"log_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
+
+      - name: Run Drupal updates
+        uses: ./.github/actions/drainpipe/pantheon/update
+        with:
+          site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
+          environment: ${{ github.event.client_payload.environment }}
+          run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}
+          skip-workflow-wait: 'true'
+
+      - name: Lock environment (optional)
+        if: ${{ secrets.PANTHEON_REVIEW_USERNAME != '' && secrets.PANTHEON_REVIEW_PASSWORD != '' }}
+        env:
+          INPUT_SITE_NAME: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
+          INPUT_LOCK_USERNAME: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
+          INPUT_LOCK_PASSWORD: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+        run: |
+          terminus lock:enable "$INPUT_SITE_NAME.$MULTIDEV_NAME" \
+            "$INPUT_LOCK_USERNAME" "$INPUT_LOCK_PASSWORD"
+
+      - name: Update GitHub Deployment to success
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_SITE_NAME: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
+          INPUT_LOCK_USERNAME: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
+          INPUT_LOCK_PASSWORD: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+        run: |
+          ENVIRONMENT_URL="https://$MULTIDEV_NAME-$INPUT_SITE_NAME.pantheonsite.io"
+          if [ -n "$INPUT_LOCK_USERNAME" ] && [ -n "$INPUT_LOCK_PASSWORD" ]; then
+            ENVIRONMENT_URL="https://$INPUT_LOCK_USERNAME:$INPUT_LOCK_PASSWORD@$MULTIDEV_NAME-$INPUT_SITE_NAME.pantheonsite.io"
+          fi
+          curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses" \
+            -d "{\"state\":\"success\",\"environment_url\":\"$ENVIRONMENT_URL\",\"log_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
+
+      - name: Update GitHub Deployment to failure
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -f -H "Authorization: token $GITHUB_TOKEN" -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$GITHUB_DEPLOYMENT_ID/statuses" \
+            -d "{\"state\":\"failure\",\"log_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"

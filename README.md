@@ -729,7 +729,7 @@ To enable deployment of Pantheon Review Apps (Multidev environments per pull req
     - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
     - `TERMINUS_TIMEOUT_LIMIT` (optional) Number of seconds that terminus will wait until timeout. Defaults to 600
     - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
-    - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to 'true' to skip wiping the multidev environment on each push, preserving its database state. Defaults to 'false'
+    - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to `'true'` to skip wiping and re-cloning the multidev's database and files on each push. When the multidev does not yet exist it is still created with a full content clone from the source environment; only subsequent pushes skip the clone. Defaults to `'false'` (always wipe and re-clone). See [Multidev content cloning performance](#multidev-content-cloning-performance).
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
     - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (`PANTHEON_TERMINUS_TOKEN` is also accepted for backwards compatibility)
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
@@ -741,6 +741,137 @@ To enable deployment of Pantheon Review Apps (Multidev environments per pull req
 > **Deprecated:** `"github": ["PantheonReviewApps"]` still works but is deprecated. Migrate to
 > `"github": {"pantheon": ["ReviewApps"]}`. Similarly, `"github": ["Pantheon"]` (previously a
 > no-op) is now a deprecated alias for `"github": {"pantheon": ["Actions"]}`.
+
+### Async deploy with Quicksilver
+
+By default, the review app job blocks the CI runner for up to 10 minutes while it waits for
+Pantheon to finish syncing code (`terminus workflow:wait`). The `AsyncDeploy` option eliminates
+this wait by splitting the job in two:
+
+- **Job 1 (Push):** builds the project, creates the multidev, pushes code to Pantheon, then exits
+  immediately. The CI runner is released within a few minutes. The GitHub Deployment remains
+  `in_progress`.
+- **Pantheon** syncs code internally and fires the `sync_code` Quicksilver hook.
+- **Quicksilver script** (PHP running on Pantheon): detects the `pr-NNN` multidev pattern, reads
+  secrets from Pantheon Secrets, and fires a `repository_dispatch` event to GitHub.
+- **Job 2 (Post-deploy):** triggered by the webhook — runs `terminus aliases`, `drush update` (or
+  `task update`), and marks the GitHub Deployment as `success`.
+
+#### Enabling async deploy
+
+Add `"AsyncDeploy"` alongside `"ReviewApps"` in your `composer.json`:
+
+```json
+"extra": {
+    "drainpipe": {
+        "github": {
+            "pantheon": ["ReviewApps", "AsyncDeploy"]
+        }
+    }
+}
+```
+
+Then run `composer install`. The following files are scaffolded or replaced:
+
+- `.github/workflows/PantheonReviewApps.yml` — replaced with the async variant (exits after git push)
+- `.github/workflows/PantheonReviewAppsPostDeploy.yml` — new post-deploy workflow triggered by Quicksilver
+- `web/private/scripts/drainpipe_notify_github.php` — Quicksilver script that fires the webhook
+
+#### Manual step: add the Quicksilver hook to `pantheon.yml`
+
+Drainpipe does not auto-edit `pantheon.yml` because it is version-controlled and site-specific.
+Add the following to your site's `pantheon.yml`:
+
+```yaml
+workflows:
+  sync_code:
+    after:
+      - type: webphp
+        description: Notify CI after Pantheon code sync
+        script: private/scripts/drainpipe_notify_github.php
+```
+
+> **Important:** the path is `private/scripts/` — **not** `web/private/scripts/`. Pantheon resolves
+> this path relative to the web root when `web_docroot: true` is set. Using the `web/` prefix is a
+> common misconfiguration that silently prevents the hook from running.
+
+#### Set Pantheon secrets (once per site)
+
+The Quicksilver script reads credentials from Pantheon Secrets at runtime using
+`pantheon_get_secret()`. Set them with Terminus before the first deployment:
+
+```bash
+terminus secret:set <site> drainpipe_github_token <PAT-with-repo-scope>
+terminus secret:set <site> drainpipe_github_repo  owner/repo
+```
+
+> **Note:** `GITHUB_TOKEN` (the automatic Actions token) cannot be used here because Quicksilver
+> runs outside GitHub's infrastructure. You must create a [personal access token](https://github.com/settings/tokens)
+> with `repo` scope.
+
+> **Note:** `terminus secret:set` requires the
+> [`terminus-secrets-manager-plugin`](https://github.com/pantheon-systems/terminus-secrets-manager-plugin)
+> to be installed wherever Terminus runs (CI runner or local workstation). You can make it
+> available in CI by adding it to the `TERMINUS_PLUGINS` repository variable.
+
+#### GitHub checks behaviour
+
+This is an important difference from the default blocking mode:
+
+| | Blocking mode | Async mode |
+|---|---|---|
+| **Job 1** | Appears as a PR check; can block merging | Appears as a PR check; can block merging |
+| **Job 2** | N/A (single job) | **Does NOT appear as a PR check** — only visible in the GitHub Deployments panel (environment badge) and the Actions tab |
+
+In async mode, a failure in Job 2 (e.g. `drush update` fails) will **not** block a merge even if
+the review app check is set as required in branch protection. Monitor the Deployments panel on
+the PR to confirm Job 2 succeeds before merging.
+
+#### Monitoring and troubleshooting
+
+The async pipeline has six observable states. The table below explains each and where to find logs.
+
+| State | What you see | Where to look |
+|-------|-------------|---------------|
+| **Job 1 fails** (build or git push error) | PR check fails; deployment marked `failure` | Job 1 CI run — click "View deployment" in the PR Deployments panel |
+| **Pantheon sync fails** (internal error after push) | Deployment stays `in_progress`, then auto-resolved to `error` by the watchdog | Pantheon dashboard → site → multidev → Workflows tab; or run `terminus workflow:list <site>.<env>` locally |
+| **Quicksilver fires but fails** (bad secrets, network, non-2xx response) | Same as above | Pantheon dashboard → Workflows tab (Quicksilver `echo` output is in the workflow log) |
+| **Dispatch accepted but Job 2 doesn't start** | Same as above | Pantheon dashboard confirms sync succeeded; check Actions tab → PantheonReviewAppsPostDeploy runs |
+| **Job 2 fails** (drush update error, etc.) | Deployment marked `failure` | Job 2 CI run — click "View deployment" in the PR Deployments panel |
+| **Job 2 succeeds** | Deployment marked `success` with environment URL | Deployment panel shows ready; "View deployment" links to the Job 2 run |
+
+> **`log_url` on every status**: each deployment status update now carries a `log_url` pointing
+> directly to the CI run that created it. The "View deployment" link in the PR Deployments panel
+> always takes you to the relevant logs.
+
+> **Job 1 step summary**: when Job 1 exits in async mode it writes a summary to the Actions job
+> page with a direct link to the Pantheon dashboard workflow logs and the `terminus workflow:list`
+> command for local diagnosis.
+
+##### Watchdog
+
+The scaffolded `PantheonReviewAppsWatchdog.yml` workflow runs every 30 minutes and automatically
+resolves deployments stuck in `in_progress`. When a deployment has been `in_progress` longer than
+the threshold, the watchdog:
+
+1. Queries Terminus for the most recent Pantheon workflow status on that multidev
+2. If the sync **failed** → marks the deployment `error` and describes the failure
+3. If the sync **succeeded** but Job 2 never ran → marks `error` and points to the Quicksilver/dispatch path as the likely failure point
+4. If the sync is still **running** → leaves the deployment alone (not stale yet)
+
+The threshold defaults to 20 minutes and can be overridden with a repository variable:
+
+```
+PANTHEON_ASYNC_WATCHDOG_THRESHOLD_MINUTES=30
+```
+
+You can also trigger the watchdog manually via `workflow_dispatch` with a custom `threshold_minutes` input.
+
+#### Concurrency
+
+If a developer pushes twice in quick succession, a second Quicksilver event fires while Job 2 is
+still running. The `cancel-in-progress: true` concurrency group on the post-deploy workflow cancels
+the older Job 2 automatically — only the latest sync triggers a Drush update.
 
 ### Acquia
 
@@ -899,6 +1030,7 @@ To enable deployment of Pantheon Review Apps (Multidev environments per merge re
   - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
   - `REVIEW_APP_BASIC_AUTH` (optional) Basic auth credentials prepended to the review app URL e.g. `user:password@`
   - `PANTHEON_MULTIDEV_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
+  - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to `"true"` to skip deleting and re-creating the multidev on each push, preserving its database and files state. When the multidev does not yet exist it is still created with a full content clone from the source environment; only subsequent pushes skip the clone. Defaults to `"false"` (always delete and re-create). See [Multidev content cloning performance](#multidev-content-cloning-performance).
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
 [scaffold/gitlab/gitlab-ci.example.yml] for an example. You can also just
@@ -909,6 +1041,84 @@ such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 > **Deprecated:** `"gitlab": ["Pantheon", "PantheonReviewApps"]` still works but is deprecated.
 > Migrate to `"gitlab": {"pantheon": ["Deploy", "ReviewApps"]}`.`"gitlab": ["Pantheon"]` alone
 > maps to `{"pantheon": ["Deploy"]}`.
+
+### Async deploy with Quicksilver (GitLab)
+
+The `AsyncDeploy` option is also available for GitLab. Add it alongside `"ReviewApps"`:
+
+```json
+"extra": {
+    "drainpipe": {
+        "gitlab": {
+            "pantheon": ["Deploy", "ReviewApps", "AsyncDeploy"]
+        }
+    }
+}
+```
+
+Then run `composer install`. The following files are scaffolded or replaced:
+
+- `.drainpipe/gitlab/PantheonReviewApps.gitlab-ci.yml` — replaced with the async variant (exits after git push)
+- `.drainpipe/gitlab/PantheonReviewAppsPostDeploy.gitlab-ci.yml` — new post-deploy job triggered by Quicksilver
+- `web/private/scripts/drainpipe_notify_gitlab.php` — Quicksilver script that fires the pipeline trigger
+
+#### Manual step: add the Quicksilver hook to `pantheon.yml`
+
+Drainpipe does not auto-edit `pantheon.yml` because it is version-controlled and site-specific.
+Add the following to your site's `pantheon.yml`:
+
+```yaml
+workflows:
+  sync_code:
+    after:
+      - type: webphp
+        description: Notify CI after Pantheon code sync
+        script: private/scripts/drainpipe_notify_gitlab.php
+```
+
+> **Important:** the path is `private/scripts/` — **not** `web/private/scripts/`. Pantheon resolves
+> this path relative to the web root when `web_docroot: true` is set. Using the `web/` prefix is a
+> common misconfiguration that silently prevents the hook from running.
+
+#### Set Pantheon secrets (once per site)
+
+```bash
+terminus secret:set <site> drainpipe_gitlab_url           https://gitlab.com
+terminus secret:set <site> drainpipe_gitlab_project_id    <numeric-project-id>
+terminus secret:set <site> drainpipe_gitlab_trigger_token <pipeline-trigger-token>
+terminus secret:set <site> drainpipe_gitlab_ref           main
+```
+
+> **Note:** Job 2 (post-deploy) is triggered via a pipeline trigger and runs on the `main` branch,
+> not the MR branch. This is intentional — Job 2 only needs `composer install` to obtain the
+> `drush`/`task` binaries; it does not rebuild the project. Do not expect Job 2 to run on the MR
+> branch.
+
+> **Note:** `terminus secret:set` requires the
+> [`terminus-secrets-manager-plugin`](https://github.com/pantheon-systems/terminus-secrets-manager-plugin).
+> Add it to the `TERMINUS_PLUGINS` CI variable to make it available in CI.
+
+### Multidev content cloning performance
+
+By default, every push to an open pull request / merge request wipes the multidev's database and
+files and re-clones them from the source environment (e.g. `live`). This guarantees that reviewers
+always see content that mirrors production, but it is the slowest part of the deployment: cloning a
+large database can add several minutes to every CI run.
+
+Set `PANTHEON_SKIP_WIPE_MULTIDEV` to `'true'` (GitHub) or `"true"` (GitLab) to change this
+behaviour:
+
+- **First push** (multidev does not exist yet): content is still cloned from the source environment
+  so the environment starts with realistic data.
+- **Subsequent pushes** (multidev already exists): the wipe / delete-and-recreate step is skipped.
+  Only code is updated. The database and files remain as they were after the previous deployment,
+  which may include data entered or modified by reviewers.
+
+**When to use it:** `PANTHEON_SKIP_WIPE_MULTIDEV=true` is a good default for projects where
+reviewers do not depend on a fresh production database for each review, or where the `live`
+database is large enough to make cloning noticeably slow. Keep it at the default `false` when it
+is important that each push reflects the current production content (e.g. for content-heavy sites
+where QA involves checking migrations or editor workflows).
 
 ## Tugboat
 

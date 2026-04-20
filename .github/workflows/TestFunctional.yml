@@ -339,6 +339,7 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
+          echo 'pnpEnableEsmLoader: false' >> .yarnrc.yml
           echo "packageExtensions:" >> .yarnrc.yml
           echo '  "nightwatch@*":' >> .yarnrc.yml
           echo '    dependencies:' >> .yarnrc.yml
@@ -396,6 +397,7 @@ jobs:
           ddev restart
           ddev yarn set version berry
           ddev yarn init -y
+          echo 'pnpEnableEsmLoader: false' >> .yarnrc.yml
           echo "packageExtensions:" >> .yarnrc.yml
           echo '  "nightwatch@*":' >> .yarnrc.yml
           echo '    dependencies:' >> .yarnrc.yml
