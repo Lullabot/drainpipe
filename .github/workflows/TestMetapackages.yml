@@ -168,10 +168,7 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: |
-          # Yarn 3 is incompatible with Node 24
-          ddev config --nodejs-version 22
-          ddev start
+        run: ddev start
 
       - name: Setup Sass
         run: |
@@ -321,10 +318,7 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: |
-          # Yarn 3 is incompatible with Node 24
-          ddev config --nodejs-version 22
-          ddev start
+        run: ddev start
 
       - name: Setup Sass
         run: |
