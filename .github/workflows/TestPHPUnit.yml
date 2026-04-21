@@ -56,7 +56,35 @@ jobs:
           ddev exec --raw composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
-          # Restart is required to enable the provided Selenium containers
+          ddev restart
+
+      - name: Setup Selenium
+        run: |
+          cat > .ddev/docker-compose.selenium.yaml << 'EOF'
+          services:
+            chrome:
+              container_name: ddev-${DDEV_SITENAME}-chrome
+              image: selenium/standalone-chromium:127.0-20240820
+              labels:
+                com.ddev.site-name: ${DDEV_SITENAME}
+                com.ddev.approot: $DDEV_APPROOT
+              shm_size: 2gb
+              environment:
+                - VIRTUAL_HOST=$DDEV_HOSTNAME
+                - HTTPS_EXPOSE=7900:7900
+                - HTTP_EXPOSE=7910:7900
+              links:
+                - web:web
+              external_links:
+                - ddev-router:${DDEV_SITENAME}.${DDEV_TLD}
+              volumes:
+                - type: bind
+                  source: ../
+                  target: /var/www/html
+                  consistency: cached
+                - ".:/mnt/ddev_config:ro"
+                - ddev-global-cache:/mnt/ddev-global-cache
+          EOF
           ddev restart
 
       - name: Add Custom Testing Module
@@ -71,7 +99,6 @@ jobs:
           ddev drush user:password admin password
           ddev task test:phpunit:functional format=junit
           docker logs ddev-drainpipe-chrome | tee test_result/ddev-chrome.log
-          docker logs ddev-drainpipe-firefox | tee test_result/ddev-firefox.log
 
       - name: Upload test artifacts
         if: ${{ always() }}
@@ -130,7 +157,6 @@ jobs:
           ddev exec --raw composer config minimum-stability dev
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
-          # Restart is required to enable the provided Selenium containers
           ddev restart
 
       - name: Add Custom Testing Module

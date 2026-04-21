@@ -54,13 +54,10 @@ for an example of this in use.
 Drupal scaffolds are core files automatically placed and updated in the project
 root by `drupal/core-composer-scaffold` ([documentation](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4)).
 
-Scaffold files provided by Drainpipe are located in the main `scaffold` directory,
-while Nightwatch specific scaffold files can be found in `drainpipe-dev/scaffold`.
+Scaffold files provided by Drainpipe are located in the main `scaffold` directory.
 
 To determine where a file is placed, edit the `extra.drupal-scaffold` section in
-`composer.json`. Check how each scaffolded file defined in `/src/ScaffoldInstallerPlugin.php`
-for Drainpipe provided files, and `drainpipe-dev/src/NightwatchScaffoldPlugin.php`
-for Nightwatch specific files.
+`composer.json`. Check how each scaffolded file is defined in `/src/ScaffoldInstallerPlugin.php`.
 
 A specific file scaffolding can be disabled by mapping it to false under the
 `extra.drupal-scaffold.file-mapping` in the project `composer.json` file. This
@@ -294,56 +291,6 @@ Runs PHPUnit tests in:
 You will need to make sure you have a working Drupal site before you're
 able to run these.
 
-
-#### Nightwatch
-
-`task test:nightwatch`
-
-Runs functional browser tests with [Nightwatch](https://nightwatchjs.org/).
-
-To enable Nightwatch support, add the following to your `composer.json`, then
-run `composer install` to ensure required files are scaffolded:
-```
-"extra": {
-    "drainpipe": {
-        "testing": ["Nightwatch"]
-    },
-},
-```
-
-Run `test:nightwatch:setup` to help you setup your project to run Nightwatch
-tests by installing the necessary node packages and DDEV configurations.
-
-If you are using DDEV, Drainpipe will have created a
-`.ddev/docker-compose.selenium.yaml` file that provides standalone Firefox and
-Chrome as containers, as well as an example test in `test/nightwatch/example.nightwatch.js`.
-
-To run the above test you will need to have a working Drupal installation in the
-Firefox and Chrome containers. You can run the `test:nightwatch:siteinstall`
-helper task to run the Drupal site installer for both sites with your existing
-configuration.
-
-After you've verified this test works, you can ignore it in your `composer.json`:
-```
-"extra": {
-        "drupal-scaffold": {
-            "file-mapping": {
-                "[project-root]/test/nightwatch/example.nightwatch.js": {
-			"mode": "skip"
-		}
-	}
-}
-```
-
-Nightwatch tests must have the suffix `.nightwatch.js` to be recognised by
-the test runner.
-
-Whilst tests are running, you can view them in realtime through your browser.
-
-https://<ddev-site-name>:7900 for Chrome
-https://<ddev-site-name>:7901 for Firefox
-
-The password for all environments is `secret`.
 
 ### Autofix
 
