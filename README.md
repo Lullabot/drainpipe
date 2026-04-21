@@ -291,7 +291,6 @@ Runs PHPUnit tests in:
 You will need to make sure you have a working Drupal site before you're
 able to run these.
 
-
 ### Autofix
 
 `task test:autofix` attempts to autofix any issues discovered by tests.
@@ -665,8 +664,6 @@ To add Acquia specific GitHub actions, add the following to `composer.json`:
   }
   ```
 Then run `composer install`. A Deploy to Acquia workflow at `.github/workflows/AcquiaDeploy.yml` will be added (with its dependent actions).
-
-After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
 
 After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
 
