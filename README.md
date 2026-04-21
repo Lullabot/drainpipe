@@ -291,25 +291,6 @@ Runs PHPUnit tests in:
 You will need to make sure you have a working Drupal site before you're
 able to run these.
 
-> [!WARNING]
-> **Deprecated since v5.2.0:** DTT (Drupal Test Traits) support will be removed in a future major release. If you rely on `ExistingSite` or `ExistingSiteJavascript` test types, plan to migrate away from Drainpipe's built-in DTT integration.
-
-Support for [Drupal Test Traits](https://gitlab.com/weitzman/drupal-test-traits)
-is included, set this in your `Taskfile.yml` vars:
-
-```
-vars:
-  DRUPAL_TEST_TRAITS: true
-```
-This will additionally look for tests in:
-- `web/modules/custom/**/tests/src/ExistingSite`
-- `test/phpunit/**/ExistingSite`
-- `web/modules/custom/**/tests/src/ExistingSiteJavascript`
-- `test/phpunit/**/ExistingSiteJavascript`
-
-_beware: DTT tests will run against the main working Drupal site rather than
-installing a new instance in isolation_
-
 ### Autofix
 
 `task test:autofix` attempts to autofix any issues discovered by tests.
@@ -617,21 +598,6 @@ detected in `yarn.lock` or `package-lock.json` files.
 }
 ```
 
-### Composer Lock Diff (Deprecated)
-
-**This is now provided as part of the Security workflow**
-
-Update Pull Request descriptions with a markdown table of any changes detected
-in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
-
-```json
-"extra": {
-    "drainpipe": {
-        "github": ["ComposerLockDiff"]
-    }
-}
-```
-
 ### Pantheon
 
 To scaffold Pantheon composite actions for use in your own workflows (without a managed review app
@@ -678,16 +644,12 @@ To enable deployment of Pantheon Review Apps (Multidev environments per pull req
     - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
     - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to 'true' to skip wiping the multidev environment on each push, preserving its database state. Defaults to 'false'
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
-    - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (`PANTHEON_TERMINUS_TOKEN` is also accepted for backwards compatibility)
+    - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
     - `PANTHEON_REVIEW_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
-
-> **Deprecated:** `"github": ["PantheonReviewApps"]` still works but is deprecated. Migrate to
-> `"github": {"pantheon": ["ReviewApps"]}`. Similarly, `"github": ["Pantheon"]` (previously a
-> no-op) is now a deprecated alias for `"github": {"pantheon": ["Actions"]}`.
 
 ### Acquia
 
@@ -702,11 +664,6 @@ To add Acquia specific GitHub actions, add the following to `composer.json`:
   }
   ```
 Then run `composer install`. A Deploy to Acquia workflow at `.github/workflows/AcquiaDeploy.yml` will be added (with its dependent actions).
-
-> **Deprecated:** `"github": ["acquia"]` still works but is deprecated. Migrate to
-> `"github": {"acquia": ["Deploy"]}`.
-
-After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
 
 After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
 
@@ -837,7 +794,7 @@ To enable deployment of Pantheon Review Apps (Multidev environments per merge re
   - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
   - `PANTHEON_SITE_ID` The Pantheon site UUID, used to construct the SSH remote URL
   - `PANTHEON_GIT_REMOTE` The Pantheon git remote URL e.g. `ssh://codeserver.dev.$PANTHEON_SITE_ID@codeserver.dev.$PANTHEON_SITE_ID.drush.in:2222/~/repository.git`
-  - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox). `PANTHEON_TERMINUS_TOKEN` is also accepted for backwards compatibility.
+  - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
   - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in` (enable the _Mask variable_ checkbox)
   - `GIT_EMAIL` Email address to use for git commits
@@ -852,10 +809,6 @@ This will setup Merge Request deployment to Pantheon Multidev environments. See
 include `"Deploy"` which will give you helpers that you can include and reference for tasks
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
-
-> **Deprecated:** `"gitlab": ["Pantheon", "PantheonReviewApps"]` still works but is deprecated.
-> Migrate to `"gitlab": {"pantheon": ["Deploy", "ReviewApps"]}`.`"gitlab": ["Pantheon"]` alone
-> maps to `{"pantheon": ["Deploy"]}`.
 
 ## Tugboat
 
@@ -897,7 +850,7 @@ Additionally, Pantheon integration can be added:
 }
 ```
 
-This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `TERMINUS_MACHINE_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) (`PANTHEON_TERMINUS_TOKEN` and `PANTHEON_TOKEN` are also accepted for backwards compatibility), and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
+This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `TERMINUS_MACHINE_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
 
 ```
   sync:tugboat:

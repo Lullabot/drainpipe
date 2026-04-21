@@ -134,9 +134,6 @@ tasks:
     cmds:
       - |
         CONFIG="$(pwd)/phpunit.xml"
-        if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="$(pwd)/phpunit-testtraits.xml"
-        fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result/phpunit
           CONFIG="$CONFIG --log-junit $(pwd)/test_result/phpunit.xml"
@@ -147,9 +144,6 @@ tasks:
     cmds:
       - |
         CONFIG="$(pwd)/phpunit.xml"
-        if [ "{{.DRUPAL_TEST_TRAITS}}" == "true" ]; then
-          CONFIG="$(pwd)/phpunit-testtraits.xml"
-        fi
         if [ "{{.format}}" == "junit" ]; then
           mkdir -p test_result/phpunit
           CONFIG="$CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml"
