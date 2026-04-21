@@ -14,7 +14,6 @@ vars:
   # those directories do not exist, so we create them with the assumption that
   # every Drupal site will eventually have these directories.
   TEST_DIRS: '{{ default (printf "%s/modules/custom %s/themes/custom %s/sites" .WEBROOT .WEBROOT .WEBROOT) .TEST_DIRS }}'
-  NIGHTWATCH_TEST_DIRS: '{{ default "test" .NIGHTWATCH_TEST_DIRS }}'
   FUNC_ENSURE_DIRS: |
     DIRS_ARR=({{.TEST_DIRS}})
     for DIR in "${DIRS_ARR[@]}"; do
@@ -29,7 +28,7 @@ tasks:
       - task: untracked
   functional:
     desc: Runs all tests that require a bootstrapped Drupal site
-    deps: [config, phpunit:functional, nightwatch]
+    deps: [config, phpunit:functional]
     cmds:
       - task: untracked
   security:
@@ -208,169 +207,33 @@ tasks:
           echo "Untracked changes detected - please rectify or add the files to your .gitignore"
           exit 1
         fi
-  nightwatch:check:
-    #desc: Verifies Nightwatch is setup correctly
-    cmds:
-      - |
-        if [ ! -f "package.json" ]; then
-          echo "No package.json exists, please run test:nightwatch:setup"
-        fi
-      - |
-        if [ "$IS_DDEV_PROJECT" == "true" ]; then
-          DATABASE_FIREFOX="CREATE DATABASE IF NOT EXISTS firefox";
-          DATABASE_CHROME="CREATE DATABASE IF NOT EXISTS chrome";
-          if ! grep -q "$DATABASE_FIREFOX" .ddev/config.yaml; then
-            echo "No Firefox container found, please run test:nightwatch:setup"
-            exit 1
-          fi
-          if ! grep -q "$DATABASE_CHROME" .ddev/config.yaml; then
-            echo "No Chrome container found, please run test:nightwatch:setup"
-            exit 1
-          fi
-        fi
-      - |
-        if [ "$IS_DDEV_PROJECT" == "true" ]; then
-          HOST_FIREFOX="NIGHTWATCH_DRUPAL_URL_FIREFOX="
-          HOST_CHROME="NIGHTWATCH_DRUPAL_URL_CHROME="
-          if ! grep -q "$HOST_FIREFOX" .ddev/config.yaml; then
-            echo "No Firefox hostname found, please run test:nightwatch:setup"
-            exit 1
-          fi
-          if ! grep -q "$HOST_CHROME" .ddev/config.yaml; then
-            echo "No Chrome hostname found, please run test:nightwatch:setup"
-            exit 1
-          fi
-        fi
-      - echo "Nightwatch appears to be setup correctly"
-  nightwatch:setup:
-    desc: Sets up Nightwatch
-    interactive: true
-    cmds:
-      - |
-        PACKAGES="nightwatch nightwatch-axe-verbose @nightwatch/vrt @lullabot/nightwatch-drupal-commands"
-        if [ ! -f "package.json" ]; then
-          echo -n "No package.json exists, would you like to use yarn1, npm, yarn3 (node <= 20), or yarn (node >= 21)? "
-          read -r PACKAGE_MANAGER
-          if [ "$PACKAGE_MANAGER" == "npm" ]; then
-            if [ "$IS_DDEV_PROJECT" == "true" ]; then
-              sudo npm update -g
-            fi
-            npm init -y
-            npm install $PACKAGES lodash --save-dev
-          elif [ "$PACKAGE_MANAGER" == "yarn1" ]; then
-            yarn set version classic
-            yarn init -y
-            yarn add $PACKAGES lodash --dev
-          elif [ "$PACKAGE_MANAGER" == "yarn3" ]; then
-            yarn set version berry
-            yarn set version 3
-            yarn init
-            echo "packageExtensions:" >> .yarnrc.yml
-            echo '  "nightwatch@*":' >> .yarnrc.yml
-            echo '    dependencies:' >> .yarnrc.yml
-            echo '      ws: "*"' >> .yarnrc.yml
-            echo '  "@nightwatch/vrt@*":' >> .yarnrc.yml
-            echo '    dependencies:' >> .yarnrc.yml
-            echo '      open: "^8"' >> .yarnrc.yml
-            yarn add $PACKAGES --dev
-          elif [ "$PACKAGE_MANAGER" == "yarn" ]; then
-            yarn set version berry
-            yarn init
-            echo "packageExtensions:" >> .yarnrc.yml
-            echo '  "nightwatch@*":' >> .yarnrc.yml
-            echo '    dependencies:' >> .yarnrc.yml
-            echo '      ws: "*"' >> .yarnrc.yml
-            echo '  "@nightwatch/vrt@*":' >> .yarnrc.yml
-            echo '    dependencies:' >> .yarnrc.yml
-            echo '      open: "^8"' >> .yarnrc.yml
-            yarn cache clear
-            yarn add $PACKAGES --dev
-          else
-            echo "Sorry I'm not aware of that package manager. Please first init package.json with it yourself manually."
-          fi
-        else
-          if [ -f "package-lock.json" ]; then
-            npm install $PACKAGES lodash --save-dev
-          elif [ -f "yarn.lock" ]; then
-            yarn add $PACKAGES lodash --dev
-          else
-            echo "package.json found but unable to figure out which package manager is in use"
-            echo "Please manually install $PACKAGES"
-            exit 1;
-          fi
-        fi
-
-        if [ "$IS_DDEV_PROJECT" == "true" ]; then
-          echo 'Add the following to post-start hooks to .ddev/config.yaml:';
-          echo ""
-          echo "hooks:";
-          echo "  post-start:";
-          echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS firefox; GRANT ALL ON firefox.* TO 'db'@'%';\"";
-          echo "    - exec: mysql -uroot -proot -hdb -e \"CREATE DATABASE IF NOT EXISTS chrome; GRANT ALL ON chrome.* TO 'db'@'%';\"";
-          echo ""
-          echo "------"
-          echo ""
-          echo "Then run:"
-          echo ""
-          echo "ddev config --web-environment=\"NIGHTWATCH_DRUPAL_URL_FIREFOX=https://drupal_firefox,NIGHTWATCH_DRUPAL_URL_CHROME=https://drupal_chrome\""
-          echo "ddev config --additional-hostnames=\"*.$DDEV_SITENAME\""
-          echo "ddev restart"
-        fi
   siteinstall:default:
     desc: "Runs the site installer for the default site"
     cmds:
       - ./vendor/bin/drush --yes site:install --existing-config
-  siteinstall:firefox:
-    desc: "Runs the site installer for the Firefox container"
+  # The following nightwatch:* tasks are deprecated no-ops retained for
+  # backwards compatibility. They will be removed in a future release.
+  nightwatch:check:
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
-      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
-  siteinstall:chrome:
-    desc: "Runs the site installer for the Chrome container"
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
+  nightwatch:setup:
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
-      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
-  siteinstall:all:
-    desc: "Runs the site installer for the default site, Chrome, and Firefox container"
-    deps: [ siteinstall:default, siteinstall:firefox, siteinstall:chrome ]
-    cmds:
-      - echo "Default, Chrome, and Firefox installed"
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
   nightwatch:siteinstall:firefox:
-    desc: "Runs the site installer for the Firefox container"
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
-      - ./vendor/bin/drush --uri=https://drupal_firefox --yes site:install --existing-config
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
   nightwatch:siteinstall:chrome:
-    desc: "Runs the site installer for the Chrome container"
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
-      - ./vendor/bin/drush --uri=https://drupal_chrome --yes site:install --existing-config
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
   nightwatch:siteinstall:
-    desc: "Runs the site installer for the Firefox and Chrome containers"
-    deps: [nightwatch:siteinstall:firefox, nightwatch:siteinstall:chrome]
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
+    cmds:
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
   nightwatch:
-    desc: Runs Nighwatch functional browser tests
-    deps: [nightwatch:check]
-    env:
-      NIGHTWATCH_ENV: 'firefox,chrome'
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
     cmds:
-      - defer: { task: _nightwatch:vrt-report }
-      - rm -rf test_result/nightwatch*
-      - |
-        if [ -f "package-lock.json" ]; then
-          npx nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
-        elif [ -f "yarn.lock" ]; then
-          yarn nightwatch --env $NIGHTWATCH_ENV {{.CLI_ARGS}}
-        else
-          echo "Unable to figure out which package manager is in use"
-          exit 1;
-        fi
-  _nightwatch:vrt-report:
-    desc: "Moves the VRT report into the test_results folder"
-    cmds:
-      - |
-        if [ -d "vrt-report" ]; then
-          mkdir -p test_result
-          mv vrt-report test_result/nightwatch-vrt-report
-          cp -R test/nightwatch/vrt test_result/nightwatch-vrt-report
-          mkdir -p test_result/nightwatch-vrt-report/test/nightwatch
-          mv test_result/nightwatch-vrt-report/vrt test_result/nightwatch-vrt-report/test/nightwatch
-          sed -i 's/\/test\/nightwatch\/vrt\//test\/nightwatch\/vrt\//g' test_result/nightwatch-vrt-report/index.html
-          echo "Nightwatch VTR report moved to test_result/nightwatch-vrt-report"
-        fi
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
