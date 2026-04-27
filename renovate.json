@@ -160,8 +160,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "\\.github/workflows/Security\\.yml$",
-        "scaffold/github/workflows/Security\\.yml$"
+        "^\\.github/workflows/Security\\.yml$",
+        "^scaffold/github/workflows/Security\\.yml$"
       ],
       "matchStrings": [
         "zizmor==(?<currentValue>\\d+\\.\\d+\\.\\d+)"
