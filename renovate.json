@@ -7,6 +7,13 @@
   "automergeType": "pr",
   "minimumReleaseAge": "3 days",
   "rangeStrategy": "replace",
+  "github-actions": {
+    "managerFilePatterns": [
+      "(^|/).github/(workflows|actions)/[^/]+\\.ya?ml$",
+      "(^|/).github/(workflows|actions)/[^/]+/action\\.ya?ml$",
+      "(^|/)scaffold/github/workflows/[^/]+\\.ya?ml$"
+    ]
+  },
   "ignoreDeps": [
     "drainpipe"
   ],
@@ -153,7 +160,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "\\.github/workflows/Security\\.yml$"
+        "^\\.github/workflows/Security\\.yml$",
+        "^scaffold/github/workflows/Security\\.yml$"
       ],
       "matchStrings": [
         "zizmor==(?<currentValue>\\d+\\.\\d+\\.\\d+)"
