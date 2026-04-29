@@ -1,0 +1,66 @@
+image: php:8.5-cli
+
+clone:
+  depth: full
+
+options:
+  max-time: 60
+
+definitions:
+  caches:
+    composer:
+      key:
+        files:
+          - composer.lock
+      path: ~/.composer/cache
+
+pipelines:
+  pull-requests:
+    "**":
+      - step:
+          name: "Acquia Review App: Deploy"
+          caches:
+            - composer
+          script:
+            # Install system dependencies, configure SSH, and install Composer
+            - bash .bitbucket/setup-php.sh
+            # Install packages from Composer
+            - COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction --prefer-dist
+            # Install and configure Acquia CLI
+            - ./vendor/bin/task bitbucket:acquia:setup
+            # Build
+            - ./vendor/bin/task bitbucket:acquia:build
+            # Push code and create/update CDE on Acquia
+            - ./vendor/bin/task bitbucket:acquia:push-cde
+            # Run site updates
+            - ./vendor/bin/task bitbucket:acquia:update-cde
+          after-script:
+            - |
+              if [ "$BITBUCKET_EXIT_CODE" -eq 1 ]; then
+                if [ -z "${BITBUCKET_USERNAME:-}" ] || [ -z "${BITBUCKET_APP_PASSWORD:-}" ]; then
+                  exit 0
+                fi
+                PAYLOAD=$(jq -n \
+                  --arg state "FAILED" \
+                  --arg url "" \
+                  --arg description "Deployment failed for PR #$BITBUCKET_PR_ID" \
+                  '{state: $state, key: "drainpipe-acquia-review-app", name: "Acquia Review App", url: $url, description: $description}')
+                curl -s -f -X POST \
+                  -u "${BITBUCKET_USERNAME}:${BITBUCKET_APP_PASSWORD}" \
+                  -H "Content-Type: application/json" \
+                  --data "${PAYLOAD}" \
+                  "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO_SLUG}/commit/${BITBUCKET_COMMIT}/statuses/build" \
+                  || true
+              fi
+
+  custom:
+    acquia-review-apps-cleanup:
+      - step:
+          name: "Acquia Review Apps: Cleanup stale CDEs"
+          script:
+            # Install system dependencies and Composer
+            - bash .bitbucket/setup-php.sh --minimal
+            # Install packages from Composer
+            - COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction --prefer-dist
+            # Delete stale CDEs (installs Acquia CLI and authenticates via task deps)
+            - ./vendor/bin/task bitbucket:acquia:cleanup
