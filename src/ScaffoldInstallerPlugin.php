@@ -162,7 +162,10 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $projectTaskfile = Yaml::parseFile('./Taskfile.yml');
             $missingIncludes = [];
             foreach ($scaffoldTaskFile['includes'] as $key => $value) {
-                if (empty($projectTaskfile['includes'][$key]) || $projectTaskfile['includes'][$key] !== $value) {
+                $scaffoldPath = is_array($value) ? ($value['taskfile'] ?? '') : $value;
+                $projectValue = $projectTaskfile['includes'][$key] ?? null;
+                $projectPath = is_array($projectValue) ? ($projectValue['taskfile'] ?? '') : (string) $projectValue;
+                if ($scaffoldPath !== $projectPath) {
                     $missingIncludes[] = $key;
                 }
             }
@@ -394,87 +397,6 @@ EOT;
     }
 
     /**
-     * Normalizes deprecated hosting provider config values in memory.
-     *
-     * Detects deprecated string-based provider values in
-     * $this->extra['drainpipe']['github'] and
-     * $this->extra['drainpipe']['gitlab'], emits deprecation warnings, and
-     * rewrites them to the new provider sub-key object form. The user's
-     * composer.json is never modified.
-     *
-     * Non-provider string values (TestStatic, Security, ComposerLockDiff,
-     * LockfileDiff, TestFunctional) are not deprecated and remain unchanged.
-     */
-    private function normalizeHostingProviderConfig(): void
-    {
-        // Normalize github config.
-        if (isset($this->extra['drainpipe']['github']) && is_array($this->extra['drainpipe']['github'])) {
-            $github = $this->extra['drainpipe']['github'];
-
-            // Only normalize if it looks like a flat (indexed) array, i.e. the
-            // legacy string-list form. An associative array is already the new
-            // object form and must not be touched.
-            if (array_values($github) === $github) {
-                $newGithub = [];
-                foreach ($github as $value) {
-                    if ($value === 'acquia') {
-                        $this->io->warning(
-                            "The 'github: [\"acquia\"]' value is deprecated. Use 'github: {\"acquia\": [\"Deploy\"]}' instead."
-                        );
-                        $newGithub['acquia'] = array_merge($newGithub['acquia'] ?? [], ['Deploy']);
-                    }
-                    elseif ($value === 'PantheonReviewApps') {
-                        $this->io->warning(
-                            "The 'github: [\"PantheonReviewApps\"]' value is deprecated. Use 'github: {\"pantheon\": [\"ReviewApps\"]}' instead."
-                        );
-                        $newGithub['pantheon'] = array_merge($newGithub['pantheon'] ?? [], ['ReviewApps']);
-                    }
-                    elseif ($value === 'Pantheon') {
-                        $this->io->warning(
-                            "The 'github: [\"Pantheon\"]' value is deprecated and was previously a no-op. It now scaffolds Pantheon GitHub Actions. Use 'github: {\"pantheon\": [\"Actions\"]}' instead."
-                        );
-                        $newGithub['pantheon'] = array_merge($newGithub['pantheon'] ?? [], ['Actions']);
-                    }
-                    else {
-                        // Non-provider string values remain as-is (keyed by value).
-                        $newGithub[$value] = $value;
-                    }
-                }
-                $this->extra['drainpipe']['github'] = $newGithub;
-            }
-        }
-
-        // Normalize gitlab config.
-        if (isset($this->extra['drainpipe']['gitlab']) && is_array($this->extra['drainpipe']['gitlab'])) {
-            $gitlab = $this->extra['drainpipe']['gitlab'];
-
-            // Only normalize if it looks like a flat (indexed) array.
-            if (array_values($gitlab) === $gitlab) {
-                $newGitlab = [];
-                foreach ($gitlab as $value) {
-                    if ($value === 'Pantheon') {
-                        $this->io->warning(
-                            "The 'gitlab: [\"Pantheon\"]' value is deprecated. Use 'gitlab: {\"pantheon\": [\"Deploy\"]}' instead."
-                        );
-                        $newGitlab['pantheon'] = array_merge($newGitlab['pantheon'] ?? [], ['Deploy']);
-                    }
-                    elseif ($value === 'PantheonReviewApps') {
-                        $this->io->warning(
-                            "The 'gitlab: [\"PantheonReviewApps\"]' value is deprecated. Use 'gitlab: {\"pantheon\": [\"ReviewApps\"]}' instead."
-                        );
-                        $newGitlab['pantheon'] = array_merge($newGitlab['pantheon'] ?? [], ['ReviewApps']);
-                    }
-                    else {
-                        // Non-provider string values remain as-is.
-                        $newGitlab[$value] = $value;
-                    }
-                }
-                $this->extra['drainpipe']['gitlab'] = $newGitlab;
-            }
-        }
-    }
-
-    /**
      * Returns true if any Pantheon CI configuration is present.
      *
      * Checks for a non-empty 'pantheon' sub-key under either
@@ -497,8 +419,6 @@ EOT;
      */
     private function installHostingProviderSupport(Composer $composer): void
     {
-        $this->normalizeHostingProviderConfig();
-
         $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
 
         if (isset($this->extra['drainpipe']['acquia'])) {
@@ -643,13 +563,10 @@ EOT;
                 continue;
             }
 
-            // Handle non-provider feature values (ComposerLockDiff, etc.).
-            // Accept both string values (from flat-array normalization) and boolean true
-            // (from the new object form e.g. "ComposerLockDiff": true).
-            if (!is_string($value) && $value !== true) {
+            if ($value !== true) {
                 continue;
             }
-            $gitlab = is_string($value) ? $value : $key;
+            $gitlab = $key;
             $file = "gitlab/$gitlab.gitlab-ci.yml";
             if (file_exists("$scaffoldPath/$file")) {
                 $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
@@ -726,32 +643,25 @@ EOT;
         $fs->ensureDirectoryExists('./.github/workflows');
         $fs->copy("$scaffoldPath/github/workflows/TestRenovate.yml", './.github/workflows/TestRenovate.yml');
 
-        // Install configurable GitHub workflows — non-provider string values.
+        // Install configurable GitHub workflows — non-provider values.
         foreach ($this->extra['drainpipe']['github'] as $key => $value) {
-            // Skip provider sub-arrays (arrays); they are handled explicitly below.
-            // Accept both string values (from flat-array normalization) and boolean true
-            // (from the new object form e.g. "TestStatic": true).
-            if (is_array($value)) {
-                continue;
-            }
-            if (!is_string($value) && $value !== true) {
+            if (is_array($value) || $value !== true) {
                 continue;
             }
 
-            $github = is_string($value) ? $value : $key;
-            if ($github === 'ComposerLockDiff') {
-                $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
-            }
-            else if ($github === 'LockfileDiff') {
+            if ($key === 'LockfileDiff') {
                 $fs->copy("$scaffoldPath/github/workflows/LockfileDiff.yml", './.github/workflows/LockfileDiff.yml');
             }
-            else if ($github === 'Security') {
+            else if ($key === 'Security') {
                 $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
+                if (!file_exists('./.gitleaks.toml')) {
+                    $fs->copy("$scaffoldPath/gitleaks.toml", './.gitleaks.toml');
+                }
             }
-            else if ($github === 'TestStatic') {
+            else if ($key === 'TestStatic') {
                 $fs->copy("$scaffoldPath/github/workflows/TestStatic.yml", './.github/workflows/TestStatic.yml');
             }
-            else if ($github === 'TestFunctional') {
+            else if ($key === 'TestFunctional') {
                 $fs->copy("$scaffoldPath/github/workflows/TestFunctional.yml", './.github/workflows/TestFunctional.yml');
             }
         }

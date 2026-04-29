@@ -16,7 +16,7 @@
         "behat/mink": "^1.13.0",
         "behat/mink-browserkit-driver": "^2.3.0",
         "davidrjonas/composer-lock-diff": "^1.7.1",
-        "drupal/coder": "^8.3.31",
+        "drupal/coder": "^9.0.0",
         "lullabot/drainpipe": "*",
         "lullabot/twig-cs-fixer-drupal": "^2.1.0",
         "mglaman/phpstan-drupal": "^1||^2",
@@ -36,7 +36,6 @@
     },
     "extra": {
         "class": [
-            "\\Lullabot\\DrainpipeDev\\NightwatchScaffoldPlugin",
             "\\Lullabot\\DrainpipeDev\\ScaffoldInstallerPlugin"
         ],
         "drupal-scaffold": {

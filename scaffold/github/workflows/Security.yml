@@ -28,7 +28,7 @@ jobs:
           git checkout ${{ github.base_ref }}
           git checkout -
 
-      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -52,50 +52,29 @@ jobs:
       - name: Run Security Checks
         run: ddev task test:security composer_lock_diff_from=${{ github.base_ref }} composer_lock_diff=composer-lock-diff.md
 
-      - name: Publish Results
+      - name: Format composer lock diff comment
+        if: always()
         run: |
-          COMPOSER_LOCK_DIFF="<!-- composer-lock-diff -->
-          ## Composer Lock Diff
-          $(cat composer-lock-diff.md)"
-          EMPTY=true
-          if [ "$(cat composer-lock-diff.md)" != "" ]; then
-            echo $COMPOSER_LOCK_DIFF >> $GITHUB_STEP_SUMMARY
-            EMPTY=false
+          if [ -s composer-lock-diff.md ]; then
+            printf '## Composer Lock Diff\n\n%s\n' "$(cat composer-lock-diff.md)" > composer-lock-diff-comment.md
+            printf '## Composer Lock Diff\n\n%s\n' "$(cat composer-lock-diff.md)" >> $GITHUB_STEP_SUMMARY
           fi
-          COMPOSER_LOCK_DIFF=$(echo "$COMPOSER_LOCK_DIFF" | jq -Rsa .)
-          FIRST=true
-          for i in $(curl -s -L -f -X GET \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER/comments | jq -rc '.[]|select(.body | contains("<!-- composer-lock-diff -->")) | .id'); do
-            if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
-              curl -s -L -f -X PATCH \
-                --output /dev/null \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/${{ github.repository }}/pulls/comments/$i \
-                -d "{\"body\":$COMPOSER_LOCK_DIFF}"
-            else
-              curl -s -L -f -X DELETE \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/${{ github.repository }}/pulls/comments/$i
-            fi
-            if [ "$FIRST" == "true" ]; then
-              FIRST=false
-            fi
-          done
-          if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
-            curl -s -L -f -X POST \
-              --output /dev/null \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              https://api.github.com/repos/${{ github.repository }}/pulls/$DRAINPIPE_PR_NUMBER/comments \
-              -d "{\"body\":$COMPOSER_LOCK_DIFF,\"commit_id\":\"$DRAINPIPE_SHA\",\"path\":\"composer.lock\",\"subject_type\":\"file\",\"side\":\"RIGHT\"}"
-          fi
+
+      - name: Post composer lock diff comment
+        if: hashFiles('composer-lock-diff-comment.md') != ''
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          header: composer-lock-diff
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: composer-lock-diff-comment.md
+
+      - name: Delete composer lock diff comment
+        if: hashFiles('composer-lock-diff-comment.md') == ''
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          header: composer-lock-diff
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          delete: true
 
   Composer-Audit:
     runs-on: ubuntu-24.04
@@ -106,7 +85,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -129,7 +108,7 @@ jobs:
         run: ddev exec bash ./vendor/lullabot/drainpipe/scripts/composer-audit.sh
 
       - name: Post comment
-        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2.9.4
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
         with:
           header: composer-security-audit
           path: comment.md
@@ -158,11 +137,83 @@ jobs:
       - name: Upload SARIF
         if: always()
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@c793b717bc78562f491db7b0e93a3a178b099162 # v4.32.5
+        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           sarif_file: zizmor.sarif
           category: zizmor
 
       - name: Fail on findings
         if: steps.zizmor.outcome == 'failure'
+        run: exit 1
+
+  Gitleaks:
+    name: Run Gitleaks Secret Scanning
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Gitleaks
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          sudo install gitleaks /usr/local/bin/gitleaks
+
+      - name: Run Gitleaks
+        id: gitleaks
+        run: |
+          gitleaks git \
+            --config .gitleaks.toml \
+            --report-format sarif \
+            --report-path results.sarif \
+            --exit-code 1 \
+            .
+        continue-on-error: true
+
+      - name: Upload SARIF
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
+        with:
+          sarif_file: results.sarif
+          category: gitleaks
+
+      - name: Generate PR comment
+        if: steps.gitleaks.outcome == 'failure' && github.event_name == 'pull_request'
+        run: |
+          {
+            echo "## :warning: Gitleaks: potential secrets detected"
+            echo ""
+            echo "The following potential secrets were detected. Please review and rotate any valid credentials."
+            echo ""
+            echo "| Rule | File |"
+            echo "|------|------|"
+            jq -r '.runs[0].results[] | "| " + .ruleId + " | `" + .locations[0].physicalLocation.artifactLocation.uri + "` |"' results.sarif
+            echo ""
+            echo "See the [Security tab]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/security/code-scanning) for full details."
+          } > gitleaks-comment.md
+
+      - name: Post PR comment
+        if: steps.gitleaks.outcome == 'failure' && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          header: gitleaks
+          path: gitleaks-comment.md
+
+      - name: Delete PR comment if clean
+        if: steps.gitleaks.outcome == 'success' && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          header: gitleaks
+          delete: true
+
+      - name: Fail on findings
+        if: steps.gitleaks.outcome == 'failure'
         run: exit 1

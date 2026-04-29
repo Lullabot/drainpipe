@@ -9,13 +9,8 @@
     - ln -s ~/terminus/terminus /usr/local/bin/terminus
     - echo "$TERMINUS_PLUGINS" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
     - |
-      if [ -n "$TERMINUS_MACHINE_TOKEN" ]; then
-        _PANTHEON_AUTH_TOKEN="$TERMINUS_MACHINE_TOKEN"
-      elif [ -n "$PANTHEON_TERMINUS_TOKEN" ]; then
-        echo "WARNING: PANTHEON_TERMINUS_TOKEN is deprecated. Please use TERMINUS_MACHINE_TOKEN instead."
-        _PANTHEON_AUTH_TOKEN="$PANTHEON_TERMINUS_TOKEN"
-      else
-        echo "ERROR: No Pantheon token found. Set TERMINUS_MACHINE_TOKEN as a CI/CD variable."
+      if [ -z "$TERMINUS_MACHINE_TOKEN" ]; then
+        echo "ERROR: TERMINUS_MACHINE_TOKEN is not set. Add it as a masked CI/CD variable."
         exit 1
       fi
-      terminus auth:login --machine-token="$_PANTHEON_AUTH_TOKEN"
+      terminus auth:login --machine-token="$TERMINUS_MACHINE_TOKEN"

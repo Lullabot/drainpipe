@@ -3,7 +3,18 @@
   "extends": [
     "config:recommended"
   ],
+  "automerge": true,
+  "automergeType": "pr",
+  "minimumReleaseAge": "3 days",
   "rangeStrategy": "replace",
+  "github-actions": {
+    "managerFilePatterns": [
+      "(^|/).github/(workflows|actions)/[^/]+\\.ya?ml$",
+      "(^|/).github/(workflows|actions)/[^/]+/action\\.ya?ml$",
+      "(^|/)scaffold/github/workflows/[^/]+\\.ya?ml$",
+      "(^|/)scaffold/github/actions/[^/]+/[^/]+/action\\.ya?ml$"
+    ]
+  },
   "ignoreDeps": [
     "drainpipe"
   ],
@@ -31,10 +42,10 @@
       "allowedVersions": "^9 || ^10 || ^11"
     },
     {
+      "automerge": false,
       "matchPackageNames": [
         "drush/drush",
         "phpunit/phpunit",
-        "symfony/phpunit-bridge",
         "symfony/yaml",
         "twig/twig",
         "vlucas/phpdotenv"
@@ -80,6 +91,12 @@
         "/^symfony\//"
       ],
       "allowedVersions": "^6 || ^7"
+    },
+    {
+      "description": "phpunit-bridge v7 removed Legacy namespace traits relied on by Drupal 10 core",
+      "matchPackageNames": ["symfony/phpunit-bridge"],
+      "rangeStrategy": "replace",
+      "allowedVersions": "^6"
     },
     {
       "matchDatasources": ["node-version"],
@@ -128,7 +145,7 @@
       "customType": "regex",
       "managerFilePatterns": [
         "^\\.taskfile$",
-        "scaffold/tugboat/scripts/custom-init-command\\.sh$"
+        "^scaffold/tugboat/scripts/custom-init-command\\.sh$"
       ],
       "matchStrings": [
         "(?:TASKFILE=|^)v(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s*$"
@@ -140,8 +157,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "scaffold/tugboat/scripts/custom-init-command\\.sh$",
-        "tasks/bitbucket\\.yml$"
+        "^scaffold/tugboat/scripts/custom-init-command\\.sh$",
+        "^tasks/bitbucket\\.yml$"
       ],
       "matchStrings": [
         "YQ=v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -153,8 +170,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "tasks/bitbucket\\.yml$",
-        "scaffold/github/actions/acquia/deploy/action\\.yml$"
+        "^tasks/bitbucket\\.yml$",
+        "^scaffold/github/actions/acquia/deploy/action\\.yml$"
       ],
       "matchStrings": [
         "ACLI_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -165,7 +182,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "scaffold/bitbucket/setup-php\\.sh$"
+        "^scaffold/bitbucket/setup-php\\.sh$"
       ],
       "matchStrings": [
         "COMPOSER_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -176,7 +193,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "\\.github/workflows/Security\\.yml$"
+        "^\\.github/workflows/Security\\.yml$",
+        "^scaffold/github/workflows/Security\\.yml$"
       ],
       "matchStrings": [
         "zizmor==(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -187,7 +205,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "\\.github/workflows/Security\\.yml$"
+        "^\\.github/workflows/Security\\.yml$",
+        "^scaffold/github/workflows/Security\\.yml$"
       ],
       "matchStrings": [
         "gitleaks_(?<currentValue>\\d+\\.\\d+\\.\\d+)_linux_x64"
@@ -199,8 +218,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "\\.github/workflows/TestMetapackages\\.yml$",
-        "\\.github/workflows/TestFunctional\\.yml$"
+        "^\\.github/workflows/TestMetapackages\\.yml$",
+        "^\\.github/workflows/TestFunctional\\.yml$"
       ],
       "matchStrings": [
         "yarn@(?<currentValue>\\d+\\.\\d+\\.\\d+)"

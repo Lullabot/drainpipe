@@ -32,7 +32,7 @@ jobs:
 
       - name: Upload SARIF
         if: always()
-        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           sarif_file: zizmor.sarif
           category: zizmor
@@ -64,18 +64,18 @@ jobs:
       - name: Run Gitleaks
         id: gitleaks
         run: |
-          gitleaks detect \
-            --source . \
+          gitleaks git \
             --config .gitleaks.toml \
             --report-format sarif \
             --report-path results.sarif \
-            --exit-code 1
+            --exit-code 1 \
+            .
         continue-on-error: true
 
       - name: Upload SARIF
         if: always()
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           sarif_file: results.sarif
           category: gitleaks
@@ -97,14 +97,14 @@ jobs:
 
       - name: Post PR comment
         if: steps.gitleaks.outcome == 'failure' && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@d4d6b0936434b21bc8345ad45a440c5f7d2c40ff # v3.0.3
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
         with:
           header: gitleaks
           path: gitleaks-comment.md
 
       - name: Delete PR comment if clean
         if: steps.gitleaks.outcome == 'success' && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@d4d6b0936434b21bc8345ad45a440c5f7d2c40ff # v3.0.3
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
         with:
           header: gitleaks
           delete: true

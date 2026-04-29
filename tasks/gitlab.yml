@@ -1,0 +1,57 @@
+version: '3'
+
+tasks:
+  lock-diff:
+    desc: Posts a composer lock diff comment on a GitLab merge request
+    summary: |
+      Posts a composer lock diff as a GitLab MR note using the GitLab Notes API.
+      Reads GITLAB_ACCESS_TOKEN from the environment unless access_token is
+      provided directly (useful for testing). Creates a new note, updates the
+      first existing one, or deletes all existing notes when the diff is empty.
+
+      usage: task gitlab:lock-diff diff_file=... project_id=... mr_iid=...
+
+      diff_file        Path to the composer-lock-diff.md output file
+      project_id       GitLab project ID ($CI_PROJECT_ID)
+      mr_iid           Merge request IID ($CI_MERGE_REQUEST_IID)
+      gitlab_api_url   GitLab API base URL (default: https://gitlab.com/api/v4)
+      access_token     Override for GITLAB_ACCESS_TOKEN (optional, for testing)
+    vars:
+      _NOTES_URL: '{{ default "https://gitlab.com/api/v4" .gitlab_api_url }}/projects/{{ .project_id }}/merge_requests/{{ .mr_iid }}/notes'
+    cmds:
+      - |
+        set -eo pipefail
+        AUTH_TOKEN="{{ if .access_token }}{{ .access_token }}{{ else }}$GITLAB_ACCESS_TOKEN{{ end }}"
+        DIFF="$(cat {{ shellQuote .diff_file }})"
+        COMMENT="<!-- composer-lock-diff -->
+        ## Composer Lock Diff
+        $DIFF"
+        COMMENT_JSON=$(printf '%s' "$COMMENT" | jq -Rsa .)
+        EMPTY=true
+        if [ "$DIFF" != "" ]; then EMPTY=false; fi
+        FIRST=true
+        for ID in $(curl --fail -s \
+          -H "PRIVATE-TOKEN: $AUTH_TOKEN" \
+          "{{ ._NOTES_URL }}?per_page=100" \
+          | jq -rc '.[]? | select(.body | contains("<!-- composer-lock-diff -->")) | .id'); do
+          if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
+            curl --fail -s \
+              -X PUT \
+              -H "Content-Type: application/json" \
+              -H "PRIVATE-TOKEN: $AUTH_TOKEN" \
+              "{{ ._NOTES_URL }}/$ID" \
+              -d "{\"body\":$COMMENT_JSON}"
+          else
+            curl --fail -s -X DELETE \
+              -H "PRIVATE-TOKEN: $AUTH_TOKEN" \
+              "{{ ._NOTES_URL }}/$ID"
+          fi
+          if [ "$FIRST" == "true" ]; then FIRST=false; fi
+        done
+        if [ "$FIRST" == "true" ] && [ "$EMPTY" == "false" ]; then
+          curl --fail -s -X POST \
+            -H "Content-Type: application/json" \
+            -H "PRIVATE-TOKEN: $AUTH_TOKEN" \
+            "{{ ._NOTES_URL }}" \
+            -d "{\"body\":$COMMENT_JSON}"
+        fi

@@ -54,13 +54,10 @@ for an example of this in use.
 Drupal scaffolds are core files automatically placed and updated in the project
 root by `drupal/core-composer-scaffold` ([documentation](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4)).
 
-Scaffold files provided by Drainpipe are located in the main `scaffold` directory,
-while Nightwatch specific scaffold files can be found in `drainpipe-dev/scaffold`.
+Scaffold files provided by Drainpipe are located in the main `scaffold` directory.
 
 To determine where a file is placed, edit the `extra.drupal-scaffold` section in
-`composer.json`. Check how each scaffolded file defined in `/src/ScaffoldInstallerPlugin.php`
-for Drainpipe provided files, and `drainpipe-dev/src/NightwatchScaffoldPlugin.php`
-for Nightwatch specific files.
+`composer.json`. Check how each scaffolded file is defined in `/src/ScaffoldInstallerPlugin.php`.
 
 A specific file scaffolding can be disabled by mapping it to false under the
 `extra.drupal-scaffold.file-mapping` in the project `composer.json` file. This
@@ -121,19 +118,18 @@ This preset provides safe automation with flexibility and control for teams main
 
 ## Database Updates
 
-The `drupal:update` command follows the same procedure as the
-['drush deploy'](https://www.drush.org/12.x/deploycommand/) command, with the
-exception that it runs the configuration import twice as in some cases the
-import can fail due to memory exhaustion before completion.
+The `drupal:update` command runs [`drush deploy`](https://www.drush.org/12.x/deploycommand/)
+directly, per the [Lullabot ADR on Drupal build steps](https://architecture.lullabot.com/adr/20260313-drupal-build-steps/).
 
 ```
-drush updatedb --no-cache-clear
-drush cache:rebuild
-drush config:import || true
-drush config:import
-drush deploy:hook
-drush cache:rebuild
+drush deploy
 ```
+
+Sites that need to customize the deploy steps (e.g. running `config:import`
+twice, or running `drush cron` after deploy) should replace the `drush deploy`
+command using a site-level Drush command file. See the
+[ADR](https://architecture.lullabot.com/adr/20260313-drupal-build-steps/) for a
+full example.
 
 ## .env support
 
@@ -294,72 +290,6 @@ Runs PHPUnit tests in:
 
 You will need to make sure you have a working Drupal site before you're
 able to run these.
-
-Support for [Drupal Test Traits](https://gitlab.com/weitzman/drupal-test-traits)
-is included, set this in your `Taskfile.yml` vars:
-
-```
-vars:
-  DRUPAL_TEST_TRAITS: true
-```
-This will additionally look for tests in:
-- `web/modules/custom/**/tests/src/ExistingSite`
-- `test/phpunit/**/ExistingSite`
-- `web/modules/custom/**/tests/src/ExistingSiteJavascript`
-- `test/phpunit/**/ExistingSiteJavascript`
-
-_beware: DTT tests will run against the main working Drupal site rather than
-installing a new instance in isolation_
-
-#### Nightwatch
-
-`task test:nightwatch`
-
-Runs functional browser tests with [Nightwatch](https://nightwatchjs.org/).
-
-To enable Nightwatch support, add the following to your `composer.json`, then
-run `composer install` to ensure required files are scaffolded:
-```
-"extra": {
-    "drainpipe": {
-        "testing": ["Nightwatch"]
-    },
-},
-```
-
-Run `test:nightwatch:setup` to help you setup your project to run Nightwatch
-tests by installing the necessary node packages and DDEV configurations.
-
-If you are using DDEV, Drainpipe will have created a
-`.ddev/docker-compose.selenium.yaml` file that provides standalone Firefox and
-Chrome as containers, as well as an example test in `test/nightwatch/example.nightwatch.js`.
-
-To run the above test you will need to have a working Drupal installation in the
-Firefox and Chrome containers. You can run the `test:nightwatch:siteinstall`
-helper task to run the Drupal site installer for both sites with your existing
-configuration.
-
-After you've verified this test works, you can ignore it in your `composer.json`:
-```
-"extra": {
-        "drupal-scaffold": {
-            "file-mapping": {
-                "[project-root]/test/nightwatch/example.nightwatch.js": {
-			"mode": "skip"
-		}
-	}
-}
-```
-
-Nightwatch tests must have the suffix `.nightwatch.js` to be recognised by
-the test runner.
-
-Whilst tests are running, you can view them in realtime through your browser.
-
-https://<ddev-site-name>:7900 for Chrome
-https://<ddev-site-name>:7901 for Firefox
-
-The password for all environments is `secret`.
 
 ### Autofix
 
@@ -617,14 +547,14 @@ committed secrets — API keys, tokens, credentials, and similar sensitive value
 Findings are uploaded to GitHub's code scanning dashboard under the **Gitleaks**
 category.
 
-**Suppressing false positives**: Create a `.gitleaks.toml` file at the project
-root to allowlist patterns that are not real secrets. Use `[extend]` with
+**Suppressing false positives**: Drainpipe scaffolds a `.gitleaks.toml` at the
+project root that pre-configures allowlists for patterns common in Drupal
+projects (contributed modules, Drupal core, GitHub Actions template expressions,
+and placeholder values). Add `[[allowlists]]` blocks to that file to suppress
+additional false positives specific to your project. Use `[extend]` with
 `useDefault = true` to inherit all default rules and layer your allowlists on top:
 
 ```toml
-[extend]
-useDefault = true
-
 [[allowlists]]
 description = "Allow example values in documentation"
 regexes = [
@@ -664,21 +594,6 @@ detected in `yarn.lock` or `package-lock.json` files.
 "extra": {
     "drainpipe": {
         "github": ["LockfileDiff"]
-    }
-}
-```
-
-### Composer Lock Diff (Deprecated)
-
-**This is now provided as part of the Security workflow**
-
-Update Pull Request descriptions with a markdown table of any changes detected
-in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
-
-```json
-"extra": {
-    "drainpipe": {
-        "github": ["ComposerLockDiff"]
     }
 }
 ```
@@ -729,16 +644,12 @@ To enable deployment of Pantheon Review Apps (Multidev environments per pull req
     - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
     - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to 'true' to skip wiping the multidev environment on each push, preserving its database state. Defaults to 'false'
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
-    - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (`PANTHEON_TERMINUS_TOKEN` is also accepted for backwards compatibility)
+    - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
     - `PANTHEON_REVIEW_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
-
-> **Deprecated:** `"github": ["PantheonReviewApps"]` still works but is deprecated. Migrate to
-> `"github": {"pantheon": ["ReviewApps"]}`. Similarly, `"github": ["Pantheon"]` (previously a
-> no-op) is now a deprecated alias for `"github": {"pantheon": ["Actions"]}`.
 
 ### Acquia
 
@@ -753,11 +664,6 @@ To add Acquia specific GitHub actions, add the following to `composer.json`:
   }
   ```
 Then run `composer install`. A Deploy to Acquia workflow at `.github/workflows/AcquiaDeploy.yml` will be added (with its dependent actions).
-
-> **Deprecated:** `"github": ["acquia"]` still works but is deprecated. Migrate to
-> `"github": {"acquia": ["Deploy"]}`.
-
-After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
 
 After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
 
@@ -790,14 +696,19 @@ When a deployment is made, you must run your own code _before_ and _after_ the d
         - task: build
   ```
 - **acquia:deploy:after**
+
+  Runs after the code is switched on the Acquia environment and before
+  `drupal:update` is called automatically by Drainpipe. Use this for any steps
+  that must happen between the code switch and the Drupal update, such as
+  enabling maintenance mode or syncing files from another environment.
+
   ```
     acquia:deploy:after:
       desc: "After the code is switched on the Acquia environment, run these commands"
       cmds:
-        # When using Drainpipe's deployment workflow,
-        # drupal:update runs on the Acquia environment because it sends
-        # a parameter that specifies the environment alias.
-        - task: drupal:update
+        # This task runs on the Acquia environment. The site alias is passed
+        # automatically so commands like drush run against the correct environment.
+        - task: drupal:maintenance:on
   ```
 
 ## GitLab CI Integration
@@ -848,17 +759,15 @@ Available variables are:
 | DRAINPIPE_DDEV_COMPOSER_CACHE_DIR | Set to "false" to disable composer cache dir, or another value to override the default location of .ddev/.drainpipe-composer-cache |
 | DRAINPIPE_DDEV_VERSION            | Install a specific version of DDEV instead of the latest                                                                           |
 
-### Composer Lock Diff
+### Security
 
-Updates Merge Request descriptions with a markdown table of any changes detected
-in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
-Requires `GITLAB_ACCESS_TOKEN` variable to be set, which is an access token with
-`api` scope.
+Runs `composer audit` and posts a composer lock diff as a merge request comment.
+Requires `GITLAB_ACCESS_TOKEN` variable to be set with `api` scope.
 
 ```json
 "extra": {
     "drainpipe": {
-        "gitlab": ["ComposerLockDiff"]
+        "gitlab": ["Security"]
     }
 }
 ```
@@ -885,7 +794,7 @@ To enable deployment of Pantheon Review Apps (Multidev environments per merge re
   - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
   - `PANTHEON_SITE_ID` The Pantheon site UUID, used to construct the SSH remote URL
   - `PANTHEON_GIT_REMOTE` The Pantheon git remote URL e.g. `ssh://codeserver.dev.$PANTHEON_SITE_ID@codeserver.dev.$PANTHEON_SITE_ID.drush.in:2222/~/repository.git`
-  - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox). `PANTHEON_TERMINUS_TOKEN` is also accepted for backwards compatibility.
+  - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
   - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in` (enable the _Mask variable_ checkbox)
   - `GIT_EMAIL` Email address to use for git commits
@@ -900,10 +809,6 @@ This will setup Merge Request deployment to Pantheon Multidev environments. See
 include `"Deploy"` which will give you helpers that you can include and reference for tasks
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
-
-> **Deprecated:** `"gitlab": ["Pantheon", "PantheonReviewApps"]` still works but is deprecated.
-> Migrate to `"gitlab": {"pantheon": ["Deploy", "ReviewApps"]}`.`"gitlab": ["Pantheon"]` alone
-> maps to `{"pantheon": ["Deploy"]}`.
 
 ## Bitbucket Pipelines Integration
 
@@ -1099,7 +1004,7 @@ Additionally, Pantheon integration can be added:
 }
 ```
 
-This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `TERMINUS_MACHINE_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) (`PANTHEON_TERMINUS_TOKEN` and `PANTHEON_TOKEN` are also accepted for backwards compatibility), and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
+This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `TERMINUS_MACHINE_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
 
 ```
   sync:tugboat:
