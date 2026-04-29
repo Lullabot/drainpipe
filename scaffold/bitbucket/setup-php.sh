@@ -12,17 +12,15 @@ for arg in "$@"; do
   esac
 done
 
+apt-get update -qq && apt-get install -y -qq git curl jq unzip
+
 if ! command -v composer &>/dev/null; then
   COMPOSER_VERSION=2.9.5
   curl -sS "https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer
   chmod +x /usr/local/bin/composer
 fi
 
-if [ "$MINIMAL" = "true" ]; then
-  apt-get update -qq && apt-get install -y -qq git curl jq unzip
-else
-  apt-get update -qq && apt-get install -y -qq git curl jq unzip
-
+if [ "$MINIMAL" != "true" ]; then
   # install-php-extensions handles apt dependencies, configure flags, and
   # PECL vs built-in logic automatically for any extension name passed to it.
   # See https://github.com/mlocati/docker-php-extension-installer
