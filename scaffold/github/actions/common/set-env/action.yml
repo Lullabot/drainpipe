@@ -1,12 +1,5 @@
 name: 'Set Env'
 description: 'Creates some useful environment variables'
-inputs:
-  github-api-token:
-    description: "GitHub API token"
-    required: true
-  github-api-token-username:
-    description: "GitHub API token username"
-    required: true
 runs:
   using: "composite"
   steps:
