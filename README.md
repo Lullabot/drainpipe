@@ -822,6 +822,31 @@ Add the following to `composer.json` to enable Bitbucket Pipelines support:
 }
 ```
 
+### PHP extensions
+
+The pipeline image (`php:8.5-cli`) includes only a minimal set of PHP extensions. Before running `composer install`, `setup-php.sh` automatically detects missing extensions by running `composer check-platform-reqs` against `composer.lock` and installs them via [`mlocati/docker-php-extension-installer`](https://github.com/mlocati/docker-php-extension-installer).
+
+To ensure an extension is installed, declare it in the `require` block of your project's `composer.json`:
+
+```json
+"require": {
+    "ext-zip": "*",
+    "ext-gd": "*"
+}
+```
+
+To identify which extensions your project needs, run:
+
+```
+ddev composer check-platform-reqs
+```
+
+For extensions that cannot be declared in `composer.json` (e.g. proprietary agents such as New Relic or Tideways), set the `DRAINPIPE_PHP_EXTENSIONS` Bitbucket repository variable to a space-separated list of extension names:
+
+```
+newrelic tideways_xhprof
+```
+
 ### Acquia Deploy
 
 Acquia Deploy triggers a deployment to the Acquia `dev` environment whenever a PR is merged to `main`, equivalent to the GitHub Actions `AcquiaDeploy` workflow.
@@ -897,6 +922,7 @@ Add these in your Bitbucket repository settings under **Repository variables**:
 | `ACQUIA_SITE_GROUP` | No | Application/site group name (e.g. `mysite` from `mysite.dev`) |
 | `BITBUCKET_USERNAME` | No | Bitbucket username — required for commit status API calls |
 | `BITBUCKET_APP_PASSWORD` | Yes | Bitbucket App Password with `pullrequest:read` scope — required for commit status |
+| `DRAINPIPE_PHP_EXTENSIONS` | No | Space-separated list of additional PHP extensions to install beyond those declared in `composer.json` (see [PHP extensions](#php-extensions)) |
 
 > Note: `BITBUCKET_COMMIT` is injected automatically by Bitbucket Pipelines and does not need to be set manually.
 
@@ -949,6 +975,7 @@ Add these in your Bitbucket repository settings under **Repository variables**:
 | `BITBUCKET_APP_PASSWORD` | Yes | Bitbucket App Password with `pullrequest:read` scope — required for commit status and cleanup |
 | `ACQUIA_SOURCE_ENVIRONMENT` | No | Environment to copy the database from (default: `dev`) |
 | `ACQUIA_REVIEW_RUN_INSTALLER` | No | Set to `"true"` to run `drush site:install --existing-config` instead of copying the database |
+| `DRAINPIPE_PHP_EXTENSIONS` | No | Space-separated list of additional PHP extensions to install beyond those declared in `composer.json` (see [PHP extensions](#php-extensions)) |
 
 > Note: `BITBUCKET_WORKSPACE`, `BITBUCKET_REPO_SLUG`, `BITBUCKET_COMMIT`, and `BITBUCKET_PR_ID` are injected automatically by Bitbucket Pipelines and do not need to be set manually.
 

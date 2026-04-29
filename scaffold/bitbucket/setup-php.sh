@@ -12,21 +12,43 @@ for arg in "$@"; do
   esac
 done
 
+if ! command -v composer &>/dev/null; then
+  COMPOSER_VERSION=2.9.5
+  curl -sS "https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer
+  chmod +x /usr/local/bin/composer
+fi
+
 if [ "$MINIMAL" = "true" ]; then
   apt-get update -qq && apt-get install -y -qq git curl jq unzip
 else
-  apt-get update -qq && apt-get install -y -qq git curl jq unzip libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev
-  docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
-  docker-php-ext-install -j"$(nproc)" gd
+  apt-get update -qq && apt-get install -y -qq git curl jq unzip
+
+  # install-php-extensions handles apt dependencies, configure flags, and
+  # PECL vs built-in logic automatically for any extension name passed to it.
+  # See https://github.com/mlocati/docker-php-extension-installer
+  IPE_VERSION=2.7.14
+  curl -sSLf "https://github.com/mlocati/docker-php-extension-installer/releases/download/${IPE_VERSION}/install-php-extensions" \
+    -o /usr/local/bin/install-php-extensions
+  chmod +x /usr/local/bin/install-php-extensions
+
+  # Detect PHP extensions declared in composer.json/composer.lock that are
+  # missing from the current environment and install them automatically.
+  # To identify extensions your project needs, run: ddev composer check-platform-reqs
+  # Then add any missing ext-* entries to the require block in composer.json.
+  MISSING_EXTS=$(COMPOSER_ALLOW_SUPERUSER=1 composer check-platform-reqs 2>/dev/null \
+    | awk '/[[:space:]]missing$/ && /^ext-/ { gsub(/^ext-/, ""); print $1 }')
+
+  # DRAINPIPE_PHP_EXTENSIONS can be set as a Bitbucket repository variable to
+  # install extensions not declared in composer.json (e.g. proprietary agents).
+  ALL_EXTS=$(printf '%s %s' "$MISSING_EXTS" "${DRAINPIPE_PHP_EXTENSIONS:-}" | xargs)
+  if [ -n "$ALL_EXTS" ]; then
+    # shellcheck disable=SC2086
+    install-php-extensions $ALL_EXTS
+  fi
+
   mkdir -p ~/.ssh && chmod 700 ~/.ssh
   echo "${ACQUIA_SSH_PRIVATE_KEY}" | base64 -d > ~/.ssh/id_rsa
   chmod 600 ~/.ssh/id_rsa
   git config --global user.name "Drainpipe Bot"
   git config --global user.email "no-reply@example.com"
-fi
-
-if ! command -v composer &>/dev/null; then
-  COMPOSER_VERSION=2.9.5
-  curl -sS "https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer
-  chmod +x /usr/local/bin/composer
 fi
