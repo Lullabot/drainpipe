@@ -105,6 +105,19 @@ tasks:
         ./vendor/bin/task bitbucket:acquia:code-switch ALIAS="${CDE_ALIAS}" BRANCH="${BUILD_BRANCH}"
         echo "Code switch complete."
 
+  "acquia:drupal-update":
+    desc: "Run Drupal deploy and config-status check on a remote Acquia environment via acli"
+    cmds:
+      - |
+        set -euo pipefail
+        vendor/bin/acli --no-interaction remote:drush "{{.ALIAS}}" -- deploy --yes
+        config_status_output=$(vendor/bin/acli --no-interaction remote:drush "{{.ALIAS}}" -- config:status --format=json --state=Different | tail -n1)
+        if [[ "${config_status_output}" != '[]' ]]; then
+          echo "Config export does not match database."
+          vendor/bin/acli --no-interaction remote:drush "{{.ALIAS}}" -- config:status
+          exit 1
+        fi
+
   "acquia:update-cde":
     desc: "Run site updates on the Acquia CDE and post deployment status"
     cmds:
@@ -123,13 +136,10 @@ tasks:
 
         if [ "${ACQUIA_REVIEW_RUN_INSTALLER:-}" = "true" ]; then
           echo "Running site installer..."
-          ./vendor/bin/drush "@${CDE_ALIAS}" --yes site:install --existing-config
-        elif ./vendor/bin/task -l 2>/dev/null | grep -q '^\* update: '; then
-          echo "Running task update..."
-          ./vendor/bin/task update "site=@${CDE_ALIAS}"
+          vendor/bin/acli --no-interaction remote:drush "${CDE_ALIAS}" -- site:install --existing-config --yes
         else
-          echo "Running task drupal:update..."
-          ./vendor/bin/task drupal:update "site=@${CDE_ALIAS}"
+          echo "Running Drupal updates on ${CDE_ALIAS}..."
+          ./vendor/bin/task bitbucket:acquia:drupal-update "ALIAS=${CDE_ALIAS}"
         fi
 
         echo "Retrieving environment URL..."
@@ -198,13 +208,8 @@ tasks:
           ./vendor/bin/task acquia:deploy:after "site=@${ENV_ALIAS}"
         fi
 
-        if ./vendor/bin/task -l 2>/dev/null | grep -q '^\* update: '; then
-          echo "Running task update..."
-          ./vendor/bin/task update "site=@${ENV_ALIAS}"
-        else
-          echo "Running task drupal:update..."
-          ./vendor/bin/task drupal:update "site=@${ENV_ALIAS}"
-        fi
+        echo "Running Drupal updates on ${ENV_ALIAS}..."
+        ./vendor/bin/task bitbucket:acquia:drupal-update "ALIAS=${ENV_ALIAS}"
 
         echo "Clearing caches on all domains..."
         HOSTNAMES=$(vendor/bin/acli api:environments:domain-list --no-interaction "${ENV_ALIAS}" \
