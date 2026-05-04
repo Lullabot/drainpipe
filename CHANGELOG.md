@@ -1,5 +1,17 @@
 # Changelog
 
+## [6.1.0](https://github.com/Lullabot/drainpipe/compare/v6.0.0...v6.1.0) (2026-05-04)
+
+
+### Features
+
+* [#728](https://github.com/Lullabot/drainpipe/issues/728) Add Bitbucket Pipelines support for Acquia ([#1149](https://github.com/Lullabot/drainpipe/issues/1149)) ([db5c9c3](https://github.com/Lullabot/drainpipe/commit/db5c9c3cc536f8bab6fb6e0a9b9f11863be24f8c))
+
+
+### Bug Fixes
+
+* remove GitHub API token inputs from action.yml ([#1225](https://github.com/Lullabot/drainpipe/issues/1225)) ([b4fd162](https://github.com/Lullabot/drainpipe/commit/b4fd16268ce000c7b893cf59525372d613347d5c))
+
 ## [6.0.0](https://github.com/Lullabot/drainpipe/compare/v5.2.0...v6.0.0) (2026-04-21)
 
 
