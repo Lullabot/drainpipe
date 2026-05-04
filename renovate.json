@@ -11,7 +11,8 @@
     "managerFilePatterns": [
       "(^|/).github/(workflows|actions)/[^/]+\\.ya?ml$",
       "(^|/).github/(workflows|actions)/[^/]+/action\\.ya?ml$",
-      "(^|/)scaffold/github/workflows/[^/]+\\.ya?ml$"
+      "(^|/)scaffold/github/workflows/[^/]+\\.ya?ml$",
+      "(^|/)scaffold/github/actions/[^/]+/[^/]+/action\\.ya?ml$"
     ]
   },
   "ignoreDeps": [
@@ -112,6 +113,14 @@
       "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
     },
     {
+      "matchPackageNames": ["acquia/cli"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "matchPackageNames": ["composer/composer"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
       "matchPackageNames": ["gitleaks/gitleaks"],
       "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
     },
@@ -136,7 +145,7 @@
       "customType": "regex",
       "managerFilePatterns": [
         "^\\.taskfile$",
-        "scaffold/tugboat/scripts/custom-init-command\\.sh$"
+        "^scaffold/tugboat/scripts/custom-init-command\\.sh$"
       ],
       "matchStrings": [
         "(?:TASKFILE=|^)v(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s*$"
@@ -148,7 +157,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "scaffold/tugboat/scripts/custom-init-command\\.sh$"
+        "^scaffold/tugboat/scripts/custom-init-command\\.sh$",
+        "^tasks/bitbucket\\.yml$"
       ],
       "matchStrings": [
         "YQ=v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -156,6 +166,29 @@
       "depNameTemplate": "mikefarah/yq",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^tasks/bitbucket\\.yml$",
+        "^scaffold/github/actions/acquia/deploy/action\\.yml$"
+      ],
+      "matchStrings": [
+        "ACLI_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "acquia/cli",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^scaffold/bitbucket/setup-php\\.sh$"
+      ],
+      "matchStrings": [
+        "COMPOSER_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "composer/composer",
+      "datasourceTemplate": "github-releases"
     },
     {
       "customType": "regex",
@@ -172,8 +205,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "\\.github/workflows/Security\\.yml$",
-        "scaffold/github/workflows/Security\\.yml$"
+        "^\\.github/workflows/Security\\.yml$",
+        "^scaffold/github/workflows/Security\\.yml$"
       ],
       "matchStrings": [
         "gitleaks_(?<currentValue>\\d+\\.\\d+\\.\\d+)_linux_x64"
@@ -185,8 +218,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "\\.github/workflows/TestMetapackages\\.yml$",
-        "\\.github/workflows/TestFunctional\\.yml$"
+        "^\\.github/workflows/TestMetapackages\\.yml$",
+        "^\\.github/workflows/TestFunctional\\.yml$"
       ],
       "matchStrings": [
         "yarn@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
