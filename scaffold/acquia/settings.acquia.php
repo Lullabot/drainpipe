@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+use Acquia\Drupal\RecommendedSettings\Helpers\EnvironmentDetector;
+
 if (getenv('AH_SITE_ENVIRONMENT')) {
   // If trusted_reverse_proxy_ips is not defined, fail gracefully.
   // phpcs:ignore
