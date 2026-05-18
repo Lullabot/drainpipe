@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.1](https://github.com/Lullabot/drainpipe/compare/v6.1.0...v6.1.1) (2026-05-18)
+
+
+### Bug Fixes
+
+* Reference class path with 'use'  for EnvironmentDetector ([#1229](https://github.com/Lullabot/drainpipe/issues/1229)) ([f5e2693](https://github.com/Lullabot/drainpipe/commit/f5e2693f574d38c61c69a1ffa806399d3a932819))
+
 ## [6.1.0](https://github.com/Lullabot/drainpipe/compare/v6.0.0...v6.1.0) (2026-05-04)
 
 
