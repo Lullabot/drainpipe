@@ -36,7 +36,6 @@
     },
     "extra": {
         "class": [
-            "\\Lullabot\\DrainpipeDev\\NightwatchScaffoldPlugin",
             "\\Lullabot\\DrainpipeDev\\ScaffoldInstallerPlugin"
         ],
         "drupal-scaffold": {

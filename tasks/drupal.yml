@@ -75,14 +75,6 @@ tasks:
       # See https://architecture.lullabot.com/adr/20260313-drupal-build-steps/
       - ./vendor/bin/drush {{.site}} --yes deploy
       - |
-        echo "WARNING: Running drush cron as part of drupal:update is deprecated and will be removed in the next major release. Add it as a separate step in your project Taskfile.yml instead:"
-        echo ""
-        echo "  update:"
-        echo "    cmds:"
-        echo "      - task: drupal:update"
-        echo "      - ./vendor/bin/drush {{.site}} --yes cron"
-        ./vendor/bin/drush {{.site}} --yes cron
-      - |
        # drush config:status --format=json is outputting notices in Pantheon even with the json format,
        # so we need to tail the last line.
         config_status_output=$(./vendor/bin/drush {{.site}} config:status --format=json --state=Different | tail -n1)

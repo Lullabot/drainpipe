@@ -54,13 +54,10 @@ for an example of this in use.
 Drupal scaffolds are core files automatically placed and updated in the project
 root by `drupal/core-composer-scaffold` ([documentation](https://www.drupal.org/docs/develop/using-composer/using-drupals-composer-scaffold#toc_4)).
 
-Scaffold files provided by Drainpipe are located in the main `scaffold` directory,
-while Nightwatch specific scaffold files can be found in `drainpipe-dev/scaffold`.
+Scaffold files provided by Drainpipe are located in the main `scaffold` directory.
 
 To determine where a file is placed, edit the `extra.drupal-scaffold` section in
-`composer.json`. Check how each scaffolded file defined in `/src/ScaffoldInstallerPlugin.php`
-for Drainpipe provided files, and `drainpipe-dev/src/NightwatchScaffoldPlugin.php`
-for Nightwatch specific files.
+`composer.json`. Check how each scaffolded file is defined in `/src/ScaffoldInstallerPlugin.php`.
 
 A specific file scaffolding can be disabled by mapping it to false under the
 `extra.drupal-scaffold.file-mapping` in the project `composer.json` file. This
@@ -293,75 +290,6 @@ Runs PHPUnit tests in:
 
 You will need to make sure you have a working Drupal site before you're
 able to run these.
-
-> [!WARNING]
-> **Deprecated since v5.2.0:** DTT (Drupal Test Traits) support will be removed in a future major release. If you rely on `ExistingSite` or `ExistingSiteJavascript` test types, plan to migrate away from Drainpipe's built-in DTT integration.
-
-Support for [Drupal Test Traits](https://gitlab.com/weitzman/drupal-test-traits)
-is included, set this in your `Taskfile.yml` vars:
-
-```
-vars:
-  DRUPAL_TEST_TRAITS: true
-```
-This will additionally look for tests in:
-- `web/modules/custom/**/tests/src/ExistingSite`
-- `test/phpunit/**/ExistingSite`
-- `web/modules/custom/**/tests/src/ExistingSiteJavascript`
-- `test/phpunit/**/ExistingSiteJavascript`
-
-_beware: DTT tests will run against the main working Drupal site rather than
-installing a new instance in isolation_
-
-#### Nightwatch
-
-`task test:nightwatch`
-
-Runs functional browser tests with [Nightwatch](https://nightwatchjs.org/).
-
-To enable Nightwatch support, add the following to your `composer.json`, then
-run `composer install` to ensure required files are scaffolded:
-```
-"extra": {
-    "drainpipe": {
-        "testing": ["Nightwatch"]
-    },
-},
-```
-
-Run `test:nightwatch:setup` to help you setup your project to run Nightwatch
-tests by installing the necessary node packages and DDEV configurations.
-
-If you are using DDEV, Drainpipe will have created a
-`.ddev/docker-compose.selenium.yaml` file that provides standalone Firefox and
-Chrome as containers, as well as an example test in `test/nightwatch/example.nightwatch.js`.
-
-To run the above test you will need to have a working Drupal installation in the
-Firefox and Chrome containers. You can run the `test:nightwatch:siteinstall`
-helper task to run the Drupal site installer for both sites with your existing
-configuration.
-
-After you've verified this test works, you can ignore it in your `composer.json`:
-```
-"extra": {
-        "drupal-scaffold": {
-            "file-mapping": {
-                "[project-root]/test/nightwatch/example.nightwatch.js": {
-			"mode": "skip"
-		}
-	}
-}
-```
-
-Nightwatch tests must have the suffix `.nightwatch.js` to be recognised by
-the test runner.
-
-Whilst tests are running, you can view them in realtime through your browser.
-
-https://<ddev-site-name>:7900 for Chrome
-https://<ddev-site-name>:7901 for Firefox
-
-The password for all environments is `secret`.
 
 ### Autofix
 
@@ -670,21 +598,6 @@ detected in `yarn.lock` or `package-lock.json` files.
 }
 ```
 
-### Composer Lock Diff (Deprecated)
-
-**This is now provided as part of the Security workflow**
-
-Update Pull Request descriptions with a markdown table of any changes detected
-in `composer.lock` using [composer-lock-diff](https://github.com/davidrjonas/composer-lock-diff).
-
-```json
-"extra": {
-    "drainpipe": {
-        "github": ["ComposerLockDiff"]
-    }
-}
-```
-
 ### Pantheon
 
 To scaffold Pantheon composite actions for use in your own workflows (without a managed review app
@@ -731,16 +644,12 @@ To enable deployment of Pantheon Review Apps (Multidev environments per pull req
     - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to 'live'
     - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to `'true'` to skip wiping and re-cloning the multidev's database and files on each push. When the multidev does not yet exist it is still created with a full content clone from the source environment; only subsequent pushes skip the clone. Defaults to `'false'` (always wipe and re-clone). See [Multidev content cloning performance](#multidev-content-cloning-performance).
 - Add the following [secrets to your GitHub repository](https://docs.github.com/en/codespaces/managing-codespaces-for-your-organization/managing-development-environment-secrets-for-your-repository-or-organization#adding-secrets-for-a-repository):
-    - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (`PANTHEON_TERMINUS_TOKEN` is also accepted for backwards compatibility)
+    - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token
     - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon
     - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in`
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
     - `PANTHEON_REVIEW_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
-
-> **Deprecated:** `"github": ["PantheonReviewApps"]` still works but is deprecated. Migrate to
-> `"github": {"pantheon": ["ReviewApps"]}`. Similarly, `"github": ["Pantheon"]` (previously a
-> no-op) is now a deprecated alias for `"github": {"pantheon": ["Actions"]}`.
 
 ### Async deploy with Quicksilver
 
@@ -887,11 +796,6 @@ To add Acquia specific GitHub actions, add the following to `composer.json`:
   ```
 Then run `composer install`. A Deploy to Acquia workflow at `.github/workflows/AcquiaDeploy.yml` will be added (with its dependent actions).
 
-> **Deprecated:** `"github": ["acquia"]` still works but is deprecated. Migrate to
-> `"github": {"acquia": ["Deploy"]}`.
-
-After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
-
 After the Github Actions Integration is merged, you can deploy to Acquia using the UI or the Github CLI (gh).
 
 **Github repository settings**
@@ -1021,7 +925,7 @@ To enable deployment of Pantheon Review Apps (Multidev environments per merge re
   - `PANTHEON_SITE_NAME` The canonical site name in Pantheon
   - `PANTHEON_SITE_ID` The Pantheon site UUID, used to construct the SSH remote URL
   - `PANTHEON_GIT_REMOTE` The Pantheon git remote URL e.g. `ssh://codeserver.dev.$PANTHEON_SITE_ID@codeserver.dev.$PANTHEON_SITE_ID.drush.in:2222/~/repository.git`
-  - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox). `PANTHEON_TERMINUS_TOKEN` is also accepted for backwards compatibility.
+  - `TERMINUS_MACHINE_TOKEN` See https://pantheon.io/docs/terminus/install#machine-token (enable the _Mask variable_ checkbox)
   - `SSH_PRIVATE_KEY` A private key of a user which can push to Pantheon (enable the _Mask variable_ checkbox)
   - `SSH_KNOWN_HOSTS` The result of running `ssh-keyscan -H -p 2222 codeserver.dev.$PANTHEON_SITE_ID.drush.in` (enable the _Mask variable_ checkbox)
   - `GIT_EMAIL` Email address to use for git commits
@@ -1038,9 +942,186 @@ include `"Deploy"` which will give you helpers that you can include and referenc
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
 
-> **Deprecated:** `"gitlab": ["Pantheon", "PantheonReviewApps"]` still works but is deprecated.
-> Migrate to `"gitlab": {"pantheon": ["Deploy", "ReviewApps"]}`.`"gitlab": ["Pantheon"]` alone
-> maps to `{"pantheon": ["Deploy"]}`.
+## Bitbucket Pipelines Integration
+
+Add the following to `composer.json` to enable Bitbucket Pipelines support:
+
+```json
+"extra": {
+  "drainpipe": {
+    "bitbucket": []
+  }
+}
+```
+
+### PHP extensions
+
+The pipeline image (`php:8.5-cli`) includes only a minimal set of PHP extensions. Before running `composer install`, `setup-php.sh` automatically detects missing extensions by running `composer check-platform-reqs` against `composer.lock` and installs them via [`mlocati/docker-php-extension-installer`](https://github.com/mlocati/docker-php-extension-installer).
+
+To ensure an extension is installed, declare it in the `require` block of your project's `composer.json`:
+
+```json
+"require": {
+    "ext-zip": "*",
+    "ext-gd": "*"
+}
+```
+
+To identify which extensions your project needs, run:
+
+```
+ddev composer check-platform-reqs
+```
+
+For extensions that cannot be declared in `composer.json` (e.g. proprietary agents such as New Relic or Tideways), set the `DRAINPIPE_PHP_EXTENSIONS` Bitbucket repository variable to a space-separated list of extension names:
+
+```
+newrelic tideways_xhprof
+```
+
+### Acquia Deploy
+
+Acquia Deploy triggers a deployment to the Acquia `dev` environment whenever a PR is merged to `main`, equivalent to the GitHub Actions `AcquiaDeploy` workflow.
+
+To enable Acquia Deploy on Bitbucket:
+
+- Add the following to `composer.json`:
+  ```json
+  "extra": {
+      "drainpipe": {
+          "bitbucket": ["AcquiaDeploy"],
+          "acquia": { "settings": true }
+      }
+  }
+  ```
+  If your main branch is named `master` (or anything other than `main`), set `bitbucketDeployBranch`:
+  ```json
+  "extra": {
+      "drainpipe": {
+          "bitbucket": ["AcquiaDeploy"],
+          "bitbucketDeployBranch": "master",
+          "acquia": { "settings": true }
+      }
+  }
+  ```
+  If you are using both Acquia Review Apps and Acquia Deploy, list them together:
+  ```json
+  "bitbucket": ["AcquiaReviewApps", "AcquiaDeploy"]
+  ```
+- Run `composer install` to scaffold the following files into your project:
+  - `bitbucket-pipelines.yml` — generated at the repository root and kept up to date on every `composer install`. Do not edit this file manually — changes will be overwritten.
+  - `Taskfile.yml` — a `bitbucket` include pointing to `vendor/lullabot/drainpipe/tasks/bitbucket.yml` is auto-injected
+
+**How it works**
+
+When a PR is merged to `main` the `branches.main` pipeline:
+
+1. Installs system dependencies and configures SSH
+2. Runs `composer install`
+3. Installs Acquia CLI and authenticates (`task bitbucket:acquia:setup`)
+4. Runs the pre-deploy build hook if defined (`task bitbucket:acquia:build` → `task acquia:deploy:before`)
+5. Resolves the VCS branch and remote that the Acquia `dev` environment tracks, pushes code via `task deploy:git`, and waits for the code switch to complete (`task bitbucket:acquia:push-dev`)
+6. Downloads Drush aliases, runs `task acquia:deploy:after` (if defined), then `task update` or `task drupal:update`, clears caches on all domains, and posts a commit status (`task bitbucket:acquia:update-dev`)
+
+**User-defined hooks**
+
+Add these tasks to your project's `Taskfile.yml` as needed:
+
+```yaml
+tasks:
+  acquia:deploy:before:
+    desc: "Runs before the Acquia deploy snapshot — compile assets, etc. Do NOT call drupal:composer:production here."
+    cmds:
+      - task: build
+
+  acquia:deploy:after:
+    desc: "Runs after code is switched on Acquia — typically calls 'task drupal:update'"
+    cmds:
+      - task: drupal:update
+        vars:
+          site: "{{.site}}"
+```
+
+**Bitbucket repository variables**
+
+Add these in your Bitbucket repository settings under **Repository variables**:
+
+| Variable | Secured | Description |
+|---|---|---|
+| `ACQUIA_API_KEY` | Yes | Acquia API Key |
+| `ACQUIA_API_SECRET` | Yes | Acquia API Secret |
+| `ACQUIA_SSH_PRIVATE_KEY` | Yes | SSH private key (base64-encoded) with Acquia Git access |
+| `ACQUIA_SITE_GROUP` | No | Application/site group name (e.g. `mysite` from `mysite.dev`) |
+| `BITBUCKET_USERNAME` | No | Bitbucket username — required for commit status API calls |
+| `BITBUCKET_APP_PASSWORD` | Yes | Bitbucket App Password with `pullrequest:read` scope — required for commit status |
+| `DRAINPIPE_PHP_EXTENSIONS` | No | Space-separated list of additional PHP extensions to install beyond those declared in `composer.json` (see [PHP extensions](#php-extensions)) |
+
+> Note: `BITBUCKET_COMMIT` is injected automatically by Bitbucket Pipelines and does not need to be set manually.
+
+> Note: When both `AcquiaReviewApps` and `AcquiaDeploy` are configured, `composer install` generates a single merged `bitbucket-pipelines.yml` containing all pipeline sections. Do not edit this file manually — changes will be overwritten on the next `composer install`.
+
+### Acquia Review Apps
+
+Acquia Review Apps create an [Acquia Cloud Development Environment (CDE)](https://docs.acquia.com/acquia-cloud-platform/manage-apps/dev-env/) for every pull request, equivalent to Pantheon Multidev environments.
+
+To enable Acquia Review Apps on Bitbucket:
+
+- Add the following to `composer.json`:
+  ```json
+  "extra": {
+      "drainpipe": {
+          "bitbucket": ["AcquiaReviewApps"],
+          "acquia": { "settings": true }
+      }
+  }
+  ```
+- Run `composer install` to scaffold the following files into your project:
+  - `bitbucket-pipelines.yml` — generated at the repository root and kept up to date on every `composer install`. Do not edit this file manually — changes will be overwritten.
+  - `Taskfile.yml` — a `bitbucket` include pointing to `vendor/lullabot/drainpipe/tasks/bitbucket.yml` is auto-injected
+
+**How it works**
+
+When a pull request is opened or updated, the `pull-requests` pipeline:
+
+1. Installs system dependencies and configures SSH
+2. Runs `composer install`
+3. Installs Acquia CLI and authenticates (`task bitbucket:acquia:setup`)
+4. Runs the pre-deploy build hook if defined (`task bitbucket:acquia:build` → `task acquia:deploy:before`)
+5. Pushes code to a PR-specific branch on Acquia, creates the CDE (`PR-{N}`) if it doesn't exist, copies the database from the source environment (default: `dev`) unless `ACQUIA_REVIEW_RUN_INSTALLER` is set, and waits for the code switch to complete (`task bitbucket:acquia:push-cde`)
+6. Downloads Drush aliases, runs `task acquia:deploy:after` (if defined) and `task update` or `task drupal:update`, then posts the environment URL as a commit status (`task bitbucket:acquia:update-cde`)
+
+Stale CDEs are **not** deleted automatically on PR close. See [Scheduling the cleanup pipeline](#scheduling-the-cleanup-pipeline) below.
+
+**Bitbucket repository variables**
+
+Add these in your Bitbucket repository settings under **Repository variables**:
+
+| Variable | Secured | Description |
+|---|---|---|
+| `ACQUIA_API_KEY` | Yes | Acquia API Key |
+| `ACQUIA_API_SECRET` | Yes | Acquia API Secret |
+| `ACQUIA_SSH_PRIVATE_KEY` | Yes | SSH private key (base64-encoded) with Acquia Git access |
+| `ACQUIA_APP_UUID` | No | Application UUID from the Acquia Cloud console |
+| `ACQUIA_SITE_GROUP` | No | Application/site group name (e.g. `mysite` from `mysite.dev`) |
+| `BITBUCKET_USERNAME` | No | Bitbucket username — required for commit status and cleanup API calls |
+| `BITBUCKET_APP_PASSWORD` | Yes | Bitbucket App Password with `pullrequest:read` scope — required for commit status and cleanup |
+| `ACQUIA_SOURCE_ENVIRONMENT` | No | Environment to copy the database from (default: `dev`) |
+| `ACQUIA_REVIEW_RUN_INSTALLER` | No | Set to `"true"` to run `drush site:install --existing-config` instead of copying the database |
+| `DRAINPIPE_PHP_EXTENSIONS` | No | Space-separated list of additional PHP extensions to install beyond those declared in `composer.json` (see [PHP extensions](#php-extensions)) |
+
+> Note: `BITBUCKET_WORKSPACE`, `BITBUCKET_REPO_SLUG`, `BITBUCKET_COMMIT`, and `BITBUCKET_PR_ID` are injected automatically by Bitbucket Pipelines and do not need to be set manually.
+
+**Scheduling the cleanup pipeline**
+
+Bitbucket does not trigger pipelines on PR close. To avoid accumulating stale CDEs, schedule the `acquia-review-apps-cleanup` custom pipeline:
+
+1. In your Bitbucket repository, go to **Repository settings → Pipelines → Schedules**
+2. Add a new schedule for the `acquia-review-apps-cleanup` custom pipeline (e.g., daily at midnight)
+
+**Known limitations**
+
+- No automatic cancel-in-progress — multiple commits to the same PR will queue rather than cancel prior runs.
+- Extra credentials required — `BITBUCKET_USERNAME` and `BITBUCKET_APP_PASSWORD` must be set manually, unlike GitHub where `GITHUB_TOKEN` is injected automatically.
 
 ### Async deploy with Quicksilver (GitLab)
 
@@ -1160,7 +1241,7 @@ Additionally, Pantheon integration can be added:
 }
 ```
 
-This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `TERMINUS_MACHINE_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) (`PANTHEON_TERMINUS_TOKEN` and `PANTHEON_TOKEN` are also accepted for backwards compatibility), and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
+This will install [Terminus](https://docs.pantheon.io/terminus) in the Tugboat environment. Add `TERMINUS_MACHINE_TOKEN` as a [Tugboat environment variable](https://docs.tugboatqa.com/setting-up-tugboat/select-repo-settings/#set-environment-variables) and set `PANTHEON_SITE_ID` in your `Taskfile.yml` vars. Then add a `sync:tugboat` task to fetch the database during Tugboat preview builds:
 
 ```
   sync:tugboat:

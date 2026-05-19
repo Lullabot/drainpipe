@@ -109,7 +109,6 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     private function installPhpUnit(): void
     {
         $this->scaffoldTemplate('phpunit.xml', '{% DOCROOT %}', $this->webRoot);
-        $this->scaffoldTemplate('phpunit-testtraits.xml', '{% DOCROOT %}', $this->webRoot);
     }
 
     /**
