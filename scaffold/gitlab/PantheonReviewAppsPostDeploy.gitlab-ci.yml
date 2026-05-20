@@ -1,0 +1,18 @@
+drainpipe_pantheon_post_deploy:
+  stage: deploy
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "trigger" && $PANTHEON_TRIGGERED_ENVIRONMENT =~ /^mr-\d+$/'
+  variables:
+    site: '${PANTHEON_SITE_NAME}.${PANTHEON_TRIGGERED_ENVIRONMENT}'
+  script:
+    - !reference [.drainpipe_pantheon_setup_terminus, script]
+    - composer install
+    - terminus aliases --only $PANTHEON_SITE_NAME --yes
+    - |
+      if [ "$PANTHEON_MULTIDEV_RUN_INSTALLER" == "true" ]; then
+        ./vendor/bin/drush @$PANTHEON_SITE_NAME.$PANTHEON_TRIGGERED_ENVIRONMENT --yes site:install --existing-config
+      elif ./vendor/bin/task -l | grep '* update: '; then
+        ./vendor/bin/task site=@$PANTHEON_SITE_NAME.$PANTHEON_TRIGGERED_ENVIRONMENT update
+      else
+        ./vendor/bin/task site=@$PANTHEON_SITE_NAME.$PANTHEON_TRIGGERED_ENVIRONMENT drupal:update
+      fi

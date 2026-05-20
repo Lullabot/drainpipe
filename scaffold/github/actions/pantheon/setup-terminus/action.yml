@@ -10,15 +10,26 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - env:
+    - name: Cache Terminus
+      id: terminus-cache
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: ~/terminus/terminus
+        key: terminus-4.1.1
+
+    - name: Install and authenticate Terminus
+      env:
         INPUT_TERMINUS_TOKEN: ${{ inputs.terminus-token }}
         INPUT_TERMINUS_PLUGINS: ${{ inputs.terminus-plugins }}
+        TERMINUS_CACHE_HIT: ${{ steps.terminus-cache.outputs.cache-hit }}
       run: |
         echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >> ~/.ssh/config
-        mkdir ~/terminus
-        curl -L https://github.com/pantheon-systems/terminus/releases/download/4.1.1/terminus.phar --output ~/terminus/terminus
-        chmod +x ~/terminus/terminus
-        ln -s ~/terminus/terminus /usr/local/bin/terminus
+        mkdir -p ~/terminus
+        if [ "$TERMINUS_CACHE_HIT" != "true" ]; then
+          curl -L https://github.com/pantheon-systems/terminus/releases/download/4.1.1/terminus.phar --output ~/terminus/terminus
+          chmod +x ~/terminus/terminus
+        fi
+        ln -sf ~/terminus/terminus /usr/local/bin/terminus
         echo "$INPUT_TERMINUS_PLUGINS" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
         terminus auth:login --machine-token="$INPUT_TERMINUS_TOKEN"
       shell: bash

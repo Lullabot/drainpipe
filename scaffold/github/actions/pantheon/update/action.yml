@@ -10,6 +10,10 @@ inputs:
   environment:
     description: "The environment to run the updates or install in e.g. 'test'"
     required: true
+  skip-workflow-wait:
+    description: "When 'true', skip terminus workflow:wait. Use when the sync is already complete (e.g. triggered by Quicksilver)."
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -18,10 +22,13 @@ runs:
         INPUT_SITE_NAME: ${{ inputs.site-name }}
         INPUT_ENVIRONMENT: ${{ inputs.environment }}
         INPUT_RUN_INSTALLER: ${{ inputs.run-installer }}
+        INPUT_SKIP_WORKFLOW_WAIT: ${{ inputs.skip-workflow-wait }}
       run: |
-        # Wait for Pantheon to sync.
         source .github/actions/drainpipe/set-env/bash_aliases
-        drainpipe_exec "terminus workflow:wait $INPUT_SITE_NAME.$INPUT_ENVIRONMENT"
+        if [ "$INPUT_SKIP_WORKFLOW_WAIT" != "true" ]; then
+          # Wait for Pantheon to sync.
+          drainpipe_exec "terminus workflow:wait $INPUT_SITE_NAME.$INPUT_ENVIRONMENT"
+        fi
         drainpipe_exec "terminus aliases --only $INPUT_SITE_NAME --yes"
         if [ "$INPUT_RUN_INSTALLER" == "true" ]; then
           drainpipe_exec "./vendor/bin/drush @$INPUT_SITE_NAME.$INPUT_ENVIRONMENT --yes site:install --existing-config"

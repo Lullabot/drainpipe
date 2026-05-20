@@ -1,0 +1,148 @@
+name: "Pantheon Review Apps Watchdog"
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      threshold_minutes:
+        description: 'Minutes before an in_progress deployment is considered stale'
+        required: false
+        default: '20'
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  deployments: write
+  contents: read
+
+jobs:
+  Drainpipe-Watchdog-Pantheon:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
+        id: terminus-setup
+        continue-on-error: true
+        with:
+          terminus-token: ${{ secrets.TERMINUS_MACHINE_TOKEN || secrets.PANTHEON_TERMINUS_TOKEN }}
+
+      - name: Detect and resolve stale deployments
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SITE_NAME: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
+          THRESHOLD_MINUTES: ${{ inputs.threshold_minutes || vars.PANTHEON_ASYNC_WATCHDOG_THRESHOLD_MINUTES || '20' }}
+          TERMINUS_AVAILABLE: ${{ steps.terminus-setup.outcome == 'success' }}
+        run: | # zizmor: ignore[github-env]
+          set -euo pipefail
+
+          THRESHOLD_SECONDS=$(( THRESHOLD_MINUTES * 60 ))
+          NOW=$(date -u +%s)
+          STALE_COUNT=0
+
+          {
+            echo "## Pantheon Async Deploy Watchdog"
+            echo "Threshold: ${THRESHOLD_MINUTES} min | Run: $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          page=1
+          while true; do
+            response=$(curl -sf \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/deployments?per_page=100&page=$page")
+
+            count=$(echo "$response" | jq 'length')
+            [ "$count" != "0" ] || break
+
+            while IFS= read -r deployment; do
+              deployment_id=$(echo "$deployment" | jq '.id')
+              environment=$(echo "$deployment" | jq -r '.environment')
+
+              echo "$environment" | grep -qE '^pantheon-pr-[0-9]+$' || continue
+
+              statuses=$(curl -sf \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$deployment_id/statuses?per_page=1")
+
+              latest_state=$(echo "$statuses" | jq -r '.[0].state // "none"')
+              [ "$latest_state" = "in_progress" ] || continue
+
+              latest_created=$(echo "$statuses" | jq -r '.[0].created_at // ""')
+              [ -n "$latest_created" ] || continue
+
+              status_ts=$(date -u -d "$latest_created" +%s 2>/dev/null) || continue
+              age=$(( NOW - status_ts ))
+              [ "$age" -ge "$THRESHOLD_SECONDS" ] || continue
+
+              STALE_COUNT=$(( STALE_COUNT + 1 ))
+              multidev="${environment#pantheon-}"
+              age_min=$(( age / 60 ))
+
+              echo "Stale: $environment (ID $deployment_id, ${age_min} min old)"
+
+              DESCRIPTION="Deployment stuck in_progress for ${age_min} minutes. Check Pantheon dashboard and Actions tab."
+              PANTHEON_URL=""
+
+              if [ "$TERMINUS_AVAILABLE" = "true" ] && [ -n "$SITE_NAME" ]; then
+                site_uuid=$(terminus site:info --format=json "$SITE_NAME" 2>/dev/null \
+                  | jq -r '.id // ""') || site_uuid=""
+                [ -n "$site_uuid" ] && \
+                  PANTHEON_URL="https://dashboard.pantheon.io/sites/$site_uuid#$multidev/workflows"
+
+                workflow_json=$(terminus workflow:list --format=json "$SITE_NAME.$multidev" \
+                  2>/dev/null) || workflow_json="[]"
+
+                wf_status=$(echo "$workflow_json" | jq -r \
+                  'if type == "array" then .[0].status // "unknown"
+                   else (to_entries | .[0].value.status // "unknown")
+                   end' 2>/dev/null) || wf_status="parse_error"
+
+                case "$wf_status" in
+                  failed)
+                    DESCRIPTION="Pantheon code sync failed for $multidev (age: ${age_min} min). Check Pantheon workflow logs." ;;
+                  succeeded)
+                    DESCRIPTION="Pantheon sync succeeded but the post-deploy job did not start (age: ${age_min} min). The Quicksilver webhook may have failed to dispatch. Check Pantheon dashboard logs and the Actions tab." ;;
+                  running)
+                    echo "Pantheon sync still running for $multidev — not yet stale, skipping."
+                    STALE_COUNT=$(( STALE_COUNT - 1 ))
+                    continue ;;
+                  *)
+                    DESCRIPTION="Cannot determine Pantheon workflow status ($wf_status) for $multidev (age: ${age_min} min). Check Pantheon dashboard." ;;
+                esac
+              fi
+
+              curl -sf -X POST \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$GITHUB_REPOSITORY/deployments/$deployment_id/statuses" \
+                -d "{\"state\":\"error\",\"description\":\"$DESCRIPTION\",\"log_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
+
+              {
+                echo "### $environment"
+                echo "- **Deployment ID**: $deployment_id"
+                echo "- **Age**: ${age_min} minutes"
+                echo "- **Action**: marked error"
+                echo "- **Description**: $DESCRIPTION"
+                [ -n "$PANTHEON_URL" ] && echo "- **Pantheon dashboard**: $PANTHEON_URL"
+                echo ""
+              } >> "$GITHUB_STEP_SUMMARY"
+
+            done < <(echo "$response" | jq -c '.[]')
+
+            page=$(( page + 1 ))
+          done
+
+          if [ "$STALE_COUNT" -eq 0 ]; then
+            echo "No stale deployments found." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "Watchdog complete. Stale deployments processed: $STALE_COUNT"
+        shell: bash

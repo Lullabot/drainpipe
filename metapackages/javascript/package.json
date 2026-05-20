@@ -6,7 +6,7 @@
     "@yarnpkg/esbuild-plugin-pnp": "^3.0.0-rc.15",
     "chokidar": "^5.0.0",
     "esbuild": "^0.28.0",
-    "yargs": "^18.0.0"
+    "yargs": "^17.7.2"
   },
   "repository": {
     "type": "git",
