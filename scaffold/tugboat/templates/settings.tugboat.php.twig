@@ -37,6 +37,8 @@ if (getenv('TUGBOAT_REPO')) {
   $settings['skip_permissions_hardening'] = TRUE;
 
   // Enable mail to be captured by Tugboat.
+  $config['system.mail']['interface']['default'] = 'php_mail';
+  // Mail System
   $config['mailsystem.settings']['defaults']['sender'] = 'php_mail';
   // Symfony Mailer 1.x
   $config['symfony_mailer.settings']['default_transport'] = 'sendmail';
