@@ -36,13 +36,20 @@ if (getenv('TUGBOAT_REPO')) {
   // Keep the sites/default directory writable.
   $settings['skip_permissions_hardening'] = TRUE;
 
-  // Enable mail to be captured by Tugboat.
-  $config['system.mail']['interface']['default'] = 'php_mail';
+  // Override mail system to use Tugboat.
   $config['mailsystem.settings']['defaults']['sender'] = 'php_mail';
+  // Symfony Mailer 1.x
   $config['symfony_mailer.settings']['default_transport'] = 'sendmail';
   $config['symfony_mailer.mailer_transport.sendmail']['plugin'] = 'smtp';
   $config['symfony_mailer.mailer_transport.sendmail']['configuration']['user'] = '';
   $config['symfony_mailer.mailer_transport.sendmail']['configuration']['pass'] = '';
   $config['symfony_mailer.mailer_transport.sendmail']['configuration']['host'] = getenv('TUGBOAT_SMTP');
   $config['symfony_mailer.mailer_transport.sendmail']['configuration']['port'] = '25';
+  // Symfony Mailer 2.x
+  $config['mailer_transport.settings']['default_transport'] = 'sendmail';
+  $config['mailer_transport.mailer_transport.sendmail']['plugin'] = 'smtp';
+  $config['mailer_transport.mailer_transport.sendmail']['configuration']['user'] = '';
+  $config['mailer_transport.mailer_transport.sendmail']['configuration']['pass'] = '';
+  $config['mailer_transport.mailer_transport.sendmail']['configuration']['host'] = getenv('TUGBOAT_SMTP');
+  $config['mailer_transport.mailer_transport.sendmail']['configuration']['port'] = '1025';
 }
