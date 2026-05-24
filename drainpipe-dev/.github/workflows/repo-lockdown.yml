@@ -16,7 +16,7 @@ jobs:
   action:
     runs-on: ubuntu-24.04
     steps:
-      - uses: dessant/repo-lockdown@c52db783bfe6119f60bea4bf77db4066af63351a # v5.0.0
+      - uses: dessant/repo-lockdown@e4c5559242505881c33abb43b70f311e7f7b5954 # v5.0.1
         with:
           issue-comment: >
             Please file your issue in the upstream Drainpipe repository at https://github.com/Lullabot/drainpipe/issues.
