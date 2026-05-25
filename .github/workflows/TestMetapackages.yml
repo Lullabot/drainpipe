@@ -168,7 +168,9 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: ddev start
+        run: |
+          ddev config --nodejs-version 22
+          ddev start
 
       - name: Setup Sass
         run: |
@@ -205,7 +207,9 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: ddev start
+        run: |
+          ddev config --nodejs-version 22
+          ddev start
 
       - name: Setup Sass
         run: |
@@ -318,7 +322,9 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: ddev start
+        run: |
+          ddev config --nodejs-version 22
+          ddev start
 
       - name: Setup Sass
         run: |
@@ -356,7 +362,9 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: ddev start
+        run: |
+          ddev config --nodejs-version 22
+          ddev start
 
       - name: Setup Sass
         run: |
