@@ -440,7 +440,7 @@ jobs:
 
       - name: "GitHub: non-2xx HTTP response causes exit 1 (source assertion)"
         run: |
-          grep -qE 'http_code < 200|http_code >= 300' \
+          grep -qE 'http_code >= 200.*http_code < 300' \
             scaffold/pantheon/quicksilver/drainpipe_notify_github.php \
             || { echo "FAIL: drainpipe_notify_github.php does not check HTTP response code"; exit 1; }
           echo "PASS"
@@ -470,7 +470,7 @@ jobs:
 
       - name: "GitLab: non-2xx HTTP response causes exit 1 (source assertion)"
         run: |
-          grep -qE 'http_code < 200|http_code >= 300' \
+          grep -qE 'http_code >= 200.*http_code < 300' \
             scaffold/pantheon/quicksilver/drainpipe_notify_gitlab.php \
             || { echo "FAIL: drainpipe_notify_gitlab.php does not check HTTP response code"; exit 1; }
           echo "PASS"
