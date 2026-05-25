@@ -169,6 +169,7 @@ jobs:
 
       - name: Start DDEV
         run: |
+          # Yarn 3 is incompatible with Node 24
           ddev config --nodejs-version 22
           ddev start
 
@@ -177,7 +178,6 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
-          echo 'pnpEnableEsmLoader: false' >> .yarnrc.yml
           ddev yarn add ./drainpipe/metapackages/sass --dev
 
       - name: Compile Sass
@@ -207,9 +207,7 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: |
-          ddev config --nodejs-version 22
-          ddev start
+        run: ddev start
 
       - name: Setup Sass
         run: |
@@ -217,7 +215,6 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 4
           ddev yarn init -y
-          echo 'pnpEnableEsmLoader: false' >> .yarnrc.yml
           ddev yarn cache clear
           ddev yarn add ./drainpipe/metapackages/sass --dev
 
@@ -323,6 +320,7 @@ jobs:
 
       - name: Start DDEV
         run: |
+          # Yarn 3 is incompatible with Node 24
           ddev config --nodejs-version 22
           ddev start
 
@@ -331,7 +329,6 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 3
           ddev yarn init -y
-          echo 'pnpEnableEsmLoader: false' >> .yarnrc.yml
           ddev yarn add focus-trap@^6.7.3
           ddev yarn add ./drainpipe/metapackages/javascript --dev
 
@@ -362,9 +359,7 @@ jobs:
           git-email: no-reply@example.com#
 
       - name: Start DDEV
-        run: |
-          ddev config --nodejs-version 22
-          ddev start
+        run: ddev start
 
       - name: Setup Sass
         run: |
@@ -372,7 +367,6 @@ jobs:
           ddev yarn set version berry
           ddev yarn set version 4
           ddev yarn init -y
-          echo 'pnpEnableEsmLoader: false' >> .yarnrc.yml
           ddev yarn cache clear
           ddev yarn add focus-trap@^6.7.3
           ddev yarn add ./drainpipe/metapackages/javascript --dev
