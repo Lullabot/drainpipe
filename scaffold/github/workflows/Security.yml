@@ -20,14 +20,17 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Checkout # zizmor: ignore[artipacked] -- persist-credentials needed; next step fetches base branch via git fetch origin
+      - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Checkout base branch
         env:
           BASE_REF: ${{ github.base_ref }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          git fetch --no-tags --depth=1 origin "$BASE_REF"
+          git fetch --no-tags --depth=1 "https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" "$BASE_REF":refs/remotes/origin/"$BASE_REF"
           git checkout "$BASE_REF"
           git checkout -
 
