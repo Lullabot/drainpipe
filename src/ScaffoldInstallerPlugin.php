@@ -702,6 +702,8 @@ EOT;
                 $fs->ensureDirectoryExists('./web/private/scripts');
                 $fs->copy("$scaffoldPath/pantheon/quicksilver/drainpipe_notify_github.php", './web/private/scripts/drainpipe_notify_github.php');
                 $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsWatchdog.yml", './.github/workflows/PantheonReviewAppsWatchdog.yml');
+                $fs->ensureDirectoryExists('./.github/scripts');
+                $fs->copy("$scaffoldPath/github/scripts/pantheon-watchdog.sh", './.github/scripts/pantheon-watchdog.sh');
                 $this->io->write('🪠 [Drainpipe] Pantheon async deploy scaffolded.');
             }
         }

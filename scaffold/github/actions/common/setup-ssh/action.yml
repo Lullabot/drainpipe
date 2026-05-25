@@ -10,7 +10,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: | # zizmor: ignore[github-env]
+    - run: | # zizmor: ignore[github-env] -- safe: only runner-generated values (SSH_AUTH_SOCK, SSH_AGENT_PID) are written to GITHUB_ENV, never user-controlled input
         sudo apt-get update
         sudo apt-get install -y openssh-client
         eval $(ssh-agent -s)

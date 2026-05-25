@@ -33,32 +33,45 @@ $payload = json_encode([
     ],
 ]);
 
-$ch = curl_init("https://api.github.com/repos/$github_repo/dispatches");
-curl_setopt_array($ch, [
-    CURLOPT_POST           => true,
-    CURLOPT_POSTFIELDS     => $payload,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT        => 10,
-    CURLOPT_HTTPHEADER     => [
-        "Authorization: Bearer $github_token",
-        'Accept: application/vnd.github.v3+json',
-        'Content-Type: application/json',
-        'User-Agent: Drainpipe/Quicksilver',
-    ],
-]);
+// Retry up to 3 times with backoff. Total budget ~36 s, well within Quicksilver's 120 s limit.
+$max_attempts = 3;
+$retry_delays = [2, 4]; // seconds to wait before attempt 2 and 3
 
-$response  = curl_exec($ch);
-$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
+for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
+    $ch = curl_init("https://api.github.com/repos/$github_repo/dispatches");
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $payload,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 10,
+        CURLOPT_HTTPHEADER     => [
+            "Authorization: Bearer $github_token",
+            'Accept: application/vnd.github.v3+json',
+            'Content-Type: application/json',
+            'User-Agent: Drainpipe/Quicksilver',
+        ],
+    ]);
 
-if ($response === false || $http_code === 0) {
-    echo "ERROR: curl connection failed for $github_repo dispatch (environment: $environment).\n";
-    exit(1);
+    $response  = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($response === false || $http_code === 0) {
+        echo "Attempt $attempt/$max_attempts: curl connection failed for $github_repo dispatch (environment: $environment).\n";
+    } elseif ($http_code >= 200 && $http_code < 300) {
+        echo "SUCCESS: Dispatched pantheon-multidev-synced for $environment to $github_repo — HTTP $http_code (attempt $attempt).\n";
+        exit(0);
+    } elseif ($http_code >= 400 && $http_code < 500 && $http_code !== 429) {
+        // 4xx errors (except rate-limit 429) indicate a configuration problem; retrying won't help.
+        echo "ERROR: GitHub dispatch failed — HTTP $http_code for $github_repo (environment: $environment). Response: $response\n";
+        exit(1);
+    } else {
+        echo "Attempt $attempt/$max_attempts: GitHub dispatch failed — HTTP $http_code for $github_repo (environment: $environment). Response: $response\n";
+    }
+
+    if ($attempt < $max_attempts) {
+        sleep($retry_delays[$attempt - 1]);
+    }
 }
 
-if ($http_code < 200 || $http_code >= 300) {
-    echo "ERROR: GitHub dispatch failed — HTTP $http_code for $github_repo (environment: $environment). Response: $response\n";
-    exit(1);
-}
-
-echo "SUCCESS: Dispatched pantheon-multidev-synced for $environment to $github_repo — HTTP $http_code.\n";
+echo "ERROR: GitHub dispatch failed after $max_attempts attempts for $github_repo (environment: $environment).\n";

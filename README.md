@@ -686,6 +686,13 @@ Then run `composer install`. The following files are scaffolded or replaced:
 - `.github/workflows/PantheonReviewAppsPostDeploy.yml` — new post-deploy workflow triggered by Quicksilver
 - `web/private/scripts/drainpipe_notify_github.php` — Quicksilver script that fires the webhook
 
+> **DDEV vs. bare runner:** Drainpipe automatically selects the right workflow variant. If
+> `.ddev/config.yaml` is present in your project, the DDEV-based workflow is scaffolded and the
+> build runs inside DDEV as usual. If DDEV is not configured, the bare-runner variant is used
+> instead — in this case your `task build` target must be executable on a standard
+> `ubuntu-24.04` runner without any system dependencies provided by DDEV (e.g. specific PHP
+> extensions, Node versions, or services).
+
 #### Manual step: add the Quicksilver hook to `pantheon.yml`
 
 Drainpipe does not auto-edit `pantheon.yml` because it is version-controlled and site-specific.

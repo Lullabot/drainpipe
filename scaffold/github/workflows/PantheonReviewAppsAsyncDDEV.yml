@@ -1,4 +1,4 @@
-name: "Pantheon Review Apps"
+name: "Pantheon Review Apps (Async DDEV)"
 
 on:
   pull_request:

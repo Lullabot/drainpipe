@@ -226,6 +226,18 @@
       ],
       "depNameTemplate": "yarn",
       "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^scaffold/github/actions/pantheon/setup-terminus/action\\.yml$"
+      ],
+      "matchStrings": [
+        "key: terminus-(?<currentValue>\\d+\\.\\d+\\.\\d+)",
+        "releases/download/(?<currentValue>\\d+\\.\\d+\\.\\d+)/terminus\\.phar"
+      ],
+      "depNameTemplate": "pantheon-systems/terminus",
+      "datasourceTemplate": "github-releases"
     }
   ]
 }

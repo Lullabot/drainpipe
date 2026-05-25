@@ -35,7 +35,7 @@ inputs:
     required: false
     default: "false"
   async:
-    description: "When 'true', skip the post-deploy step (terminus workflow:wait, drush update, deployment success). The Quicksilver async flow handles that in a separate job."
+    description: "When 'true', run the post-deploy step (terminus workflow:wait, drush update, deployment success) using a Quicksilver webhook that calls back to GitHub."
     required: false
     default: "false"
 runs:

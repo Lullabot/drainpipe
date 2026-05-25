@@ -1,4 +1,4 @@
-name: "Pantheon Review Apps"
+name: "Pantheon Review Apps (Async)"
 
 on:
   pull_request:
@@ -59,6 +59,9 @@ jobs:
 
       - uses: php-actions/composer@8a65f0d3c6a1d17ca4800491a40b5756a4c164f3 # v6.1.2
 
+      # This step runs directly on the GitHub-hosted runner without DDEV.
+      # If your project requires system dependencies provided by DDEV (e.g. specific
+      # PHP extensions, Node versions, or services), use PantheonReviewAppsAsyncDDEV.yml instead.
       - name: Build Project
         env:
           directory: /tmp/release
