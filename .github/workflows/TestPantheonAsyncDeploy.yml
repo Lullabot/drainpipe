@@ -85,6 +85,14 @@ jobs:
             || { echo "FAIL: watchdog missing schedule trigger"; exit 1; }
           echo "PASS"
 
+      - name: Assert pantheon task include is injected into Taskfile.yml
+        run: |
+          test -f /tmp/test-gh-async/Taskfile.yml \
+            || { echo "FAIL: Taskfile.yml not found"; exit 1; }
+          grep -q 'pantheon:.*tasks/pantheon.yml' /tmp/test-gh-async/Taskfile.yml \
+            || { echo "FAIL: pantheon task include not injected into Taskfile.yml"; exit 1; }
+          echo "PASS"
+
   # -----------------------------------------------------------------------
   # 2. Composer plugin — GitLab AsyncDeploy scaffold
   # -----------------------------------------------------------------------
@@ -138,6 +146,14 @@ jobs:
         run: |
           test -f /tmp/test-gl-async/web/private/scripts/drainpipe_notify_gitlab.php \
             || { echo "FAIL: drainpipe_notify_gitlab.php not found"; exit 1; }
+          echo "PASS"
+
+      - name: Assert pantheon task include is injected into Taskfile.yml
+        run: |
+          test -f /tmp/test-gl-async/Taskfile.yml \
+            || { echo "FAIL: Taskfile.yml not found"; exit 1; }
+          grep -q 'pantheon:.*tasks/pantheon.yml' /tmp/test-gl-async/Taskfile.yml \
+            || { echo "FAIL: pantheon task include not injected into Taskfile.yml"; exit 1; }
           echo "PASS"
 
   # -----------------------------------------------------------------------
@@ -220,82 +236,34 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "review/action.yml: async=true skips terminus workflow:wait"
+      - name: "pantheon:drupal-update skips workflow:wait when skip-workflow-wait=true (source assertion)"
         run: |
-          CALL_LOG=$(mktemp)
-          drainpipe_exec() { echo "$1" >> "$CALL_LOG"; }
-          export -f drainpipe_exec
-
-          INPUT_ASYNC="true"
-          INPUT_SITE_NAME="mysite"
-          INPUT_TERMINUS_TIMEOUT="600"
-          MULTIDEV_NAME="pr-42"
-
-          if [ "$INPUT_ASYNC" != "true" ]; then
-            drainpipe_exec "terminus workflow:wait -vv --max $INPUT_TERMINUS_TIMEOUT -- $INPUT_SITE_NAME.$MULTIDEV_NAME"
-          fi
-
-          if grep -q "workflow:wait" "$CALL_LOG"; then
-            echo "FAIL: terminus workflow:wait was called with async=true"
-            exit 1
-          fi
+          grep -q 'SKIP_WAIT\|skip-workflow-wait\|skip_workflow_wait' tasks/pantheon.yml \
+            || { echo "FAIL: skip-workflow-wait guard not found in tasks/pantheon.yml"; exit 1; }
+          grep -q 'workflow:wait' tasks/pantheon.yml \
+            || { echo "FAIL: terminus workflow:wait not found in tasks/pantheon.yml"; exit 1; }
           echo "PASS"
 
-      - name: "review/action.yml: async=false calls terminus workflow:wait"
+      - name: "pantheon:drupal-update uses --max flag with configurable timeout (source assertion)"
         run: |
-          CALL_LOG=$(mktemp)
-          drainpipe_exec() { echo "$1" >> "$CALL_LOG"; }
-          export -f drainpipe_exec
-
-          INPUT_ASYNC="false"
-          INPUT_SITE_NAME="mysite"
-          INPUT_TERMINUS_TIMEOUT="600"
-          MULTIDEV_NAME="pr-42"
-
-          if [ "$INPUT_ASYNC" != "true" ]; then
-            drainpipe_exec "terminus workflow:wait -vv --max $INPUT_TERMINUS_TIMEOUT -- $INPUT_SITE_NAME.$MULTIDEV_NAME"
-          fi
-
-          grep -q "workflow:wait" "$CALL_LOG" \
-            || { echo "FAIL: terminus workflow:wait was not called with async=false"; exit 1; }
+          grep -qE 'workflow:wait.*--max|--max.*workflow:wait' tasks/pantheon.yml \
+            || { echo "FAIL: --max flag not found in workflow:wait call in tasks/pantheon.yml"; exit 1; }
           echo "PASS"
 
-      - name: "update/action.yml: skip-workflow-wait=true skips terminus workflow:wait"
+      - name: "pantheon:drupal-update respects run-installer flag (source assertion)"
         run: |
-          CALL_LOG=$(mktemp)
-          drainpipe_exec() { echo "$1" >> "$CALL_LOG"; }
-          export -f drainpipe_exec
-
-          INPUT_SKIP_WORKFLOW_WAIT="true"
-          INPUT_SITE_NAME="mysite"
-          INPUT_ENVIRONMENT="pr-42"
-
-          if [ "$INPUT_SKIP_WORKFLOW_WAIT" != "true" ]; then
-            drainpipe_exec "terminus workflow:wait $INPUT_SITE_NAME.$INPUT_ENVIRONMENT"
-          fi
-
-          if grep -q "workflow:wait" "$CALL_LOG"; then
-            echo "FAIL: terminus workflow:wait was called with skip-workflow-wait=true"
-            exit 1
-          fi
+          grep -q 'RUN_INSTALLER\|run-installer\|run_installer' tasks/pantheon.yml \
+            || { echo "FAIL: run-installer guard not found in tasks/pantheon.yml"; exit 1; }
+          grep -q 'site:install' tasks/pantheon.yml \
+            || { echo "FAIL: site:install not found in tasks/pantheon.yml"; exit 1; }
           echo "PASS"
 
-      - name: "update/action.yml: skip-workflow-wait=false calls terminus workflow:wait"
+      - name: "pantheon:lock-env only runs when credentials are set (source assertion)"
         run: |
-          CALL_LOG=$(mktemp)
-          drainpipe_exec() { echo "$1" >> "$CALL_LOG"; }
-          export -f drainpipe_exec
-
-          INPUT_SKIP_WORKFLOW_WAIT="false"
-          INPUT_SITE_NAME="mysite"
-          INPUT_ENVIRONMENT="pr-42"
-
-          if [ "$INPUT_SKIP_WORKFLOW_WAIT" != "true" ]; then
-            drainpipe_exec "terminus workflow:wait $INPUT_SITE_NAME.$INPUT_ENVIRONMENT"
-          fi
-
-          grep -q "workflow:wait" "$CALL_LOG" \
-            || { echo "FAIL: terminus workflow:wait was not called with skip-workflow-wait=false"; exit 1; }
+          grep -q 'lock:enable' tasks/pantheon.yml \
+            || { echo "FAIL: terminus lock:enable not found in tasks/pantheon.yml"; exit 1; }
+          grep -q 'username\|password' tasks/pantheon.yml \
+            || { echo "FAIL: credential guard not found in tasks/pantheon.yml"; exit 1; }
           echo "PASS"
 
   # -----------------------------------------------------------------------

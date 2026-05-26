@@ -540,6 +540,7 @@ EOT;
         foreach ($this->extra['drainpipe']['gitlab'] as $key => $value) {
             // Handle the pantheon provider sub-key.
             if ($key === 'pantheon' && is_array($value)) {
+                $this->ensurePantheonTaskfileInclude();
                 if (in_array('Deploy', $value)) {
                     $file = "gitlab/Pantheon.gitlab-ci.yml";
                     if (file_exists("$scaffoldPath/$file")) {
@@ -678,6 +679,7 @@ EOT;
         // Handle Pantheon GitHub Actions.
         $pantheonOptions = $this->extra['drainpipe']['github']['pantheon'] ?? [];
         if (!empty($pantheonOptions)) {
+            $this->ensurePantheonTaskfileInclude();
             // Actions are needed for both "Actions" and "ReviewApps".
             if (in_array('Actions', $pantheonOptions) || in_array('ReviewApps', $pantheonOptions)) {
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
@@ -716,6 +718,37 @@ EOT;
                 $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
                 $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
             }
+        }
+    }
+
+    /**
+     * Ensures the pantheon task namespace is included in Taskfile.yml.
+     *
+     * Called whenever any Pantheon CI configuration is being installed so that
+     * `task pantheon:*` commands in scaffolded CI files resolve correctly.
+     */
+    private function ensurePantheonTaskfileInclude(): void
+    {
+        if (!file_exists('./Taskfile.yml')) {
+            return;
+        }
+        $taskfileContent = file_get_contents('./Taskfile.yml');
+        if (str_contains($taskfileContent, 'pantheon:')) {
+            return;
+        }
+        $updated = preg_replace(
+            '/^(includes:[ \t]*\n)/m',
+            "$1  pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml\n",
+            $taskfileContent
+        );
+        if ($updated !== null && $updated !== $taskfileContent) {
+            file_put_contents('./Taskfile.yml', $updated);
+            $this->io->write("🪠 [Drainpipe] Added 'pantheon' include to Taskfile.yml");
+        } else {
+            $this->io->warning(
+                "🪠 [Drainpipe] Could not auto-inject 'pantheon' include into Taskfile.yml. " .
+                "Add 'pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml' under 'includes:' manually."
+            );
         }
     }
 

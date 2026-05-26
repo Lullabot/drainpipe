@@ -351,7 +351,7 @@ pushed to a git remote with `task deploy:git`.
 ### Pantheon
 
 Pantheon specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.yml).
-Add the following to your `Taskfile.yml`'s `includes` section to use them:
+When any Pantheon CI configuration is present in `composer.json`, Drainpipe automatically adds the following to your `Taskfile.yml`'s `includes` section. You can also add it manually:
 ```yml
 includes:
   pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml
@@ -650,6 +650,8 @@ To enable deployment of Pantheon Review Apps (Multidev environments per pull req
     - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth
     - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
     - `PANTHEON_REVIEW_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
+
+The deploy steps delegate to `task pantheon:prepare-multidev`, `task pantheon:drupal-update`, and `task pantheon:lock-env` in [`tasks/pantheon.yml`](tasks/pantheon.yml) — customize behavior there.
 
 ### Async deploy with Quicksilver
 
@@ -952,6 +954,8 @@ This will setup Merge Request deployment to Pantheon Multidev environments. See
 include `"Deploy"` which will give you helpers that you can include and reference for tasks
 such as setting up [Terminus](https://pantheon.io/docs/terminus). See
 [scaffold/gitlab/Pantheon.gitlab-ci.yml](scaffold/gitlab/Pantheon.gitlab-ci.yml).
+
+The deploy steps delegate to `task pantheon:prepare-multidev`, `task pantheon:drupal-update`, and `task pantheon:lock-env` in [`tasks/pantheon.yml`](tasks/pantheon.yml) — customize behavior there.
 
 ## Bitbucket Pipelines Integration
 

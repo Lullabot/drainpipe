@@ -7,16 +7,5 @@ drainpipe_pantheon_post_deploy:
   script:
     - !reference [.drainpipe_pantheon_setup_terminus, script]
     - composer install
-    - terminus aliases --only $PANTHEON_SITE_NAME --yes
-    - |
-      if [ "$PANTHEON_MULTIDEV_RUN_INSTALLER" == "true" ]; then
-        ./vendor/bin/drush @$PANTHEON_SITE_NAME.$PANTHEON_TRIGGERED_ENVIRONMENT --yes site:install --existing-config
-      elif ./vendor/bin/task -l | grep '* update: '; then
-        ./vendor/bin/task site=@$PANTHEON_SITE_NAME.$PANTHEON_TRIGGERED_ENVIRONMENT update
-      else
-        ./vendor/bin/task site=@$PANTHEON_SITE_NAME.$PANTHEON_TRIGGERED_ENVIRONMENT drupal:update
-      fi
-    - |
-      if [ -n "$PANTHEON_REVIEW_USERNAME" ] && [ -n "$PANTHEON_REVIEW_PASSWORD" ]; then
-        terminus lock:enable $PANTHEON_SITE_NAME.$PANTHEON_TRIGGERED_ENVIRONMENT "$PANTHEON_REVIEW_USERNAME" "$PANTHEON_REVIEW_PASSWORD"
-      fi
+    - ./vendor/bin/task pantheon:drupal-update site=$PANTHEON_SITE_NAME environment=$PANTHEON_TRIGGERED_ENVIRONMENT skip-workflow-wait=true run-installer=${PANTHEON_MULTIDEV_RUN_INSTALLER:-false}
+    - ./vendor/bin/task pantheon:lock-env site=$PANTHEON_SITE_NAME environment=$PANTHEON_TRIGGERED_ENVIRONMENT username=${PANTHEON_REVIEW_USERNAME:-} password=${PANTHEON_REVIEW_PASSWORD:-}

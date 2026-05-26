@@ -33,3 +33,64 @@ tasks:
         }
         rm -f "$TMPFILE"
       - echo "✅ Database fetch complete."
+
+  prepare-multidev:
+    desc: "Creates or wipes a Pantheon multidev and optionally clones content from another environment"
+    cmds:
+      - |
+        echo "{{.site}}" | grep -qE '^[a-zA-Z0-9_-]+$' || { echo "ERROR: site must contain only alphanumeric characters, underscores, and hyphens."; exit 1; }
+        echo "{{default "dev" .clone-from}}" | grep -qE '^[a-zA-Z0-9._-]+$' || { echo "ERROR: clone-from must contain only alphanumeric characters, periods, underscores, and hyphens."; exit 1; }
+      - |
+        SITE="{{.site}}"
+        MULTIDEV="{{.multidev}}"
+        CLONE_FROM="{{default "dev" .clone-from}}"
+        SKIP_WIPE="{{default "false" .skip-wipe}}"
+        RUN_INSTALLER="{{default "false" .run-installer}}"
+
+        if terminus env:info "$SITE.$MULTIDEV" > /dev/null 2>&1; then
+          if [ "$SKIP_WIPE" != "true" ]; then
+            terminus env:wipe "$SITE.$MULTIDEV" --yes
+          fi
+        else
+          if [ "$SKIP_WIPE" != "true" ]; then
+            terminus multidev:create "$SITE.$CLONE_FROM" "$MULTIDEV" --no-db --no-files --yes
+          else
+            terminus multidev:create "$SITE.$CLONE_FROM" "$MULTIDEV" --yes
+          fi
+          ACTUAL_NAME=$(terminus multidev:list --format json "$SITE" | jq -r --arg name "$MULTIDEV" '.[] | select(.id | startswith($name[:11])) | .id')
+          echo "MULTIDEV_NAME=$ACTUAL_NAME"
+        fi
+
+        if [ "$SKIP_WIPE" != "true" ] && [ "$RUN_INSTALLER" != "true" ]; then
+          terminus env:clone-content "$SITE.$CLONE_FROM" "$MULTIDEV" --yes
+        fi
+
+  drupal-update:
+    desc: "Waits for Pantheon sync then runs Drupal updates or site installer"
+    cmds:
+      - |
+        SITE="{{.site}}"
+        ENVIRONMENT="{{.environment}}"
+        SKIP_WAIT="{{default "false" .skip-workflow-wait}}"
+        RUN_INSTALLER="{{default "false" .run-installer}}"
+        TIMEOUT="{{default "600" .timeout}}"
+
+        if [ "$SKIP_WAIT" != "true" ]; then
+          terminus workflow:wait --max "$TIMEOUT" "$SITE.$ENVIRONMENT"
+        fi
+        terminus aliases --only "$SITE" --yes
+        if [ "$RUN_INSTALLER" = "true" ]; then
+          ./vendor/bin/drush "@$SITE.$ENVIRONMENT" --yes site:install --existing-config
+        elif ./vendor/bin/task -l | grep '* update: '; then
+          ./vendor/bin/task update "site=@$SITE.$ENVIRONMENT"
+        else
+          ./vendor/bin/task drupal:update "site=@$SITE.$ENVIRONMENT"
+        fi
+
+  lock-env:
+    desc: "Enables HTTP Basic Auth on a Pantheon environment (no-op if credentials are not set)"
+    cmds:
+      - |
+        if [ -n "{{.username}}" ] && [ -n "{{.password}}" ]; then
+          terminus lock:enable "{{.site}}.{{.environment}}" "{{.username}}" "{{.password}}"
+        fi

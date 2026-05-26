@@ -2,44 +2,13 @@
   script:
     - !reference [.drainpipe_pantheon_setup_terminus, script]
     - composer install
-    - |
-      echo "$PANTHEON_SITE_NAME" | grep -qE '^[a-zA-Z0-9_-]+$' || { echo "ERROR: PANTHEON_SITE_NAME must contain only alphanumeric characters, underscores, and hyphens."; exit 1; }
-      echo "${PANTHEON_CLONE_FROM:-dev}" | grep -qE '^[a-zA-Z0-9._-]+$' || { echo "ERROR: PANTHEON_CLONE_FROM must contain only alphanumeric characters, periods, underscores, and hyphens."; exit 1; }
-      echo "${TERMINUS_TIMEOUT_LIMIT:-600}" | grep -qE '^[0-9]+$' || { echo "ERROR: TERMINUS_TIMEOUT_LIMIT must be a positive integer."; exit 1; }
-    - |
-      if terminus env:info "$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID" > /dev/null 2>&1; then
-        if [ "$PANTHEON_SKIP_WIPE_MULTIDEV" != "true" ]; then
-          terminus env:wipe $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --yes
-        fi
-      else
-        if [ "$PANTHEON_SKIP_WIPE_MULTIDEV" != "true" ]; then
-          terminus multidev:create $PANTHEON_SITE_NAME.${PANTHEON_CLONE_FROM:-dev} mr-$CI_MERGE_REQUEST_IID --no-db --no-files --yes
-        else
-          terminus multidev:create $PANTHEON_SITE_NAME.${PANTHEON_CLONE_FROM:-dev} mr-$CI_MERGE_REQUEST_IID --yes
-        fi
-      fi
-      if [ "$PANTHEON_SKIP_WIPE_MULTIDEV" != "true" ] && [ "$PANTHEON_MULTIDEV_RUN_INSTALLER" != "true" ]; then
-        terminus env:clone-content $PANTHEON_SITE_NAME.${PANTHEON_CLONE_FROM:-dev} mr-$CI_MERGE_REQUEST_IID --yes
-      fi
+    - ./vendor/bin/task pantheon:prepare-multidev site=$PANTHEON_SITE_NAME multidev=mr-$CI_MERGE_REQUEST_IID clone-from=${PANTHEON_CLONE_FROM:-dev} skip-wipe=${PANTHEON_SKIP_WIPE_MULTIDEV:-false} run-installer=${PANTHEON_MULTIDEV_RUN_INSTALLER:-false}
     - ./vendor/bin/task build
     - ./vendor/bin/task snapshot:directory
     - terminus connection:set $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID git --yes
     - ./vendor/bin/task deploy:git
-    # Wait for Pantheon to sync
-    - terminus workflow:wait --max ${TERMINUS_TIMEOUT_LIMIT:-600} $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID
-    - terminus aliases --only $PANTHEON_SITE_NAME --yes
-    - |
-      if [ "$PANTHEON_MULTIDEV_RUN_INSTALLER" == "true" ]; then
-        ./vendor/bin/drush @$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID --yes site:install --existing-config
-      elif ./vendor/bin/task -l | grep '* update: '; then
-        ./vendor/bin/task site=@$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID update
-      else
-        ./vendor/bin/task site=@$PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID drupal:update
-      fi
-    - |
-      if [ -n "$PANTHEON_REVIEW_USERNAME" ] && [ -n "$PANTHEON_REVIEW_PASSWORD" ]; then
-        terminus lock:enable $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID "$PANTHEON_REVIEW_USERNAME" "$PANTHEON_REVIEW_PASSWORD"
-      fi
+    - ./vendor/bin/task pantheon:drupal-update site=$PANTHEON_SITE_NAME environment=mr-$CI_MERGE_REQUEST_IID timeout=${TERMINUS_TIMEOUT_LIMIT:-600} run-installer=${PANTHEON_MULTIDEV_RUN_INSTALLER:-false}
+    - ./vendor/bin/task pantheon:lock-env site=$PANTHEON_SITE_NAME environment=mr-$CI_MERGE_REQUEST_IID username=${PANTHEON_REVIEW_USERNAME:-} password=${PANTHEON_REVIEW_PASSWORD:-}
     - echo $CI_ENVIRONMENT_URL > environment_url.txt
 drainpipe_pantheon_drupal_review_app:
   needs: []
