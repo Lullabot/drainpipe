@@ -16,3 +16,7 @@ drainpipe_pantheon_post_deploy:
       else
         ./vendor/bin/task site=@$PANTHEON_SITE_NAME.$PANTHEON_TRIGGERED_ENVIRONMENT drupal:update
       fi
+    - |
+      if [ -n "$PANTHEON_REVIEW_USERNAME" ] && [ -n "$PANTHEON_REVIEW_PASSWORD" ]; then
+        terminus lock:enable $PANTHEON_SITE_NAME.$PANTHEON_TRIGGERED_ENVIRONMENT "$PANTHEON_REVIEW_USERNAME" "$PANTHEON_REVIEW_PASSWORD"
+      fi

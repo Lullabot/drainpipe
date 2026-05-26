@@ -939,9 +939,13 @@ To enable deployment of Pantheon Review Apps (Multidev environments per merge re
   - `GIT_USERNAME` Username to use for git commits
   - `GITLAB_ACCESS_TOKEN` A GitLab access token with `api` scope, used by the scheduled multidev cleanup job
   - `TERMINUS_PLUGINS` (optional) Comma-separated list of Terminus plugins to be available
+  - `TERMINUS_TIMEOUT_LIMIT` (optional) Number of seconds that terminus will wait until timeout. Defaults to 600
+  - `PANTHEON_CLONE_FROM` (optional) The environment to clone from when creating multidev sites. Defaults to `dev`
   - `REVIEW_APP_BASIC_AUTH` (optional) Basic auth credentials prepended to the review app URL e.g. `user:password@`
+  - `PANTHEON_REVIEW_USERNAME` (optional) A username for HTTP basic auth. When set alongside `PANTHEON_REVIEW_PASSWORD`, the multidev is locked with `terminus lock:enable` after deployment
+  - `PANTHEON_REVIEW_PASSWORD` (optional) The password to lock the site with
   - `PANTHEON_MULTIDEV_RUN_INSTALLER` (optional) Set to `"true"` to run `site:install --existing-config` instead of `drupal:update` when deploying
-  - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to `"true"` to skip deleting and re-creating the multidev on each push, preserving its database and files state. When the multidev does not yet exist it is still created with a full content clone from the source environment; only subsequent pushes skip the clone. Defaults to `"false"` (always delete and re-create). See [Multidev content cloning performance](#multidev-content-cloning-performance).
+  - `PANTHEON_SKIP_WIPE_MULTIDEV` (optional) Set to `"true"` to skip wiping the multidev's database and files on each push, preserving its state. When the multidev does not yet exist it is still created with a full content clone from the source environment; only subsequent pushes skip the clone. Defaults to `"false"` (always wipe and re-clone). See [Multidev content cloning performance](#multidev-content-cloning-performance).
 
 This will setup Merge Request deployment to Pantheon Multidev environments. See
 [scaffold/gitlab/gitlab-ci.example.yml] for an example. You can also just
@@ -1198,9 +1202,9 @@ behaviour:
 
 - **First push** (multidev does not exist yet): content is still cloned from the source environment
   so the environment starts with realistic data.
-- **Subsequent pushes** (multidev already exists): the wipe / delete-and-recreate step is skipped.
-  Only code is updated. The database and files remain as they were after the previous deployment,
-  which may include data entered or modified by reviewers.
+- **Subsequent pushes** (multidev already exists): the wipe step is skipped. Only code is updated.
+  The database and files remain as they were after the previous deployment, which may include data
+  entered or modified by reviewers.
 
 **When to use it:** `PANTHEON_SKIP_WIPE_MULTIDEV=true` is a good default for projects where
 reviewers do not depend on a fresh production database for each review, or where the `live`
