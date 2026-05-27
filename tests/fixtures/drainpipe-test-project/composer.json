@@ -16,5 +16,8 @@
     "allow-plugins": {
       "lullabot/drainpipe": true
     }
+  },
+  "autoload-dev": {
+    "files": ["vendor/lullabot/drainpipe/scaffold/env/dotenv.php"]
   }
 }

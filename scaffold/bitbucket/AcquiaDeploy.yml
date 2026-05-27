@@ -1,0 +1,36 @@
+image: php:8.5-cli
+
+clone:
+  depth: full
+
+options:
+  max-time: 60
+
+definitions:
+  caches:
+    composer:
+      key:
+        files:
+          - composer.lock
+      path: ~/.composer/cache
+
+pipelines:
+  branches:
+    main:
+      - step:
+          name: "Acquia Dev: Deploy"
+          caches:
+            - composer
+          script:
+            # Install system dependencies, configure SSH, and install Composer
+            - bash .bitbucket/setup-php.sh
+            # Install packages from Composer
+            - COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction --prefer-dist
+            # Install and configure Acquia CLI
+            - ./vendor/bin/task bitbucket:acquia:setup
+            # Build
+            - ./vendor/bin/task bitbucket:acquia:build
+            # Push code to Acquia dev
+            - ./vendor/bin/task bitbucket:acquia:push-dev
+            # Run site updates
+            - ./vendor/bin/task bitbucket:acquia:update-dev

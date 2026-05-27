@@ -16,25 +16,25 @@ variables:
   #
   # https://pantheon.io/docs/machine-tokens
   # Use a bot account for this rather than an individual
-  #PANTHEON_TERMINUS_TOKEN
+  # PANTHEON_TERMINUS_TOKEN
   #
   # https://pantheon.io/docs/ssh-keys
   # No passphrase, add the public key to:
   # https://dashboard.pantheon.io/users/your-user-id#account/ssh-keys
   # Use a bot account for this rather than an individual
-  #SSH_PRIVATE_KEY
+  # SSH_PRIVATE_KEY
   #
   # A password for http basic auth authentication on Multidev sites
-  #REVIEW_APP_BASIC_AUTH_PASSWORD
+  # REVIEW_APP_BASIC_AUTH_PASSWORD
   #
   # https://gitlab.com/username/project/-/settings/access_tokens
   # https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#project-access-tokens
   # Only supported by GitLab Premium or self-hosted GitLab
   # Needs "api" scope. Used by Composer Lock Diff and Pantheon Multidev Cleanup.
-  #GITLAB_ACCESS_TOKEN
+  # GITLAB_ACCESS_TOKEN
   #
   # A comma-separated list of Terminus plugins to install
-  #TERMINUS_PLUGINS
+  # TERMINUS_PLUGINS
 
 cache:
   key:
@@ -53,12 +53,12 @@ cache:
 # after the Multidev environment has been deployed, or create a new job with
 # "needs: [drainpipe_pantheon_drupal_review_app]"
 #
-#drainpipe_pantheon_drupal_review_app:
-#  before_script:
-#    - *setup_node
-#  script:
-#    - !reference [.drainpipe_pantheon_drupal_review_app, script]
-#    - terminus lock:enable $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID aba ${REVIEW_APP_BASIC_AUTH_PASSWORD} --yes
+# drainpipe_pantheon_drupal_review_app:
+#   before_script:
+#     - *setup_node
+#   script:
+#     - !reference [.drainpipe_pantheon_drupal_review_app, script]
+#     - terminus lock:enable $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID aba ${REVIEW_APP_BASIC_AUTH_PASSWORD} --yes
 
 browser_performance:
   needs:

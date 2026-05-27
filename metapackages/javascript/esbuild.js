@@ -13,7 +13,6 @@ const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers')
 const argv = yargs(hideBin(process.argv)).argv
 const { build, context } = require('esbuild');
-const chokidar = require('chokidar');
 const scripts = argv.files.split(' ');
 
 if (!scripts.length) {
@@ -76,6 +75,7 @@ if (uniqueFileExtension.length !== 1) {
     await build(config);
 
     if (!!argv.watch) {
+      const { default: chokidar } = await import('chokidar');
       let ready = false;
       chokidar.watch(`${uniqueBaseDir[0]}/**/*.js`, {
         ignored: targets,

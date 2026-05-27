@@ -10,22 +10,23 @@
         "psr-4": {"Lullabot\\Drainpipe\\Tests\\Functional\\": "tests/src/functional/"}
     },
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-json": "*",
         "composer-plugin-api": "^2.0",
-        "drush/drush": "^11|^12|^13",
-        "symfony/yaml": "^6|^7",
+        "drush/drush": "^11||^12||^13",
+        "symfony/yaml": "^6||^7",
         "twig/twig": "^3",
-        "vlucas/phpdotenv": "^4|^5"
+        "vlucas/phpdotenv": "^4||^5"
     },
     "require-dev": {
-        "composer/composer": "^2.9.2",
-        "phpunit/phpunit": "^9.6.21"
+        "composer/composer": "^2.9.5",
+        "phpunit/phpunit": "^9.6.31"
     },
     "extra": {
         "class": [
             "\\Lullabot\\Drainpipe\\TaskfileInstallerPlugin",
-            "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin"
+            "\\Lullabot\\Drainpipe\\ScaffoldInstallerPlugin",
+            "\\Lullabot\\Drainpipe\\TugboatConfigPlugin"
         ],
         "drupal-scaffold": {
             "gitignore": true,

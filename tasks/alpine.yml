@@ -19,4 +19,3 @@ tasks:
       - chmod 700 ~/.ssh
       - echo "{{.ssh_known_hosts}}" >> ~/.ssh/known_hosts
       - chmod 644 ~/.ssh/known_hosts
-

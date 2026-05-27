@@ -10,6 +10,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   Test-Static:
     runs-on: ubuntu-24.04
@@ -20,9 +22,10 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: drainpipe
+          persist-credentials: false
 
       - name: Setup drainpipe-dev
         run: mv drainpipe/drainpipe-dev .
@@ -79,12 +82,14 @@ jobs:
 
       - name: Test for untracked and modified files
         run: |
-          if [ "${{ steps.test_untracked.outcome }}" != "failure" ]; then
+          if [ "${TEST_UNTRACKED_OUTCOME}" != "failure" ]; then
             exit 1
           fi
           git add .
           git commit -m "Second commit"
           ddev task test:untracked
+        env:
+          TEST_UNTRACKED_OUTCOME: ${{ steps.test_untracked.outcome }}
 
       - name: Run Static Tests
         run: ddev task test:static
@@ -97,9 +102,21 @@ jobs:
           ddev task test:static YAML_DIRS="custom-yaml-directory/*.yml" | tee static.log
           [[ $(grep '\[OK] All 1 YAML files contain valid syntax.' static.log | wc -l) -eq 1 ]]
 
+      - name: Confirm Twig CS Fixer catches violations and autofix works
+        run: |
+          set -x
+          mkdir -p web/themes/custom/test_theme/templates
+          printf '{{foo}}\n' > web/themes/custom/test_theme/templates/test.html.twig
+          # Should fail - spacing violation inside delimiters
+          ! ddev task test:lint TWIG_DIRS="web/themes/custom/test_theme/templates"
+          # Fix automatically
+          ddev task test:autofix TWIG_DIRS="web/themes/custom/test_theme/templates"
+          # Should pass now
+          ddev task test:lint TWIG_DIRS="web/themes/custom/test_theme/templates"
+
       - name: Upload test artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test_result-static
           path: test_result

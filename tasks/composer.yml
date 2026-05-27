@@ -1,0 +1,15 @@
+version: '3'
+
+tasks:
+  lock-diff:
+    desc: Generates a composer lock diff and writes it to a file
+    summary: |
+      Runs composer-lock-diff comparing the current composer.lock against a base
+      ref and writes the markdown output to a file.
+
+      usage: task composer:lock-diff from=main output=composer-lock-diff.md
+
+      from    The git ref to compare against (default: main)
+      output  Path to write the markdown diff output to
+    cmds:
+      - ./vendor/bin/composer-lock-diff --from {{ shellQuote (default "main" .from) }} --md > {{ shellQuote .output }}

@@ -10,15 +10,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   Test-Taskfile-Installer:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        php-version: [ 8.1, 8.2, 8.3, 8.4, 8.5 ]
+        php-version: [ 8.2, 8.3, 8.4, 8.5 ]
         include:
-          - php-version: 8.1
-            drupal-version: ":^10"
           - php-version: 8.2
             drupal-version: ":^10"
           - php-version: 8.3
@@ -32,9 +32,10 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project${{ matrix.drupal-version }} . --ignore-platform-reqs
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: drainpipe
+          persist-credentials: false
 
       - name: Setup drainpipe-dev
         run: mv drainpipe/drainpipe-dev .
@@ -95,7 +96,4 @@ jobs:
           ddev task drupal:composer:development
           cp composer-upgraded.json composer.json
           cp composer-upgraded.lock composer.lock
-          # Composer won't run updated plugin code until after its been
-          # installed. Once we have two new releases after 3.11.0, that upgrade
-          # task, we can remove this double call.
-          ddev task drupal:composer:development || ddev task drupal:composer:development
+          ddev task drupal:composer:development

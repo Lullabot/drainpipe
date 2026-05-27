@@ -10,15 +10,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   Test-Production-Build:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        php-version: [ 8.1, 8.2, 8.3, 8.4, 8.5 ]
+        php-version: [ 8.2, 8.3, 8.4, 8.5 ]
         include:
-          - php-version: 8.1
-            drupal-version: ":^10"
           - php-version: 8.2
             drupal-version: ":^10"
           - php-version: 8.3
@@ -28,9 +28,11 @@ jobs:
           - php-version: 8.5
             drupal-version: ":^10"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
-      - uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # 2.37.1
         with:
           php-version: ${{ matrix.php-version }}
           tools: composer:v2
@@ -41,12 +43,11 @@ jobs:
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Cache dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
-
 
       - name: Install Drupal
         run: |
@@ -63,7 +64,38 @@ jobs:
           composer config minimum-stability dev
           composer require "lullabot/drainpipe @dev" --with-all-dependencies
 
-      - name: Run static tests
+      - name: Run production build via alias
         run: |
           cd ../drupal
           ./vendor/bin/task build
+
+      - name: Verify unified task is no-op after production build
+        run: |
+          cd ../drupal
+          # After a production build, calling drupal:composer with COMPOSER_NO_DEV=1
+          # should be a no-op (status check passes, task is skipped).
+          ./vendor/bin/task drupal:composer COMPOSER_NO_DEV=1 2>&1 | tee /tmp/task-output.txt
+          # Task prints nothing when skipped via status check, so verify
+          # composer install was NOT run again.
+          if grep -q "Installing\|Updating\|Nothing to install" /tmp/task-output.txt; then
+            echo "FAIL: composer ran again when it should have been skipped"
+            exit 1
+          fi
+
+      - name: Verify passthrough status check does not undo production build
+        run: |
+          cd ../drupal
+          # Calling drupal:composer without COMPOSER_NO_DEV (the empty/passthrough
+          # case) should be a no-op because installed.json exists. This is the
+          # scenario when drupal:update depends on drupal:composer.
+          ./vendor/bin/task drupal:composer 2>&1 | tee /tmp/task-output.txt
+          if grep -q "Installing\|Updating\|Nothing to install" /tmp/task-output.txt; then
+            echo "FAIL: composer ran again when it should have been skipped"
+            exit 1
+          fi
+          # Verify vendor is still in production mode (no dev packages).
+          if [ -f "vendor/lullabot/drainpipe-dev/composer.json" ]; then
+            echo "FAIL: dev dependencies were installed in production build"
+            exit 1
+          fi
+          grep -q '"dev": false' vendor/composer/installed.json

@@ -5,12 +5,16 @@ dotenv: ['.env', '.env.defaults']
 includes:
   deploy: ./vendor/lullabot/drainpipe/tasks/deploy.yml
   drupal: ./vendor/lullabot/drainpipe/tasks/drupal.yml
+  composer: ./vendor/lullabot/drainpipe/tasks/composer.yml
   github: ./vendor/lullabot/drainpipe/tasks/github.yml
+  gitlab: ./vendor/lullabot/drainpipe/tasks/gitlab.yml
   sass: ./vendor/lullabot/drainpipe/tasks/sass.yml
   snapshot: ./vendor/lullabot/drainpipe/tasks/snapshot.yml
-  test: ./vendor/lullabot/drainpipe/tasks/test.yml
   javascript: ./vendor/lullabot/drainpipe/tasks/javascript.yml
   tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+  test:
+    taskfile: ./vendor/lullabot/drainpipe-dev/tasks/test.yml
+    optional: true
 
 output: prefixed
 silent: true
@@ -20,11 +24,11 @@ silent: true
 # @see https://github.com/go-task/task/issues/812
 run: once
 
-#vars:
-#  DRAINPIPE_SASS: |
-#    web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
-#  DRAINPIPE_JAVASCRIPT: |
-#    web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
+# vars:
+#   DRAINPIPE_SASS: |
+#     web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
+#   DRAINPIPE_JAVASCRIPT: |
+#     web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
 
 tasks:
   sync:
@@ -37,14 +41,19 @@ tasks:
 
   build:
     desc: "Builds the project for production"
-    deps: [drupal:composer:production]
     cmds:
+      - task: drupal:composer
+        vars:
+          COMPOSER_NO_DEV: "1"
       - echo "Nothing to do"
-      #- task: assets
+      # - task: assets
 
   build:dev:
     desc: "Builds the project for development"
-    deps: [drupal:composer:development]
+    deps:
+      - task: drupal:composer
+        vars:
+          COMPOSER_NO_DEV: "0"
     cmds:
       # @see https://architecture.lullabot.com/adr/20211026-one-time-login-first-drupal-user-account/
       - ./vendor/bin/drush user:unblock --uid=1
@@ -77,4 +86,3 @@ tasks:
 # assets:watch:
 #   desc: "Builds assets such as CSS & JS, and watches them for changes"
 #   deps: [sass:watch, javascript:watch]
-

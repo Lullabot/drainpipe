@@ -2,19 +2,25 @@ name: "Pantheon Review Apps"
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [labeled, synchronize]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions:
+  deployments: write
+  contents: read
+  pull-requests: read
+
 jobs:
   Drainpipe-Deploy-Pantheon-Multidev:
+    if: contains(github.event.pull_request.labels.*.name, 'build multidev')
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -46,7 +52,7 @@ jobs:
         uses: ./.github/actions/drainpipe/pantheon/review
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          terminus-token: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          terminus-token: ${{ secrets.TERMINUS_MACHINE_TOKEN }}
           commit-message: ${{ github.sha }}
           site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
           lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
@@ -55,3 +61,4 @@ jobs:
           run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}
           clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
           terminus-timeout-limit: ${{ env.TERMINUS_TIMEOUT_LIMIT }}
+          skip-wipe-multidev: ${{ vars.PANTHEON_SKIP_WIPE_MULTIDEV }}

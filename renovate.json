@@ -3,16 +3,49 @@
   "extends": [
     "config:recommended"
   ],
-  "rangeStrategy": "bump",
+  "automerge": true,
+  "automergeType": "pr",
+  "minimumReleaseAge": "3 days",
+  "rangeStrategy": "replace",
+  "github-actions": {
+    "managerFilePatterns": [
+      "(^|/).github/(workflows|actions)/[^/]+\\.ya?ml$",
+      "(^|/).github/(workflows|actions)/[^/]+/action\\.ya?ml$",
+      "(^|/)scaffold/github/workflows/[^/]+\\.ya?ml$",
+      "(^|/)scaffold/github/actions/[^/]+/[^/]+/action\\.ya?ml$"
+    ]
+  },
   "ignoreDeps": [
     "drainpipe"
   ],
   "packageRules": [
     {
+      "description": "Widen ranges for packages that must support both Drupal 10 and 11 simultaneously",
+      "matchPackageNames": [
+        "drush/drush",
+        "/^symfony\\//",
+        "vlucas/phpdotenv",
+        "mglaman/phpstan-drupal",
+        "phpstan/phpstan-deprecation-rules"
+      ],
+      "rangeStrategy": "widen"
+    },
+    {
+      "description": "Widen phpunit range in drainpipe-dev only (supports PHPUnit 9/10/11 for D10/D11)",
+      "matchPackageNames": [
+        "phpunit/phpunit"
+      ],
+      "matchFileNames": [
+        "drainpipe-dev/composer.json"
+      ],
+      "rangeStrategy": "widen",
+      "allowedVersions": "^9 || ^10 || ^11"
+    },
+    {
+      "automerge": false,
       "matchPackageNames": [
         "drush/drush",
         "phpunit/phpunit",
-        "symfony/php-unit-bridge",
         "symfony/yaml",
         "twig/twig",
         "vlucas/phpdotenv"
@@ -32,20 +65,167 @@
       "matchPackageNames": [
         "drush/drush"
       ],
-      "allowedVersions": "^11 || ^12 || ^13",
-      "rangeStrategy": "widen"
+      "allowedVersions": "^11 || ^12 || ^13"
     },
     {
       "matchPackageNames": [
-        "/^symfony//"
+        "phpunit/phpunit"
       ],
-      "allowedVersions": "^6 || ^7",
-      "rangeStrategy": "widen"
+      "allowedVersions": "^9"
+    },
+    {
+      "matchPackageNames": [
+        "mglaman/phpstan-drupal",
+        "phpstan/phpstan-deprecation-rules"
+      ],
+      "allowedVersions": "^1 || ^2"
+    },
+    {
+      "matchPackageNames": [
+        "vlucas/phpdotenv"
+      ],
+      "allowedVersions": "^4 || ^5"
+    },
+    {
+      "matchPackageNames": [
+        "/^symfony\//"
+      ],
+      "allowedVersions": "^6 || ^7"
+    },
+    {
+      "description": "phpunit-bridge v7 removed Legacy namespace traits relied on by Drupal 10 core",
+      "matchPackageNames": ["symfony/phpunit-bridge"],
+      "rangeStrategy": "replace",
+      "allowedVersions": "^6"
     },
     {
       "matchDatasources": ["node-version"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "enabled": false
+    },
+    {
+      "matchPackageNames": ["go-task/task"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/",
+      "groupName": "Taskfile"
+    },
+    {
+      "matchPackageNames": ["mikefarah/yq"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "matchPackageNames": ["acquia/cli"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "matchPackageNames": ["composer/composer"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "matchPackageNames": ["gitleaks/gitleaks"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "matchPackageNames": ["yarn"],
+      "matchFileNames": [
+        ".github/workflows/TestMetapackages.yml",
+        ".github/workflows/TestFunctional.yml"
+      ],
+      "allowedVersions": "^1"
+    },
+    {
+      "matchPackageNames": ["yarn"],
+      "matchFileNames": [
+        "package.json"
+      ],
+      "allowedVersions": "^4"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^\\.taskfile$",
+        "^scaffold/tugboat/scripts/custom-init-command\\.sh$"
+      ],
+      "matchStrings": [
+        "(?:TASKFILE=|^)v(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s*$"
+      ],
+      "depNameTemplate": "go-task/task",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^scaffold/tugboat/scripts/custom-init-command\\.sh$",
+        "^tasks/bitbucket\\.yml$"
+      ],
+      "matchStrings": [
+        "YQ=v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "mikefarah/yq",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^tasks/bitbucket\\.yml$",
+        "^scaffold/github/actions/acquia/deploy/action\\.yml$"
+      ],
+      "matchStrings": [
+        "ACLI_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "acquia/cli",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^scaffold/bitbucket/setup-php\\.sh$"
+      ],
+      "matchStrings": [
+        "COMPOSER_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "composer/composer",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^\\.github/workflows/Security\\.yml$",
+        "^scaffold/github/workflows/Security\\.yml$"
+      ],
+      "matchStrings": [
+        "zizmor==(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "zizmor",
+      "datasourceTemplate": "pypi"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^\\.github/workflows/Security\\.yml$",
+        "^scaffold/github/workflows/Security\\.yml$"
+      ],
+      "matchStrings": [
+        "gitleaks_(?<currentValue>\\d+\\.\\d+\\.\\d+)_linux_x64"
+      ],
+      "depNameTemplate": "gitleaks/gitleaks",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^\\.github/workflows/TestMetapackages\\.yml$",
+        "^\\.github/workflows/TestFunctional\\.yml$"
+      ],
+      "matchStrings": [
+        "yarn@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "yarn",
+      "datasourceTemplate": "npm"
     }
   ]
 }

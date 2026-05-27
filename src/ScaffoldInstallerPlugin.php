@@ -8,6 +8,7 @@ use Composer\Composer;
 use Composer\Config;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
+use Composer\Json\JsonManipulator;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
@@ -38,6 +39,13 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
     protected $extra;
 
     /**
+     * Composer autoload-dev configuration.
+     *
+     * @var array
+     */
+    protected $autoloadDev;
+
+    /**
      * {@inheritDoc}
      */
     public function activate(Composer $composer, IOInterface $io)
@@ -45,6 +53,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->io = $io;
         $this->config = $composer->getConfig();
         $this->extra = $composer->getPackage()->getExtra();
+        $this->autoloadDev = $composer->getPackage()->getDevAutoload();
     }
 
     /**
@@ -83,11 +92,11 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
-        $this->installHostingProviderSupport();
+        $this->installHostingProviderSupport($event->getComposer());
         $this->installCICommands($event->getComposer());
         $this->configureRenovateIgnore();
         $this->installEnvSupport();
-        if ($this->hasPantheonConfigurationFiles()) {
+        if ($this->hasAnyPantheonCIConfig() || $this->hasPantheonConfigurationFiles()) {
             $this->checkPantheonSystemDrupalIntegrations($event->getComposer());
         }
     }
@@ -103,12 +112,12 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         $this->installTaskfile();
         $this->installGitignore();
         $this->installDdevCommand();
-        $this->installHostingProviderSupport();
+        $this->installHostingProviderSupport($event->getComposer());
         $this->installCICommands($event->getComposer());
         $this->configureRenovateIgnore();
         $this->installEnvSupport();
-        if ($this->hasPantheonConfigurationFiles()) {
-            $this->pantheonSystemDrupalIntegrationsWarning();
+        if ($this->hasAnyPantheonCIConfig() || $this->hasPantheonConfigurationFiles()) {
+            $this->checkPantheonSystemDrupalIntegrations($event->getComposer());
         }
     }
 
@@ -151,19 +160,36 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         } else {
             $scaffoldTaskFile = Yaml::parseFile($taskfilePath);
             $projectTaskfile = Yaml::parseFile('./Taskfile.yml');
+            $missingIncludes = [];
             foreach ($scaffoldTaskFile['includes'] as $key => $value) {
-                if (empty($projectTaskfile['includes'][$key]) || $projectTaskfile['includes'][$key] !== $value) {
-                    $this->io->warning(
-                        'Taskfile.yml has either been customized or requires review.'
-                    );
+                $scaffoldPath = is_array($value) ? ($value['taskfile'] ?? '') : $value;
+                $projectValue = $projectTaskfile['includes'][$key] ?? null;
+                $projectPath = is_array($projectValue) ? ($projectValue['taskfile'] ?? '') : (string) $projectValue;
+                if ($scaffoldPath !== $projectPath) {
+                    $missingIncludes[] = $key;
+                }
+            }
+            if (!empty($missingIncludes)) {
+                $this->io->warning(
+                    'Taskfile.yml has either been customized or requires review. Currently the following includes are missing or outdated:'
+                );
+                foreach ($missingIncludes as $include) {
+                    $value = $scaffoldTaskFile['includes'][$include];
+                    $valueString = is_array($value) ? Yaml::dump($value, 0) : $value;
                     $this->io->warning(
                         sprintf(
-                            'Compare Taskfile.yml includes in the root of your repository with %s and update as needed.',
-                            $taskfilePath
+                            '  - %s: %s',
+                            $include,
+                            $valueString
                         )
                     );
-                    break;
                 }
+                $this->io->warning(
+                    sprintf(
+                        'Compare Taskfile.yml includes in the root of your repository with %s and update as needed.',
+                        $taskfilePath
+                    )
+                );
             }
             if (empty($projectTaskfile['tasks']['sync'])) {
                 $this->io->warning(
@@ -229,7 +255,7 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                     'config:recommended'
                 ]
             ];
-            file_put_contents($renovateConfigPath, json_encode($baseConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+            $this->writeJsonFile($renovateConfigPath, $baseConfig);
         }
 
         // Read and parse the existing renovate.json
@@ -270,8 +296,39 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
                 'description' => 'Managed by Drainpipe',
             ];
 
-            file_put_contents($renovateConfigPath, json_encode($renovateConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+            $this->writeJsonFile($renovateConfigPath, $renovateConfig);
             $this->io->write('<info>Updated renovate.json to ignore Drainpipe managed dependencies</info>');
+        }
+    }
+
+    /**
+     * Writes JSON data to a file with 2-space indentation.
+     *
+     * @param string $path
+     *   The file path.
+     * @param array $data
+     *   The data to encode.
+     */
+    private function writeJsonFile(string $path, array $data): void
+    {
+        try {
+            $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $this->io->warning(sprintf('Failed to encode JSON for file "%s": %s', $path, $e->getMessage()));
+            return;
+        }
+
+        $json = preg_replace_callback('/^ +/m', function ($m) {
+            return str_repeat(' ', strlen($m[0]) / 2);
+        }, $json);
+
+        if ($json === null) {
+            $this->io->warning(sprintf('Failed to process JSON for file "%s" (preg_replace_callback error).', $path));
+            return;
+        }
+
+        if (file_put_contents($path, $json . PHP_EOL) === false) {
+            $this->io->warning(sprintf('Failed to write to file: %s', $path));
         }
     }
 
@@ -287,12 +344,17 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         if (!is_file('./.env.defaults')) {
             $fs->copy($vendor . '/lullabot/drainpipe/scaffold/env/env.defaults', './.env.defaults');
         }
-        // There has to be a better way of doing this?
         $vendorRelative = str_replace(getcwd() . DIRECTORY_SEPARATOR, '', $vendor);
-        $composerJson = file_get_contents('composer.json');
-        $composerFullConfig = json_decode($composerJson, true);
-        if (empty($composerFullConfig['autoload-dev']['files']) || !in_array("$vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php", $composerFullConfig['autoload-dev']['files'])) {
-            $this->io->warning("🪠 [Drainpipe] $vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php' missing from autoload-dev files");
+        $dotenvFile = "$vendorRelative/lullabot/drainpipe/scaffold/env/dotenv.php";
+        $files = $this->autoloadDev['files'] ?? [];
+
+        if (!in_array($dotenvFile, $files)) {
+            $files[] = $dotenvFile;
+            $composerFile = $this->config->getConfigSource()->getName();
+            $manipulator = new JsonManipulator(file_get_contents($composerFile));
+            $manipulator->addSubNode('autoload-dev', 'files', $files);
+            file_put_contents($composerFile, $manipulator->getContents());
+            $this->io->write('<info>🪠 [Drainpipe] Added dotenv.php to autoload-dev files in composer.json</info>');
         }
     }
 
@@ -330,36 +392,106 @@ EOT;
                 $data = [];
             }
             $data['nodejs_version'] = 'auto';
-            file_put_contents('./.ddev/config.yaml', Yaml::dump($data, 10, 4, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE));
+            file_put_contents('./.ddev/config.yaml', Yaml::dump($data, 10, 2, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE));
         }
     }
 
     /**
-     * Install hosting provider support.
+     * Returns true if any Pantheon CI configuration is present.
+     *
+     * Checks for a non-empty 'pantheon' sub-key under either
+     * $this->extra['drainpipe']['github'] or
+     * $this->extra['drainpipe']['gitlab'].
+     *
+     * @return bool
      */
-    private function installHostingProviderSupport(): void
+    private function hasAnyPantheonCIConfig(): bool
+    {
+        $githubPantheon = $this->extra['drainpipe']['github']['pantheon'] ?? [];
+        $gitlabPantheon = $this->extra['drainpipe']['gitlab']['pantheon'] ?? [];
+        return !empty($githubPantheon) || !empty($gitlabPantheon);
+    }
+
+    /**
+     * Install hosting provider support.
+     *
+     * @param Composer $composer The Composer instance.
+     */
+    private function installHostingProviderSupport(Composer $composer): void
+    {
+        $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
+
+        if (isset($this->extra['drainpipe']['acquia'])) {
+            $this->installAcquiaSupport($scaffoldPath);
+        }
+
+        if ($this->hasAnyPantheonCIConfig()) {
+            $this->installPantheonSupport($scaffoldPath, $composer);
+        }
+    }
+
+    /**
+     * Install Acquia hosting provider support files.
+     *
+     * Copies CI-agnostic Acquia scaffold files into the project.
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
+     */
+    private function installAcquiaSupport(string $scaffoldPath): void
     {
         $fs = new Filesystem();
-        $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
-        if (isset($this->extra['drainpipe']['acquia'])) {
-            if (!file_exists('.drainpipeignore')) {
-                $fs->copy("$scaffoldPath/acquia/.drainpipeignore", '.drainpipeignore');
+        if (!file_exists('.drainpipeignore')) {
+            $fs->copy("$scaffoldPath/acquia/.drainpipeignore", '.drainpipeignore');
+        }
+        if (!empty($this->extra['drainpipe']['acquia']['settings'])) {
+            // settings.acquia.php
+            if (!file_exists('./web/sites/default/settings.acquia.php')) {
+                $fs->copy("$scaffoldPath/acquia/settings.acquia.php", './web/sites/default/settings.acquia.php');
             }
-            if (!empty($this->extra['drainpipe']['acquia']['settings'])) {
-                // settings.acquia.php
-                if (!file_exists('./web/sites/default/settings.acquia.php')) {
-                    $fs->copy("$scaffoldPath/acquia/settings.acquia.php", './web/sites/default/settings.acquia.php');
-                }
-                if (file_exists('./web/sites/default/settings.php')) {
-                    $settings = file_get_contents('./web/sites/default/settings.php');
-                    if (strpos($settings, 'settings.acquia.php') === false) {
-                        $include = <<<'EOT'
+            if (file_exists('./web/sites/default/settings.php')) {
+                $settings = file_get_contents('./web/sites/default/settings.php');
+                if (strpos($settings, 'settings.acquia.php') === false) {
+                    $include = <<<'EOT'
 include __DIR__ . "/settings.acquia.php";
 EOT;
-                        file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
-                    }
+                    file_put_contents('./web/sites/default/settings.php', $include . PHP_EOL, FILE_APPEND);
                 }
             }
+        }
+    }
+
+    /**
+     * Install Pantheon hosting provider support files (CI-agnostic).
+     *
+     * Copies files required for Pantheon deployments regardless of which CI
+     * system the project uses.
+     *
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
+     * @param Composer $composer The Composer instance.
+     */
+    private function installPantheonSupport(string $scaffoldPath, Composer $composer): void
+    {
+        $fs = new Filesystem();
+
+        // .drainpipeignore
+        if (!file_exists('.drainpipeignore')) {
+            $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
+        }
+        else {
+            $contents = file_get_contents('./.drainpipeignore');
+            if (strpos($contents, '/web/sites/default/files') === false) {
+                $this->io->warning(
+                    sprintf(
+                        '.gitignore does not contain drainpipe ignores. Compare .drainpipeignore in the root of your repository with %s and update as needed.',
+                        "$scaffoldPath/pantheon/.drainpipeignore"
+                    )
+                );
+            }
+        }
+
+        // pantheon.yml
+        if (!file_exists('./pantheon.yml')) {
+            $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
         }
     }
 
@@ -371,7 +503,7 @@ EOT;
         $scaffoldPath = $this->config->get('vendor-dir') . '/lullabot/drainpipe/scaffold';
         $this->installGitlabCI($scaffoldPath, $composer);
         $this->installGitHubActions($scaffoldPath, $composer);
-        $this->installTugboat($scaffoldPath);
+        $this->installBitbucketPipelines($scaffoldPath);
     }
 
     /**
@@ -405,7 +537,36 @@ EOT;
             }
         }
 
-        foreach ($this->extra['drainpipe']['gitlab'] as $gitlab) {
+        foreach ($this->extra['drainpipe']['gitlab'] as $key => $value) {
+            // Handle the pantheon provider sub-key.
+            if ($key === 'pantheon' && is_array($value)) {
+                if (in_array('Deploy', $value)) {
+                    $file = "gitlab/Pantheon.gitlab-ci.yml";
+                    if (file_exists("$scaffoldPath/$file")) {
+                        $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
+                        $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
+                    }
+                    else {
+                        $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
+                    }
+                }
+                if (in_array('ReviewApps', $value)) {
+                    $file = "gitlab/PantheonReviewApps.gitlab-ci.yml";
+                    if (file_exists("$scaffoldPath/$file")) {
+                        $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
+                        $this->io->write("🪠 [Drainpipe] .drainpipe/$file installed");
+                    }
+                    else {
+                        $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
+                    }
+                }
+                continue;
+            }
+
+            if ($value !== true) {
+                continue;
+            }
+            $gitlab = $key;
             $file = "gitlab/$gitlab.gitlab-ci.yml";
             if (file_exists("$scaffoldPath/$file")) {
                 $fs->copy("$scaffoldPath/$file", ".drainpipe/$file");
@@ -414,32 +575,8 @@ EOT;
             else {
                 $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
             }
-
-            if ($gitlab === 'Pantheon') {
-                // @TODO this isn't really specific to GitLab
-                // .drainpipeignore
-                if (!file_exists('.drainpipeignore')) {
-                    $fs->copy("$scaffoldPath/pantheon/.drainpipeignore", '.drainpipeignore');
-                }
-                else {
-                    $contents = file_get_contents('./.drainpipeignore');
-                    if (strpos($contents, '/web/sites/default/files') === false) {
-                        $this->io->warning(
-                            sprintf(
-                                '.gitignore does not contain drainpipe ignores. Compare .drainpipeignore in the root of your repository with %s and update as needed.',
-                                "$scaffoldPath/pantheon/.drainpipeignore"
-                            )
-                        );
-                    }
-                }
-                // pantheon.yml
-                if (!file_exists('./pantheon.yml')) {
-                    $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
-                }
-
-                $this->checkPantheonSystemDrupalIntegrations($composer);
-            }
         }
+
         if (!file_exists('./.gitlab-ci.yml')) {
             $fs->copy("$scaffoldPath/gitlab/gitlab-ci.example.yml", './.gitlab-ci.yml');
         }
@@ -485,9 +622,10 @@ EOT;
     }
 
     /**
-     * Install GitLab CI configuration if defined in composer.json
+     * Install GitHub Actions configuration if defined in composer.json
      *
      * @param string $scaffoldPath The path to the scaffold files to copy from.
+     * @param Composer $composer The Composer instance.
      */
     private function installGitHubActions(string $scaffoldPath, Composer $composer): void {
         $fs = new Filesystem();
@@ -497,313 +635,143 @@ EOT;
             return;
         }
 
+        // Install GitHub actions
         $fs->ensureDirectoryExists('./.github/actions');
         $fs->copy("$scaffoldPath/github/actions/common", './.github/actions/drainpipe');
-        foreach ($this->extra['drainpipe']['github'] as $github) {
-            if ($github === 'PantheonReviewApps' || $github === 'PantheonReviewAppsManual') {
-                $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
-                $fs->ensureDirectoryExists('./.github/workflows');
-                $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
-                $pantheon_review_apps = ($github === 'PantheonReviewApps') ? 'PantheonReviewApps' : 'PantheonReviewAppsManual';
-                if (file_exists('./.ddev/config.yaml')) {
-                    $pantheon_review_apps_ddev = $pantheon_review_apps . 'DDEV';
-                    $fs->copy("$scaffoldPath/github/workflows/$pantheon_review_apps_ddev.yml", './.github/workflows/PantheonReviewApps.yml');
-                }
-                else {
-                    $fs->copy("$scaffoldPath/github/workflows/$pantheon_review_apps.yml", './.github/workflows/PantheonReviewApps.yml');
-                }
-                $this->checkPantheonSystemDrupalIntegrations($composer);
+
+        // Install base GitHub workflows
+        $fs->ensureDirectoryExists('./.github/workflows');
+        $fs->copy("$scaffoldPath/github/workflows/TestRenovate.yml", './.github/workflows/TestRenovate.yml');
+
+        // Install configurable GitHub workflows — non-provider values.
+        foreach ($this->extra['drainpipe']['github'] as $key => $value) {
+            if (is_array($value) || $value !== true) {
+                continue;
             }
-            else if ($github === 'acquia') {
-                $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
-                $fs->ensureDirectoryExists('./.github/workflows');
-                $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
-                $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
+
+            if ($key === 'LockfileDiff') {
+                $fs->copy("$scaffoldPath/github/workflows/LockfileDiff.yml", './.github/workflows/LockfileDiff.yml');
             }
-            else if ($github === 'ComposerLockDiff') {
-                $fs->ensureDirectoryExists('./.github/workflows');
-                $fs->copy("$scaffoldPath/github/workflows/ComposerLockDiff.yml", './.github/workflows/ComposerLockDiff.yml');
-            }
-            else if ($github === 'Security') {
-                $fs->ensureDirectoryExists('./.github/workflows');
+            else if ($key === 'Security') {
                 $fs->copy("$scaffoldPath/github/workflows/Security.yml", './.github/workflows/Security.yml');
+                if (!file_exists('./.gitleaks.toml')) {
+                    $fs->copy("$scaffoldPath/gitleaks.toml", './.gitleaks.toml');
+                }
             }
-            else if ($github === 'TestStatic') {
-                $fs->ensureDirectoryExists('./.github/workflows');
+            else if ($key === 'TestStatic') {
                 $fs->copy("$scaffoldPath/github/workflows/TestStatic.yml", './.github/workflows/TestStatic.yml');
             }
-            else if ($github === 'TestFunctional') {
-                $fs->ensureDirectoryExists('./.github/workflows');
+            else if ($key === 'TestFunctional') {
                 $fs->copy("$scaffoldPath/github/workflows/TestFunctional.yml", './.github/workflows/TestFunctional.yml');
             }
         }
 
-        if (isset($this->extra['drainpipe']['acquia'])) {
-            // TODO: Add Acquia related GitHub Actions.
-        }
-    }
-
-    /**
-     * Installs Tugboat if defined in composer.json.
-     *
-     * @param string $scaffoldPath
-     */
-    private function installTugboat(string $scaffoldPath): void {
-        $fs = new Filesystem();
-
-        if (!isset($this->extra['drainpipe']['tugboat']) || !is_array($this->extra['drainpipe']['tugboat'])) {
-            return;
-        }
-
-        // Look for a config override file before we wipe the directory.
-        $tugboatConfigOverride = [];
-        $tugboatConfigOverridePath = './.tugboat/config.drainpipe-override.yml';
-        if (file_exists($tugboatConfigOverridePath)) {
-            $tugboatConfigOverride = Yaml::parseFile($tugboatConfigOverridePath);
-            $tugboatConfigOverrideFile = file_get_contents($tugboatConfigOverridePath);
-        }
-
-        // Wipe the Tugboat directory and define base config.
-        $filesToRemove = [
-            './.tugboat/config.drainpipe-override.yml',
-            './.tugboat/config.yml',
-            './.tugboat/steps/1-init.sh',
-            './.tugboat/steps/2-update.sh',
-            './.tugboat/steps/3-build.sh',
-            './.tugboat/steps/4-online.sh',
-            './.tugboat/scripts/install-mysql-client.sh',
-        ];
-        foreach ($filesToRemove as $file) {
-            if (file_exists($file)) {
-                $fs->remove($file);
+        // Handle Pantheon GitHub Actions.
+        $pantheonOptions = $this->extra['drainpipe']['github']['pantheon'] ?? [];
+        if (!empty($pantheonOptions)) {
+            // Actions are needed for both "Actions" and "ReviewApps".
+            if (in_array('Actions', $pantheonOptions) || in_array('ReviewApps', $pantheonOptions)) {
+                $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
+                $fs->copy("$scaffoldPath/github/actions/pantheon", './.github/actions/drainpipe/pantheon');
             }
-        }
-        $tugboatConfig = [
-            'nodejs_version' => '$(cat ${TUGBOAT_ROOT}/.nvmrc)',
-            'webserver_image' => 'tugboatqa/php-nginx:8.1-fpm-bookworm',
-            'database_type' => 'mariadb',
-            'database_version' => '10.11',
-            'php_version' => '8.1',
-            'sync_command' => 'sync',
-            'build_command' => 'build',
-            'update_command' => 'drupal:update',
-            'init' => [],
-            'pantheon' => isset($this->extra['drainpipe']['tugboat']['pantheon']),
-            'overrides' => ['php' => '', 'solr' => ''],
-        ];
-
-        // Read DDEV config.
-        if (file_exists('./.ddev/config.yaml')) {
-            $ddevConfig = Yaml::parseFile('./.ddev/config.yaml');
-            $tugboatConfig['database_type'] = $ddevConfig['database']['type'];
-            $tugboatConfig['database_version'] = $ddevConfig['database']['version'];
-            $tugboatConfig['webserver_image'] = 'tugboatqa/php-nginx:' . $ddevConfig['php_version'] . '-fpm-bookworm';
-
-            if (!empty($ddevConfig['webserver_type']) && $ddevConfig['webserver_type'] === 'apache-fpm') {
-                $tugboatConfig['webserver_image'] = 'tugboatqa/php:' . $ddevConfig['php_version'] . '-apache-bookworm';
-            }
-        }
-
-        // Process PHP config overrides.
-        $tugboatConfig['overrides']['php'] = $this->processTugboatOverride(
-            $tugboatConfigOverride,
-            'php',
-            ['aliases', 'urls', 'visualdiff', 'screenshot']
-        );
-
-        // Extract Solr image configuration before filtering for service detection
-        $solrOverrideImage = null;
-        if (!empty($tugboatConfigOverride['solr']) && is_array($tugboatConfigOverride['solr'])) {
-            $solrOverrideImage = $tugboatConfigOverride['solr']['image'] ?? null;
-        }
-
-        // Process Solr config overrides.
-        $tugboatConfig['overrides']['solr'] = $this->processTugboatOverride(
-            $tugboatConfigOverride,
-            'solr',
-            ['commands', 'depends', 'aliases', 'urls', 'volumes', 'environment', 'checkout']
-        );
-
-        // Add Redis service.
-        if (file_exists('./.ddev/docker-compose.redis.yaml')) {
-            $redisConfig = Yaml::parseFile('.ddev/docker-compose.redis.yaml');
-            $image = $redisConfig['services']['redis']['image'] ?? '';
-
-            $version = self::extractRedisImageVersion($image);
-            $tugboatConfig['memory_cache_type'] = 'redis';
-            $tugboatConfig['memory_cache_version'] = $version;
-        }
-
-        // Add search service (mutually exclusive).
-        // Priority: Solr override -> Solr DDEV -> Elasticsearch DDEV
-        if (!empty($solrOverrideImage)) {
-            $solrImage = explode(':', $solrOverrideImage);
-            $tugboatConfig['search_type'] = 'solr';
-            $tugboatConfig['search_version'] = array_pop($solrImage);
-        }
-        // Fall back to DDEV docker-compose configuration if not specified in override
-        elseif (file_exists('./.ddev/docker-compose.solr.yaml')) {
-            $solrConfig = Yaml::parseFile('.ddev/docker-compose.solr.yaml');
-            $solrImage = explode(':',
-                $solrConfig['services']['solr']['image']);
-            $tugboatConfig['search_type'] = 'solr';
-            $tugboatConfig['search_version'] = array_pop($solrImage);
-        }
-        elseif (file_exists('./.ddev/docker-compose.elasticsearch.yaml')) {
-            $esConfig = Yaml::parseFile('.ddev/docker-compose.elasticsearch.yaml');
-            $esImage = explode(':',
-                $esConfig['services']['elasticsearch']['image']);
-            $tugboatConfig['search_type'] = 'elasticsearch';
-            $tugboatConfig['search_version'] = array_pop($esImage);
-        }
-
-        // Add commands to Task.
-        if (file_exists('Taskfile.yml')) {
-            // Get steps out of the Taskfile.
-            $taskfile = Yaml::parseFile('./Taskfile.yml');
-            if (isset($taskfile['tasks']['sync:tugboat'])) {
-                $tugboatConfig['sync_command'] = 'sync:tugboat';
-            }
-            if (isset($taskfile['tasks']['build:tugboat'])) {
-                $tugboatConfig['build_command'] = 'build:tugboat';
-            }
-            if (isset($taskfile['tasks']['update'])) {
-                $tugboatConfig['update_command'] = 'update';
-            }
-            if (isset($taskfile['tasks']['update:tugboat'])) {
-                $tugboatConfig['update_command'] = 'update:tugboat';
-            }
-            if (isset($taskfile['tasks']['online:tugboat'])) {
-                $tugboatConfig['online_command'] = 'online:tugboat';
-            }
-            if (isset($taskfile['tasks']['tugboat:php:init'])) {
-                $tugboatConfig['init']['php'] = TRUE;
-            }
-            if (isset($taskfile['tasks']['tugboat:mysql:init'])) {
-                $tugboatConfig['init']['mysql'] = TRUE;
-            }
-            if (isset($taskfile['tasks']['tugboat:redis:init'])) {
-                $tugboatConfig['init']['redis'] = TRUE;
-            }
-            if (isset($taskfile['tasks']['tugboat:solr:init'])) {
-                $tugboatConfig['init']['solr'] = TRUE;
-            }
-        }
-
-        // Write the config.yml and settings.tugboat.php files.
-        if (count($tugboatConfig) > 0) {
-            $fs->ensureDirectoryExists('./.tugboat');
-            $fs->ensureDirectoryExists('./.tugboat/steps');
-            $loader = new FilesystemLoader(__DIR__ . '/../scaffold/tugboat');
-            $twig = new Environment($loader);
-            // Reinstate the override file.
-            if (isset($tugboatConfigOverrideFile)) {
-                file_put_contents('./.tugboat/config.drainpipe-override.yml',
-                    $tugboatConfigOverrideFile);
-            }
-            file_put_contents('./.tugboat/config.yml',
-                $twig->render('config.yml.twig', $tugboatConfig));
-            file_put_contents('./.tugboat/steps/1-init.sh',
-                $twig->render('steps/1-init.sh.twig', $tugboatConfig));
-            file_put_contents('./.tugboat/steps/2-update.sh',
-                $twig->render('steps/2-update.sh.twig', $tugboatConfig));
-            file_put_contents('./.tugboat/steps/3-build.sh',
-                $twig->render('steps/3-build.sh.twig', $tugboatConfig));
-            chmod('./.tugboat/steps/1-init.sh', 0755);
-            chmod('./.tugboat/steps/2-update.sh', 0755);
-            chmod('./.tugboat/steps/3-build.sh', 0755);
-            if (!empty($tugboatConfig['online_command'])) {
-                file_put_contents('./.tugboat/steps/4-online.sh',
-                    $twig->render('steps/4-online.sh.twig',
-                        $tugboatConfig));
-                chmod('./.tugboat/steps/4-online.sh', 0755);
-            }
-
-            if ($tugboatConfig['database_type'] === 'mysql') {
-                $fs->ensureDirectoryExists('./.tugboat/scripts');
-                $fs->copy("$scaffoldPath/tugboat/scripts/install-mysql-client.sh",
-                    './.tugboat/scripts/install-mysql-client.sh');
-                chmod('./.tugboat/scripts/install-mysql-client.sh', 0755);
-            }
-
-            file_put_contents('./web/sites/default/settings.tugboat.php',
-                $twig->render('settings.tugboat.php.twig', $tugboatConfig));
-            if (file_exists('./web/sites/default/settings.php')) {
-                $settings = file_get_contents('./web/sites/default/settings.php');
-                if (strpos($settings, 'settings.tugboat.php') === FALSE) {
-                    $include = <<<'EOT'
-include __DIR__ . "/settings.tugboat.php";
-EOT;
-                    file_put_contents('./web/sites/default/settings.php',
-                        $include . PHP_EOL,
-                        FILE_APPEND);
+            if (in_array('ReviewApps', $pantheonOptions)) {
+                if (file_exists('./.ddev/config.yaml')) {
+                    $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsDDEV.yml", './.github/workflows/PantheonReviewApps.yml');
+                }
+                else {
+                    $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                 }
             }
         }
+
+        // Handle Acquia GitHub Actions.
+        $acquiaOptions = $this->extra['drainpipe']['github']['acquia'] ?? [];
+        if (!empty($acquiaOptions)) {
+            if (in_array('Deploy', $acquiaOptions)) {
+                $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
+                $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
+                $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
+            }
+        }
     }
 
     /**
-     * Processes Tugboat service configuration overrides.
+     * Install Bitbucket Pipelines configuration if defined in composer.json.
      *
-     * @param array $configOverride The configuration override array.
-     * @param string $service The service name (e.g., 'php', 'solr').
-     * @param array $allowedKeys The keys allowed for this service override.
-     * @return string The formatted YAML string for the overrides.
+     * @param string $scaffoldPath The path to the scaffold files to copy from.
      */
-    private function processTugboatOverride(array $configOverride, string $service, array $allowedKeys): string
-    {
-        if (empty($configOverride[$service]) || !is_array($configOverride[$service])) {
-            return '';
+    private function installBitbucketPipelines(string $scaffoldPath): void {
+        $fs = new Filesystem();
+        $fs->removeDirectory('./.drainpipe/bitbucket');
+
+        if (!isset($this->extra['drainpipe']['bitbucket']) || !is_array($this->extra['drainpipe']['bitbucket'])) {
+            return;
         }
 
-        $filteredOverride = array_filter($configOverride[$service],
-            function($key) use ($allowedKeys) {
-                return in_array($key, $allowedKeys);
-            },
-            ARRAY_FILTER_USE_KEY);
+        $requested = $this->extra['drainpipe']['bitbucket'];
 
-        $overrideOutput = [];
-        foreach (explode(PHP_EOL, Yaml::dump($filteredOverride, 2, 2)) as $line) {
-            $overrideOutput[] = str_repeat(' ', 4) . $line;
+        // Warn about unknown pipelines.
+        $known = ['AcquiaReviewApps', 'AcquiaDeploy'];
+        foreach ($requested as $pipeline) {
+            if (!in_array($pipeline, $known)) {
+                $this->io->warning("🪠 [Drainpipe] Unknown Bitbucket pipeline: $pipeline");
+            }
         }
 
-        return rtrim(implode("\n", $overrideOutput));
+        // Ensure the bitbucket task namespace is included in Taskfile.yml.
+        if (file_exists('./Taskfile.yml')) {
+            $taskfileContent = file_get_contents('./Taskfile.yml');
+            if (!str_contains($taskfileContent, 'bitbucket:')) {
+                $updated = preg_replace(
+                    '/^(includes:[ \t]*\n)/m',
+                    "$1  bitbucket: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml\n",
+                    $taskfileContent
+                );
+                if ($updated !== null && $updated !== $taskfileContent) {
+                    file_put_contents('./Taskfile.yml', $updated);
+                    $this->io->write("🪠 [Drainpipe] Added 'bitbucket' include to Taskfile.yml");
+                } else {
+                    $this->io->warning(
+                        "🪠 [Drainpipe] Could not auto-inject 'bitbucket' include into Taskfile.yml. " .
+                        "Add 'bitbucket: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml' under 'includes:' manually."
+                    );
+                }
+            }
+        }
+
+        // Determine which known pipelines were requested, in a stable order.
+        $active = array_values(array_intersect($known, $requested));
+
+        if (empty($active)) {
+            return;
+        }
+
+        // Parse each scaffold YAML and merge the pipelines sections into one file.
+        $deployBranch = $this->extra['drainpipe']['bitbucketDeployBranch'] ?? 'main';
+        $merged = null;
+        foreach ($active as $pipeline) {
+            if ($pipeline === 'AcquiaDeploy') {
+                $raw = file_get_contents("$scaffoldPath/bitbucket/AcquiaDeploy.yml");
+                $raw = preg_replace('/(^\s+)main:/m', "\$1$deployBranch:", $raw);
+                $parsed = Yaml::parse($raw);
+            } else {
+                $parsed = Yaml::parseFile("$scaffoldPath/bitbucket/$pipeline.yml");
+            }
+            if ($merged === null) {
+                $merged = $parsed;
+            } else {
+                $merged['pipelines'] = array_merge(
+                    $merged['pipelines'] ?? [],
+                    $parsed['pipelines'] ?? []
+                );
+            }
+        }
+
+        file_put_contents('./bitbucket-pipelines.yml', Yaml::dump($merged, 10, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+        $this->io->write('🪠 [Drainpipe] bitbucket-pipelines.yml updated');
+
+        $fs->ensureDirectoryExists('./.bitbucket');
+        $fs->copy("$scaffoldPath/bitbucket/setup-php.sh", './.bitbucket/setup-php.sh');
+        $this->io->write('🪠 [Drainpipe] .bitbucket/setup-php.sh updated');
     }
-
-    /**
-     * Extracts the Redis version tag from a Docker image string.
-     *
-     * Supports formats using environment variable fallbacks such as:
-     *   - ${REDIS_DOCKER_IMAGE:-redis:7}
-     *   - redis:${REDIS_TAG:-6-bullseye}
-     * As well as direct image values like:
-     *   - redis:7-alpine
-     *   - tugboatqa/redis:bookworm
-     *
-     * @param string $image The raw or interpolated image string from docker-compose.redis.yaml.
-     *
-     * @return string The extracted Redis version/tag (e.g. "7", "6-bullseye", "bookworm").
-     *
-     * @throws \RuntimeException If the version tag cannot be extracted.
-     */
-    public static function extractRedisImageVersion(string $image): string
-    {
-        // Normalize image from possible environment syntax.
-        // Example: $image = '${REDIS_DOCKER_IMAGE:-redis:7}'.
-        if (preg_match('/^\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
-            $image = $matches[1];
-        // Example: $image = 'redis:${REDIS_TAG:-6-bullseye}'.
-        } elseif (preg_match('/^([^:]+):\$\{[^:}]+:-(.+)\}$/', $image, $matches)) {
-            $image = "{$matches[1]}:{$matches[2]}";
-        }
-
-        // Extract the version/tag from the image string.
-        // Example: $image = 'redis:6-bullseye' → $version = '6-bullseye'
-        if (!preg_match('/:([a-zA-Z0-9._-]+)$/', $image, $versionMatch)) {
-            throw new \RuntimeException("Unable to extract Redis version from image: {$image}");
-        }
-
-        return $versionMatch[1];
-    }
-
 }
