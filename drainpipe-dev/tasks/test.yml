@@ -1,0 +1,247 @@
+version: '3'
+
+vars:
+  WEBROOT:
+    sh: |
+      if [ -d "docroot" ] && [ -d "docroot/modules" ] && [ -d "docroot/themes" ] && [ -f "docroot/index.php" ]; then
+        echo "docroot"
+      else
+        echo "web"
+      fi
+  YAML_DIRS: '{{ default (printf "%s/**/*.yml" .WEBROOT) .YAML_DIRS }}'
+  TWIG_DIRS: '{{ default (printf "%s/modules/custom %s/profiles %s/themes/custom" .WEBROOT .WEBROOT .WEBROOT) .TWIG_DIRS }}'
+  # These directories are configured in phpcs.xml. However, phpcs will fail if
+  # those directories do not exist, so we create them with the assumption that
+  # every Drupal site will eventually have these directories.
+  TEST_DIRS: '{{ default (printf "%s/modules/custom %s/themes/custom %s/sites" .WEBROOT .WEBROOT .WEBROOT) .TEST_DIRS }}'
+  FUNC_ENSURE_DIRS: |
+    DIRS_ARR=({{.TEST_DIRS}})
+    for DIR in "${DIRS_ARR[@]}"; do
+      mkdir -p $DIR
+    done
+
+tasks:
+  static:
+    desc: Runs all static tests
+    deps: [lint, phpstan, phpunit:static, phpcs]
+    cmds:
+      - task: untracked
+  functional:
+    desc: Runs all tests that require a bootstrapped Drupal site
+    deps: [config, phpunit:functional]
+    cmds:
+      - task: untracked
+  security:
+    desc: Runs security checks for composer packages and Drupal contrib
+    cmds:
+      - |
+        if [ "{{.format}}" == "junit" ]; then
+          composer global config allow-plugins.nedbase/composer-audit-common-report-formats-plugin true
+          composer global require nedbase/composer-audit-common-report-formats-plugin
+          composer audit:junit
+        else
+          composer audit
+        fi
+      - |
+        DIFF_FROM={{ shellQuote (.composer_lock_diff_from | default "main") }}
+        DIFF_OUTPUT={{ shellQuote (.composer_lock_diff | default "") }}
+        if [ -n "$DIFF_OUTPUT" ]; then
+          ./vendor/bin/composer-lock-diff --from "$DIFF_FROM" --md | tee "$DIFF_OUTPUT"
+        else
+          ./vendor/bin/composer-lock-diff --from "$DIFF_FROM" --md
+        fi
+  lint:
+    desc: Runs lint on composer, YAML, and Twig files
+    # @todo JUnit output
+    cmds:
+      - composer validate
+      - |
+        DIRS_ARR=({{.YAML_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          ./vendor/bin/yaml-lint --parse-tags $DIR
+        done
+      - |
+        DIRS_ARR=({{.TWIG_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          if [ "{{.format}}" == "junit" ]; then
+            ./vendor/bin/twig-cs-fixer lint $DIR --report junit > test_result/twig-cs-fixer.xml
+          else
+            ./vendor/bin/twig-cs-fixer lint $DIR
+          fi
+        done
+      - |
+        if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn prettier --check --cache-location=.prettiercache .
+        elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run prettier --check .
+        fi
+      - |
+        if [ -f ".stylelintrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn stylelint "**/*.{css,scss,sass}"
+        elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run stylelint "**/*.{css,scss,sass}"
+        fi
+      - |
+        if [ -f ".eslintrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn eslint .
+        elif [ -f ".eslintrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run eslint .
+        fi
+  config:
+    desc: "Verifies that exported config matches the config in Drupal. Run with format=short to skip showing the full table of diffs."
+    # @todo JUnit output
+    cmds:
+      - |
+        if [ $(./vendor/bin/drush config:status --format=string | wc -w) -gt 0 ]; then
+          echo "Config export does not match"
+          if [ "{{.format}}" != "short" ]; then
+            ./vendor/bin/drush config:status
+          fi
+          exit 1
+        fi
+  phpstan:
+    desc: Runs PHPStan with mglaman/phpstan-drupal
+    cmds:
+      - |
+        {{ .FUNC_ENSURE_DIRS }}
+      - |
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpstan analyse --error-format=junit {{.TEST_DIRS}} > test_result/phpstan.xml
+        else
+          ./vendor/bin/phpstan analyse {{.TEST_DIRS}}
+        fi
+  phpstan:generate-baseline:
+    desc: Generates a PHPStan baseline file to suppress existing violations, allowing CI to enforce level 6 on new code only
+    cmds:
+      - |
+        {{ .FUNC_ENSURE_DIRS }}
+      - ./vendor/bin/phpstan analyse --generate-baseline phpstan-baseline.neon {{.TEST_DIRS}}
+      - |
+        if [ ! -f "phpstan.neon" ]; then
+          printf 'includes:\n    - phpstan.neon.dist\n    - phpstan-baseline.neon\n' > phpstan.neon
+          echo "Created phpstan.neon including phpstan-baseline.neon"
+          echo "Commit both phpstan.neon and phpstan-baseline.neon to your repository."
+        else
+          echo "phpstan.neon already exists."
+          echo "Add '- phpstan-baseline.neon' to the includes section of phpstan.neon, then commit both files."
+        fi
+  phpunit:
+    desc: Runs PHPUnit
+    deps: [phpunit:static, phpunit:functional]
+  phpunit:static:
+    desc: Runs PHPUnit unit tests
+    cmds:
+      - |
+        CONFIG="$(pwd)/phpunit.xml"
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result/phpunit
+          CONFIG="$CONFIG --log-junit $(pwd)/test_result/phpunit.xml"
+        fi
+        ./vendor/bin/phpunit -c $CONFIG --testsuite=unit
+  phpunit:functional:
+    desc: Runs PHPUnit functional tests
+    cmds:
+      - |
+        CONFIG="$(pwd)/phpunit.xml"
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result/phpunit
+          CONFIG="$CONFIG --log-junit $(pwd)/test_result/phpunit-functional.xml"
+        fi
+        PHPUNIT_VERSION=$(./vendor/bin/phpunit --version | grep -Po 'PHPUnit [0-9]+\.' | grep -Po '[0-9]+')
+        if [ "$PHPUNIT_VERSION" == "9" ]; then
+          ./vendor/bin/phpunit -c $CONFIG --testsuite=kernel,functional,functional-javascript,existing-site,existing-site-javascript
+        else
+          ./vendor/bin/phpunit -c $CONFIG --exclude-testsuite=unit
+        fi
+  phpcs:
+    desc: Runs PHPCS with Drupal Coding Standards
+    summary: |
+      Check your code against Drupal's coding standards. To override the default
+      ruleset, create a phpcs.xml file and extend phpcs.xml.dist
+    cmds:
+      - |
+        {{ .FUNC_ENSURE_DIRS }}
+        if [ "{{.format}}" == "junit" ]; then
+          mkdir -p test_result
+          ./vendor/bin/phpcs --report=junit -q > test_result/phpcs.xml
+        else
+          ./vendor/bin/phpcs
+        fi
+  autofix:
+    desc: Runs PHPCBF with Drupal Coding Standards to fix PHPCS violations
+    cmds:
+      - |
+        {{ .FUNC_ENSURE_DIRS }}
+      - ./vendor/bin/phpcbf
+      - |
+        if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn prettier --write --cache-location=.prettiercache .
+        elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run prettier --write .
+        fi
+      - |
+        if [ -f ".stylelintrc.json" ] && [ -f "yarn.lock" ]; then
+          yarn stylelint "**/*.{css,scss,sass}" --fix
+        elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
+          npm run stylelint "**/*.{css,scss,sass}" --fix
+        fi
+      - |
+        DIRS_ARR=({{.TWIG_DIRS}})
+        for DIR in "${DIRS_ARR[@]}"; do
+          ./vendor/bin/twig-cs-fixer lint --fix $DIR
+        done
+  untracked:
+    desc: Checks for any untracked files in git
+    cmds:
+      - |
+        # .ddev is always ignored as changes are made to it during tests e.g. adding environment variables.
+        # Additional paths can be excluded via extra.drainpipe.untracked-ignore in composer.json.
+        IGNORE_ARGS=(':!.ddev')
+        if [ -f "composer.json" ]; then
+          while IFS= read -r file; do
+            [ -n "$file" ] && IGNORE_ARGS+=(":!$file")
+          done < <(php -r '
+            $json = json_decode(file_get_contents("composer.json"), true);
+            $ignored = $json["extra"]["drainpipe"]["untracked-ignore"] ?? [];
+            foreach ($ignored as $file) {
+              echo $file . "\n";
+            }
+          ')
+        fi
+        STATUS=$(git status -s --ignore-submodules=dirty -- "${IGNORE_ARGS[@]}")
+        if [ -n "$STATUS" ]; then
+          echo "$STATUS"
+          echo "Untracked changes detected - please rectify or add the files to your .gitignore"
+          exit 1
+        fi
+  siteinstall:default:
+    desc: "Runs the site installer for the default site"
+    cmds:
+      - ./vendor/bin/drush --yes site:install --existing-config
+  # The following nightwatch:* tasks are deprecated no-ops retained for
+  # backwards compatibility. They will be removed in a future release.
+  nightwatch:check:
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
+    cmds:
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
+  nightwatch:setup:
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
+    cmds:
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
+  nightwatch:siteinstall:firefox:
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
+    cmds:
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
+  nightwatch:siteinstall:chrome:
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
+    cmds:
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
+  nightwatch:siteinstall:
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
+    cmds:
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."
+  nightwatch:
+    desc: "Nightwatch support has been dropped in Drainpipe v6"
+    cmds:
+      - echo "Nightwatch support has been dropped in Drainpipe v6. Please migrate to Playwright."

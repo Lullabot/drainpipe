@@ -260,6 +260,22 @@ All the below static code analysis tests can be run with `task test:static`
   <exclude-pattern>web/sites/sites.php</exclude-pattern>
   ```
 
+#### Ignoring Files in the Untracked Files Check
+
+`task test:static` includes a check for untracked or modified files in the working tree. If your project intentionally leaves certain files uncommitted (e.g. a local config file that must not be in version control), you can exclude them from this check via `composer.json`:
+
+```json
+"extra": {
+    "drainpipe": {
+        "untracked-ignore": [
+            ".tugboat/config.yml"
+        ]
+    }
+}
+```
+
+The `.ddev` directory is always excluded automatically.
+
 ### Functional Tests
 
 Functional tests require some mechanism of creating a functing Drupal site to
