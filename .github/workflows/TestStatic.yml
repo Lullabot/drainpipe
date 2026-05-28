@@ -52,7 +52,7 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
           # TODO: Remove once Drupal core releases a version with symfony/polyfill-intl-idn that resolves PKSA-dwsq-ppd2-mb1x.
-          ddev exec --raw composer config --json config.policy.advisories.ignore-id '["PKSA-dwsq-ppd2-mb1x"]'
+          ddev exec --raw composer config --json policy.advisories.ignore-id '["PKSA-dwsq-ppd2-mb1x"]'
           ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
           # Restart is required to enable the provided Selenium containers
