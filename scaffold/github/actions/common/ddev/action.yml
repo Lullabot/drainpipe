@@ -80,3 +80,9 @@ runs:
         ddev exec "git config --global user.name \"$INPUT_GIT_NAME\""
         ddev exec "git config --global user.email \"$INPUT_GIT_EMAIL\""
         echo "DRAINPIPE_DDEV=true" >> $GITHUB_ENV
+
+    # TODO: Remove once Drupal 10.6.10 is released: https://www.drupal.org/project/drupal/issues/3592065
+    - name: Ignore symfony/polyfill-intl-idn advisory until Drupal 10.6.10
+      shell: bash
+      run: |
+        ddev exec composer config --global --json audit '{"ignore": {"PKSA-dwsq-ppd2-mb1x": "Pinned by drupal/core-recommended, temporary until Drupal 10.6.10"}}'
