@@ -63,7 +63,7 @@ jobs:
           composer config repositories.drainpipe --json '{"type": "path", "url": "../drainpipe", "options": {"symlink": false}}'
           composer config minimum-stability dev
           # TODO: Remove once Drupal 10.6.10 is released: https://www.drupal.org/project/drupal/issues/3592065
-          composer config --json audit '{"ignore": {"PKSA-dwsq-ppd2-mb1x": "Pinned by drupal/core-recommended, temporary until Drupal 10.6.10"}}'
+          cat composer.json | jq --indent 4 '.config.audit = {"ignore": {"PKSA-dwsq-ppd2-mb1x": "Pinned by drupal/core-recommended, temporary until Drupal 10.6.10"}}' | tee composer.json > /dev/null
           composer require "lullabot/drainpipe @dev" --with-all-dependencies
 
       - name: Run production build via alias
