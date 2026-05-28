@@ -46,7 +46,7 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json "{\"type\": \"path\", \"url\": \"drainpipe\", \"options\": {\"symlink\": false}}"
           ddev exec --raw composer config minimum-stability dev
           # TODO: Remove once Drupal core releases a version with symfony/polyfill-intl-idn that resolves PKSA-dwsq-ppd2-mb1x.
-          ddev exec --raw composer config --json policy.advisories.ignore-id '["PKSA-dwsq-ppd2-mb1x"]'
+          ddev exec --raw composer config policy.advisories.block false
           cat composer.json | jq --indent 4 '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/dotenv.php"]}' | tee composer.json > /dev/null
           ddev composer update --lock
           ddev composer validate
