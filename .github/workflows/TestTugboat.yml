@@ -49,6 +49,8 @@ jobs:
           ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
+          # TODO: Remove once Drupal core releases a version with symfony/polyfill-intl-idn that resolves PKSA-dwsq-ppd2-mb1x.
+          ddev exec --raw composer config --json config.policy.advisories.ignore-id '["PKSA-dwsq-ppd2-mb1x"]'
           ddev exec --raw composer config extra.drainpipe --json '{"tugboat": {}}'
           mkdir -p .tugboat
           echo "php:" >  .tugboat/config.drainpipe-override.yml
@@ -122,6 +124,8 @@ jobs:
           ddev exec --raw composer config --no-plugins allow-plugins.lullabot/drainpipe true
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
+          # TODO: Remove once Drupal core releases a version with symfony/polyfill-intl-idn that resolves PKSA-dwsq-ppd2-mb1x.
+          ddev exec --raw composer config --json config.policy.advisories.ignore-id '["PKSA-dwsq-ppd2-mb1x"]'
           ddev exec --raw composer config extra.drainpipe --json '{"tugboat": {}}'
           ddev exec --raw echo "16" > .nvmrc
           ddev composer require lullabot/drainpipe --with-all-dependencies
