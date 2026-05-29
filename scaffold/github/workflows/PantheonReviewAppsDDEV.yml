@@ -52,8 +52,8 @@ jobs:
 
       - name: Install Terminus in DDEV
         run: |
-          ddev exec curl -fsSL https://github.com/pantheon-systems/terminus/releases/download/4.1.1/terminus.phar -o /usr/local/bin/terminus
-          ddev exec chmod +x /usr/local/bin/terminus
+          ddev exec --user root curl -fsSL https://github.com/pantheon-systems/terminus/releases/download/4.1.1/terminus.phar -o /usr/local/bin/terminus
+          ddev exec --user root chmod +x /usr/local/bin/terminus
 
       - name: Deploy Pantheon Review App
         uses: ./.github/actions/drainpipe/pantheon/review
