@@ -50,6 +50,7 @@ jobs:
           ddev exec --raw composer config minimum-stability dev
           # TODO: Remove once Drupal core releases a version with symfony/polyfill-intl-idn that resolves PKSA-dwsq-ppd2-mb1x.
           ddev exec --raw composer config policy.advisories.block false
+          ddev exec --raw composer config --json extra.drainpipe '{"github": {"pantheon": ["ReviewApps"]}}'
           ddev composer require lullabot/drainpipe --with-all-dependencies
           ddev composer require --dev lullabot/drainpipe-dev --with-all-dependencies
           ddev restart
@@ -68,7 +69,7 @@ jobs:
 
       - name: Create pantheon.yml
         run: |
-          echo "api_version: 1" >> pantheon.yml
+          echo "api_version: 1" > pantheon.yml
           echo "web_docroot: true" >> pantheon.yml
           echo "php_version: 8.3" >> pantheon.yml
           echo "database:" >> pantheon.yml
@@ -105,6 +106,11 @@ jobs:
         run: |
           mkdir -p .github/actions
           cp -R ./drainpipe/scaffold/github/actions/common .github/actions/drainpipe
+
+      - name: Install Terminus in DDEV
+        run: |
+          ddev exec curl -fsSL https://github.com/pantheon-systems/terminus/releases/download/4.1.1/terminus.phar -o /usr/local/bin/terminus
+          ddev exec chmod +x /usr/local/bin/terminus
 
       - name: Deploy Pantheon Review App
         uses: ./drainpipe/scaffold/github/actions/pantheon/review

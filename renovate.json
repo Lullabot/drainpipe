@@ -230,7 +230,10 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^scaffold/github/actions/pantheon/setup-terminus/action\\.yml$"
+        "^scaffold/github/actions/pantheon/setup-terminus/action\\.yml$",
+        "^\\.github/workflows/TestGitHubActions\\.yml$",
+        "^scaffold/github/workflows/PantheonReviewAppsDDEV\\.yml$",
+        "^scaffold/github/workflows/PantheonReviewAppsAsyncDDEV\\.yml$"
       ],
       "matchStrings": [
         "key: terminus-(?<currentValue>\\d+\\.\\d+\\.\\d+)",
