@@ -107,12 +107,33 @@ jobs:
           mkdir -p .github/actions
           cp -R ./drainpipe/scaffold/github/actions/common .github/actions/drainpipe
 
+      # The deploy below pushes to a real Pantheon site. Skip it cleanly when the
+      # required secrets are absent (e.g. on forks/Dependabot PRs) so the rest of
+      # the job still validates instead of hard-failing.
+      - name: Check Pantheon secrets
+        id: pantheon
+        env:
+          TERMINUS_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          SITE_NAME: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
+        run: |
+          if [ -n "$TERMINUS_TOKEN" ] && [ -n "$SITE_NAME" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Pantheon secrets (PANTHEON_TERMINUS_TOKEN / PANTHEON_SITE_NAME) not configured — skipping the live Pantheon deploy test."
+          fi
+
       - name: Install Terminus in DDEV
+        if: steps.pantheon.outputs.enabled == 'true'
         run: |
           ddev exec --user root curl -fsSL https://github.com/pantheon-systems/terminus/releases/download/4.1.1/terminus.phar -o /usr/local/bin/terminus
           ddev exec --user root chmod +x /usr/local/bin/terminus
 
+      # This exercises the synchronous review path only. The async path
+      # (Quicksilver -> repository_dispatch -> PantheonReviewAppsPostDeploy -> Watchdog)
+      # is covered hermetically by TestPantheonAsyncDeploy.yml.
       - name: Deploy Pantheon Review App
+        if: steps.pantheon.outputs.enabled == 'true'
         uses: ./drainpipe/scaffold/github/actions/pantheon/review
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -121,5 +142,20 @@ jobs:
           site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
           lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+          # Clone from an environment that always exists on the test site.
+          clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'dev' }}
           # set to "true" if you want to run the installer
           run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}
+
+      # Always clean up the multidev this test created so runs are self-contained
+      # and don't accumulate environments against Pantheon's per-site cap.
+      - name: Tear down test multidev
+        if: always() && steps.pantheon.outputs.enabled == 'true'
+        env:
+          INPUT_TERMINUS_TOKEN: ${{ secrets.PANTHEON_TERMINUS_TOKEN }}
+          INPUT_SITE_NAME: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
+        run: |
+          MD="${MULTIDEV_NAME:-pr-$DRAINPIPE_PR_NUMBER}"
+          echo "Removing test multidev $INPUT_SITE_NAME.$MD"
+          ddev exec "terminus auth:login --machine-token=\"$INPUT_TERMINUS_TOKEN\"" || true
+          ddev exec "terminus multidev:delete $INPUT_SITE_NAME.$MD --delete-branch --yes" || true

@@ -7,5 +7,5 @@ drainpipe_pantheon_post_deploy:
   script:
     - !reference [.drainpipe_pantheon_setup_terminus, script]
     - composer install
-    - ./vendor/bin/task pantheon:drupal-update site=$PANTHEON_SITE_NAME environment=$PANTHEON_TRIGGERED_ENVIRONMENT skip-workflow-wait=true run-installer=${PANTHEON_MULTIDEV_RUN_INSTALLER:-false}
+    - ./vendor/bin/task pantheon:drupal-update site=$PANTHEON_SITE_NAME environment=$PANTHEON_TRIGGERED_ENVIRONMENT skip_workflow_wait=true run_installer=${PANTHEON_MULTIDEV_RUN_INSTALLER:-false}
     - ./vendor/bin/task pantheon:lock-env site=$PANTHEON_SITE_NAME environment=$PANTHEON_TRIGGERED_ENVIRONMENT username=${PANTHEON_REVIEW_USERNAME:-} password=${PANTHEON_REVIEW_PASSWORD:-}

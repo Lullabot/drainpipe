@@ -28,6 +28,6 @@ runs:
         task pantheon:drupal-update \
           site="$INPUT_SITE_NAME" \
           environment="$INPUT_ENVIRONMENT" \
-          skip-workflow-wait="$INPUT_SKIP_WORKFLOW_WAIT" \
-          run-installer="$INPUT_RUN_INSTALLER"
+          skip_workflow_wait="$INPUT_SKIP_WORKFLOW_WAIT" \
+          run_installer="$INPUT_RUN_INSTALLER"
       shell: bash

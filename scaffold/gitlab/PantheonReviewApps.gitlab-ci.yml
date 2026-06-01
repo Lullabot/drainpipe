@@ -2,12 +2,12 @@
   script:
     - !reference [.drainpipe_pantheon_setup_terminus, script]
     - composer install
-    - ./vendor/bin/task pantheon:prepare-multidev site=$PANTHEON_SITE_NAME multidev=mr-$CI_MERGE_REQUEST_IID clone-from=${PANTHEON_CLONE_FROM:-dev} skip-wipe=${PANTHEON_SKIP_WIPE_MULTIDEV:-false} run-installer=${PANTHEON_MULTIDEV_RUN_INSTALLER:-false}
+    - ./vendor/bin/task pantheon:prepare-multidev site=$PANTHEON_SITE_NAME multidev=mr-$CI_MERGE_REQUEST_IID clone_from=${PANTHEON_CLONE_FROM:-dev} skip_wipe=${PANTHEON_SKIP_WIPE_MULTIDEV:-false} run_installer=${PANTHEON_MULTIDEV_RUN_INSTALLER:-false}
     - ./vendor/bin/task build
     - ./vendor/bin/task snapshot:directory
     - terminus connection:set $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID git --yes
     - ./vendor/bin/task deploy:git
-    - ./vendor/bin/task pantheon:drupal-update site=$PANTHEON_SITE_NAME environment=mr-$CI_MERGE_REQUEST_IID timeout=${TERMINUS_TIMEOUT_LIMIT:-600} run-installer=${PANTHEON_MULTIDEV_RUN_INSTALLER:-false}
+    - ./vendor/bin/task pantheon:drupal-update site=$PANTHEON_SITE_NAME environment=mr-$CI_MERGE_REQUEST_IID timeout=${TERMINUS_TIMEOUT_LIMIT:-600} run_installer=${PANTHEON_MULTIDEV_RUN_INSTALLER:-false}
     - ./vendor/bin/task pantheon:lock-env site=$PANTHEON_SITE_NAME environment=mr-$CI_MERGE_REQUEST_IID username=${PANTHEON_REVIEW_USERNAME:-} password=${PANTHEON_REVIEW_PASSWORD:-}
     - echo $CI_ENVIRONMENT_URL > environment_url.txt
 drainpipe_pantheon_drupal_review_app:

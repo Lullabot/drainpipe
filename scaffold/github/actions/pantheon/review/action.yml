@@ -136,7 +136,7 @@ runs:
         INPUT_SKIP_WIPE_MULTIDEV: ${{ inputs.skip-wipe-multidev }}
       run: | # zizmor: ignore[github-env]
         source .github/actions/drainpipe/set-env/bash_aliases
-        MULTIDEV_LINE=$(drainpipe_exec "./vendor/bin/task pantheon:prepare-multidev site=\"$INPUT_SITE_NAME\" multidev=\"pr-$DRAINPIPE_PR_NUMBER\" clone-from=\"$INPUT_CLONE_FROM\" skip-wipe=\"$INPUT_SKIP_WIPE_MULTIDEV\" run-installer=\"$INPUT_RUN_INSTALLER\"")
+        MULTIDEV_LINE=$(drainpipe_exec "./vendor/bin/task pantheon:prepare-multidev site=\"$INPUT_SITE_NAME\" multidev=\"pr-$DRAINPIPE_PR_NUMBER\" clone_from=\"$INPUT_CLONE_FROM\" skip_wipe=\"$INPUT_SKIP_WIPE_MULTIDEV\" run_installer=\"$INPUT_RUN_INSTALLER\"")
         MULTIDEV_NAME=$(echo "$MULTIDEV_LINE" | grep '^MULTIDEV_NAME=' | cut -d= -f2)
         MULTIDEV_NAME="${MULTIDEV_NAME:-pr-$DRAINPIPE_PR_NUMBER}"
         echo "MULTIDEV_NAME=$MULTIDEV_NAME" >> $GITHUB_ENV
@@ -166,7 +166,7 @@ runs:
         source .github/actions/drainpipe/set-env/bash_aliases
 
         if [ "$INPUT_ASYNC" != "true" ]; then
-          drainpipe_exec "./vendor/bin/task pantheon:drupal-update site=\"$INPUT_SITE_NAME\" environment=\"$MULTIDEV_NAME\" skip-workflow-wait=\"false\" run-installer=\"$INPUT_RUN_INSTALLER\" timeout=\"$INPUT_TERMINUS_TIMEOUT\""
+          drainpipe_exec "./vendor/bin/task pantheon:drupal-update site=\"$INPUT_SITE_NAME\" environment=\"$MULTIDEV_NAME\" skip_workflow_wait=\"false\" run_installer=\"$INPUT_RUN_INSTALLER\" timeout=\"$INPUT_TERMINUS_TIMEOUT\""
           ENVIRONMENT_URL="https://$MULTIDEV_NAME-$INPUT_SITE_NAME.pantheonsite.io"
           drainpipe_exec "./vendor/bin/task pantheon:lock-env site=\"$INPUT_SITE_NAME\" environment=\"$MULTIDEV_NAME\" username=\"$INPUT_LOCK_USERNAME\" password=\"$INPUT_LOCK_PASSWORD\""
           if [ -n "$INPUT_LOCK_USERNAME" ] && [ -n "$INPUT_LOCK_PASSWORD" ]; then
