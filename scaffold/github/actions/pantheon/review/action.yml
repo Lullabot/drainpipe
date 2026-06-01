@@ -147,7 +147,7 @@ runs:
           echo "::error::pantheon:prepare-multidev failed (exit $STATUS)"
           exit "$STATUS"
         fi
-        MULTIDEV_NAME=$(printf '%s\n' "$MULTIDEV_LINE" | tr -d '\r' | grep '^MULTIDEV_NAME=' | tail -n1 | cut -d= -f2)
+        MULTIDEV_NAME=$(printf '%s\n' "$MULTIDEV_LINE" | tr -d '\r' | sed -n 's/.*MULTIDEV_NAME=\([A-Za-z0-9_-]*\).*/\1/p' | tail -n1)
         MULTIDEV_NAME="${MULTIDEV_NAME:-pr-$DRAINPIPE_PR_NUMBER}"
         echo "MULTIDEV_NAME=$MULTIDEV_NAME" >> $GITHUB_ENV
       shell: bash
