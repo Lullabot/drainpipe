@@ -136,8 +136,18 @@ runs:
         INPUT_SKIP_WIPE_MULTIDEV: ${{ inputs.skip-wipe-multidev }}
       run: | # zizmor: ignore[github-env]
         source .github/actions/drainpipe/set-env/bash_aliases
-        MULTIDEV_LINE=$(drainpipe_exec "./vendor/bin/task pantheon:prepare-multidev site=\"$INPUT_SITE_NAME\" multidev=\"pr-$DRAINPIPE_PR_NUMBER\" clone_from=\"$INPUT_CLONE_FROM\" skip_wipe=\"$INPUT_SKIP_WIPE_MULTIDEV\" run_installer=\"$INPUT_RUN_INSTALLER\"")
-        MULTIDEV_NAME=$(echo "$MULTIDEV_LINE" | grep '^MULTIDEV_NAME=' | cut -d= -f2)
+        # Capture the task output so we can extract the (possibly truncated)
+        # multidev name, but tee it to the log so failures are diagnosable
+        # instead of being swallowed by the command substitution.
+        set +e
+        MULTIDEV_LINE=$(drainpipe_exec "./vendor/bin/task pantheon:prepare-multidev site=\"$INPUT_SITE_NAME\" multidev=\"pr-$DRAINPIPE_PR_NUMBER\" clone_from=\"$INPUT_CLONE_FROM\" skip_wipe=\"$INPUT_SKIP_WIPE_MULTIDEV\" run_installer=\"$INPUT_RUN_INSTALLER\"" 2>&1 | tee /dev/stderr)
+        STATUS=${PIPESTATUS[0]}
+        set -e
+        if [ "$STATUS" -ne 0 ]; then
+          echo "::error::pantheon:prepare-multidev failed (exit $STATUS)"
+          exit "$STATUS"
+        fi
+        MULTIDEV_NAME=$(printf '%s\n' "$MULTIDEV_LINE" | tr -d '\r' | grep '^MULTIDEV_NAME=' | tail -n1 | cut -d= -f2)
         MULTIDEV_NAME="${MULTIDEV_NAME:-pr-$DRAINPIPE_PR_NUMBER}"
         echo "MULTIDEV_NAME=$MULTIDEV_NAME" >> $GITHUB_ENV
       shell: bash

@@ -41,6 +41,9 @@ tasks:
         echo "{{.site}}" | grep -qE '^[a-zA-Z0-9_-]+$' || { echo "ERROR: site must contain only alphanumeric characters, underscores, and hyphens."; exit 1; }
         echo "{{default "dev" .clone_from}}" | grep -qE '^[a-zA-Z0-9._-]+$' || { echo "ERROR: clone_from must contain only alphanumeric characters, periods, underscores, and hyphens."; exit 1; }
       - |
+        # Abort on the first failing terminus command so the failure is
+        # attributable, instead of being masked by a later command's exit code.
+        set -e
         SITE="{{.site}}"
         MULTIDEV="{{.multidev}}"
         CLONE_FROM="{{default "dev" .clone_from}}"
@@ -48,10 +51,13 @@ tasks:
         RUN_INSTALLER="{{default "false" .run_installer}}"
 
         if terminus env:info "$SITE.$MULTIDEV" > /dev/null 2>&1; then
+          echo "ℹ️  Multidev $SITE.$MULTIDEV already exists."
           if [ "$SKIP_WIPE" != "true" ]; then
+            echo "⚡ Wiping $SITE.$MULTIDEV..."
             terminus env:wipe "$SITE.$MULTIDEV" --yes
           fi
         else
+          echo "⚡ Creating multidev $SITE.$MULTIDEV from $SITE.$CLONE_FROM..."
           if [ "$SKIP_WIPE" != "true" ]; then
             terminus multidev:create "$SITE.$CLONE_FROM" "$MULTIDEV" --no-db --no-files --yes
           else
@@ -62,13 +68,17 @@ tasks:
         fi
 
         if [ "$SKIP_WIPE" != "true" ] && [ "$RUN_INSTALLER" != "true" ]; then
+          echo "⚡ Cloning content from $SITE.$CLONE_FROM to $SITE.$MULTIDEV..."
           terminus env:clone-content "$SITE.$CLONE_FROM" "$MULTIDEV" --yes
         fi
+        echo "✅ prepare-multidev complete for $SITE.$MULTIDEV."
 
   drupal-update:
     desc: "Waits for Pantheon sync then runs Drupal updates or site installer"
     cmds:
       - |
+        # Abort on the first failing terminus command so the failure is attributable.
+        set -e
         SITE="{{.site}}"
         ENVIRONMENT="{{.environment}}"
         SKIP_WAIT="{{default "false" .skip_workflow_wait}}"
@@ -76,6 +86,7 @@ tasks:
         TIMEOUT="{{default "600" .timeout}}"
 
         if [ "$SKIP_WAIT" != "true" ]; then
+          echo "⚡ Waiting for Pantheon sync on $SITE.$ENVIRONMENT (max ${TIMEOUT}s)..."
           terminus workflow:wait --max "$TIMEOUT" "$SITE.$ENVIRONMENT"
         fi
         terminus aliases --only "$SITE" --yes
