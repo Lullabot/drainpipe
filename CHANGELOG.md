@@ -1,5 +1,15 @@
 # Changelog
 
+## [6.1.1](https://github.com/Lullabot/drainpipe/compare/v6.1.0...v6.1.1) (2026-06-04)
+
+
+### Bug Fixes
+
+* [#674](https://github.com/Lullabot/drainpipe/issues/674) Add configuration to ignore files when running git status checks. ([#1079](https://github.com/Lullabot/drainpipe/issues/1079)) ([fca3606](https://github.com/Lullabot/drainpipe/commit/fca3606cd1ceeca036a45bfaedc700dce1bd2733))
+* Ensure Drainpipe 6.x can be installed for Drupal 10 and 11 ([#1243](https://github.com/Lullabot/drainpipe/issues/1243)) ([1b20a1c](https://github.com/Lullabot/drainpipe/commit/1b20a1ccc1f735f12a64d9a1ab824fbda16af046))
+* Reference class path with 'use'  for EnvironmentDetector ([#1229](https://github.com/Lullabot/drainpipe/issues/1229)) ([f5e2693](https://github.com/Lullabot/drainpipe/commit/f5e2693f574d38c61c69a1ffa806399d3a932819))
+* **tugboat:** Update mail system overrides to support Symfony Mailer v2 ([#1239](https://github.com/Lullabot/drainpipe/issues/1239)) ([04d0a45](https://github.com/Lullabot/drainpipe/commit/04d0a45db7d260d2ba41fad43a02a2a4eeb70aa7))
+
 ## [6.1.0](https://github.com/Lullabot/drainpipe/compare/v6.0.0...v6.1.0) (2026-05-04)
 
 
