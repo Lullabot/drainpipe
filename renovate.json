@@ -42,6 +42,17 @@
       "allowedVersions": "^9 || ^10 || ^11"
     },
     {
+      "description": "Widen drupal/coder range in drainpipe-dev (coder ^8 for D10/D11, ^9 for D12)",
+      "matchPackageNames": [
+        "drupal/coder"
+      ],
+      "matchFileNames": [
+        "drainpipe-dev/composer.json"
+      ],
+      "rangeStrategy": "widen",
+      "allowedVersions": "^8 || ^9"
+    },
+    {
       "automerge": false,
       "matchPackageNames": [
         "drush/drush",
