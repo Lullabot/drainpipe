@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.2](https://github.com/Lullabot/drainpipe/compare/v6.1.1...v6.1.2) (2026-06-25)
+
+
+### Bug Fixes
+
+* [#1239](https://github.com/Lullabot/drainpipe/issues/1239) Fix phpcs comments for settings.tugboat file ([#1250](https://github.com/Lullabot/drainpipe/issues/1250)) ([07e20de](https://github.com/Lullabot/drainpipe/commit/07e20defb45fc148482a68a831065abc02be612c))
+
 ## [6.1.1](https://github.com/Lullabot/drainpipe/compare/v6.1.0...v6.1.1) (2026-06-04)
 
 
