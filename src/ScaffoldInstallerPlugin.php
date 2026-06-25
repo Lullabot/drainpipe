@@ -540,6 +540,7 @@ EOT;
         foreach ($this->extra['drainpipe']['gitlab'] as $key => $value) {
             // Handle the pantheon provider sub-key.
             if ($key === 'pantheon' && is_array($value)) {
+                $this->ensurePantheonTaskfileInclude();
                 if (in_array('Deploy', $value)) {
                     $file = "gitlab/Pantheon.gitlab-ci.yml";
                     if (file_exists("$scaffoldPath/$file")) {
@@ -559,6 +560,15 @@ EOT;
                     else {
                         $this->io->warning("🪠 [Drainpipe] $scaffoldPath/$file does not exist");
                     }
+                }
+                // AsyncDeploy overrides the blocking review job with an async variant.
+                // Requires ReviewApps to also be set.
+                if (in_array('AsyncDeploy', $value) && in_array('ReviewApps', $value)) {
+                    $fs->copy("$scaffoldPath/gitlab/PantheonReviewAppsAsyncJob.gitlab-ci.yml", ".drainpipe/gitlab/PantheonReviewApps.gitlab-ci.yml");
+                    $fs->copy("$scaffoldPath/gitlab/PantheonReviewAppsPostDeploy.gitlab-ci.yml", ".drainpipe/gitlab/PantheonReviewAppsPostDeploy.gitlab-ci.yml");
+                    $fs->ensureDirectoryExists('./web/private/scripts');
+                    $fs->copy("$scaffoldPath/pantheon/quicksilver/drainpipe_notify_gitlab.php", './web/private/scripts/drainpipe_notify_gitlab.php');
+                    $this->io->write('🪠 [Drainpipe] Pantheon async deploy (GitLab) scaffolded.');
                 }
                 continue;
             }
@@ -669,6 +679,7 @@ EOT;
         // Handle Pantheon GitHub Actions.
         $pantheonOptions = $this->extra['drainpipe']['github']['pantheon'] ?? [];
         if (!empty($pantheonOptions)) {
+            $this->ensurePantheonTaskfileInclude();
             // Actions are needed for both "Actions" and "ReviewApps".
             if (in_array('Actions', $pantheonOptions) || in_array('ReviewApps', $pantheonOptions)) {
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/pantheon');
@@ -682,6 +693,21 @@ EOT;
                     $fs->copy("$scaffoldPath/github/workflows/PantheonReviewApps.yml", './.github/workflows/PantheonReviewApps.yml');
                 }
             }
+            // AsyncDeploy overrides the blocking review workflow with an async variant.
+            // Requires ReviewApps to also be set.
+            if (in_array('AsyncDeploy', $pantheonOptions) && in_array('ReviewApps', $pantheonOptions)) {
+                $asyncSource = file_exists('./.ddev/config.yaml')
+                    ? 'PantheonReviewAppsAsyncDDEV.yml'
+                    : 'PantheonReviewAppsAsync.yml';
+                $fs->copy("$scaffoldPath/github/workflows/$asyncSource", './.github/workflows/PantheonReviewApps.yml');
+                $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsPostDeploy.yml", './.github/workflows/PantheonReviewAppsPostDeploy.yml');
+                $fs->ensureDirectoryExists('./web/private/scripts');
+                $fs->copy("$scaffoldPath/pantheon/quicksilver/drainpipe_notify_github.php", './web/private/scripts/drainpipe_notify_github.php');
+                $fs->copy("$scaffoldPath/github/workflows/PantheonReviewAppsWatchdog.yml", './.github/workflows/PantheonReviewAppsWatchdog.yml');
+                $fs->ensureDirectoryExists('./.github/scripts');
+                $fs->copy("$scaffoldPath/github/scripts/pantheon-watchdog.sh", './.github/scripts/pantheon-watchdog.sh');
+                $this->io->write('🪠 [Drainpipe] Pantheon async deploy scaffolded.');
+            }
         }
 
         // Handle Acquia GitHub Actions.
@@ -692,6 +718,37 @@ EOT;
                 $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
                 $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
             }
+        }
+    }
+
+    /**
+     * Ensures the pantheon task namespace is included in Taskfile.yml.
+     *
+     * Called whenever any Pantheon CI configuration is being installed so that
+     * `task pantheon:*` commands in scaffolded CI files resolve correctly.
+     */
+    private function ensurePantheonTaskfileInclude(): void
+    {
+        if (!file_exists('./Taskfile.yml')) {
+            return;
+        }
+        $taskfileContent = file_get_contents('./Taskfile.yml');
+        if (str_contains($taskfileContent, 'pantheon:')) {
+            return;
+        }
+        $updated = preg_replace(
+            '/^(includes:[ \t]*\n)/m',
+            "$1  pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml\n",
+            $taskfileContent
+        );
+        if ($updated !== null && $updated !== $taskfileContent) {
+            file_put_contents('./Taskfile.yml', $updated);
+            $this->io->write("🪠 [Drainpipe] Added 'pantheon' include to Taskfile.yml");
+        } else {
+            $this->io->warning(
+                "🪠 [Drainpipe] Could not auto-inject 'pantheon' include into Taskfile.yml. " .
+                "Add 'pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml' under 'includes:' manually."
+            );
         }
     }
 
