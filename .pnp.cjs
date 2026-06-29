@@ -3126,7 +3126,7 @@ const RAW_RUNTIME_STATE =
           ["conventional-changelog-writer", "npm:6.0.1"],\
           ["conventional-commits-filter", "npm:3.0.0"],\
           ["dateformat", "npm:3.0.3"],\
-          ["handlebars", "npm:4.7.8"],\
+          ["handlebars", "npm:4.7.9"],\
           ["json-stringify-safe", "npm:5.0.1"],\
           ["meow", "npm:8.1.2"],\
           ["semver", "npm:7.6.0"],\
@@ -5026,10 +5026,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["handlebars", [\
-      ["npm:4.7.8", {\
-        "packageLocation": "../../.yarn/berry/cache/handlebars-npm-4.7.8-25244c2c82-10c0.zip/node_modules/handlebars/",\
+      ["npm:4.7.9", {\
+        "packageLocation": "../../.yarn/berry/cache/handlebars-npm-4.7.9-46c3c68605-10c0.zip/node_modules/handlebars/",\
         "packageDependencies": [\
-          ["handlebars", "npm:4.7.8"],\
+          ["handlebars", "npm:4.7.9"],\
           ["minimist", "npm:1.2.5"],\
           ["neo-async", "npm:2.6.2"],\
           ["source-map", "npm:0.6.1"],\
@@ -10181,8 +10181,8 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["uuid", [\
-      ["npm:11.1.0", {\
-        "packageLocation": "../../.yarn/berry/cache/uuid-npm-11.1.0-61d0d08928-10c0.zip/node_modules/uuid/",\
+      ["npm:11.1.1", {\
+        "packageLocation": "../../.yarn/berry/cache/uuid-npm-11.1.1-311687c807-10c0.zip/node_modules/uuid/",\
         "packageDependencies": [\
           ["uuid", "npm:11.1.1"]\
         ],\
