@@ -7279,7 +7279,7 @@ const RAW_RUNTIME_STATE =
           ["semver", "npm:7.7.3"],\
           ["string-width", "npm:4.2.3"],\
           ["tar-stream", "npm:2.2.0"],\
-          ["tmp", "npm:0.2.3"],\
+          ["tmp", "npm:0.2.7"],\
           ["tree-kill", "npm:1.2.2"],\
           ["tsconfig-paths", "npm:4.2.0"],\
           ["tslib", "npm:2.6.2"],\
@@ -9870,10 +9870,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["tmp", [\
-      ["npm:0.2.3", {\
-        "packageLocation": "../../.yarn/berry/cache/tmp-npm-0.2.3-ac2a701365-10c0.zip/node_modules/tmp/",\
+      ["npm:0.2.7", {\
+        "packageLocation": "../../.yarn/berry/cache/tmp-npm-0.2.7-a6fd3441a0-10c0.zip/node_modules/tmp/",\
         "packageDependencies": [\
-          ["tmp", "npm:0.2.3"]\
+          ["tmp", "npm:0.2.7"]\
         ],\
         "linkType": "HARD"\
       }]\
