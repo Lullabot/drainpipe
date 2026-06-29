@@ -923,7 +923,7 @@ const RAW_RUNTIME_STATE =
           ["through", "npm:2.3.8"],\
           ["tinyglobby", "npm:0.2.12"],\
           ["upath", "npm:2.0.1"],\
-          ["uuid", "npm:11.1.0"],\
+          ["uuid", "npm:11.1.1"],\
           ["validate-npm-package-license", "npm:3.0.4"],\
           ["validate-npm-package-name", "npm:6.0.2"],\
           ["wide-align", "npm:1.1.5"],\
@@ -6077,7 +6077,7 @@ const RAW_RUNTIME_STATE =
           ["tinyglobby", "npm:0.2.12"],\
           ["typescript", "patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"],\
           ["upath", "npm:2.0.1"],\
-          ["uuid", "npm:11.1.0"],\
+          ["uuid", "npm:11.1.1"],\
           ["validate-npm-package-license", "npm:3.0.4"],\
           ["validate-npm-package-name", "npm:6.0.2"],\
           ["wide-align", "npm:1.1.5"],\
@@ -10184,7 +10184,7 @@ const RAW_RUNTIME_STATE =
       ["npm:11.1.0", {\
         "packageLocation": "../../.yarn/berry/cache/uuid-npm-11.1.0-61d0d08928-10c0.zip/node_modules/uuid/",\
         "packageDependencies": [\
-          ["uuid", "npm:11.1.0"]\
+          ["uuid", "npm:11.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
