@@ -7283,7 +7283,7 @@ const RAW_RUNTIME_STATE =
           ["tree-kill", "npm:1.2.2"],\
           ["tsconfig-paths", "npm:4.2.0"],\
           ["tslib", "npm:2.6.2"],\
-          ["yaml", "npm:2.7.0"],\
+          ["yaml", "npm:2.9.0"],\
           ["yargs", "npm:17.7.2"],\
           ["yargs-parser", "npm:21.1.1"]\
         ],\
@@ -8088,7 +8088,7 @@ const RAW_RUNTIME_STATE =
           ["lilconfig", "npm:3.0.0"],\
           ["postcss", "npm:8.5.16"],\
           ["postcss-load-config", "virtual:d02b558011efa25c690f7e72f3660e7d02aeb45908ac008dab2d898aad21e783b3079f249d5ab42ad6099cca0a37d6f25d259a6f381aac14d40b4f97a50ae4b4#npm:5.0.2"],\
-          ["yaml", "npm:2.3.4"]\
+          ["yaml", "npm:2.9.0"]\
         ],\
         "packagePeers": [\
           "@types/jiti",\
@@ -10526,17 +10526,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["yaml", [\
-      ["npm:2.3.4", {\
-        "packageLocation": "../../.yarn/berry/cache/yaml-npm-2.3.4-8bb6dc2c0d-10c0.zip/node_modules/yaml/",\
+      ["npm:2.9.0", {\
+        "packageLocation": "../../.yarn/berry/cache/yaml-npm-2.9.0-0cdd9bc0bc-10c0.zip/node_modules/yaml/",\
         "packageDependencies": [\
-          ["yaml", "npm:2.3.4"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:2.7.0", {\
-        "packageLocation": "../../.yarn/berry/cache/yaml-npm-2.7.0-bb348b356b-10c0.zip/node_modules/yaml/",\
-        "packageDependencies": [\
-          ["yaml", "npm:2.7.0"]\
+          ["yaml", "npm:2.9.0"]\
         ],\
         "linkType": "HARD"\
       }]\
