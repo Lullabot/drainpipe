@@ -20,7 +20,13 @@ jobs:
         drupal-version: [ 10, 11 ]
     steps:
       - name: Install xmllint
-        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+        run: |
+          # The Microsoft apt repositories preinstalled on GitHub runners
+          # intermittently serve invalid signatures, which fails apt-get update
+          # even though only the Ubuntu archives are needed here.
+          sudo rm -f /etc/apt/sources.list.d/microsoft* /etc/apt/sources.list.d/azure*
+          sudo apt-get update
+          sudo apt-get install -y libxml2-utils
 
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-reqs
@@ -121,7 +127,13 @@ jobs:
         drupal-version: [ 10, 11 ]
     steps:
       - name: Install xmllint
-        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+        run: |
+          # The Microsoft apt repositories preinstalled on GitHub runners
+          # intermittently serve invalid signatures, which fails apt-get update
+          # even though only the Ubuntu archives are needed here.
+          sudo rm -f /etc/apt/sources.list.d/microsoft* /etc/apt/sources.list.d/azure*
+          sudo apt-get update
+          sudo apt-get install -y libxml2-utils
 
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
