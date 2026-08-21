@@ -18,6 +18,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # The Microsoft apt repositories preinstalled on GitHub runners
+          # intermittently serve invalid signatures, which fails apt-get update
+          # even though only the Ubuntu archives are needed here.
+          sudo rm -f /etc/apt/sources.list.d/microsoft* /etc/apt/sources.list.d/azure*
           sudo apt-get update -y
           sudo apt-get install -y ca-certificates curl unzip git openssh-client
 
