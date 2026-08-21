@@ -17,7 +17,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-reqs
 
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: drainpipe
           persist-credentials: false
@@ -96,7 +96,7 @@ jobs:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
 
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: drainpipe
           persist-credentials: false
