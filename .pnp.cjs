@@ -5714,7 +5714,7 @@ const RAW_RUNTIME_STATE =
           ["is-plain-object", "npm:5.0.0"],\
           ["liftoff", "npm:5.0.1"],\
           ["rechoir", "npm:0.8.0"],\
-          ["resolve", "patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=c3c19d"]\
+          ["resolve", "patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=9bd1a5"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8218,7 +8218,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../../../../../../runner/cache/others/berry/cache/rechoir-npm-0.8.0-fb660b3bc8-10c0.zip/node_modules/rechoir/",\
         "packageDependencies": [\
           ["rechoir", "npm:0.8.0"],\
-          ["resolve", "patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=c3c19d"]\
+          ["resolve", "patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=9bd1a5"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8260,12 +8260,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["resolve", [\
-      ["patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=c3c19d", {\
-        "packageLocation": "../../../../../../runner/cache/others/berry/cache/resolve-patch-4254c24959-10c0.zip/node_modules/resolve/",\
+      ["patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=9bd1a5", {\
+        "packageLocation": "../../../../../../runner/cache/others/berry/cache/resolve-patch-49bde8f0be-10c0.zip/node_modules/resolve/",\
         "packageDependencies": [\
           ["is-core-module", "npm:2.13.1"],\
           ["path-parse", "npm:1.0.7"],\
-          ["resolve", "patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=c3c19d"],\
+          ["resolve", "patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=9bd1a5"],\
           ["supports-preserve-symlinks-flag", "npm:1.0.0"]\
         ],\
         "linkType": "HARD"\
