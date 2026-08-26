@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.1.2](https://github.com/Lullabot/drainpipe/compare/v6.1.1...v6.1.2) (2026-08-26)
+
+
+### Bug Fixes
+
+* [#1239](https://github.com/Lullabot/drainpipe/issues/1239) Fix phpcs comments for settings.tugboat file ([#1250](https://github.com/Lullabot/drainpipe/issues/1250)) ([07e20de](https://github.com/Lullabot/drainpipe/commit/07e20defb45fc148482a68a831065abc02be612c))
+* [#1273](https://github.com/Lullabot/drainpipe/issues/1273) enable lock file maintenance for Renovate ([#1297](https://github.com/Lullabot/drainpipe/issues/1297)) ([7b5f14e](https://github.com/Lullabot/drainpipe/commit/7b5f14e26a62107304f28e6f5271c8e599c881ca))
+
 ## [6.1.1](https://github.com/Lullabot/drainpipe/compare/v6.1.0...v6.1.1) (2026-06-04)
 
 
