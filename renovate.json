@@ -1,12 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    ":enableVulnerabilityAlerts",
+    "helpers:pinGitHubActionDigests"
   ],
   "automerge": true,
   "automergeType": "pr",
   "minimumReleaseAge": "3 days",
   "rangeStrategy": "replace",
+  "lockFileMaintenance": {
+    "enabled": true
+  },
   "github-actions": {
     "managerFilePatterns": [
       "(^|/).github/(workflows|actions)/[^/]+\\.ya?ml$",
