@@ -1,15 +1,20 @@
-const path = require('path');
-const { fileURLToPath } = require('url');
-const yargs = require('yargs');
-const { hideBin } = require('yargs/helpers')
-const { src, dest, task, watch, series } = require('gulp');
-const dartSass = require('sass');
-const gulpSass = require('gulp-sass')(dartSass);
-const sassGlob = require('gulp-sass-glob');
-const postcss = require('gulp-postcss');
-const sourcemaps = require('gulp-sourcemaps');
-const cssnano = require('cssnano');
-const autoprefixer = require('autoprefixer');
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import gulp from 'gulp';
+import * as dartSass from 'sass';
+import gulpSassFactory from 'gulp-sass';
+import sassGlob from 'gulp-sass-glob';
+import postcss from 'gulp-postcss';
+import sourcemaps from 'gulp-sourcemaps';
+import cssnano from 'cssnano';
+import autoprefixer from 'autoprefixer';
+
+const { src, dest, task, watch, series } = gulp;
+const require = createRequire(import.meta.url);
+const gulpSass = gulpSassFactory(dartSass);
 
 const argv = yargs(hideBin(process.argv)).argv
 const modernNormalizePath = path.join(path.dirname(require.resolve('modern-normalize')), '..');
