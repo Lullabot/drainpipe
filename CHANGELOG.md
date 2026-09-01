@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.3](https://github.com/Lullabot/drainpipe/compare/v6.1.2...v6.1.3) (2026-09-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency cssnano to v9 ([#1301](https://github.com/Lullabot/drainpipe/issues/1301)) ([e70386f](https://github.com/Lullabot/drainpipe/commit/e70386f741f1abeec9b0f2ee323496eef834f8f1))
+
 ## [6.1.2](https://github.com/Lullabot/drainpipe/compare/v6.1.1...v6.1.2) (2026-08-26)
 
 
