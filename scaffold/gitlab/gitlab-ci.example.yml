@@ -52,13 +52,14 @@ cache:
 # Uncomment below if you want to customise the build or perform any actions
 # after the Multidev environment has been deployed, or create a new job with
 # "needs: [drainpipe_pantheon_drupal_review_app]"
+# Note: Basic Auth locking is handled automatically when PANTHEON_REVIEW_USERNAME
+# and PANTHEON_REVIEW_PASSWORD CI variables are set — no custom script needed.
 #
 # drainpipe_pantheon_drupal_review_app:
 #   before_script:
 #     - *setup_node
 #   script:
 #     - !reference [.drainpipe_pantheon_drupal_review_app, script]
-#     - terminus lock:enable $PANTHEON_SITE_NAME.mr-$CI_MERGE_REQUEST_IID aba ${REVIEW_APP_BASIC_AUTH_PASSWORD} --yes
 
 browser_performance:
   needs:

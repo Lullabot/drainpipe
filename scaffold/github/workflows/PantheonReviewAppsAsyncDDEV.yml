@@ -1,4 +1,4 @@
-name: "Pantheon Review Apps"
+name: "Pantheon Review Apps (Async DDEV)"
 
 on:
   pull_request:
@@ -8,8 +8,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-# You will also need to add the secrets used below to Dependabot secrets
-# if you want this to successfully run in auto-created PRs.
 permissions:
   deployments: write
   contents: read
@@ -24,14 +22,9 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
+          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
@@ -42,40 +35,39 @@ jobs:
         with:
           terminus_timeout_limit: ${{ vars.TERMINUS_TIMEOUT_LIMIT }}
 
-      - uses: ./.github/actions/drainpipe/setup-git
+      - name: Install and Start DDEV
+        uses: ./.github/actions/drainpipe/ddev
         with:
           git-name: Drainpipe Bot
           git-email: no-reply@example.com
-
-      - uses: ./.github/actions/drainpipe/setup-ssh
-        with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-
-      - uses: ./.github/actions/drainpipe/pantheon/setup-terminus
-        with:
-          terminus-token: ${{ secrets.TERMINUS_MACHINE_TOKEN }}
-          terminus-plugins: ${{ vars.TERMINUS_PLUGINS || secrets.TERMINUS_PLUGINS }}
-
-      - uses: php-actions/composer@8a65f0d3c6a1d17ca4800491a40b5756a4c164f3 # v6.1.2
 
       - name: Build Project
         env:
           directory: /tmp/release
         run: |
-          composer install
-          task build
-          task snapshot:directory directory=/tmp/release
+          ddev composer install
+          ddev task build
+          ddev task snapshot:directory directory=/tmp/release
+
+      - name: Install Terminus in DDEV
+        run: |
+          ddev exec --user root curl -fsSL https://github.com/pantheon-systems/terminus/releases/download/4.1.1/terminus.phar -o /usr/local/bin/terminus
+          ddev exec --user root chmod +x /usr/local/bin/terminus
 
       - name: Deploy Pantheon Review App
         uses: ./.github/actions/drainpipe/pantheon/review
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          terminus-token: ${{ secrets.TERMINUS_MACHINE_TOKEN }}
+          terminus-token: ${{ secrets.TERMINUS_MACHINE_TOKEN || secrets.PANTHEON_TERMINUS_TOKEN }}
           commit-message: ${{ github.sha }}
           site-name: ${{ vars.PANTHEON_SITE_NAME || secrets.PANTHEON_SITE_NAME }}
           lock-username: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
           lock-password: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
+          # set to "true" if you want to run the installer
+          run-installer: ${{ secrets.PANTHEON_REVIEW_RUN_INSTALLER }}
           clone-from: ${{ vars.PANTHEON_CLONE_FROM || 'live' }}
           terminus-timeout-limit: ${{ env.TERMINUS_TIMEOUT_LIMIT }}
           skip-wipe-multidev: ${{ vars.PANTHEON_SKIP_WIPE_MULTIDEV }}
+          async: 'true'
