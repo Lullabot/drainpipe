@@ -1,5 +1,17 @@
 # Changelog
 
+## [6.2.0](https://github.com/Lullabot/drainpipe/compare/v6.1.2...v6.2.0) (2026-09-14)
+
+
+### Features
+
+* [#553](https://github.com/Lullabot/drainpipe/issues/553) add AsyncDeploy option for Pantheon review apps via Quicksilver webhook ([#1211](https://github.com/Lullabot/drainpipe/issues/1211)) ([3f2f46b](https://github.com/Lullabot/drainpipe/commit/3f2f46bcd3ec21f97bcbb617628dd61d4c3a33bf))
+
+
+### Bug Fixes
+
+* **deps:** update dependency cssnano to v9 ([#1301](https://github.com/Lullabot/drainpipe/issues/1301)) ([e70386f](https://github.com/Lullabot/drainpipe/commit/e70386f741f1abeec9b0f2ee323496eef834f8f1))
+
 ## [6.1.2](https://github.com/Lullabot/drainpipe/compare/v6.1.1...v6.1.2) (2026-08-26)
 
 
