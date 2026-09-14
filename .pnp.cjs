@@ -2371,13 +2371,6 @@ const RAW_RUNTIME_STATE =
           ["baseline-browser-mapping", "npm:2.11.23"]\
         ],\
         "linkType": "HARD"\
-      }],\
-      ["npm:2.9.7", {\
-        "packageLocation": "../../.yarn/berry/cache/baseline-browser-mapping-npm-2.9.7-fcb7e16891-10c0.zip/node_modules/baseline-browser-mapping/",\
-        "packageDependencies": [\
-          ["baseline-browser-mapping", "npm:2.9.7"]\
-        ],\
-        "linkType": "HARD"\
       }]\
     ]],\
     ["before-after-hook", [\
@@ -2492,7 +2485,7 @@ const RAW_RUNTIME_STATE =
       ["npm:4.28.1", {\
         "packageLocation": "../../.yarn/berry/cache/browserslist-npm-4.28.1-e455c4c2e8-10c0.zip/node_modules/browserslist/",\
         "packageDependencies": [\
-          ["baseline-browser-mapping", "npm:2.9.7"],\
+          ["baseline-browser-mapping", "npm:2.11.23"],\
           ["browserslist", "npm:4.28.1"],\
           ["caniuse-lite", "npm:1.0.30001760"],\
           ["electron-to-chromium", "npm:1.5.267"],\
