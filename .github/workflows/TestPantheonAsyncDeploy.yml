@@ -266,6 +266,18 @@ jobs:
             || { echo "FAIL: credential guard not found in tasks/pantheon.yml"; exit 1; }
           echo "PASS"
 
+      - name: "every task invocation goes through drainpipe_exec (source assertion)"
+        run: |
+          # A bare `task` call runs on the runner, not in the container.
+          BARE=$(grep -rnE '^[[:space:]]*(\./)?(vendor/bin/)?task[[:space:]]' \
+            scaffold/github/actions/ --include='action.yml' || true)
+          if [ -n "$BARE" ]; then
+            echo "FAIL: task invoked outside drainpipe_exec:"
+            echo "$BARE"
+            exit 1
+          fi
+          echo "PASS"
+
   # -----------------------------------------------------------------------
   # 5. PHP — Quicksilver script behaviour (no Pantheon required)
   #    Tests environment pattern filtering and missing-secrets validation.
