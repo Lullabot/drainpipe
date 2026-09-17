@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.1](https://github.com/Lullabot/drainpipe/compare/v6.2.0...v6.2.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* run pantheon:drupal-update through drainpipe_exec. ([#1316](https://github.com/Lullabot/drainpipe/issues/1316)) ([cd2bccb](https://github.com/Lullabot/drainpipe/commit/cd2bccb3608b3ecb2b60c6e9618e8be6324d21d5))
+
 ## [6.2.0](https://github.com/Lullabot/drainpipe/compare/v6.1.2...v6.2.0) (2026-09-14)
 
 
