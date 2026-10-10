@@ -272,32 +272,34 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
             $renovateConfig['packageRules'] = [];
         }
 
-        // Check if the rule already exists
-        $ruleExists = false;
-        foreach ($renovateConfig['packageRules'] as $rule) {
-            if (isset($rule['matchPackageNames'])
-                && is_array($rule['matchPackageNames'])
-                && in_array('marocchino/sticky-pull-request-comment', $rule['matchPackageNames'])
-                && isset($rule['matchManagers'])
-                && is_array($rule['matchManagers'])
-                && in_array('github-actions', $rule['matchManagers'])
-            ) {
-                $ruleExists = true;
-                break;
+        if (!isset($this->extra['drainpipe']['gitlab']) || !is_array($this->extra['drainpipe']['gitlab'])) {
+            // Check if the rule already exists
+            $ruleExists = false;
+            foreach ($renovateConfig['packageRules'] as $rule) {
+                if (isset($rule['matchPackageNames'])
+                    && is_array($rule['matchPackageNames'])
+                    && in_array('marocchino/sticky-pull-request-comment', $rule['matchPackageNames'])
+                    && isset($rule['matchManagers'])
+                    && is_array($rule['matchManagers'])
+                    && in_array('github-actions', $rule['matchManagers'])
+                ) {
+                    $ruleExists = true;
+                    break;
+                }
             }
-        }
 
-        // Add the rule if it doesn't exist
-        if (!$ruleExists) {
-            $renovateConfig['packageRules'][] = [
-                'matchManagers' => ['github-actions'],
-                'matchPackageNames' => ['marocchino/sticky-pull-request-comment'],
-                'enabled' => false,
-                'description' => 'Managed by Drainpipe',
-            ];
+            // Add the rule if it doesn't exist
+            if (!$ruleExists) {
+                $renovateConfig['packageRules'][] = [
+                    'matchManagers' => ['github-actions'],
+                    'matchPackageNames' => ['marocchino/sticky-pull-request-comment'],
+                    'enabled' => false,
+                    'description' => 'Managed by Drainpipe',
+                ];
 
-            $this->writeJsonFile($renovateConfigPath, $renovateConfig);
-            $this->io->write('<info>Updated renovate.json to ignore Drainpipe managed dependencies</info>');
+                $this->writeJsonFile($renovateConfigPath, $renovateConfig);
+                $this->io->write('<info>Updated renovate.json to ignore Drainpipe managed dependencies</info>');
+            }
         }
     }
 
