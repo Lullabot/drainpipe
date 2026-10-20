@@ -19,7 +19,7 @@ jobs:
   # -----------------------------------------------------------------------
   scaffold-github-async:
     name: "Scaffold — GitHub AsyncDeploy"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions: {}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -98,7 +98,7 @@ jobs:
   # -----------------------------------------------------------------------
   scaffold-gitlab-async:
     name: "Scaffold — GitLab AsyncDeploy"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions: {}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -161,7 +161,7 @@ jobs:
   # -----------------------------------------------------------------------
   scaffold-blocking-unaffected:
     name: "Scaffold — blocking mode unaffected"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions: {}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -229,7 +229,7 @@ jobs:
   # -----------------------------------------------------------------------
   bash-guards:
     name: "Bash — async and skip-workflow-wait guards"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions: {}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -285,7 +285,7 @@ jobs:
   # -----------------------------------------------------------------------
   quicksilver-php:
     name: "PHP — Quicksilver scripts"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions: {}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
