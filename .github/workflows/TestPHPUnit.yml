@@ -14,7 +14,7 @@ permissions: {}
 
 jobs:
   Test-PHPUnit-Functional:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         drupal-version: [ 10, 11 ]
@@ -121,7 +121,7 @@ jobs:
           expected_result: PASSED
 
   Test-PHPUnit-Static:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         drupal-version: [ 10, 11 ]
