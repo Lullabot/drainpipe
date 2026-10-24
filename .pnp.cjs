@@ -894,7 +894,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@lullabot/drainpipe-javascript", "workspace:metapackages/javascript"],\
           ["@yarnpkg/esbuild-plugin-pnp", "virtual:695acef4d4cde78b2c2255f1357379f47db3b8b1a9d58f9ea5012120207ebd42b4a754f5df7aeabf13834dd937f06dbbd452125dd55378f1b0ab87c078370032#npm:3.0.0-rc.15"],\
-          ["chokidar", "npm:5.0.0"],\
+          ["chokidar", "npm:6.0.0"],\
           ["esbuild", "npm:0.28.2"],\
           ["yargs", "npm:18.2.0"]\
         ],\
@@ -2326,6 +2326,14 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../../../../../../runner/cache/others/berry/cache/chokidar-npm-5.0.0-2f70d31c86-10c0.zip/node_modules/chokidar/",\
         "packageDependencies": [\
           ["chokidar", "npm:5.0.0"],\
+          ["readdirp", "npm:5.1.1"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:6.0.0", {\
+        "packageLocation": "../../../../../../runner/cache/others/berry/cache/chokidar-npm-6.0.0-53be5debd5-10c0.zip/node_modules/chokidar/",\
+        "packageDependencies": [\
+          ["chokidar", "npm:6.0.0"],\
           ["readdirp", "npm:5.1.1"]\
         ],\
         "linkType": "HARD"\
