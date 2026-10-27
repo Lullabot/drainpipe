@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.2](https://github.com/Lullabot/drainpipe/compare/v6.2.1...v6.2.2) (2026-10-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency chokidar to v6 ([#1336](https://github.com/Lullabot/drainpipe/issues/1336)) ([aa1e025](https://github.com/Lullabot/drainpipe/commit/aa1e0258a46c976806053175a8e176d435d35c53))
+
 ## [6.2.1](https://github.com/Lullabot/drainpipe/compare/v6.2.0...v6.2.1) (2026-09-17)
 
 
