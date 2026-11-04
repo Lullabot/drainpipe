@@ -195,6 +195,20 @@ tasks:
     desc: Checks for any untracked files in git
     cmds:
       - |
+        # In a git worktree, .git is a file pointing at <repo>/.git/worktrees/<name>
+        # via an absolute host path. DDEV only mounts the worktree itself, so that
+        # path is missing inside the container and every git call fails. Skip the
+        # check with a warning; CI has no reason to run from a worktree, so it is
+        # still enforced there.
+        if [ -f .git ] && grep -q '^gitdir: .*/worktrees/' .git; then
+          echo "################################################################"
+          echo "# WARNING: git worktree detected - skipping test:untracked."
+          echo "# The worktree's git metadata ($(sed 's/^gitdir: //' .git))"
+          echo "# is not reachable from this environment. Run this check from"
+          echo "# the main checkout or rely on CI to enforce it."
+          echo "################################################################"
+          exit 0
+        fi
         # .ddev is always ignored as changes are made to it during tests e.g. adding environment variables.
         # Additional paths can be excluded via extra.drainpipe.untracked-ignore in composer.json.
         IGNORE_ARGS=(':!.ddev')
