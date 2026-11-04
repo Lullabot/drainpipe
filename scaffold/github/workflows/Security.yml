@@ -123,6 +123,41 @@ jobs:
           header: composer-security-audit
           path: comment.md
 
+  Npm-Audit:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      # Package directories come from extra.drainpipe.github.NpmAudit in
+      # composer.json. The script writes no report when none are configured.
+      - name: Run npm audit
+        run: |
+          bash .github/scripts/npm-audit.sh
+          if [ -s npm-audit-comment.md ]; then
+            cat npm-audit-comment.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Post npm audit comment
+        if: hashFiles('npm-audit-comment.md') != ''
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          header: npm-security-audit
+          path: npm-audit-comment.md
+
+      - name: Delete npm audit comment
+        if: hashFiles('npm-audit-comment.md') == ''
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          header: npm-security-audit
+          delete: true
+
   ZizmorAnalysis:
     name: Run Zizmor Security Analysis
     runs-on: ubuntu-24.04
