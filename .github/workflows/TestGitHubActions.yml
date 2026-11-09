@@ -16,7 +16,7 @@ permissions:
 jobs:
   Test-GitHub-Actions:
     if: github.actor != 'dependabot[bot]'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Create a Drupal project
         run: composer create-project drupal/recommended-project . --ignore-platform-reqs
