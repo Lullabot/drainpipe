@@ -159,7 +159,10 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         $this->generateConfigYml($services, $isPantheon, $isAcquia);
 
         // Generate settings.tugboat.php
-        $this->generateSettingsFile($services);
+        if (!$this->generateSettingsFile($services)) {
+            $this->io->writeError('<error>🪠 [Drainpipe] Tugboat configuration generated with errors. See above.</error>');
+            return;
+        }
 
         $this->io->write('🪠 [Drainpipe] Tugboat configuration generated successfully!');
     }
@@ -500,6 +503,28 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
         return $services;
     }
 
+    /**
+     * Get the Drupal web root relative to the project root.
+     *
+     * Read from extra.drupal-scaffold.locations.web-root, defaulting to "web".
+     *
+     * @return string The web root without leading "./" or trailing slash.
+     */
+    private function getWebRoot(): string
+    {
+        $webRoot = $this->extra['drupal-scaffold']['locations']['web-root'] ?? 'web';
+        if (!is_string($webRoot)) {
+            return 'web';
+        }
+        $webRoot = trim($webRoot);
+        if (strpos($webRoot, './') === 0) {
+            $webRoot = substr($webRoot, 2);
+        }
+        $webRoot = rtrim($webRoot, '/');
+
+        return $webRoot === '' ? '.' : $webRoot;
+    }
+
     private function initTwigLoader(): Environment
     {
         $vendor = $this->config->get('vendor-dir');
@@ -552,6 +577,7 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
             'services' => $services,
             'pantheon' => $isPantheon,
             'acquia' => $isAcquia,
+            'web_root' => $this->getWebRoot(),
         ];
 
         // Generate config.yml
@@ -565,33 +591,51 @@ class TugboatConfigPlugin implements PluginInterface, EventSubscriberInterface
      * Generate settings.tugboat.php file.
      *
      * @param array $services The services configuration
+     *
+     * @return bool TRUE if the settings file was written, FALSE otherwise.
      */
-    private function generateSettingsFile(array $services): void
+    private function generateSettingsFile(array $services): bool
     {
         $twig = $this->initTwigLoader();
+        $webRoot = $this->getWebRoot();
+        $sitesDefault = "./$webRoot/sites/default";
+        $tugboatSettingsPath = "$sitesDefault/settings.tugboat.php";
+        $settingsPath = "$sitesDefault/settings.php";
 
         $templateVars = [
             'services' => $services,
+            'web_root' => $webRoot,
         ];
 
+        if (!is_dir($sitesDefault)) {
+            $this->io->writeError("<error>🪠 [Drainpipe] Unable to write $tugboatSettingsPath: directory $sitesDefault does not exist. Check extra.drupal-scaffold.locations.web-root in composer.json.</error>");
+            return false;
+        }
+
         $settingsPhp = $twig->render('settings.tugboat.php.twig', $templateVars);
-        file_put_contents('./web/sites/default/settings.tugboat.php', $settingsPhp);
+        if (@file_put_contents($tugboatSettingsPath, $settingsPhp) === false) {
+            $this->io->writeError("<error>🪠 [Drainpipe] Unable to write $tugboatSettingsPath.</error>");
+            return false;
+        }
 
         // Add include to settings.php if not already present
-        if (file_exists('./web/sites/default/settings.php')) {
-            $settings = file_get_contents('./web/sites/default/settings.php');
+        if (file_exists($settingsPath)) {
+            $settings = file_get_contents($settingsPath);
             if (strpos($settings, 'settings.tugboat.php') === false) {
                 $include = <<<'EOT'
 include __DIR__ . "/settings.tugboat.php";
 EOT;
-                file_put_contents(
-                    './web/sites/default/settings.php',
-                    $include . PHP_EOL,
-                    FILE_APPEND
-                );
+                if (@file_put_contents($settingsPath, $include . PHP_EOL, FILE_APPEND) === false) {
+                    $this->io->writeError("<error>🪠 [Drainpipe] Unable to add settings.tugboat.php include to $settingsPath.</error>");
+                    return false;
+                }
             }
+        } else {
+            $this->io->warning("🪠 [Drainpipe] $settingsPath not found. Add include __DIR__ . \"/settings.tugboat.php\"; to your settings.php manually.");
         }
 
-        $this->io->write('🪠 [Drainpipe] Generated web/sites/default/settings.tugboat.php');
+        $this->io->write("🪠 [Drainpipe] Generated $webRoot/sites/default/settings.tugboat.php");
+
+        return true;
     }
 }
