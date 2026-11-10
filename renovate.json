@@ -14,10 +14,10 @@
   },
   "github-actions": {
     "managerFilePatterns": [
-      "(^|/).github/(workflows|actions)/[^/]+\\.ya?ml$",
-      "(^|/).github/(workflows|actions)/[^/]+/action\\.ya?ml$",
-      "(^|/)scaffold/github/workflows/[^/]+\\.ya?ml$",
-      "(^|/)scaffold/github/actions/[^/]+/[^/]+/action\\.ya?ml$"
+      "/(^|/)\\.github/(workflows|actions)/[^/]+\\.ya?ml$/",
+      "/(^|/)\\.github/(workflows|actions)/[^/]+/action\\.ya?ml$/",
+      "/(^|/)scaffold/github/workflows/[^/]+\\.ya?ml$/",
+      "/(^|/)scaffold/github/actions/[^/]+/[^/]+/action\\.ya?ml$/"
     ]
   },
   "ignoreDeps": [
@@ -160,8 +160,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^\\.taskfile$",
-        "^scaffold/tugboat/scripts/custom-init-command\\.sh$"
+        "/^\\.taskfile$/",
+        "/^scaffold/tugboat/scripts/custom-init-command\\.sh$/"
       ],
       "matchStrings": [
         "(?:TASKFILE=|^)v(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s*$"
@@ -173,8 +173,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^scaffold/tugboat/scripts/custom-init-command\\.sh$",
-        "^tasks/bitbucket\\.yml$"
+        "/^scaffold/tugboat/scripts/custom-init-command\\.sh$/",
+        "/^tasks/bitbucket\\.yml$/"
       ],
       "matchStrings": [
         "YQ=v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -186,8 +186,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^tasks/bitbucket\\.yml$",
-        "^scaffold/github/actions/acquia/deploy/action\\.yml$"
+        "/^tasks/bitbucket\\.yml$/",
+        "/^scaffold/github/actions/acquia/deploy/action\\.yml$/"
       ],
       "matchStrings": [
         "ACLI_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -198,7 +198,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^scaffold/bitbucket/setup-php\\.sh$"
+        "/^scaffold/bitbucket/setup-php\\.sh$/"
       ],
       "matchStrings": [
         "COMPOSER_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -209,8 +209,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^\\.github/workflows/Security\\.yml$",
-        "^scaffold/github/workflows/Security\\.yml$"
+        "/^\\.github/workflows/Security\\.yml$/",
+        "/^scaffold/github/workflows/Security\\.yml$/"
       ],
       "matchStrings": [
         "zizmor==(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -221,8 +221,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^\\.github/workflows/Security\\.yml$",
-        "^scaffold/github/workflows/Security\\.yml$"
+        "/^\\.github/workflows/Security\\.yml$/",
+        "/^scaffold/github/workflows/Security\\.yml$/"
       ],
       "matchStrings": [
         "gitleaks_(?<currentValue>\\d+\\.\\d+\\.\\d+)_linux_x64"
@@ -234,8 +234,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^\\.github/workflows/TestMetapackages\\.yml$",
-        "^\\.github/workflows/TestFunctional\\.yml$"
+        "/^\\.github/workflows/TestMetapackages\\.yml$/",
+        "/^\\.github/workflows/TestFunctional\\.yml$/"
       ],
       "matchStrings": [
         "yarn@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -246,10 +246,11 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^scaffold/github/actions/pantheon/setup-terminus/action\\.yml$",
-        "^\\.github/workflows/TestGitHubActions\\.yml$",
-        "^scaffold/github/workflows/PantheonReviewAppsDDEV\\.yml$",
-        "^scaffold/github/workflows/PantheonReviewAppsAsyncDDEV\\.yml$"
+        "/^scaffold/github/actions/pantheon/setup-terminus/action\\.yml$/",
+        "/^\\.github/workflows/TestGitHubActions\\.yml$/",
+        "/^scaffold/github/workflows/PantheonReviewAppsDDEV\\.yml$/",
+        "/^scaffold/github/workflows/PantheonReviewAppsAsyncDDEV\\.yml$/",
+        "/^scaffold/gitlab/Pantheon\\.gitlab-ci\\.yml$/"
       ],
       "matchStrings": [
         "key: terminus-(?<currentValue>\\d+\\.\\d+\\.\\d+)",

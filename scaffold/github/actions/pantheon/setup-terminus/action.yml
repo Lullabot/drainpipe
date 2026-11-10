@@ -15,7 +15,7 @@ runs:
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/terminus/terminus
-        key: terminus-4.1.1
+        key: terminus-4.3.4
 
     - name: Install and authenticate Terminus
       env:
@@ -26,7 +26,7 @@ runs:
         echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >> ~/.ssh/config
         mkdir -p ~/terminus
         if [ "$TERMINUS_CACHE_HIT" != "true" ]; then
-          curl -L https://github.com/pantheon-systems/terminus/releases/download/4.1.1/terminus.phar --output ~/terminus/terminus
+          curl -L https://github.com/pantheon-systems/terminus/releases/download/4.3.4/terminus.phar --output ~/terminus/terminus
           chmod +x ~/terminus/terminus
         fi
         ln -sf ~/terminus/terminus /usr/local/bin/terminus
