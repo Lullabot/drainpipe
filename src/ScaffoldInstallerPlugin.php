@@ -667,6 +667,9 @@ EOT;
                 if (!file_exists('./.gitleaks.toml')) {
                     $fs->copy("$scaffoldPath/gitleaks.toml", './.gitleaks.toml');
                 }
+                $fs->ensureDirectoryExists('./.github/scripts');
+                $fs->copy("$scaffoldPath/github/scripts/npm-audit.sh", './.github/scripts/npm-audit.sh');
+                $this->validateNpmAuditPaths();
             }
             else if ($key === 'TestStatic') {
                 $fs->copy("$scaffoldPath/github/workflows/TestStatic.yml", './.github/workflows/TestStatic.yml');
@@ -717,6 +720,34 @@ EOT;
                 $fs->ensureDirectoryExists('./.github/actions/drainpipe/acquia');
                 $fs->copy("$scaffoldPath/github/actions/acquia", './.github/actions/drainpipe/acquia');
                 $fs->copy("$scaffoldPath/github/workflows/AcquiaDeploy.yml", './.github/workflows/AcquiaDeploy.yml');
+            }
+        }
+    }
+
+    /**
+     * Warns about misconfigured extra.drainpipe.github.NpmAudit entries.
+     *
+     * The Security workflow audits each listed directory from its lock file,
+     * so a missing directory or lock file means nothing gets audited.
+     */
+    private function validateNpmAuditPaths(): void
+    {
+        if (!array_key_exists('NpmAudit', $this->extra['drainpipe']['github'])) {
+            return;
+        }
+        $paths = $this->extra['drainpipe']['github']['NpmAudit'];
+        if (!is_array($paths) || !array_is_list($paths)) {
+            $this->io->warning('🪠 [Drainpipe] extra.drainpipe.github.NpmAudit must be a list of package directories, e.g. ["web/themes/custom/mytheme"].');
+            return;
+        }
+        foreach ($paths as $path) {
+            if (!is_string($path) || $path === '') {
+                $this->io->warning('🪠 [Drainpipe] extra.drainpipe.github.NpmAudit entries must be non-empty strings.');
+                continue;
+            }
+            $dir = rtrim($path, '/');
+            if (!file_exists("./$dir/package-lock.json") && !file_exists("./$dir/npm-shrinkwrap.json")) {
+                $this->io->warning("🪠 [Drainpipe] NpmAudit: no package-lock.json found in $path; it will not be audited.");
             }
         }
     }

@@ -549,6 +549,36 @@ error when running `test:security`:
 For more details about how to configure the ignore feature for `composer audit`,
 check the [Composer docs](https://getcomposer.org/doc/06-config.md#ignore).
 
+#### npm audit
+
+`composer audit` does not cover front-end dependencies. If your project builds
+or ships assets from a `package.json` (for example a custom theme), list those
+package directories under `NpmAudit` to have the Security workflow audit them
+too:
+
+```json
+"extra": {
+    "drainpipe": {
+        "github": {
+            "Security": true,
+            "NpmAudit": ["web/themes/custom/mytheme"]
+        }
+    }
+}
+```
+
+The `Npm-Audit` job runs `npm audit --package-lock-only` in each listed
+directory, so no `npm install` is needed and a stale `node_modules` cannot
+affect the result. Each directory must contain a `package-lock.json` (or
+`npm-shrinkwrap.json`). Results are posted as a sticky pull request comment and
+added to the job summary.
+
+Directories are listed explicitly rather than discovered so that leftover or
+unused lock files elsewhere in the repository don't add noise. Like the
+Composer audit comment, the job reports vulnerabilities but does not fail the
+build. npm settings in a directory's `.npmrc` (for example `omit=dev`) apply to
+its audit. If `NpmAudit` is not set, the job does nothing.
+
 The Security workflow also includes a [Zizmor](https://woodruffw.github.io/zizmor/)
 static analysis job (`ZizmorAnalysis`) that scans your GitHub Actions workflow
 files for security issues. Zizmor results are uploaded to GitHub's code scanning
