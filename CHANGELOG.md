@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.3.0](https://github.com/Lullabot/drainpipe/compare/v6.2.1...v6.3.0) (2026-11-10)
+
+
+### Features
+
+* enhance Tugboat configuration and testing with web root support ([#1344](https://github.com/Lullabot/drainpipe/issues/1344)) ([bb6629d](https://github.com/Lullabot/drainpipe/commit/bb6629d85ff3c2ed079a925fb9d14933cb02b5fa))
+* **security:** add opt-in npm audit to the GitHub Security workflow ([#1346](https://github.com/Lullabot/drainpipe/issues/1346)) ([701943c](https://github.com/Lullabot/drainpipe/commit/701943c4bb51d3ca5984756f534515ded9d0e446))
+
+
+### Bug Fixes
+
+* bump Terminus to 4.3.4 for PHP 8.5 and fix Renovate file patterns ([#1349](https://github.com/Lullabot/drainpipe/issues/1349)) ([4ed029e](https://github.com/Lullabot/drainpipe/commit/4ed029ee7a2902938e2c303c1d8b42d141dd0662))
+* **deps:** update dependency chokidar to v6 ([#1336](https://github.com/Lullabot/drainpipe/issues/1336)) ([aa1e025](https://github.com/Lullabot/drainpipe/commit/aa1e0258a46c976806053175a8e176d435d35c53))
+* **tests:** skip untracked check in git worktrees with a warning ([#1345](https://github.com/Lullabot/drainpipe/issues/1345)) ([d89e963](https://github.com/Lullabot/drainpipe/commit/d89e9634d1482c53ae383e421fc188817a94226e))
+* **tests:** update MINK_DRIVER_ARGS_WEBDRIVER for improved browser compatibility ([#1343](https://github.com/Lullabot/drainpipe/issues/1343)) ([1706633](https://github.com/Lullabot/drainpipe/commit/1706633aab2b389fe11efef74f1dda4156a72208))
+
 ## [6.2.1](https://github.com/Lullabot/drainpipe/compare/v6.2.0...v6.2.1) (2026-09-17)
 
 
