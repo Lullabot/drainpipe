@@ -11,7 +11,7 @@ tasks:
         chmod +x acli.phar
         mv acli.phar vendor/bin/acli
         if ! command -v yq &>/dev/null; then
-          YQ=v4.54.2
+          YQ=v4.54.3
           curl -sSL "https://github.com/mikefarah/yq/releases/download/${YQ}/yq_linux_amd64" \
             -o /usr/local/bin/yq
           chmod +x /usr/local/bin/yq
