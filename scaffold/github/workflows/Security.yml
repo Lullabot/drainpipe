@@ -15,7 +15,7 @@ concurrency:
 jobs:
   Security:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -85,7 +85,7 @@ jobs:
           delete: true
 
   Composer-Audit:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -125,7 +125,7 @@ jobs:
 
   Npm-Audit:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
@@ -160,7 +160,7 @@ jobs:
 
   ZizmorAnalysis:
     name: Run Zizmor Security Analysis
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       security-events: write
       contents: read
@@ -193,7 +193,7 @@ jobs:
 
   Gitleaks:
     name: Run Gitleaks Secret Scanning
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       security-events: write

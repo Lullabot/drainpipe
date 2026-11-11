@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   Drainpipe-PostDeploy-Pantheon-Multidev:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       PANTHEON_REVIEW_USERNAME: ${{ secrets.PANTHEON_REVIEW_USERNAME }}
       PANTHEON_REVIEW_PASSWORD: ${{ secrets.PANTHEON_REVIEW_PASSWORD }}
