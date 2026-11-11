@@ -114,6 +114,14 @@ jobs:
           # Should pass now
           ddev task test:lint TWIG_DIRS="web/themes/custom/test_theme/templates"
 
+      - name: Confirm front-end linting reports skipped tools and missing directories
+        run: |
+          set -x
+          ddev task test:lint | tee lint.log
+          grep -q "Skipping Prettier in '.': no .prettierrc.json found." lint.log
+          # A FRONTEND_DIRS entry that does not exist must fail rather than skip.
+          ! ddev task test:lint FRONTEND_DIRS="does/not/exist"
+
       - name: Upload test artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

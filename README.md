@@ -237,11 +237,45 @@ All the below static code analysis tests can be run with `task test:static`
 | Test Type | Task Command             | Description                                                                                                                                                                                                                                                            |
 |-----------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Security  | task test:security       | Runs security checks for composer packages against the [FriendsOfPHP Security Advisory Database](https://github.com/FriendsOfPHP/security-advisories) and Drupal core and contributed modules against [Drupal's Security Advisories](https://www.drupal.org/security). |
-| Lint      | task test:lint           | - YAML lint on `.yml` files in the `web` directory<br />- Twig lint on files in `web/modules`, `web/profiles`, and `web/themes`<br />- `composer validate`<br />These cannot currently be customised. See [#9](https://github.com/Lullabot/drainpipe-dev/issues/9).    |
+| Lint      | task test:lint           | - YAML lint on `.yml` files in the `web` directory (`YAML_DIRS`)<br />- Twig lint on files in `web/modules/custom`, `web/profiles`, and `web/themes/custom` (`TWIG_DIRS`)<br />- `composer validate`<br />- Prettier, Stylelint and ESLint in each front-end directory (`FRONTEND_DIRS`). See [Front-end Linting](#front-end-linting). |
 | PHPStan   | task test:phpstan        | Runs [PHPStan](https://phpstan.org/) with [mglaman/phpstan-drupal](https://github.com/mglaman/phpstan-drupal) on `web/modules/custom`, `web/themes/custom`, and `web/sites` at level 6.                                                                                 |
 | PHPUnit   | task test:phpunit:static | Runs Unit tests in `web/modules/custom/**/tests/src/Unit` and `test/phpunit/**/Unit`                                                                                                                                                                                   |
 | PHPCS     | task test:phpcs          | Runs PHPCS with Drupal coding standards provided by [Coder module](https://www.drupal.org/project/coder                                                                                                                                                                |
 
+
+#### Front-end Linting
+
+`task test:lint` and `task test:autofix` run front-end linters in each
+directory listed in `FRONTEND_DIRS` (space-separated, default `.`, the
+repository root). Each tool runs from inside that directory, so config files are
+looked up there:
+
+| Tool      | Runs when this file exists in the directory                                                                  |
+|-----------|--------------------------------------------------------------------------------------------------------------|
+| Prettier  | `.prettierrc.json`                                                                                           |
+| Stylelint | `.stylelintrc.json`                                                                                          |
+| ESLint    | `eslint.config.{js,mjs,cjs,ts,mts,cts}` or `.eslintrc.{json,js,cjs,yml,yaml}` (lint only, not autofix)        |
+
+The package manager is detected from a `yarn.lock` or `package-lock.json` in
+the directory or any parent up to the repository root, so a theme that is a
+workspace of a root `package.json` works. Tools are run as binaries with
+`yarn exec` / `npm exec --no --`, so a `package.json` script with the same name
+(e.g. `"prettier": "prettier -w ."`) is never invoked instead. Skipped tools
+are reported in the output.
+
+If your front-end toolchain lives in a theme, set `FRONTEND_DIRS` on the `test`
+include in your `Taskfile.yml`:
+
+```yaml
+includes:
+  test:
+    taskfile: ./vendor/lullabot/drainpipe-dev/tasks/test.yml
+    optional: true
+    vars:
+      FRONTEND_DIRS: web/themes/custom/mytheme
+```
+
+or pass it on the command line: `task test:lint FRONTEND_DIRS="web/themes/custom/mytheme"`.
 
 #### PHPStan Baseline for Existing Codebases
 
@@ -309,8 +343,9 @@ able to run these.
 
 ### Autofix
 
-`task test:autofix` attempts to autofix any issues discovered by tests.
-Currently, this is just fixing PHPCS errors with PHPCBF.
+`task test:autofix` attempts to autofix any issues discovered by tests: PHPCS
+errors with PHPCBF, Twig with twig-cs-fixer, and Prettier and Stylelint
+(`--write` / `--fix`) in each front-end directory.
 
 ## Hosting Provider Integration
 
