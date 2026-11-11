@@ -20,8 +20,11 @@ jobs:
         with:
           persist-credentials: false
 
+      # install.sh parses options with getopts, so the version must come last.
       - name: Install Task
-        run: curl -sL https://taskfile.dev/install.sh | sh -s -- -d "$(cat .taskfile)" -b /usr/local/bin
+        run: |
+          curl -fsSL https://taskfile.dev/install.sh | sh -s -- -b "$RUNNER_TEMP/bin" "$(cat .taskfile)"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
       - name: Test snapshot:directory and snapshot:archive
         run: ./tests/snapshot/test-snapshot.sh
