@@ -16,7 +16,7 @@ TASKFILE=v3.48.0
 sh -c "$(curl --location --fail --silent https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin "${TASKFILE}"
 
 # Install YQ
-YQ=v4.50.1
+YQ=v4.54.2
 wget https://github.com/mikefarah/yq/releases/download/${YQ}/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
 
 # Ensure includes are not executed
