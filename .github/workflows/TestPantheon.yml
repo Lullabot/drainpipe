@@ -6,6 +6,13 @@ on:
 
 permissions: {}
 
+# Every run pushes to and deploys the same shared Pantheon site, so runs from
+# different PRs must not overlap. The group is global (not per-PR) and queued
+# so concurrent runs wait their turn instead of colliding or being cancelled.
+concurrency:
+  group: pantheon-shared-test-site
+  queue: max
+
 jobs:
   clone-pantheon:
     if: github.actor != 'dependabot[bot]'
