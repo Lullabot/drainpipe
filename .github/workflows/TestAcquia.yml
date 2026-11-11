@@ -8,6 +8,14 @@ permissions:
   deployments: write
   contents: read
 
+# Every run clones and deploys the same shared Acquia sandbox environment, so
+# runs from different PRs must not overlap. The group is global (not per-PR)
+# and queued so concurrent runs wait their turn instead of colliding or being
+# cancelled.
+concurrency:
+  group: acquia-shared-sandbox
+  queue: max
+
 jobs:
   Test-Acquia:
     if: github.actor != 'dependabot[bot]'
