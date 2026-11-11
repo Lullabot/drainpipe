@@ -2413,9 +2413,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.464":
-  version: 1.5.478
-  resolution: "electron-to-chromium@npm:1.5.478"
-  checksum: 10c0/74788bceafee9860412f4ff2a0f7de4cfc7a2ac910c1afcf8c6dec0df9f0642f92a5b52a9468d5f50004290b70a663ecc7c4714c3465296d5217616043039b7b
+  version: 1.5.479
+  resolution: "electron-to-chromium@npm:1.5.479"
+  checksum: 10c0/98e312f108a3947fa578b4a5924ae71ec840c82a091ec5aeb32b0c84a07d855e6eb5e3d86ade923870a7e9b8078b2d674177a8bcc19b412d94a00ab1d06dbd10
   languageName: node
   linkType: hard
 
@@ -3938,9 +3938,9 @@ __metadata:
   linkType: hard
 
 "lilconfig@npm:^3.1.1":
-  version: 3.1.4
-  resolution: "lilconfig@npm:3.1.4"
-  checksum: 10c0/20ed0899f58a26b7be69564b8b2f2be770378a242b7bfe2522a9f88056a5cbe2b11ac533c3acdd7c27ce9f8317168040c41c0c037061e9da21e3bbe29393f3f8
+  version: 3.1.5
+  resolution: "lilconfig@npm:3.1.5"
+  checksum: 10c0/9e5790297b6be79f674c216781ba283f692df321c3818964aa22f85f342a66f40858c68056f4ced197a586e8880d35c997f0a2ee1a263baaa81359981d75047d
   languageName: node
   linkType: hard
 

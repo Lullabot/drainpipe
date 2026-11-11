@@ -20,7 +20,7 @@ log "apt-get install git curl jq unzip"
 apt-get update -qq && apt-get install -y -qq git curl jq unzip
 
 if ! command -v composer &>/dev/null; then
-  COMPOSER_VERSION=2.9.5
+  COMPOSER_VERSION=2.11.1
   log "composer not found; installing ${COMPOSER_VERSION} to /usr/local/bin/composer"
   curl -sS "https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer
   chmod +x /usr/local/bin/composer

@@ -15,13 +15,13 @@ concurrency:
 jobs:
   Security:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -34,7 +34,7 @@ jobs:
           git checkout "$BASE_REF"
           git checkout -
 
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -70,7 +70,7 @@ jobs:
 
       - name: Post composer lock diff comment
         if: hashFiles('composer-lock-diff-comment.md') != ''
-        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: composer-lock-diff
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,24 +78,24 @@ jobs:
 
       - name: Delete composer lock diff comment
         if: hashFiles('composer-lock-diff-comment.md') == ''
-        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: composer-lock-diff
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           delete: true
 
   Composer-Audit:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -118,20 +118,20 @@ jobs:
         run: ddev exec bash ./vendor/lullabot/drainpipe/scripts/composer-audit.sh
 
       - name: Post comment
-        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: composer-security-audit
           path: comment.md
 
   Npm-Audit:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -146,33 +146,33 @@ jobs:
 
       - name: Post npm audit comment
         if: hashFiles('npm-audit-comment.md') != ''
-        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: npm-security-audit
           path: npm-audit-comment.md
 
       - name: Delete npm audit comment
         if: hashFiles('npm-audit-comment.md') == ''
-        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: npm-security-audit
           delete: true
 
   ZizmorAnalysis:
     name: Run Zizmor Security Analysis
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       security-events: write
       contents: read
       actions: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Install Zizmor
-        run: pip install zizmor==1.22.0
+        run: pip install zizmor==1.32.0
 
       - name: Run Zizmor
         id: zizmor
@@ -182,7 +182,7 @@ jobs:
       - name: Upload SARIF
         if: always()
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           sarif_file: zizmor.sarif
           category: zizmor
@@ -193,14 +193,14 @@ jobs:
 
   Gitleaks:
     name: Run Gitleaks Secret Scanning
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       security-events: write
       pull-requests: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -225,7 +225,7 @@ jobs:
       - name: Upload SARIF
         if: always()
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           sarif_file: results.sarif
           category: gitleaks
@@ -247,14 +247,14 @@ jobs:
 
       - name: Post PR comment
         if: steps.gitleaks.outcome == 'failure' && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: gitleaks
           path: gitleaks-comment.md
 
       - name: Delete PR comment if clean
         if: steps.gitleaks.outcome == 'success' && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: gitleaks
           delete: true
