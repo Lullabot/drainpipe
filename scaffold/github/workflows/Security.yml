@@ -172,7 +172,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Zizmor
-        run: pip install zizmor==1.22.0
+        run: pip install zizmor==1.32.0
 
       - name: Run Zizmor
         id: zizmor
