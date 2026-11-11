@@ -1,0 +1,27 @@
+name: Test Snapshot Tasks
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  Test-Snapshot:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Task
+        run: curl -sL https://taskfile.dev/install.sh | sh -s -- -d "$(cat .taskfile)" -b /usr/local/bin
+
+      - name: Test snapshot:directory and snapshot:archive
+        run: ./tests/snapshot/test-snapshot.sh
