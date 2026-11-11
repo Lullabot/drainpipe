@@ -49,7 +49,7 @@ runs:
         source .github/actions/drainpipe/set-env/bash_aliases
 
         # Install Acquia CLI.
-        ACLI_VERSION=2.61.3
+        ACLI_VERSION=4.3.2
         drainpipe_exec "curl -OL https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar"
         drainpipe_exec "chmod +x acli.phar"
         drainpipe_exec "mv acli.phar vendor/bin/acli"
