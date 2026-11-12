@@ -307,6 +307,10 @@ Runs PHPUnit tests in:
 You will need to make sure you have a working Drupal site before you're
 able to run these.
 
+On Drupal 10, change `"w3c": true` to `"w3c": false` in `MINK_DRIVER_ARGS_WEBDRIVER` in
+`phpunit.xml`. Drupal 10's WebDriver client only supports the legacy protocol, and its
+FunctionalJavascript tests fail with `The requested URL returned error: 400` in W3C mode.
+
 ### Autofix
 
 `task test:autofix` attempts to autofix any issues discovered by tests.

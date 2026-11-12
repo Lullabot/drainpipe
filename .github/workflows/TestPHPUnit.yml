@@ -99,6 +99,12 @@ jobs:
           cp -R drainpipe/tests/fixtures/phpunit/testmodule web/modules/custom/
           cp drainpipe/tests/fixtures/phpunit/Taskfile.yml .
 
+      # Drupal 10's WebDriver client only works with the legacy (non-W3C) protocol.
+      - name: Disable W3C mode for Drupal 10
+        if: matrix.drupal-version == '10'
+        run: |
+          sed -i 's/"w3c": true/"w3c": false/' phpunit.xml
+
       - name: Run PHPUnit Functional Tests
         run: |
           ddev drush site:install -y
