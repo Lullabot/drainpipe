@@ -72,10 +72,10 @@
       <directory>test/phpunit/*/Functional</directory>
     </testsuite>
     <testsuite name="functional-javascript">
-      <directory>{% DOCROOT %}/modules/custom/*/tests/src/FunctionalJavaScript</directory>
-      <directory>{% DOCROOT %}/modules/custom/*/*/tests/src/FunctionalJavaScript</directory>
-      <directory>{% DOCROOT %}/modules/custom/*/modules/*/tests/src/FunctionalJavaScript</directory>
-      <directory>test/phpunit/*/FunctionalJavaScript</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/tests/src/FunctionalJavascript</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/*/tests/src/FunctionalJavascript</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/modules/*/tests/src/FunctionalJavascript</directory>
+      <directory>test/phpunit/*/FunctionalJavascript</directory>
     </testsuite>
   </testsuites>
 </phpunit>

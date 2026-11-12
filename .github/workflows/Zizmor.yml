@@ -35,7 +35,7 @@ jobs:
 
       - name: Install Zizmor
         if: steps.filter.outputs.gha == 'true'
-        run: pip install zizmor==1.22.0
+        run: pip install zizmor==1.32.0
 
       - name: Run Zizmor
         id: zizmor
@@ -50,6 +50,9 @@ jobs:
           sarif_file: zizmor.sarif
           category: zizmor
 
+      # With --format sarif zizmor exits 0 even when it reports findings, so the step above
+      # only fails if zizmor itself errors. Run it again with its default output, which exits
+      # non-zero on findings and prints them in the log.
       - name: Fail on findings
-        if: steps.filter.outputs.gha == 'true' && steps.zizmor.outcome == 'failure'
-        run: exit 1
+        if: always() && steps.filter.outputs.gha == 'true'
+        run: zizmor .github drainpipe-dev/.github scaffold/github

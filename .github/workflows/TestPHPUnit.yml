@@ -114,11 +114,10 @@ jobs:
           path: test_result
 
       - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@63ad23408d758ee7f09b4557cc0901d6ae4f3f76 # v2.4
-        with:
-          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml
-          contains: 6
-          expected_result: PASSED
+        run: |
+          tests=$(xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit-functional.xml)
+          echo "PHPUnit ran $tests tests, expected 8"
+          test "$tests" = 8
 
   Test-PHPUnit-Static:
     runs-on: ubuntu-26.04
@@ -136,7 +135,7 @@ jobs:
           sudo apt-get install -y libxml2-utils
 
       - name: Create a Drupal project
-        run: composer create-project drupal/recommended-project . --ignore-platform-req=ext-gd
+        run: composer create-project drupal/recommended-project:^${{ matrix.drupal-version }} . --ignore-platform-req=ext-gd
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -187,9 +186,8 @@ jobs:
           name: test_result-phpunit-static-${{ matrix.drupal-version }}
           path: test_result
 
-      - name: Confirm All PHPUnit Functional Tests were run
-        uses: GuillaumeFalourd/assert-command-line-output@63ad23408d758ee7f09b4557cc0901d6ae4f3f76 # v2.4
-        with:
-          command_line: xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml
-          contains: 12
-          expected_result: PASSED
+      - name: Confirm All PHPUnit Unit Tests were run
+        run: |
+          tests=$(xmllint --xpath 'string(//testsuites/testsuite/@tests)' test_result/phpunit.xml)
+          echo "PHPUnit ran $tests tests, expected 12"
+          test "$tests" = 12

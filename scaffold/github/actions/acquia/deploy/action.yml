@@ -28,7 +28,7 @@ runs:
   steps:
 
     - name: Install DDEV
-      uses: ./.github/actions/drainpipe/ddev
+      uses: ./.github/actions/drainpipe/ddev # zizmor: ignore[self-repository]
       with:
         git-name: Drainpipe Bot
         git-email: no-reply@example.com
@@ -77,7 +77,7 @@ runs:
         drainpipe_exec "vendor/bin/task acquia:deploy:before"
 
     - name: Create GitHub Deployment
-      uses: ./.github/actions/drainpipe/deployment-create
+      uses: ./.github/actions/drainpipe/deployment-create # zizmor: ignore[self-repository]
       with:
         github-token: ${{ inputs.github-token }}
         environment: ${{ inputs.environment }}
@@ -109,7 +109,7 @@ runs:
         echo "acquia_env_uri=$ACQUIA_ENV_URI" >> "$GITHUB_ENV"
 
     - name: Push to Acquia
-      uses: ./.github/actions/drainpipe/acquia/push
+      uses: ./.github/actions/drainpipe/acquia/push # zizmor: ignore[self-repository]
       with:
         environment: ${{ inputs.environment }}
         commit-message: ${{ inputs.commit-message }}
@@ -118,7 +118,7 @@ runs:
         acquia-ssh-private-key: ${{ inputs.acquia-ssh-private-key }}
 
     - name: Run updates
-      uses: ./.github/actions/drainpipe/acquia/update
+      uses: ./.github/actions/drainpipe/acquia/update # zizmor: ignore[self-repository]
       with:
         environment: ${{ inputs.environment }}
         run-installer: ${{ inputs.run-installer }}
@@ -142,7 +142,7 @@ runs:
         drainpipe_exec "acli api:environments:clear-caches --no-interaction $INPUT_ENVIRONMENT $DOMAINS_HOSTNAMES"
 
     - name: Set Deployment Status
-      uses: ./.github/actions/drainpipe/deployment-status
+      uses: ./.github/actions/drainpipe/deployment-status # zizmor: ignore[self-repository]
       with:
         github-token: ${{ inputs.github-token }}
         environment-url: ${{ env.acquia_env_uri }}
