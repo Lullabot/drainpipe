@@ -27,6 +27,9 @@ run: once
 # vars:
 #   DRAINPIPE_SASS: |
 #     web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css
+#   # Compiles *.scss and *.pcss.css in Single Directory Components to *.css.
+#   DRAINPIPE_SDC: |
+#     web/themes/custom
 #   DRAINPIPE_JAVASCRIPT: |
 #     web/themes/custom/mytheme/script.js:web/themes/custom/mytheme/script.min.js
 

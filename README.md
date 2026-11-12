@@ -192,6 +192,49 @@ the following:
     deps: [sass:watch, javascript:watch]
   ```
 
+### Single Directory Components
+
+[Single Directory Components](https://www.drupal.org/docs/develop/theming-drupal/using-single-directory-components)
+(SDC) load the CSS file that sits next to their `*.component.yml` file. Drainpipe
+can find the sources in your components and compile them in place, so they don't
+need to be listed one by one in `DRAINPIPE_SASS`.
+
+- Make sure `@lullabot/drainpipe-sass` is up to date. `task sass:compile` fails
+  with an error if the installed version doesn't support `DRAINPIPE_SDC`.
+- Add `DRAINPIPE_SDC` to the `vars` section of `Taskfile.yml` with the
+  directories to scan (use `docroot` instead of `web` if that's your docroot)
+  ```
+  vars:
+    DRAINPIPE_SDC: |
+      web/themes/custom
+      web/modules/custom
+  ```
+- Every file inside a `components` directory is compiled to a `.css` file next
+  to it:
+
+  | Source                                         | Compiled to                               |
+  |------------------------------------------------|-------------------------------------------|
+  | `components/my_component/my_component.scss`    | `components/my_component/my_component.css` |
+  | `components/my_component/my_component.pcss.css` | `components/my_component/my_component.css` |
+
+  `.scss` files are compiled with Sass and PostCSS. Sass partials (files starting
+  with `_`) are only compiled as part of the files that `@use` them.
+  `.pcss.css` files (the convention used by Drupal core) are plain CSS processed
+  only with PostCSS, for projects that don't use Sass.
+- Both kinds of source get Autoprefixer and, with `task sass:compile`, are
+  minified with cssnano. `task sass:watch` writes unminified output and picks up
+  new components without restarting.
+- `DRAINPIPE_SDC` and `DRAINPIPE_SASS` can be used together. If a file is listed
+  in `DRAINPIPE_SASS`, that mapping takes precedence.
+- Commit the sources and ignore the compiled files, e.g. in `.gitignore`:
+  ```
+  web/themes/custom/*/components/**/*.css
+  web/themes/custom/*/components/**/*.css.map
+  !web/themes/custom/*/components/**/*.pcss.css
+  ```
+  If some components use plain `.css` files that are not compiled, ignore only
+  the compiled files of the components that have a source.
+
 ## JavaScript Compilation
 
 JavaScript bundling support is via [esbuild](https://esbuild.github.io/).
