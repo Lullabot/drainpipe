@@ -121,8 +121,9 @@ jobs:
         run: |
           echo "/drainpipe" >> .drainpipeignore
           ddev task snapshot:directory directory=/tmp/release
-          test -f /tmp/release/docroot/index.php
-          test ! -e /tmp/release/docroot/sites/default/files
+          # The snapshot is written inside the DDEV web container, so check it there.
+          ddev exec test -f /tmp/release/docroot/index.php
+          ddev exec test ! -e /tmp/release/docroot/sites/default/files
 
       - name: Clone from production to dev
         uses: ./drainpipe/scaffold/github/actions/acquia/clone-env
