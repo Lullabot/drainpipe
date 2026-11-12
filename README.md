@@ -301,8 +301,8 @@ Runs PHPUnit tests in:
 - `test/phpunit/**/Kernel`
 - `web/modules/custom/**/tests/src/Functional`
 - `test/phpunit/**/Functional`
-- `web/modules/custom/**/tests/src/FunctionalJavaScript`
-- `test/phpunit/**/FunctionalJavaScript`
+- `web/modules/custom/**/tests/src/FunctionalJavascript`
+- `test/phpunit/**/FunctionalJavascript`
 
 You will need to make sure you have a working Drupal site before you're
 able to run these.
@@ -1512,7 +1512,7 @@ Testing PR code changes on real sites is extra beneficial.
 
 ### Local Development
 
-In order to test local changes follow the instructions for the [test script](./docs/test-script.md).
+To test local changes, see [Testing local changes](./docs/test-script.md).
 
 ### Peer Review Guidelines for Automated Updates
 

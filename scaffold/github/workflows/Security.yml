@@ -165,9 +165,12 @@ jobs:
           sarif_file: zizmor.sarif
           category: zizmor
 
+      # With --format sarif zizmor exits 0 even when it reports findings, so the step above
+      # only fails if zizmor itself errors. Run it again with its default output, which exits
+      # non-zero on findings and prints them in the log.
       - name: Fail on findings
-        if: steps.zizmor.outcome == 'failure'
-        run: exit 1
+        if: always()
+        run: zizmor .github
 
   Gitleaks:
     name: Run Gitleaks Secret Scanning

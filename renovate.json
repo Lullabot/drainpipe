@@ -143,8 +143,7 @@
     {
       "matchPackageNames": ["yarn"],
       "matchFileNames": [
-        ".github/workflows/TestMetapackages.yml",
-        ".github/workflows/TestFunctional.yml"
+        ".github/workflows/TestMetapackages.yml"
       ],
       "allowedVersions": "^1"
     },
@@ -209,7 +208,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.github/workflows/Security\\.yml$/",
+        "/^\\.github/workflows/Zizmor\\.yml$/",
         "/^scaffold/github/workflows/Security\\.yml$/"
       ],
       "matchStrings": [
@@ -221,7 +220,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.github/workflows/Security\\.yml$/",
+        "/^\\.github/workflows/Gitleaks\\.yml$/",
         "/^scaffold/github/workflows/Security\\.yml$/"
       ],
       "matchStrings": [
@@ -234,8 +233,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.github/workflows/TestMetapackages\\.yml$/",
-        "/^\\.github/workflows/TestFunctional\\.yml$/"
+        "/^\\.github/workflows/TestMetapackages\\.yml$/"
       ],
       "matchStrings": [
         "yarn@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
