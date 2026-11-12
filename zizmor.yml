@@ -2,3 +2,9 @@ rules:
   dangerous-triggers:
     ignore:
       - "repo-lockdown.yml"
+  # zizmor 1.30+ suggests GitHub's self-repository syntax (`uses: $/...`, July 2026) instead of
+  # `uses: ./...`. This repo's workflows deliberately run the scaffolded actions from the
+  # `./drainpipe` checkout of the code under test, and the scaffolded composite actions carry
+  # inline ignores, so downstream projects on older runners/GHES keep working.
+  self-repository:
+    disable: true

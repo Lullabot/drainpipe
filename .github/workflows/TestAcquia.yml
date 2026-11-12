@@ -106,7 +106,8 @@ jobs:
 
       - name: Create .drainpipeignore
         run: |
-          echo "/web/sites/default/files" >> .drainpipeignore
+          # web is a symlink to docroot, which git (and so the snapshot) does not follow.
+          echo "/docroot/sites/default/files" >> .drainpipeignore
           echo "/.ddev" >> .drainpipeignore
           echo "settings.ddev.php" >> .drainpipeignore
           echo "/drainpipe" >> .drainpipeignore
@@ -120,6 +121,8 @@ jobs:
         run: |
           echo "/drainpipe" >> .drainpipeignore
           ddev task snapshot:directory directory=/tmp/release
+          test -f /tmp/release/docroot/index.php
+          test ! -e /tmp/release/docroot/sites/default/files
 
       - name: Clone from production to dev
         uses: ./drainpipe/scaffold/github/actions/acquia/clone-env

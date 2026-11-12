@@ -18,6 +18,7 @@
         "davidrjonas/composer-lock-diff": "^1.7.1",
         "drupal/coder": "^8||^9",
         "lullabot/drainpipe": "*",
+        "lullabot/mink-selenium2-driver": "^1.7.3",
         "lullabot/twig-cs-fixer-drupal": "^2.1.0",
         "mglaman/phpstan-drupal": "^1||^2",
         "phpstan/extension-installer": "^1.4",
