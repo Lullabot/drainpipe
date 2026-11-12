@@ -307,6 +307,11 @@ Runs PHPUnit tests in:
 You will need to make sure you have a working Drupal site before you're
 able to run these.
 
+`FunctionalJavascript` tests need a Selenium 4 Chrome service. The scaffolded
+`phpunit.xml` expects it at `http://chrome:4444`; change `MINK_DRIVER_ARGS_WEBDRIVER`
+there if yours is elsewhere. Drupal 10's WebDriver client does not work with Selenium 4,
+so on Drupal 10 skip these tests or run them against chromedriver directly.
+
 ### Autofix
 
 `task test:autofix` attempts to autofix any issues discovered by tests.
