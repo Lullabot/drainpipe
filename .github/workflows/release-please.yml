@@ -23,8 +23,6 @@ jobs:
           # Only what release-please needs, not every permission the app is installed with.
           permission-contents: write
           permission-pull-requests: write
-          # Labels on the release PR (autorelease: pending/tagged) go through the issues API.
-          permission-issues: write
 
       - name: Run release-please
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
