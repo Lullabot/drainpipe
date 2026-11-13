@@ -3,10 +3,19 @@
     - !reference [.drainpipe_setup_ssh, script]
     - !reference [.drainpipe_setup_git, script]
     - echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >> ~/.ssh/config
-    - mkdir ~/terminus
-    - curl -L https://github.com/pantheon-systems/terminus/releases/download/4.3.5/terminus.phar --output ~/terminus/terminus
-    - chmod +x ~/terminus/terminus
-    - ln -s ~/terminus/terminus /usr/local/bin/terminus
+    - |
+      set -eu
+      # Version and checksum must be bumped together. Renovate updates both.
+      TERMINUS_VERSION=4.3.5
+      TERMINUS_SHA256=b5653c9e08329ab087d4b772a98e7a733e9a5b28f9101096d860e25fba91c8d2
+      mkdir -p ~/terminus
+      curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+        "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" \
+        --output ~/terminus/terminus.download
+      printf '%s  %s\n' "$TERMINUS_SHA256" ~/terminus/terminus.download | sha256sum -c -
+      install -m 0755 ~/terminus/terminus.download ~/terminus/terminus
+      rm -f ~/terminus/terminus.download
+      ln -sf ~/terminus/terminus /usr/local/bin/terminus
     - echo "$TERMINUS_PLUGINS" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
     - |
       if [ -z "$TERMINUS_MACHINE_TOKEN" ]; then

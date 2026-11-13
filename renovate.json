@@ -126,7 +126,7 @@
     },
     {
       "matchPackageNames": ["mikefarah/yq"],
-      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+      "allowedVersions": "/^v?\\d+\\.\\d+\\.\\d+$/"
     },
     {
       "matchPackageNames": ["acquia/cli"],
@@ -170,29 +170,31 @@
       "extractVersionTemplate": "^v(?<version>.*)$"
     },
     {
+      "description": "yq: version and SHA256 are updated together",
       "customType": "regex",
       "managerFilePatterns": [
         "/^scaffold/tugboat/scripts/custom-init-command\\.sh$/",
         "/^tasks/bitbucket\\.yml$/"
       ],
       "matchStrings": [
-        "YQ=v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+        "YQ_VERSION=(?<currentValue>v\\d+\\.\\d+\\.\\d+)\\s+YQ_SHA256=(?<currentDigest>[a-f0-9]{64})"
       ],
       "depNameTemplate": "mikefarah/yq",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.*)$"
+      "datasourceTemplate": "github-release-attachments"
     },
     {
+      "description": "Acquia CLI: version and SHA256 are updated together",
       "customType": "regex",
       "managerFilePatterns": [
         "/^tasks/bitbucket\\.yml$/",
-        "/^scaffold/github/actions/acquia/deploy/action\\.yml$/"
+        "/^scaffold/github/actions/acquia/deploy/action\\.yml$/",
+        "/^scaffold/tugboat/templates/php-init\\.yml\\.twig$/"
       ],
       "matchStrings": [
-        "ACLI_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+        "ACLI_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s+ACLI_SHA256=(?<currentDigest>[a-f0-9]{64})"
       ],
       "depNameTemplate": "acquia/cli",
-      "datasourceTemplate": "github-releases"
+      "datasourceTemplate": "github-release-attachments"
     },
     {
       "customType": "regex",
@@ -242,20 +244,21 @@
       "datasourceTemplate": "npm"
     },
     {
+      "description": "Terminus: version and SHA256 are updated together",
       "customType": "regex",
       "managerFilePatterns": [
         "/^scaffold/github/actions/pantheon/setup-terminus/action\\.yml$/",
         "/^\\.github/workflows/TestGitHubActions\\.yml$/",
         "/^scaffold/github/workflows/PantheonReviewAppsDDEV\\.yml$/",
         "/^scaffold/github/workflows/PantheonReviewAppsAsyncDDEV\\.yml$/",
-        "/^scaffold/gitlab/Pantheon\\.gitlab-ci\\.yml$/"
+        "/^scaffold/gitlab/Pantheon\\.gitlab-ci\\.yml$/",
+        "/^scaffold/tugboat/templates/php-init\\.yml\\.twig$/"
       ],
       "matchStrings": [
-        "key: terminus-(?<currentValue>\\d+\\.\\d+\\.\\d+)",
-        "releases/download/(?<currentValue>\\d+\\.\\d+\\.\\d+)/terminus\\.phar"
+        "TERMINUS_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s+TERMINUS_SHA256=(?<currentDigest>[a-f0-9]{64})"
       ],
       "depNameTemplate": "pantheon-systems/terminus",
-      "datasourceTemplate": "github-releases"
+      "datasourceTemplate": "github-release-attachments"
     }
   ]
 }

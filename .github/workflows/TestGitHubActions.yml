@@ -125,8 +125,17 @@ jobs:
       - name: Install Terminus in DDEV
         if: steps.pantheon.outputs.enabled == 'true'
         run: |
-          ddev exec --user root curl -fsSL https://github.com/pantheon-systems/terminus/releases/download/4.3.5/terminus.phar -o /usr/local/bin/terminus
-          ddev exec --user root chmod +x /usr/local/bin/terminus
+          set -eu
+          # Version and checksum must be bumped together. Renovate updates both.
+          TERMINUS_VERSION=4.3.5
+          TERMINUS_SHA256=b5653c9e08329ab087d4b772a98e7a733e9a5b28f9101096d860e25fba91c8d2
+          ddev exec --user root "set -eu
+            curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+              https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar \
+              --output /tmp/terminus.phar
+            echo '${TERMINUS_SHA256}  /tmp/terminus.phar' | sha256sum -c -
+            install -m 0755 /tmp/terminus.phar /usr/local/bin/terminus
+            rm -f /tmp/terminus.phar"
 
       # This exercises the synchronous review path only. The async path
       # (Quicksilver -> repository_dispatch -> PantheonReviewAppsPostDeploy -> Watchdog)

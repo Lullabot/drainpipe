@@ -15,9 +15,15 @@ fi
 TASKFILE=v3.48.0
 sh -c "$(curl --location --fail --silent https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin "${TASKFILE}"
 
-# Install YQ
-YQ=v4.54.3
-wget https://github.com/mikefarah/yq/releases/download/${YQ}/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+# Install YQ. Version and checksum must be bumped together. Renovate updates both.
+YQ_VERSION=v4.54.3
+YQ_SHA256=129534601871538efe0ba4c5e62a34fb1d5f469bcb975c4fddeb467d82974973
+curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+  "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" \
+  --output /tmp/yq
+printf '%s  %s\n' "$YQ_SHA256" /tmp/yq | sha256sum -c -
+install -m 0755 /tmp/yq /usr/bin/yq
+rm -f /tmp/yq
 
 # Ensure includes are not executed
 yq -i 'del(."includes")' Taskfile.yml

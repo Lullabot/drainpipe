@@ -10,25 +10,45 @@ inputs:
 runs:
   using: "composite"
   steps:
+    # Version and checksum must be bumped together. Renovate updates both.
+    - name: Pin Terminus version
+      id: terminus-version
+      shell: bash
+      run: |
+        set -eu
+        TERMINUS_VERSION=4.3.5
+        TERMINUS_SHA256=b5653c9e08329ab087d4b772a98e7a733e9a5b28f9101096d860e25fba91c8d2
+        echo "version=${TERMINUS_VERSION}" >> "$GITHUB_OUTPUT"
+        echo "sha256=${TERMINUS_SHA256}" >> "$GITHUB_OUTPUT"
+
     - name: Cache Terminus
       id: terminus-cache
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/terminus/terminus
-        key: terminus-4.3.5
+        key: terminus-${{ steps.terminus-version.outputs.version }}-${{ steps.terminus-version.outputs.sha256 }}
 
     - name: Install and authenticate Terminus
       env:
         INPUT_TERMINUS_TOKEN: ${{ inputs.terminus-token }}
         INPUT_TERMINUS_PLUGINS: ${{ inputs.terminus-plugins }}
         TERMINUS_CACHE_HIT: ${{ steps.terminus-cache.outputs.cache-hit }}
+        TERMINUS_VERSION: ${{ steps.terminus-version.outputs.version }}
+        TERMINUS_SHA256: ${{ steps.terminus-version.outputs.sha256 }}
       run: |
+        set -eu
         echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >> ~/.ssh/config
         mkdir -p ~/terminus
         if [ "$TERMINUS_CACHE_HIT" != "true" ]; then
-          curl -L https://github.com/pantheon-systems/terminus/releases/download/4.3.5/terminus.phar --output ~/terminus/terminus
-          chmod +x ~/terminus/terminus
+          curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+            "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" \
+            --output ~/terminus/terminus.download
+          printf '%s  %s\n' "$TERMINUS_SHA256" ~/terminus/terminus.download | sha256sum -c -
+          install -m 0755 ~/terminus/terminus.download ~/terminus/terminus
+          rm -f ~/terminus/terminus.download
         fi
+        # Verify on every run, including cache hits.
+        printf '%s  %s\n' "$TERMINUS_SHA256" ~/terminus/terminus | sha256sum -c -
         ln -sf ~/terminus/terminus /usr/local/bin/terminus
         echo "$INPUT_TERMINUS_PLUGINS" | while read -d, plugin || [[ -n $plugin ]]; do terminus self:plugin:install $plugin; done
         terminus auth:login --machine-token="$INPUT_TERMINUS_TOKEN"

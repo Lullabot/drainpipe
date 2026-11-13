@@ -66,12 +66,26 @@
   a2enmod headers rewrite
 {% endif %}
 {% if pantheon %}
-  curl --fail -sSL https://github.com/pantheon-systems/terminus/releases/download/$(curl -L --fail --silent "https://api.github.com/repos/pantheon-systems/terminus/releases/latest" | perl -nle 'print $1 if /"tag_name":\s*"([^"]+)"/')/terminus.phar --output /usr/local/bin/terminus
-  chmod 755 /usr/local/bin/terminus
+  # Version and checksum must be bumped together. Renovate updates both.
+  TERMINUS_VERSION=4.3.5
+  TERMINUS_SHA256=b5653c9e08329ab087d4b772a98e7a733e9a5b28f9101096d860e25fba91c8d2
+  curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+    "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" \
+    --output /tmp/terminus.phar || exit 1
+  printf '%s  %s\n' "$TERMINUS_SHA256" /tmp/terminus.phar | sha256sum -c - || exit 1
+  install -m 0755 /tmp/terminus.phar /usr/local/bin/terminus || exit 1
+  rm -f /tmp/terminus.phar
 {% endif %}
 {% if acquia %}
-  curl --fail -sSL https://github.com/acquia/cli/releases/latest/download/acli.phar --output /usr/local/bin/acli
-  chmod 755 /usr/local/bin/acli
+  # Version and checksum must be bumped together. Renovate updates both.
+  ACLI_VERSION=4.3.2
+  ACLI_SHA256=2cab26c525dadbff0f435b3cd053f1e142ef849cb05adcbd9c4a4a990632e840
+  curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+    "https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar" \
+    --output /tmp/acli.phar || exit 1
+  printf '%s  %s\n' "$ACLI_SHA256" /tmp/acli.phar | sha256sum -c - || exit 1
+  install -m 0755 /tmp/acli.phar /usr/local/bin/acli || exit 1
+  rm -f /tmp/acli.phar
 {% endif %}
 {% if services.php.commands.init|default(false) %}
   task tugboat:php:init
