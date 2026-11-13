@@ -48,7 +48,8 @@ jobs:
           jq --indent 4 '."autoload-dev" = {"files": ["vendor/lullabot/drainpipe/scaffold/env/dotenv.php"]}' composer.json > composer.json.tmp && mv composer.json.tmp composer.json
           ddev composer update --lock
           ddev composer validate
-          ddev composer require lullabot/drainpipe --with-all-dependencies
+          # Robo 5.2.1-5.2.3 break Drush on Drupal 10; unpin once consolidation/robo#1197 is fixed.
+          ddev composer require lullabot/drainpipe "consolidation/robo:5.1.*" --with-all-dependencies
           cp drainpipe/tests/fixtures/env/Taskfile.yml Taskfile.yml
 
       - name: Check files are created
