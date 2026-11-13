@@ -58,6 +58,7 @@ jobs:
           cp drainpipe/tests/fixtures/metapackages/Taskfile.yml .
           cp drainpipe/tests/fixtures/metapackages/style.scss .
           cp -R drainpipe/tests/fixtures/metapackages/js .
+          cp -R drainpipe/tests/fixtures/metapackages/web .
 
       - name: Create Artifact
         run: zip -r /tmp/drainpipe.zip ./
@@ -104,6 +105,22 @@ jobs:
       - name: Compile Sass
         run: ddev task sass
 
+      - name: Verify Single Directory Components
+        run: |
+          COMPONENTS=web/themes/custom/drainpipe_test/components
+          test -f style.css
+          test -f $COMPONENTS/card/card.css
+          test -f $COMPONENTS/card/card.css.map
+          test -f $COMPONENTS/button/button.css
+          test -f $COMPONENTS/button/button.css.map
+          # Partials and files outside "components" are not compiled, and
+          # PostCSS sources are not overwritten.
+          test ! -e $COMPONENTS/card/_card-variables.css
+          test ! -e web/themes/custom/drainpipe_test/sass/outside-components.css
+          grep -q "border:1px solid #ccc" $COMPONENTS/card/card.css
+          grep -q "user-select:none" $COMPONENTS/button/button.css
+          grep -q "color: blue;" $COMPONENTS/button/button.pcss.css
+
   Test-Sass-Yarn-Classic:
     runs-on: ubuntu-26.04
     needs: Build
@@ -141,6 +158,22 @@ jobs:
 
       - name: Compile Sass
         run: ddev task sass
+
+      - name: Verify Single Directory Components
+        run: |
+          COMPONENTS=web/themes/custom/drainpipe_test/components
+          test -f style.css
+          test -f $COMPONENTS/card/card.css
+          test -f $COMPONENTS/card/card.css.map
+          test -f $COMPONENTS/button/button.css
+          test -f $COMPONENTS/button/button.css.map
+          # Partials and files outside "components" are not compiled, and
+          # PostCSS sources are not overwritten.
+          test ! -e $COMPONENTS/card/_card-variables.css
+          test ! -e web/themes/custom/drainpipe_test/sass/outside-components.css
+          grep -q "border:1px solid #ccc" $COMPONENTS/card/card.css
+          grep -q "user-select:none" $COMPONENTS/button/button.css
+          grep -q "color: blue;" $COMPONENTS/button/button.pcss.css
 
   Test-Sass-Yarn-3:
     runs-on: ubuntu-26.04
@@ -181,6 +214,22 @@ jobs:
       - name: Compile Sass
         run: ddev task sass
 
+      - name: Verify Single Directory Components
+        run: |
+          COMPONENTS=web/themes/custom/drainpipe_test/components
+          test -f style.css
+          test -f $COMPONENTS/card/card.css
+          test -f $COMPONENTS/card/card.css.map
+          test -f $COMPONENTS/button/button.css
+          test -f $COMPONENTS/button/button.css.map
+          # Partials and files outside "components" are not compiled, and
+          # PostCSS sources are not overwritten.
+          test ! -e $COMPONENTS/card/_card-variables.css
+          test ! -e web/themes/custom/drainpipe_test/sass/outside-components.css
+          grep -q "border:1px solid #ccc" $COMPONENTS/card/card.css
+          grep -q "user-select:none" $COMPONENTS/button/button.css
+          grep -q "color: blue;" $COMPONENTS/button/button.pcss.css
+
   Test-Sass-Yarn-4:
     runs-on: ubuntu-26.04
     needs: Build
@@ -218,6 +267,22 @@ jobs:
 
       - name: Compile Sass
         run: ddev task sass
+
+      - name: Verify Single Directory Components
+        run: |
+          COMPONENTS=web/themes/custom/drainpipe_test/components
+          test -f style.css
+          test -f $COMPONENTS/card/card.css
+          test -f $COMPONENTS/card/card.css.map
+          test -f $COMPONENTS/button/button.css
+          test -f $COMPONENTS/button/button.css.map
+          # Partials and files outside "components" are not compiled, and
+          # PostCSS sources are not overwritten.
+          test ! -e $COMPONENTS/card/_card-variables.css
+          test ! -e web/themes/custom/drainpipe_test/sass/outside-components.css
+          grep -q "border:1px solid #ccc" $COMPONENTS/card/card.css
+          grep -q "user-select:none" $COMPONENTS/button/button.css
+          grep -q "color: blue;" $COMPONENTS/button/button.pcss.css
 
   Test-JavaScript-NPM:
     runs-on: ubuntu-26.04
