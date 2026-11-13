@@ -6,15 +6,24 @@ tasks:
     cmds:
       - |
         set -euo pipefail
+        # Versions and checksums must be bumped together. Renovate updates both.
         ACLI_VERSION=4.3.2
-        curl -OL "https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar"
-        chmod +x acli.phar
-        mv acli.phar vendor/bin/acli
+        ACLI_SHA256=2cab26c525dadbff0f435b3cd053f1e142ef849cb05adcbd9c4a4a990632e840
+        curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+          "https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar" \
+          --output /tmp/acli.phar
+        printf '%s  %s\n' "$ACLI_SHA256" /tmp/acli.phar | sha256sum -c -
+        install -m 0755 /tmp/acli.phar vendor/bin/acli
+        rm -f /tmp/acli.phar
         if ! command -v yq &>/dev/null; then
-          YQ=v4.54.3
-          curl -sSL "https://github.com/mikefarah/yq/releases/download/${YQ}/yq_linux_amd64" \
-            -o /usr/local/bin/yq
-          chmod +x /usr/local/bin/yq
+          YQ_VERSION=v4.54.3
+          YQ_SHA256=129534601871538efe0ba4c5e62a34fb1d5f469bcb975c4fddeb467d82974973
+          curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" \
+            --output /tmp/yq
+          printf '%s  %s\n' "$YQ_SHA256" /tmp/yq | sha256sum -c -
+          install -m 0755 /tmp/yq /usr/local/bin/yq
+          rm -f /tmp/yq
         fi
         vendor/bin/acli auth:login \
           --key="${ACQUIA_API_KEY}" \
