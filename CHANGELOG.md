@@ -1,5 +1,15 @@
 # Changelog
 
+## [6.3.1](https://github.com/Lullabot/drainpipe/compare/v6.3.0...v6.3.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* **ci:** drop issues permission from the release-please app token ([#1379](https://github.com/Lullabot/drainpipe/issues/1379)) ([f456602](https://github.com/Lullabot/drainpipe/commit/f4566026b067e782075627b462e022cbb175c593))
+* **ci:** make CI checks fail when they should and run WebDriver tests ([#1375](https://github.com/Lullabot/drainpipe/issues/1375)) ([64fac1b](https://github.com/Lullabot/drainpipe/commit/64fac1bb0635b372c072869f79b9d5feba76eece))
+* pin Robo 5.1 in CI tests and update Pantheon and PHPUnit scaffolds ([#1382](https://github.com/Lullabot/drainpipe/issues/1382)) ([eb04491](https://github.com/Lullabot/drainpipe/commit/eb044910eed05095317ea09ba6505b74b01f52ac))
+* **tests:** explain why Drupal 10 WebDriver tests are skipped ([#1377](https://github.com/Lullabot/drainpipe/issues/1377)) ([467ea6a](https://github.com/Lullabot/drainpipe/commit/467ea6a5e8c4839a83d8bfe211f997700f8d9e83))
+
 ## [6.3.0](https://github.com/Lullabot/drainpipe/compare/v6.2.1...v6.3.0) (2026-11-10)
 
 
