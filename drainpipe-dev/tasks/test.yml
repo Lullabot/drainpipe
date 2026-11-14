@@ -19,6 +19,111 @@ vars:
     for DIR in "${DIRS_ARR[@]}"; do
       mkdir -p $DIR
     done
+  # Space-separated list of directories that contain a front-end toolchain
+  # (e.g. a theme that is a Yarn/npm workspace). Prettier, Stylelint and ESLint
+  # are run from inside each directory, so their config files are resolved
+  # relative to it. Defaults to the repository root.
+  FRONTEND_DIRS: '{{ default "." .FRONTEND_DIRS }}'
+  # Defines frontend_lint, which runs Prettier, Stylelint and (when checking)
+  # ESLint in every FRONTEND_DIRS entry. Pass "check" or "fix".
+  #
+  # Binaries are invoked with `yarn exec` / `npm exec --no --` rather than
+  # `yarn <bin>` / `npm run <bin>`, so a package.json script with the same name
+  # as the tool (e.g. "prettier": "prettier -w .") can never shadow it, and
+  # flags such as --check are passed to the tool rather than to npm.
+  FUNC_FRONTEND_LINT: |
+    frontend_has_config() {
+      for f in "$@"; do
+        if [ -f "$f" ]; then
+          return 0
+        fi
+      done
+      return 1
+    }
+    frontend_lint() {
+      MODE="$1"
+      ROOT="$(pwd)"
+      FAILED=0
+      DIRS_ARR=({{.FRONTEND_DIRS}})
+      for DIR in "${DIRS_ARR[@]}"; do
+        if [ ! -d "$DIR" ]; then
+          echo "Front-end directory '$DIR' does not exist (check FRONTEND_DIRS)."
+          FAILED=1
+          continue
+        fi
+        # The lockfile may live in a parent directory when DIR is a workspace,
+        # so walk up from DIR to the project root looking for one.
+        PM=()
+        SEARCH="$(cd "$DIR" && pwd)"
+        while :; do
+          if [ -f "$SEARCH/yarn.lock" ]; then
+            PM=(yarn exec)
+            break
+          elif [ -f "$SEARCH/package-lock.json" ]; then
+            PM=(npm exec --no --)
+            break
+          fi
+          if [ "$SEARCH" = "$ROOT" ] || [ "$SEARCH" = "/" ]; then
+            break
+          fi
+          SEARCH="$(dirname "$SEARCH")"
+        done
+
+        if (cd "$DIR" && frontend_has_config .prettierrc.json); then
+          if [ ${#PM[@]} -eq 0 ]; then
+            echo "Skipping Prettier in '$DIR': .prettierrc.json found but no yarn.lock or package-lock.json."
+          else
+            echo "Running Prettier in '$DIR'"
+            if [ "$MODE" = "fix" ]; then
+              PRETTIER_MODE="--write"
+            else
+              PRETTIER_MODE="--check"
+            fi
+            if ! (cd "$DIR" && "${PM[@]}" prettier "$PRETTIER_MODE" --cache-location=.prettiercache .); then
+              FAILED=1
+            fi
+          fi
+        else
+          echo "Skipping Prettier in '$DIR': no .prettierrc.json found."
+        fi
+
+        if (cd "$DIR" && frontend_has_config .stylelintrc.json); then
+          if [ ${#PM[@]} -eq 0 ]; then
+            echo "Skipping Stylelint in '$DIR': .stylelintrc.json found but no yarn.lock or package-lock.json."
+          else
+            echo "Running Stylelint in '$DIR'"
+            STYLELINT_ARGS=("**/*.{css,scss,sass}")
+            if [ "$MODE" = "fix" ]; then
+              STYLELINT_ARGS+=(--fix)
+            fi
+            if ! (cd "$DIR" && "${PM[@]}" stylelint "${STYLELINT_ARGS[@]}"); then
+              FAILED=1
+            fi
+          fi
+        else
+          echo "Skipping Stylelint in '$DIR': no .stylelintrc.json found."
+        fi
+
+        if [ "$MODE" = "check" ]; then
+          if (cd "$DIR" && frontend_has_config \
+              eslint.config.js eslint.config.mjs eslint.config.cjs \
+              eslint.config.ts eslint.config.mts eslint.config.cts \
+              .eslintrc.json .eslintrc.js .eslintrc.cjs .eslintrc.yml .eslintrc.yaml); then
+            if [ ${#PM[@]} -eq 0 ]; then
+              echo "Skipping ESLint in '$DIR': ESLint config found but no yarn.lock or package-lock.json."
+            else
+              echo "Running ESLint in '$DIR'"
+              if ! (cd "$DIR" && "${PM[@]}" eslint .); then
+                FAILED=1
+              fi
+            fi
+          else
+            echo "Skipping ESLint in '$DIR': no ESLint config found."
+          fi
+        fi
+      done
+      return $FAILED
+    }
 
 tasks:
   static:
@@ -51,7 +156,7 @@ tasks:
           ./vendor/bin/composer-lock-diff --from "$DIFF_FROM" --md
         fi
   lint:
-    desc: Runs lint on composer, YAML, and Twig files
+    desc: Runs lint on composer, YAML, Twig, and front-end (Prettier, Stylelint, ESLint) files
     # @todo JUnit output
     cmds:
       - composer validate
@@ -70,23 +175,8 @@ tasks:
           fi
         done
       - |
-        if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn prettier --check --cache-location=.prettiercache .
-        elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
-          npm run prettier --check .
-        fi
-      - |
-        if [ -f ".stylelintrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn stylelint "**/*.{css,scss,sass}"
-        elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
-          npm run stylelint "**/*.{css,scss,sass}"
-        fi
-      - |
-        if [ -f ".eslintrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn eslint .
-        elif [ -f ".eslintrc.json" ] && [ -f "package-lock.json" ]; then
-          npm run eslint .
-        fi
+        {{ .FUNC_FRONTEND_LINT }}
+        frontend_lint check
   config:
     desc: "Verifies that exported config matches the config in Drupal. Run with format=short to skip showing the full table of diffs."
     # @todo JUnit output
@@ -175,17 +265,8 @@ tasks:
         {{ .FUNC_ENSURE_DIRS }}
       - ./vendor/bin/phpcbf
       - |
-        if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn prettier --write --cache-location=.prettiercache .
-        elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
-          npm run prettier --write .
-        fi
-      - |
-        if [ -f ".stylelintrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn stylelint "**/*.{css,scss,sass}" --fix
-        elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
-          npm run stylelint "**/*.{css,scss,sass}" --fix
-        fi
+        {{ .FUNC_FRONTEND_LINT }}
+        frontend_lint fix
       - |
         DIRS_ARR=({{.TWIG_DIRS}})
         for DIR in "${DIRS_ARR[@]}"; do
