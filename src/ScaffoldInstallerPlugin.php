@@ -769,7 +769,7 @@ EOT;
         }
         $updated = preg_replace(
             '/^(includes:[ \t]*\n)/m',
-            "$1  pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml\n",
+            "$1  pantheon:\n    taskfile: ./vendor/lullabot/drainpipe/tasks/pantheon.yml\n    optional: true\n",
             $taskfileContent
         );
         if ($updated !== null && $updated !== $taskfileContent) {
@@ -812,7 +812,7 @@ EOT;
             if (!str_contains($taskfileContent, 'bitbucket:')) {
                 $updated = preg_replace(
                     '/^(includes:[ \t]*\n)/m',
-                    "$1  bitbucket: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml\n",
+                    "$1  bitbucket:\n    taskfile: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml\n    optional: true\n",
                     $taskfileContent
                 );
                 if ($updated !== null && $updated !== $taskfileContent) {

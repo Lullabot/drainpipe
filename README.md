@@ -375,7 +375,9 @@ Pantheon specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.y
 When any Pantheon CI configuration is present in `composer.json`, Drainpipe automatically adds the following to your `Taskfile.yml`'s `includes` section. You can also add it manually:
 ```yml
 includes:
-  pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml
+  pantheon:
+    taskfile: ./vendor/lullabot/drainpipe/tasks/pantheon.yml
+    optional: true
 ```
 |                          |                                                                             |
 |--------------------------|-----------------------------------------------------------------------------|
