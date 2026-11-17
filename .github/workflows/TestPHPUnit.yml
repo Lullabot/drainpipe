@@ -60,7 +60,8 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
-          ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
+          # Robo 5.2.1-5.2.3 break Drush on Drupal 10; unpin once consolidation/robo#1197 is fixed.
+          ddev composer require "lullabot/drainpipe @dev" "consolidation/robo:5.1.*" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
           ddev restart
 
@@ -166,7 +167,8 @@ jobs:
           ddev exec --raw composer config repositories.drainpipe --json '{"type": "path", "url": "drainpipe", "options": {"symlink": false}}'
           ddev exec --raw composer config repositories.drainpipe-dev --json '{"type": "path", "url": "drainpipe-dev", "options": {"symlink": false}}'
           ddev exec --raw composer config minimum-stability dev
-          ddev composer require "lullabot/drainpipe @dev" --with-all-dependencies
+          # Robo 5.2.1-5.2.3 break Drush on Drupal 10; unpin once consolidation/robo#1197 is fixed.
+          ddev composer require "lullabot/drainpipe @dev" "consolidation/robo:5.1.*" --with-all-dependencies
           ddev composer require "lullabot/drainpipe-dev @dev" --dev --with-all-dependencies
           ddev restart
 

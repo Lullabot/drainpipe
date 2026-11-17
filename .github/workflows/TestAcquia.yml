@@ -64,7 +64,8 @@ jobs:
           ddev composer require acquia/drupal-recommended-settings
 
           # Install ourselves.
-          ddev composer require lullabot/drainpipe --with-all-dependencies
+          # Robo 5.2.1-5.2.3 break Drush on Drupal 10; unpin once consolidation/robo#1197 is fixed.
+          ddev composer require lullabot/drainpipe "consolidation/robo:5.1.*" --with-all-dependencies
           ddev restart
 
           # Acquia recommended settings before DDEV settings.
