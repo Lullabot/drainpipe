@@ -778,7 +778,7 @@ EOT;
         } else {
             $this->io->warning(
                 "🪠 [Drainpipe] Could not auto-inject 'pantheon' include into Taskfile.yml. " .
-                "Add 'pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml' under 'includes:' manually."
+                "Add 'pantheon' under 'includes:' manually, with 'taskfile: ./vendor/lullabot/drainpipe/tasks/pantheon.yml' and 'optional: true'."
             );
         }
     }
@@ -821,7 +821,7 @@ EOT;
                 } else {
                     $this->io->warning(
                         "🪠 [Drainpipe] Could not auto-inject 'bitbucket' include into Taskfile.yml. " .
-                        "Add 'bitbucket: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml' under 'includes:' manually."
+                        "Add 'bitbucket' under 'includes:' manually, with 'taskfile: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml' and 'optional: true'."
                     );
                 }
             }
