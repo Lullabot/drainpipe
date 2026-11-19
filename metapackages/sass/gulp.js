@@ -16,10 +16,17 @@ if (argv.features) {
 // ESM-only, so it has to be loaded with a dynamic import.
 // Without a listener, gulp throws task errors as unhandled "error" events.
 // Logging them instead also keeps watch mode running after a failed build.
-gulp.on('error', ({ error, branch }) => {
-  if (!branch) {
-    console.error(error && error.message ? error.message : error);
+// The same error is reported again by each task that runs the failed one, so
+// only log it once.
+const loggedErrors = new WeakSet();
+gulp.on('error', ({ error }) => {
+  if (error instanceof Object) {
+    if (loggedErrors.has(error)) {
+      return;
+    }
+    loggedErrors.add(error);
   }
+  console.error(error && error.message ? error.message : error);
 });
 
 import('./gulpfile.mjs').then(() => {

@@ -138,36 +138,56 @@ function renameToTarget(srcs) {
   });
 }
 
-function compile(srcs, { useSass, minify, rename = false }) {
-  const sources = Object.keys(srcs);
-  if (!sources.length) {
-    return Promise.resolve();
-  }
-
-  let stream = src(sources).pipe(sourcemaps.init());
-  if (useSass) {
-    stream = stream
-      .pipe(sassGlob())
-      .pipe(gulpSass({
+/**
+ * Compiles a single source file.
+ *
+ * Each file gets its own stream: an error ends the stream it happens in, so
+ * a shared stream would drop every file after a broken one.
+ */
+function compileFile(source, srcs, { useSass, minify, rename }) {
+  return new Promise((resolve, reject) => {
+    const stages = [src(source), sourcemaps.init()];
+    if (useSass) {
+      stages.push(sassGlob(), gulpSass({
         style: minify ? 'compressed' : 'expanded',
         loadPaths: [modernNormalizePath],
-      }).on('error', gulpSass.logError));
-  }
-  stream = stream.pipe(postcss([
-    autoprefixer(),
-    ...(minify ? [cssnano()] : []),
-  ]));
-  if (rename) {
-    stream = stream.pipe(renameToTarget(srcs));
-  }
-
-  return stream
-    .pipe(sourcemaps.write('./'))
-    .pipe(dest((file) => {
-      const destFile = path.dirname(srcs[file.history[0]]);
+      }));
+    }
+    stages.push(postcss([
+      autoprefixer(),
+      ...(minify ? [cssnano()] : []),
+    ]));
+    if (rename) {
+      stages.push(renameToTarget(srcs));
+    }
+    stages.push(sourcemaps.write('./'), dest((file) => {
       console.log(`🪠 Writing ${relative(file.path)}`);
-      return destFile;
+      return path.dirname(srcs[file.history[0]]);
     }));
+
+    // pipe() doesn't forward errors, so listen on every stage.
+    stages.forEach(stage => stage.on('error', reject));
+    const output = stages.reduce((stream, stage) => stream.pipe(stage));
+    output.on('finish', resolve);
+    output.on('end', resolve);
+  });
+}
+
+/**
+ * Compiles every file, then fails if any of them failed.
+ *
+ * Errors are logged as they happen, so one broken file doesn't hide the
+ * others, and valid files are still written.
+ */
+async function compile(srcs, options) {
+  const results = await Promise.allSettled(
+    Object.keys(srcs).map(source => compileFile(source, srcs, options)),
+  );
+  const failures = results.filter(result => result.status === 'rejected');
+  failures.forEach(({ reason }) => console.error(reason.messageFormatted || reason.message || reason));
+  if (failures.length) {
+    throw new Error(`🪠 ${failures.length} file(s) failed to compile`);
+  }
 }
 
 // Sources are resolved once per run and shared by the Sass and PostCSS
@@ -215,5 +235,7 @@ task('sass:watch', function() {
   console.log('🪠 Watching for changes');
   watch([...new Set(includes), ...sdcGlobs], {
       usePolling: true,
+      // Match the directories that findSdcSources() skips.
+      ignored: [...SKIPPED_DIRECTORIES].map(directory => `**/${directory}/**`),
   }, series('development'));
 });
