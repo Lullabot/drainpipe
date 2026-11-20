@@ -15,9 +15,26 @@ fi
 TASKFILE=v3.48.0
 sh -c "$(curl --location --fail --silent https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin "${TASKFILE}"
 
-# Install YQ
-YQ=v4.54.3
-wget https://github.com/mikefarah/yq/releases/download/${YQ}/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+# Install yq. Only the version is pinned (Renovate bumps it); the SHA-256 is
+# read from the release's checksums file, whose column order is given by
+# checksums_hashes_order.
+YQ_VERSION=v4.54.3
+yq_base="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}"
+yq_tmp=$(mktemp -d)
+for f in yq_linux_amd64 checksums checksums_hashes_order; do
+  curl --fail --show-error --silent --location --retry 3 \
+    "${yq_base}/${f}" --output "${yq_tmp}/${f}"
+done
+yq_sha256=$(awk 'NR == FNR { if ($0 == "SHA-256") col = FNR + 1; next }
+  col && $1 == "yq_linux_amd64" { print $col }' \
+  "${yq_tmp}/checksums_hashes_order" "${yq_tmp}/checksums")
+if [ -z "$yq_sha256" ]; then
+  echo "Could not find the SHA-256 for yq_linux_amd64 in the ${YQ_VERSION} checksums file." >&2
+  exit 1
+fi
+printf '%s  %s\n' "$yq_sha256" "${yq_tmp}/yq_linux_amd64" | sha256sum -c -
+install -m 0755 "${yq_tmp}/yq_linux_amd64" /usr/bin/yq
+rm -rf "$yq_tmp"
 
 # Ensure includes are not executed
 yq -i 'del(."includes")' Taskfile.yml
