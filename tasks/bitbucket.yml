@@ -6,24 +6,36 @@ tasks:
     cmds:
       - |
         set -euo pipefail
-        # Versions and checksums must be bumped together. Renovate updates both.
+        # Version and checksum must be bumped together. Renovate updates both.
         ACLI_VERSION=4.3.2
         ACLI_SHA256=2cab26c525dadbff0f435b3cd053f1e142ef849cb05adcbd9c4a4a990632e840
-        curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+        curl --fail --show-error --silent --location --retry 3 \
           "https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar" \
           --output /tmp/acli.phar
         printf '%s  %s\n' "$ACLI_SHA256" /tmp/acli.phar | sha256sum -c -
         install -m 0755 /tmp/acli.phar vendor/bin/acli
         rm -f /tmp/acli.phar
         if ! command -v yq &>/dev/null; then
+          # Install yq. Only the version is pinned (Renovate bumps it); the SHA-256 is
+          # read from the release's checksums file, whose column order is given by
+          # checksums_hashes_order.
           YQ_VERSION=v4.54.3
-          YQ_SHA256=129534601871538efe0ba4c5e62a34fb1d5f469bcb975c4fddeb467d82974973
-          curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
-            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" \
-            --output /tmp/yq
-          printf '%s  %s\n' "$YQ_SHA256" /tmp/yq | sha256sum -c -
-          install -m 0755 /tmp/yq /usr/local/bin/yq
-          rm -f /tmp/yq
+          yq_base="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}"
+          yq_tmp=$(mktemp -d)
+          for f in yq_linux_amd64 checksums checksums_hashes_order; do
+            curl --fail --show-error --silent --location --retry 3 \
+              "${yq_base}/${f}" --output "${yq_tmp}/${f}"
+          done
+          yq_sha256=$(awk 'NR == FNR { if ($0 == "SHA-256") col = FNR + 1; next }
+            col && $1 == "yq_linux_amd64" { print $col }' \
+            "${yq_tmp}/checksums_hashes_order" "${yq_tmp}/checksums")
+          if [ -z "$yq_sha256" ]; then
+            echo "Could not find the SHA-256 for yq_linux_amd64 in the ${YQ_VERSION} checksums file." >&2
+            exit 1
+          fi
+          printf '%s  %s\n' "$yq_sha256" "${yq_tmp}/yq_linux_amd64" | sha256sum -c -
+          install -m 0755 "${yq_tmp}/yq_linux_amd64" /usr/local/bin/yq
+          rm -rf "$yq_tmp"
         fi
         vendor/bin/acli auth:login \
           --key="${ACQUIA_API_KEY}" \

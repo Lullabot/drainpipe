@@ -40,7 +40,7 @@ runs:
         echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >> ~/.ssh/config
         mkdir -p ~/terminus
         if [ "$TERMINUS_CACHE_HIT" != "true" ]; then
-          curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+          curl --fail --show-error --silent --location --retry 3 \
             "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" \
             --output ~/terminus/terminus.download
           printf '%s  %s\n' "$TERMINUS_SHA256" ~/terminus/terminus.download | sha256sum -c -

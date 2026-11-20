@@ -46,21 +46,20 @@ runs:
         INPUT_API_KEY: ${{ inputs.api-key }}
         INPUT_API_SECRET: ${{ inputs.api-secret }}
       run: |
-        # No -u: bash_aliases reads DRAINPIPE_DDEV, which is unset outside DDEV.
-        set -eo pipefail
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        # Install Acquia CLI. Downloaded and verified on the runner; vendor/bin
-        # is inside the project directory, which is shared with DDEV.
+        # Install Acquia CLI. Downloaded and verified on the runner into the
+        # project directory (shared with DDEV), then installed into vendor/bin
+        # inside DDEV so file ownership matches the rest of vendor/.
         # Version and checksum must be bumped together. Renovate updates both.
         ACLI_VERSION=4.3.2
         ACLI_SHA256=2cab26c525dadbff0f435b3cd053f1e142ef849cb05adcbd9c4a4a990632e840
-        curl --fail --show-error --silent --location --retry 3 --retry-all-errors \
+        curl --fail --show-error --silent --location --retry 3 \
           "https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar" \
-          --output "${RUNNER_TEMP}/acli.phar"
-        printf '%s  %s\n' "$ACLI_SHA256" "${RUNNER_TEMP}/acli.phar" | sha256sum -c -
-        install -m 0755 "${RUNNER_TEMP}/acli.phar" vendor/bin/acli
-        rm -f "${RUNNER_TEMP}/acli.phar"
+          --output acli.phar
+        printf '%s  %s\n' "$ACLI_SHA256" acli.phar | sha256sum -c -
+        drainpipe_exec "install -m 0755 acli.phar vendor/bin/acli"
+        rm -f acli.phar
 
         # Configure SSH.
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"

@@ -126,7 +126,7 @@
     },
     {
       "matchPackageNames": ["mikefarah/yq"],
-      "allowedVersions": "/^v?\\d+\\.\\d+\\.\\d+$/"
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
     },
     {
       "matchPackageNames": ["acquia/cli"],
@@ -170,17 +170,18 @@
       "extractVersionTemplate": "^v(?<version>.*)$"
     },
     {
-      "description": "yq: version and SHA256 are updated together",
+      "description": "yq: only the version is pinned. Its checksums file is too large for github-release-attachments, so the SHA-256 is checked against it at download time.",
       "customType": "regex",
       "managerFilePatterns": [
         "/^scaffold/tugboat/scripts/custom-init-command\\.sh$/",
         "/^tasks/bitbucket\\.yml$/"
       ],
       "matchStrings": [
-        "YQ_VERSION=(?<currentValue>v\\d+\\.\\d+\\.\\d+)\\s+YQ_SHA256=(?<currentDigest>[a-f0-9]{64})"
+        "YQ_VERSION=v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ],
       "depNameTemplate": "mikefarah/yq",
-      "datasourceTemplate": "github-release-attachments"
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$"
     },
     {
       "description": "Acquia CLI: version and SHA256 are updated together",
