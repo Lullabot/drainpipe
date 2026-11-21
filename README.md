@@ -531,7 +531,9 @@ workflows for testing.
 ```
 
 Runs security checks for composer packages and Drupal contrib, as well as posting
-a diff of `composer.lock` as a review comment.
+a diff of `composer.lock` and a report of active and ignored Composer advisories
+as review comments. Both run in a single `Security` job, so DDEV is only started
+once.
 
 Security checks rely on `composer audit`. This means `test:security` task will
 exit with error if your dependencies have known vulnerabilities. Sometimes, this
