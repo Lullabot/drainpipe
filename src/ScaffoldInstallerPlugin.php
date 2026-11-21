@@ -769,7 +769,7 @@ EOT;
         }
         $updated = preg_replace(
             '/^(includes:[ \t]*\n)/m',
-            "$1  pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml\n",
+            "$1  pantheon:\n    taskfile: ./vendor/lullabot/drainpipe/tasks/pantheon.yml\n    optional: true\n",
             $taskfileContent
         );
         if ($updated !== null && $updated !== $taskfileContent) {
@@ -778,7 +778,7 @@ EOT;
         } else {
             $this->io->warning(
                 "🪠 [Drainpipe] Could not auto-inject 'pantheon' include into Taskfile.yml. " .
-                "Add 'pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml' under 'includes:' manually."
+                "Add 'pantheon' under 'includes:' manually, with 'taskfile: ./vendor/lullabot/drainpipe/tasks/pantheon.yml' and 'optional: true'."
             );
         }
     }
@@ -812,7 +812,7 @@ EOT;
             if (!str_contains($taskfileContent, 'bitbucket:')) {
                 $updated = preg_replace(
                     '/^(includes:[ \t]*\n)/m',
-                    "$1  bitbucket: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml\n",
+                    "$1  bitbucket:\n    taskfile: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml\n    optional: true\n",
                     $taskfileContent
                 );
                 if ($updated !== null && $updated !== $taskfileContent) {
@@ -821,7 +821,7 @@ EOT;
                 } else {
                     $this->io->warning(
                         "🪠 [Drainpipe] Could not auto-inject 'bitbucket' include into Taskfile.yml. " .
-                        "Add 'bitbucket: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml' under 'includes:' manually."
+                        "Add 'bitbucket' under 'includes:' manually, with 'taskfile: ./vendor/lullabot/drainpipe/tasks/bitbucket.yml' and 'optional: true'."
                     );
                 }
             }
