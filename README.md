@@ -369,6 +369,12 @@ format as `.gitignore`, e.g.
 This folder can then be deployed to a remote service either as an archive, or
 pushed to a git remote with `task deploy:git`.
 
+Snapshots never copy `.git` directories or files, and paths excluded by
+`.drainpipeignore` (such as `node_modules`, `.yarn`, or `.ddev`) are skipped
+while the project is copied, so they don't use temporary disk space. This uses
+`rsync` when it is installed. Without `rsync`, only top-level excluded paths are
+skipped during the copy. The output is the same either way.
+
 ### Pantheon
 
 Pantheon specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.yml).
