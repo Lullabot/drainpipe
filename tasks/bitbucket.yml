@@ -6,7 +6,7 @@ tasks:
     cmds:
       - |
         set -euo pipefail
-        ACLI_VERSION=4.3.2
+        ACLI_VERSION=4.4.0
         curl -OL "https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar"
         chmod +x acli.phar
         mv acli.phar vendor/bin/acli
