@@ -22,15 +22,30 @@ tasks:
       ```
 
       usage: task sass:compile DRAINPIPE_SASS="web/themes/custom/mytheme/style.scss:web/themes/custom/mytheme/style.css web/themes/custom/myothertheme/style.scss:web/themes/custom/myothertheme/style.css"
+
+      Single Directory Components: set DRAINPIPE_SDC to a list of directories
+      to scan. Every *.scss (except partials starting with "_") and *.pcss.css
+      file inside a "components" directory is compiled to a .css file next to
+      it, e.g. components/card/card.scss to components/card/card.css.
+
+      usage: task sass:compile DRAINPIPE_SDC="web/themes/custom web/modules/custom"
     cmds:
       - |
-        if [ "{{.DRAINPIPE_SASS}}" == "" ]; then echo "🪠 Nothing provided for Sass to compile"; exit 0; fi
+        if [ "{{.DRAINPIPE_SASS}}" == "" ] && [ "{{.DRAINPIPE_SDC}}" == "" ]; then echo "🪠 Nothing provided for Sass to compile"; exit 0; fi
         FILES="{{if .DRAINPIPE_SASS}}{{.DRAINPIPE_SASS | catLines | trim}}{{end}}"
+        SDC="{{if .DRAINPIPE_SDC}}{{.DRAINPIPE_SDC | catLines | trim}}{{end}}"
         COMMAND="node ./node_modules/.bin/drainpipe-sass"
         if [ -f "yarn.lock" ] && [ ! -d "node_modules" ]; then
           COMMAND="yarn drainpipe-sass"
         fi
-        $COMMAND --files="$FILES"{{.args}}
+        # Older versions of @lullabot/drainpipe-sass ignore --sdc and would
+        # silently compile nothing.
+        if [ -n "$SDC" ] && ! $COMMAND --features 2>/dev/null | grep -qx "sdc"; then
+          echo "🪠 DRAINPIPE_SDC requires a newer version of @lullabot/drainpipe-sass"
+          echo "🪠 Update it with 'yarn up @lullabot/drainpipe-sass' or 'npm install @lullabot/drainpipe-sass@latest'"
+          exit 1
+        fi
+        $COMMAND --files="$FILES" --sdc="$SDC"{{.args}}
   watch:
     desc: As compile, but continues running and watching for changes
     deps:

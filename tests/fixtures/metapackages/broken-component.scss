@@ -1,0 +1,5 @@
+// Copied into a component by TestMetapackages.yml to check that a Sass error
+// fails the build.
+.broken {
+  color: $undefined-variable;
+}
