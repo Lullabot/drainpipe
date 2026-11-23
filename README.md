@@ -418,7 +418,9 @@ Pantheon specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.y
 When any Pantheon CI configuration is present in `composer.json`, Drainpipe automatically adds the following to your `Taskfile.yml`'s `includes` section. You can also add it manually:
 ```yml
 includes:
-  pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml
+  pantheon:
+    taskfile: ./vendor/lullabot/drainpipe/tasks/pantheon.yml
+    optional: true
 ```
 |                          |                                                                             |
 |--------------------------|-----------------------------------------------------------------------------|
@@ -460,7 +462,9 @@ Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
 ```yml
 includes:
-  acquia: ./vendor/lullabot/drainpipe/tasks/acquia.yml
+  acquia:
+    taskfile: ./vendor/lullabot/drainpipe/tasks/acquia.yml
+    optional: true
 ```
 |                        |                                                                                                                                                                |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -1429,7 +1433,9 @@ Tugboat specific tasks are contained in [`tasks/tugboat.yml`](tasks/tugboat.yml)
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
 ```yml
 includes:
-  tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+  tugboat:
+    taskfile: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+    optional: true
 ```
 | Task | Action | Usage |
 |---|---|---|
