@@ -74,7 +74,7 @@ jobs:
             docroot/sites/default/settings.php
 
           # Add Acquia tasks to the Taskfile.
-          yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
+          yq -i '.includes.acquia = {"taskfile": "./vendor/lullabot/drainpipe/tasks/acquia.yml", "optional": true}' Taskfile.yml
 
           # Add Acquia deploy tasks
           # this is not an automated process
