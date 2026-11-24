@@ -52,8 +52,8 @@ runs:
         # project directory (shared with DDEV), then installed into vendor/bin
         # inside DDEV so file ownership matches the rest of vendor/.
         # Version and checksum must be bumped together. Renovate updates both.
-        ACLI_VERSION=4.3.2
-        ACLI_SHA256=2cab26c525dadbff0f435b3cd053f1e142ef849cb05adcbd9c4a4a990632e840
+        ACLI_VERSION=4.4.0
+        ACLI_SHA256=86af4d5a31b7bd8250ae1a028c8d99729a2219d434102d9b1dfc552ece5d4f63
         curl --fail --show-error --silent --location --retry 3 \
           "https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar" \
           --output acli.phar
