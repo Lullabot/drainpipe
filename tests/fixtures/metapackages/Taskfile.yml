@@ -12,6 +12,8 @@ silent: true
 vars:
   DRAINPIPE_SASS: |
     style.scss:style.css
+  DRAINPIPE_SDC: |
+    web/themes/custom
   DRAINPIPE_JAVASCRIPT: |
     js/script.js:js/script.min.js
 
