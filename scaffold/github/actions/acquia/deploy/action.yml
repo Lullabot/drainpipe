@@ -48,11 +48,18 @@ runs:
       run: |
         source .github/actions/drainpipe/set-env/bash_aliases
 
-        # Install Acquia CLI.
+        # Install Acquia CLI. Downloaded and verified on the runner into the
+        # project directory (shared with DDEV), then installed into vendor/bin
+        # inside DDEV so file ownership matches the rest of vendor/.
+        # Version and checksum must be bumped together. Renovate updates both.
         ACLI_VERSION=4.4.0
-        drainpipe_exec "curl -OL https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar"
-        drainpipe_exec "chmod +x acli.phar"
-        drainpipe_exec "mv acli.phar vendor/bin/acli"
+        ACLI_SHA256=86af4d5a31b7bd8250ae1a028c8d99729a2219d434102d9b1dfc552ece5d4f63
+        curl --fail --show-error --silent --location --retry 3 \
+          "https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar" \
+          --output acli.phar
+        printf '%s  %s\n' "$ACLI_SHA256" acli.phar | sha256sum -c -
+        drainpipe_exec "install -m 0755 acli.phar vendor/bin/acli"
+        rm -f acli.phar
 
         # Configure SSH.
         drainpipe_exec "echo \"StrictHostKeyChecking no\" >> ~/.ssh/config"
