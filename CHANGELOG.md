@@ -1,5 +1,18 @@
 # Changelog
 
+## [6.4.0](https://github.com/Lullabot/drainpipe/compare/v6.3.1...v6.4.0) (2026-11-26)
+
+
+### Features
+
+* **sass:** add support for Single Directory Components and enhance compilation process ([#1381](https://github.com/Lullabot/drainpipe/issues/1381)) ([db9a9f2](https://github.com/Lullabot/drainpipe/commit/db9a9f23f732638bf217dd47c6ef02790ef774ee))
+
+
+### Bug Fixes
+
+* **security:** pin and verify checksums for Terminus, Acquia CLI and yq downloads ([#1384](https://github.com/Lullabot/drainpipe/issues/1384)) ([2d58944](https://github.com/Lullabot/drainpipe/commit/2d589440271e4aba8cf8b2619386f899bdbe8a40))
+* **vendor:** make vendor includes in Taskfile optional for better flexibility ([#1387](https://github.com/Lullabot/drainpipe/issues/1387)) ([5009346](https://github.com/Lullabot/drainpipe/commit/50093465297170f39f9d6118c5e4a0759cec5cfb))
+
 ## [6.3.1](https://github.com/Lullabot/drainpipe/compare/v6.3.0...v6.3.1) (2026-11-16)
 
 
