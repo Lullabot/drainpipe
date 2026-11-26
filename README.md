@@ -370,6 +370,9 @@ while the project is copied, so they don't use temporary disk space. This uses
 `rsync` when it is installed. Without `rsync`, only top-level excluded paths are
 skipped during the copy. The output is the same either way.
 
+`task snapshot:directory` and `task snapshot:archive` require `bash`. Alpine-based
+images don't include it by default, so install it first, e.g. `apk add bash`.
+
 ### Pantheon
 
 Pantheon specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.yml).
