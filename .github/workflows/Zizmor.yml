@@ -35,7 +35,7 @@ jobs:
 
       - name: Install Zizmor
         if: steps.filter.outputs.gha == 'true'
-        run: pip install zizmor==1.33.0
+        run: pip install zizmor==1.33.1
 
       - name: Run Zizmor
         id: zizmor
