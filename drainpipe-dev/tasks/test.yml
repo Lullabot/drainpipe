@@ -27,10 +27,11 @@ vars:
   # Defines frontend_lint, which runs Prettier, Stylelint and (when checking)
   # ESLint in every FRONTEND_DIRS entry. Pass "check" or "fix".
   #
-  # Binaries are invoked with `yarn exec` / `npm exec --no --` rather than
+  # Binaries are invoked with `yarn exec --` / `npm exec --no --` rather than
   # `yarn <bin>` / `npm run <bin>`, so a package.json script with the same name
   # as the tool (e.g. "prettier": "prettier -w .") can never shadow it, and
-  # flags such as --check are passed to the tool rather than to npm.
+  # flags such as --check are passed to the tool rather than to npm. The `--`
+  # after `yarn exec` is required on Yarn 1, which otherwise drops the flags.
   FUNC_FRONTEND_LINT: |
     frontend_has_config() {
       for f in "$@"; do
@@ -57,7 +58,7 @@ vars:
         SEARCH="$(cd "$DIR" && pwd)"
         while :; do
           if [ -f "$SEARCH/yarn.lock" ]; then
-            PM=(yarn exec)
+            PM=(yarn exec --)
             break
           elif [ -f "$SEARCH/package-lock.json" ]; then
             PM=(npm exec --no --)

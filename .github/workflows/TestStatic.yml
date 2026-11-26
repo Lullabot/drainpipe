@@ -117,10 +117,63 @@ jobs:
       - name: Confirm front-end linting reports skipped tools and missing directories
         run: |
           set -x
-          ddev task test:lint | tee lint.log
+          ddev task test:lint > lint.log 2>&1 || { cat lint.log; exit 1; }
+          cat lint.log
           grep -q "Skipping Prettier in '.': no .prettierrc.json found." lint.log
-          # A FRONTEND_DIRS entry that does not exist must fail rather than skip.
-          ! ddev task test:lint FRONTEND_DIRS="does/not/exist"
+          # A FRONTEND_DIRS entry that does not exist must fail with a clear message.
+          if ddev task test:lint FRONTEND_DIRS="does/not/exist" > missing.log 2>&1; then
+            cat missing.log
+            exit 1
+          fi
+          cat missing.log
+          grep -q "Front-end directory 'does/not/exist' does not exist" missing.log
+
+      - name: Confirm front-end linting checks without writing, despite a same-named package.json script
+        run: |
+          set -x
+          ddev exec node --version
+          ddev exec yarn --version
+          ddev exec npm --version
+          for PM in npm yarn; do
+            DIR="frontend-fixtures/$PM"
+            mkdir -p "$DIR"
+            # A "prettier" script that writes. Before the fix, `yarn prettier --check`
+            # / `npm run prettier --check` ran this script and rewrote the files.
+            printf '{\n  "name": "fixture-%s",\n  "private": true,\n  "scripts": {\n    "prettier": "prettier -w ."\n  }\n}\n' "$PM" > "$DIR/package.json"
+            printf '{}\n' > "$DIR/.prettierrc.json"
+            printf '.yarn\n.pnp.*\nyarn.lock\npackage-lock.json\n' > "$DIR/.prettierignore"
+            printf 'const   foo = {a:1,\n  b:2}\n' > "$DIR/unformatted.js"
+            if [ "$PM" = "npm" ]; then
+              ddev exec -d "/var/www/html/$DIR" npm install --save-dev --no-audit --no-fund prettier@3.3.3
+              test -f "$DIR/package-lock.json"
+            else
+              ddev exec -d "/var/www/html/$DIR" "YARN_ENABLE_IMMUTABLE_INSTALLS=false COREPACK_ENABLE_DOWNLOAD_PROMPT=0 yarn add --dev prettier@3.3.3"
+              test -f "$DIR/yarn.lock"
+            fi
+            # Stage the fixture so any write by test:lint shows up in git diff.
+            git add -f "$DIR/package.json" "$DIR/.prettierrc.json" "$DIR/.prettierignore" "$DIR/unformatted.js"
+
+            # test:lint must fail on the unformatted file and must not modify it.
+            if ddev task test:lint FRONTEND_DIRS="$DIR" > "lint-$PM.log" 2>&1; then
+              cat "lint-$PM.log"
+              echo "test:lint passed with an unformatted file using $PM"
+              exit 1
+            fi
+            cat "lint-$PM.log"
+            grep -q "unformatted.js" "lint-$PM.log"
+            git diff --exit-code -- "$DIR"
+
+            # test:autofix must pass --write through to Prettier (Yarn 1 drops
+            # flags without `yarn exec --`), after which test:lint passes.
+            ddev task test:autofix FRONTEND_DIRS="$DIR"
+            if git diff --quiet -- "$DIR/unformatted.js"; then
+              echo "test:autofix did not format unformatted.js using $PM"
+              exit 1
+            fi
+            ddev task test:lint FRONTEND_DIRS="$DIR"
+          done
+          git reset -q -- frontend-fixtures
+          rm -rf frontend-fixtures
 
       - name: Upload test artifacts
         if: ${{ always() }}

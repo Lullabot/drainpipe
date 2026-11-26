@@ -259,7 +259,7 @@ looked up there:
 The package manager is detected from a `yarn.lock` or `package-lock.json` in
 the directory or any parent up to the repository root, so a theme that is a
 workspace of a root `package.json` works. Tools are run as binaries with
-`yarn exec` / `npm exec --no --`, so a `package.json` script with the same name
+`yarn exec --` / `npm exec --no --`, so a `package.json` script with the same name
 (e.g. `"prettier": "prettier -w ."`) is never invoked instead. Skipped tools
 are reported in the output.
 
