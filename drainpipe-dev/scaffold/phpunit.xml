@@ -30,7 +30,7 @@
      external DDev URL so you can follow the links directly.
     -->
     <env name="BROWSERTEST_OUTPUT_BASE_URL" value=""/>
-    <!-- Example for changing the driver args to webdriver tests MINK_DRIVER_ARGS_WEBDRIVER value: '["chrome", { "chromeOptions": { "w3c": false } }, "http://localhost:4444/wd/hub"]' For using the Firefox browser, replace "chrome" with "firefox" -->
+    <!-- Example for changing the driver args to webdriver tests MINK_DRIVER_ARGS_WEBDRIVER value: '["chrome", {"browserName":"chrome","goog:chromeOptions":{"w3c": true}}, "http://localhost:4444"]' For using the Firefox browser, replace "chrome" with "firefox" -->
     <env name="MINK_DRIVER_ARGS_WEBDRIVER" value='["chrome", {"browserName":"chrome","goog:chromeOptions":{"w3c": true, "args":["--no-sandbox","--ignore-certificate-errors", "--allow-insecure-localhost", "--disable-dev-shm-usage", "--dns-prefetch-disable"]}}, "http://chrome:4444"]'/>
   </php>
   <extensions>
@@ -72,10 +72,10 @@
       <directory>test/phpunit/*/Functional</directory>
     </testsuite>
     <testsuite name="functional-javascript">
-      <directory>{% DOCROOT %}/modules/custom/*/tests/src/FunctionalJavaScript</directory>
-      <directory>{% DOCROOT %}/modules/custom/*/*/tests/src/FunctionalJavaScript</directory>
-      <directory>{% DOCROOT %}/modules/custom/*/modules/*/tests/src/FunctionalJavaScript</directory>
-      <directory>test/phpunit/*/FunctionalJavaScript</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/tests/src/FunctionalJavascript</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/*/tests/src/FunctionalJavascript</directory>
+      <directory>{% DOCROOT %}/modules/custom/*/modules/*/tests/src/FunctionalJavascript</directory>
+      <directory>test/phpunit/*/FunctionalJavascript</directory>
     </testsuite>
   </testsuites>
 </phpunit>

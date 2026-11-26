@@ -8,6 +8,14 @@ permissions:
   deployments: write
   contents: read
 
+# Every run clones and deploys the same shared Acquia sandbox environment, so
+# runs from different PRs must not overlap. The group is global (not per-PR)
+# and queued so concurrent runs wait their turn instead of colliding or being
+# cancelled.
+concurrency:
+  group: acquia-shared-sandbox
+  queue: max
+
 jobs:
   Test-Acquia:
     if: github.actor != 'dependabot[bot]'
@@ -56,7 +64,8 @@ jobs:
           ddev composer require acquia/drupal-recommended-settings
 
           # Install ourselves.
-          ddev composer require lullabot/drainpipe --with-all-dependencies
+          # Robo 5.2.1-5.2.3 break Drush on Drupal 10; unpin once consolidation/robo#1197 is fixed.
+          ddev composer require lullabot/drainpipe "consolidation/robo:5.1.*" --with-all-dependencies
           ddev restart
 
           # Acquia recommended settings before DDEV settings.
@@ -65,7 +74,7 @@ jobs:
             docroot/sites/default/settings.php
 
           # Add Acquia tasks to the Taskfile.
-          yq -i '.includes.acquia="./vendor/lullabot/drainpipe/tasks/acquia.yml"' Taskfile.yml
+          yq -i '.includes.acquia = {"taskfile": "./vendor/lullabot/drainpipe/tasks/acquia.yml", "optional": true}' Taskfile.yml
 
           # Add Acquia deploy tasks
           # this is not an automated process
@@ -98,7 +107,8 @@ jobs:
 
       - name: Create .drainpipeignore
         run: |
-          echo "/web/sites/default/files" >> .drainpipeignore
+          # web is a symlink to docroot, which git (and so the snapshot) does not follow.
+          echo "/docroot/sites/default/files" >> .drainpipeignore
           echo "/.ddev" >> .drainpipeignore
           echo "settings.ddev.php" >> .drainpipeignore
           echo "/drainpipe" >> .drainpipeignore
@@ -112,6 +122,9 @@ jobs:
         run: |
           echo "/drainpipe" >> .drainpipeignore
           ddev task snapshot:directory directory=/tmp/release
+          # The snapshot is written inside the DDEV web container, so check it there.
+          ddev exec test -f /tmp/release/docroot/index.php
+          ddev exec test ! -e /tmp/release/docroot/sites/default/files
 
       - name: Clone from production to dev
         uses: ./drainpipe/scaffold/github/actions/acquia/clone-env

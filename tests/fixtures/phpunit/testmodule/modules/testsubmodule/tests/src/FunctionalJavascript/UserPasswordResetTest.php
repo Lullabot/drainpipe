@@ -51,6 +51,13 @@ class UserPasswordResetTest extends WebDriverTestBase {
      * {@inheritdoc}
      */
     protected function setUp(): void {
+        // Drupal 10's WebDriver client does not work with Selenium 4: in W3C
+        // mode chromedriver rejects its clicks (HTTP 400), and Selenium 4 does
+        // not accept its legacy (non-W3C) sessions. Drupal 10 is end of life in
+        // December 2026, so these tests only run on Drupal 11 and later.
+        if (version_compare(\Drupal::VERSION, '11.0', '<')) {
+            $this->markTestSkipped('Drupal 10 WebDriver tests do not work with Selenium 4.');
+        }
         parent::setUp();
 
         // Create a user.

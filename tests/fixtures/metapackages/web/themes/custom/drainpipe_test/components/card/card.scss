@@ -1,0 +1,9 @@
+@use "card-variables" as vars;
+
+.card {
+  border: 1px solid vars.$card-border-color;
+
+  &__title {
+    user-select: none;
+  }
+}

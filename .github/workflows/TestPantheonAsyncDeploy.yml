@@ -89,8 +89,8 @@ jobs:
         run: |
           test -f /tmp/test-gh-async/Taskfile.yml \
             || { echo "FAIL: Taskfile.yml not found"; exit 1; }
-          grep -q 'pantheon:.*tasks/pantheon.yml' /tmp/test-gh-async/Taskfile.yml \
-            || { echo "FAIL: pantheon task include not injected into Taskfile.yml"; exit 1; }
+          yq -e '.includes.pantheon.taskfile == "./vendor/lullabot/drainpipe/tasks/pantheon.yml" and .includes.pantheon.optional == true' /tmp/test-gh-async/Taskfile.yml > /dev/null \
+            || { echo "FAIL: optional pantheon task include not injected into Taskfile.yml"; exit 1; }
           echo "PASS"
 
   # -----------------------------------------------------------------------
@@ -152,8 +152,8 @@ jobs:
         run: |
           test -f /tmp/test-gl-async/Taskfile.yml \
             || { echo "FAIL: Taskfile.yml not found"; exit 1; }
-          grep -q 'pantheon:.*tasks/pantheon.yml' /tmp/test-gl-async/Taskfile.yml \
-            || { echo "FAIL: pantheon task include not injected into Taskfile.yml"; exit 1; }
+          yq -e '.includes.pantheon.taskfile == "./vendor/lullabot/drainpipe/tasks/pantheon.yml" and .includes.pantheon.optional == true' /tmp/test-gl-async/Taskfile.yml > /dev/null \
+            || { echo "FAIL: optional pantheon task include not injected into Taskfile.yml"; exit 1; }
           echo "PASS"
 
   # -----------------------------------------------------------------------
