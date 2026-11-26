@@ -2,25 +2,9 @@
 
 ## Pre-Release Verification
 
-Before merging the release-please PR, complete all verification steps below.
+Before merging the release-please PR, complete the verification below.
 
-### 1. Fresh Installation Test
-
-```bash
-./tests/prerelease.sh
-```
-
-Verifies Drainpipe installs cleanly in a new project without dependency conflicts.
-
-### 2. Update Path Test
-
-```bash
-./tests/prerelease.sh update
-```
-
-Verifies existing projects can upgrade to the latest version without issues.
-
-### 3. Integration Testing
+### Integration Testing
 
 Test against production hosting environments using the [`Lullabot/drainpipe-test`](https://github.com/Lullabot/drainpipe-test) repository.
 

@@ -32,7 +32,9 @@ runs:
     - name: Install lockfile parsing dependencies
       id: install-deps
       shell: bash
-      run: |
+      # The lockfile parsers are installed into a throwaway RUNNER_TEMP directory; the calling
+      # project has no manifest for them, hence the adhoc-packages ignore.
+      run: | # zizmor: ignore[adhoc-packages]
         DEPS_DIR="${RUNNER_TEMP}/lockfile-diff-deps"
         mkdir -p "$DEPS_DIR"
         npm install --prefix "$DEPS_DIR" \

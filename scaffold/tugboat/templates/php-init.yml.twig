@@ -1,4 +1,5 @@
 - |
+  set -e
   # Install mysql or mariadb client.
   apt-get update
 {% if services.database.type == 'mysql' %}
@@ -66,12 +67,26 @@
   a2enmod headers rewrite
 {% endif %}
 {% if pantheon %}
-  curl --fail -sSL https://github.com/pantheon-systems/terminus/releases/download/$(curl -L --fail --silent "https://api.github.com/repos/pantheon-systems/terminus/releases/latest" | perl -nle 'print $1 if /"tag_name":\s*"([^"]+)"/')/terminus.phar --output /usr/local/bin/terminus
-  chmod 755 /usr/local/bin/terminus
+  # Version and checksum must be bumped together. Renovate updates both.
+  TERMINUS_VERSION=4.3.5
+  TERMINUS_SHA256=b5653c9e08329ab087d4b772a98e7a733e9a5b28f9101096d860e25fba91c8d2
+  curl --fail --show-error --silent --location --retry 3 \
+    "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" \
+    --output /tmp/terminus.phar
+  printf '%s  %s\n' "$TERMINUS_SHA256" /tmp/terminus.phar | sha256sum -c -
+  install -m 0755 /tmp/terminus.phar /usr/local/bin/terminus
+  rm -f /tmp/terminus.phar
 {% endif %}
 {% if acquia %}
-  curl --fail -sSL https://github.com/acquia/cli/releases/latest/download/acli.phar --output /usr/local/bin/acli
-  chmod 755 /usr/local/bin/acli
+  # Version and checksum must be bumped together. Renovate updates both.
+  ACLI_VERSION=4.4.0
+  ACLI_SHA256=86af4d5a31b7bd8250ae1a028c8d99729a2219d434102d9b1dfc552ece5d4f63
+  curl --fail --show-error --silent --location --retry 3 \
+    "https://github.com/acquia/cli/releases/download/${ACLI_VERSION}/acli.phar" \
+    --output /tmp/acli.phar
+  printf '%s  %s\n' "$ACLI_SHA256" /tmp/acli.phar | sha256sum -c -
+  install -m 0755 /tmp/acli.phar /usr/local/bin/acli
+  rm -f /tmp/acli.phar
 {% endif %}
 {% if services.php.commands.init|default(false) %}
   task tugboat:php:init

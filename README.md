@@ -192,6 +192,49 @@ the following:
     deps: [sass:watch, javascript:watch]
   ```
 
+### Single Directory Components
+
+[Single Directory Components](https://www.drupal.org/docs/develop/theming-drupal/using-single-directory-components)
+(SDC) load the CSS file that sits next to their `*.component.yml` file. Drainpipe
+can find the sources in your components and compile them in place, so they don't
+need to be listed one by one in `DRAINPIPE_SASS`.
+
+- Make sure `@lullabot/drainpipe-sass` is up to date. `task sass:compile` fails
+  with an error if the installed version doesn't support `DRAINPIPE_SDC`.
+- Add `DRAINPIPE_SDC` to the `vars` section of `Taskfile.yml` with the
+  directories to scan (use `docroot` instead of `web` if that's your docroot)
+  ```
+  vars:
+    DRAINPIPE_SDC: |
+      web/themes/custom
+      web/modules/custom
+  ```
+- Every file inside a `components` directory is compiled to a `.css` file next
+  to it:
+
+  | Source                                         | Compiled to                               |
+  |------------------------------------------------|-------------------------------------------|
+  | `components/my_component/my_component.scss`    | `components/my_component/my_component.css` |
+  | `components/my_component/my_component.pcss.css` | `components/my_component/my_component.css` |
+
+  `.scss` files are compiled with Sass and PostCSS. Sass partials (files starting
+  with `_`) are only compiled as part of the files that `@use` them.
+  `.pcss.css` files (the convention used by Drupal core) are plain CSS processed
+  only with PostCSS, for projects that don't use Sass.
+- Both kinds of source get Autoprefixer and, with `task sass:compile`, are
+  minified with cssnano. `task sass:watch` writes unminified output and picks up
+  new components without restarting.
+- `DRAINPIPE_SDC` and `DRAINPIPE_SASS` can be used together. If a file is listed
+  in `DRAINPIPE_SASS`, that mapping takes precedence.
+- Commit the sources and ignore the compiled files, e.g. in `.gitignore`:
+  ```
+  web/themes/custom/*/components/**/*.css
+  web/themes/custom/*/components/**/*.css.map
+  !web/themes/custom/*/components/**/*.pcss.css
+  ```
+  If some components use plain `.css` files that are not compiled, ignore only
+  the compiled files of the components that have a source.
+
 ## JavaScript Compilation
 
 JavaScript bundling support is via [esbuild](https://esbuild.github.io/).
@@ -335,11 +378,16 @@ Runs PHPUnit tests in:
 - `test/phpunit/**/Kernel`
 - `web/modules/custom/**/tests/src/Functional`
 - `test/phpunit/**/Functional`
-- `web/modules/custom/**/tests/src/FunctionalJavaScript`
-- `test/phpunit/**/FunctionalJavaScript`
+- `web/modules/custom/**/tests/src/FunctionalJavascript`
+- `test/phpunit/**/FunctionalJavascript`
 
 You will need to make sure you have a working Drupal site before you're
 able to run these.
+
+`FunctionalJavascript` tests need a Selenium 4 Chrome service. The scaffolded
+`phpunit.xml` expects it at `http://chrome:4444`; change `MINK_DRIVER_ARGS_WEBDRIVER`
+there if yours is elsewhere. Drupal 10's WebDriver client does not work with Selenium 4,
+so on Drupal 10 skip these tests or run them against chromedriver directly.
 
 ### Autofix
 
@@ -399,13 +447,24 @@ format as `.gitignore`, e.g.
 This folder can then be deployed to a remote service either as an archive, or
 pushed to a git remote with `task deploy:git`.
 
+Snapshots never copy `.git` directories or files, and paths excluded by
+`.drainpipeignore` (such as `node_modules`, `.yarn`, or `.ddev`) are skipped
+while the project is copied, so they don't use temporary disk space. This uses
+`rsync` when it is installed. Without `rsync`, only top-level excluded paths are
+skipped during the copy. The output is the same either way.
+
+`task snapshot:directory` and `task snapshot:archive` require `bash`. Alpine-based
+images don't include it by default, so install it first, e.g. `apk add bash`.
+
 ### Pantheon
 
 Pantheon specific tasks are contained in [`tasks/pantheon.yml`](tasks/pantheon.yml).
 When any Pantheon CI configuration is present in `composer.json`, Drainpipe automatically adds the following to your `Taskfile.yml`'s `includes` section. You can also add it manually:
 ```yml
 includes:
-  pantheon: ./vendor/lullabot/drainpipe/tasks/pantheon.yml
+  pantheon:
+    taskfile: ./vendor/lullabot/drainpipe/tasks/pantheon.yml
+    optional: true
 ```
 |                          |                                                                             |
 |--------------------------|-----------------------------------------------------------------------------|
@@ -447,7 +506,9 @@ Acquia specific tasks are contained in [`tasks/acquia.yml`](tasks/acquia.yml).
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
 ```yml
 includes:
-  acquia: ./vendor/lullabot/drainpipe/tasks/acquia.yml
+  acquia:
+    taskfile: ./vendor/lullabot/drainpipe/tasks/acquia.yml
+    optional: true
 ```
 |                        |                                                                                                                                                                |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -1416,7 +1477,9 @@ Tugboat specific tasks are contained in [`tasks/tugboat.yml`](tasks/tugboat.yml)
 Add the following to your `Taskfile.yml`'s `includes` section to use them:
 ```yml
 includes:
-  tugboat: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+  tugboat:
+    taskfile: ./vendor/lullabot/drainpipe/tasks/tugboat.yml
+    optional: true
 ```
 | Task | Action | Usage |
 |---|---|---|
@@ -1545,7 +1608,7 @@ Testing PR code changes on real sites is extra beneficial.
 
 ### Local Development
 
-In order to test local changes follow the instructions for the [test script](./docs/test-script.md).
+To test local changes, see [Testing local changes](./docs/test-script.md).
 
 ### Peer Review Guidelines for Automated Updates
 

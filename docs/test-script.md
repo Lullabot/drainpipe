@@ -1,28 +1,18 @@
-# Test Script
+# Testing local changes
 
-A test script is available in `tests/local-test.sh` to setup a Drupal site
-with Drainpipe packages installed from your local checkout.
+## Drainpipe's own PHPUnit tests
 
-Go to the directory above `drainpipe` and run the `tests/local-test.sh` script
-to setup a new test site e.g.
+From the root of your checkout:
+
 ```
-❯ pwd
-/home/justafish/repos/drainpipe
-
-❯ cd ../
+❯ composer install
+❯ ./vendor/bin/phpunit
 ```
 
-If you previously created a test site, remove it:
-```
-❯ cd drainpipe-test
-❯ ddev stop --remove-data --omit-snapshot
-❯ cd ../
-```
+The Functional tests run `composer update` in `tests/fixtures/drainpipe-test-project`, so they
+need network access.
 
-Run the test script:
-```
-❯ pwd
-/home/justafish/repos
-❯ ./drainpipe/tests/local-test.sh
-cd drainpipe-test
-```
+## CI workflows
+
+Most of the checks in `.github/workflows` run on pull requests. To try a downstream project's
+workflows locally, see the `act` instructions in the [README](../README.md).

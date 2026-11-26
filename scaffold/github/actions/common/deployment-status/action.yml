@@ -10,7 +10,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./.github/actions/drainpipe/set-env
+    - uses: ./.github/actions/drainpipe/set-env # zizmor: ignore[self-repository]
 
     - name: Set deployment to success
       env:

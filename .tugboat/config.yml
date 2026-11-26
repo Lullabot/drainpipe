@@ -29,6 +29,7 @@ services:
     commands:
       init:
         - |
+          set -e
           apt-get update
           apt-get install -y mariadb-client
           ln -snf "${TUGBOAT_ROOT}/web" "${DOCROOT}"

@@ -57,7 +57,8 @@ jobs:
 
       - name: Commit current state
         run: |
-          echo "/drainpipe" >> .gitignore
+          # Drupal's scaffolded .gitignore has no trailing newline: start on a new line.
+          printf '\n/drainpipe\n' >> .gitignore
           git config --global user.email "no-reply@example.com"
           git config --global user.name "Drainpipe Bot"
           git init

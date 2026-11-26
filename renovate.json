@@ -143,8 +143,7 @@
     {
       "matchPackageNames": ["yarn"],
       "matchFileNames": [
-        ".github/workflows/TestMetapackages.yml",
-        ".github/workflows/TestFunctional.yml"
+        ".github/workflows/TestMetapackages.yml"
       ],
       "allowedVersions": "^1"
     },
@@ -171,29 +170,32 @@
       "extractVersionTemplate": "^v(?<version>.*)$"
     },
     {
+      "description": "yq: only the version is pinned. Its checksums file is too large for github-release-attachments, so the SHA-256 is checked against it at download time.",
       "customType": "regex",
       "managerFilePatterns": [
         "/^scaffold/tugboat/scripts/custom-init-command\\.sh$/",
         "/^tasks/bitbucket\\.yml$/"
       ],
       "matchStrings": [
-        "YQ=v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+        "YQ_VERSION=v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ],
       "depNameTemplate": "mikefarah/yq",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>.*)$"
     },
     {
+      "description": "Acquia CLI: version and SHA256 are updated together",
       "customType": "regex",
       "managerFilePatterns": [
         "/^tasks/bitbucket\\.yml$/",
-        "/^scaffold/github/actions/acquia/deploy/action\\.yml$/"
+        "/^scaffold/github/actions/acquia/deploy/action\\.yml$/",
+        "/^scaffold/tugboat/templates/php-init\\.yml\\.twig$/"
       ],
       "matchStrings": [
-        "ACLI_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+        "ACLI_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s+ACLI_SHA256=(?<currentDigest>[a-f0-9]{64})"
       ],
       "depNameTemplate": "acquia/cli",
-      "datasourceTemplate": "github-releases"
+      "datasourceTemplate": "github-release-attachments"
     },
     {
       "customType": "regex",
@@ -209,7 +211,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.github/workflows/Security\\.yml$/",
+        "/^\\.github/workflows/Zizmor\\.yml$/",
         "/^scaffold/github/workflows/Security\\.yml$/"
       ],
       "matchStrings": [
@@ -221,7 +223,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.github/workflows/Security\\.yml$/",
+        "/^\\.github/workflows/Gitleaks\\.yml$/",
         "/^scaffold/github/workflows/Security\\.yml$/"
       ],
       "matchStrings": [
@@ -234,8 +236,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.github/workflows/TestMetapackages\\.yml$/",
-        "/^\\.github/workflows/TestFunctional\\.yml$/"
+        "/^\\.github/workflows/TestMetapackages\\.yml$/"
       ],
       "matchStrings": [
         "yarn@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -244,20 +245,21 @@
       "datasourceTemplate": "npm"
     },
     {
+      "description": "Terminus: version and SHA256 are updated together",
       "customType": "regex",
       "managerFilePatterns": [
         "/^scaffold/github/actions/pantheon/setup-terminus/action\\.yml$/",
         "/^\\.github/workflows/TestGitHubActions\\.yml$/",
         "/^scaffold/github/workflows/PantheonReviewAppsDDEV\\.yml$/",
         "/^scaffold/github/workflows/PantheonReviewAppsAsyncDDEV\\.yml$/",
-        "/^scaffold/gitlab/Pantheon\\.gitlab-ci\\.yml$/"
+        "/^scaffold/gitlab/Pantheon\\.gitlab-ci\\.yml$/",
+        "/^scaffold/tugboat/templates/php-init\\.yml\\.twig$/"
       ],
       "matchStrings": [
-        "key: terminus-(?<currentValue>\\d+\\.\\d+\\.\\d+)",
-        "releases/download/(?<currentValue>\\d+\\.\\d+\\.\\d+)/terminus\\.phar"
+        "TERMINUS_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s+TERMINUS_SHA256=(?<currentDigest>[a-f0-9]{64})"
       ],
       "depNameTemplate": "pantheon-systems/terminus",
-      "datasourceTemplate": "github-releases"
+      "datasourceTemplate": "github-release-attachments"
     }
   ]
 }
