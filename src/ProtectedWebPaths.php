@@ -69,17 +69,23 @@ final class ProtectedWebPaths
     }
 
     /**
-     * Returns protected paths missing from a parsed pantheon.yml.
+     * Returns protected paths missing from parsed Pantheon YAML files.
      *
-     * @param array<mixed> $pantheonYml
+     * Pass pantheon.upstream.yml and pantheon.yml; Pantheon protects the
+     * union of their protected_web_paths.
+     *
+     * @param array<mixed> ...$pantheonYmls
      *
      * @return string[]
      */
-    public static function missingPantheonPaths(array $pantheonYml): array
+    public static function missingPantheonPaths(array ...$pantheonYmls): array
     {
-        $configured = $pantheonYml['protected_web_paths'] ?? [];
-        if (!is_array($configured)) {
-            $configured = [];
+        $configured = [];
+        foreach ($pantheonYmls as $pantheonYml) {
+            $paths = $pantheonYml['protected_web_paths'] ?? [];
+            if (is_array($paths)) {
+                $configured = array_merge($configured, $paths);
+            }
         }
         return array_values(array_diff(self::PATHS, $configured));
     }

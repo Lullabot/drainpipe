@@ -83,5 +83,11 @@ class ProtectedWebPathsTest extends TestCase
         $this->assertSame([], ProtectedWebPaths::missingPantheonPaths([
             'protected_web_paths' => ProtectedWebPaths::PATHS,
         ]));
+        // Paths split across pantheon.upstream.yml and pantheon.yml.
+        $this->assertSame([], ProtectedWebPaths::missingPantheonPaths(
+            ['protected_web_paths' => ['/core/install.php', '/install.php']],
+            ['protected_web_paths' => ['/update.php']],
+        ));
+        $this->assertSame(ProtectedWebPaths::PATHS, ProtectedWebPaths::missingPantheonPaths());
     }
 }

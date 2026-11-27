@@ -110,13 +110,20 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
         }
 
         $contents = file_get_contents($htaccessPath);
+        if ($contents === false) {
+            $this->io->warning("🪠 [Drainpipe] Could not read $htaccessPath; install.php and update.php are not blocked.");
+            return;
+        }
         $enabled = ($this->extra['drainpipe']['acquia']['protected-web-paths'] ?? true) !== false;
         $updated = $enabled
             ? ProtectedWebPaths::applyToHtaccess($contents)
             : ProtectedWebPaths::removeFromHtaccess($contents);
 
         if ($updated !== $contents) {
-            file_put_contents($htaccessPath, $updated);
+            if (file_put_contents($htaccessPath, $updated) === false) {
+                $this->io->warning("🪠 [Drainpipe] Could not write $htaccessPath; install.php and update.php protection was not updated.");
+                return;
+            }
             $this->io->write($enabled
                 ? "🪠 [Drainpipe] Blocked web access to install.php and update.php in $htaccessPath"
                 : "🪠 [Drainpipe] Removed install.php and update.php protection from $htaccessPath");
@@ -559,10 +566,15 @@ EOT;
         }
         else {
             // Existing pantheon.yml files are never modified; recommend the
-            // protected paths instead.
+            // protected paths instead. Pantheon merges the upstream's
+            // protected paths with the site's, so count both.
             try {
-                $pantheonYml = Yaml::parseFile('./pantheon.yml');
-                $missing = ProtectedWebPaths::missingPantheonPaths(is_array($pantheonYml) ? $pantheonYml : []);
+                $files = array_filter(['./pantheon.upstream.yml', './pantheon.yml'], 'is_file');
+                $parsed = array_map(
+                    fn (string $file) => (array) Yaml::parseFile($file),
+                    $files
+                );
+                $missing = ProtectedWebPaths::missingPantheonPaths(...$parsed);
                 if (!empty($missing)) {
                     $this->io->warning(
                         "🪠 [Drainpipe] pantheon.yml does not protect these paths from web access. Add them under 'protected_web_paths': " .
