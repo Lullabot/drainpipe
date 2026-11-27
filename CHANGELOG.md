@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.4.2](https://github.com/Lullabot/drainpipe/compare/v6.4.1...v6.4.2) (2026-11-27)
+
+
+### Bug Fixes
+
+* **test:** run front-end linters as binaries and support FRONTEND_DIRS ([#1374](https://github.com/Lullabot/drainpipe/issues/1374)) ([b5d0293](https://github.com/Lullabot/drainpipe/commit/b5d0293b5eea465aab8505f4ad1e9b5673410727))
+
 ## [6.4.1](https://github.com/Lullabot/drainpipe/compare/v6.4.0...v6.4.1) (2026-11-26)
 
 
