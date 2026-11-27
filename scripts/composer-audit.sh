@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Runs Composer audit feature and generates a comment.md file that contains
+# Runs Composer audit feature and generates a markdown report that contains
 # an analysis of active and ignored vulnerabilities in project's dependencies.
+#
+# The report is written to comment.md, or to the file set in
+# COMPOSER_AUDIT_OUTPUT. The audit reads composer.lock, so dependencies do not
+# need to be reinstalled. This script reports vulnerabilities but does not fail
+# because of them; use `task test:security` to fail the build.
 #
 # Requires: composer, jq
 
-composer install --prefer-dist --no-progress
+OUTPUT_FILE="${COMPOSER_AUDIT_OUTPUT:-comment.md}"
+
 composer audit --format=json > audit-results.json || true
 
 process_advisories() {
@@ -40,27 +46,27 @@ process_advisories() {
 ADVISORY_COUNT=$(jq '.advisories // {} | length' audit-results.json)
 IGNORED_COUNT=$(jq '."ignored-advisories" // {} | length' audit-results.json)
 
-echo "## Composer Audit results" > comment.md
+echo "## Composer Audit results" > "$OUTPUT_FILE"
 
 if [ "$ADVISORY_COUNT" -eq 0 ]; then
-  echo "**No security vulnerabilities found!**" >> comment.md
-  echo "" >> comment.md
+  echo "**No security vulnerabilities found!**" >> "$OUTPUT_FILE"
+  echo "" >> "$OUTPUT_FILE"
 else
   ACTIVE_ISSUES_FILE="/tmp/active_issues.md"
   echo "" > "$ACTIVE_ISSUES_FILE"
   ACTIVE_COUNT=$(process_advisories "advisories" "$ACTIVE_ISSUES_FILE")
 
   if [ "$ACTIVE_COUNT" -gt 0 ]; then
-    echo "### Active Security Issues ($ACTIVE_COUNT)" >> comment.md
-    echo "" >> comment.md
-    echo "The following vulnerabilities require attention:" >> comment.md
-    echo "" >> comment.md
-    cat "$ACTIVE_ISSUES_FILE" >> comment.md
+    echo "### Active Security Issues ($ACTIVE_COUNT)" >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
+    echo "The following vulnerabilities require attention:" >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
+    cat "$ACTIVE_ISSUES_FILE" >> "$OUTPUT_FILE"
   else
-    echo "### No Active Security Issues" >> comment.md
-    echo "" >> comment.md
-    echo "All detected vulnerabilities are currently ignored." >> comment.md
-    echo "" >> comment.md
+    echo "### No Active Security Issues" >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
+    echo "All detected vulnerabilities are currently ignored." >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
   fi
   rm -f "$ACTIVE_ISSUES_FILE"
 fi
@@ -71,14 +77,14 @@ if [ "$IGNORED_COUNT" -gt 0 ]; then
   PROCESSED_IGNORED_COUNT=$(process_advisories "ignored-advisories" "$IGNORED_ISSUES_FILE")
 
   if [ "$PROCESSED_IGNORED_COUNT" -gt 0 ]; then
-    echo "### Ignored Security Issues ($PROCESSED_IGNORED_COUNT)" >> comment.md
-    echo "" >> comment.md
-    echo "<details>" >> comment.md
-    echo "<summary>Click to expand ignored vulnerabilities</summary>" >> comment.md
-    echo "" >> comment.md
-    cat "$IGNORED_ISSUES_FILE" >> comment.md
-    echo "</details>" >> comment.md
-    echo "" >> comment.md
+    echo "### Ignored Security Issues ($PROCESSED_IGNORED_COUNT)" >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
+    echo "<details>" >> "$OUTPUT_FILE"
+    echo "<summary>Click to expand ignored vulnerabilities</summary>" >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
+    cat "$IGNORED_ISSUES_FILE" >> "$OUTPUT_FILE"
+    echo "</details>" >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
   fi
   rm -f "$IGNORED_ISSUES_FILE"
 fi

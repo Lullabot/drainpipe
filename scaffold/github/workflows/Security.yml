@@ -55,10 +55,27 @@ jobs:
         run: |
           ddev composer install
 
+      # Generate the advisory report before the security checks so it is
+      # available even when the checks fail. The script never fails the build.
+      - name: Generate composer audit report
+        run: |
+          ddev exec env COMPOSER_AUDIT_OUTPUT=composer-audit-comment.md bash ./vendor/lullabot/drainpipe/scripts/composer-audit.sh
+          if [ -s composer-audit-comment.md ]; then
+            cat composer-audit-comment.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Run Security Checks
         env:
           BASE_REF: ${{ github.base_ref }}
         run: ddev task test:security composer_lock_diff_from="$BASE_REF" composer_lock_diff=composer-lock-diff.md
+
+      - name: Post composer audit comment
+        if: always() && hashFiles('composer-audit-comment.md') != ''
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: composer-security-audit
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: composer-audit-comment.md
 
       - name: Format composer lock diff comment
         if: always()
@@ -69,7 +86,7 @@ jobs:
           fi
 
       - name: Post composer lock diff comment
-        if: hashFiles('composer-lock-diff-comment.md') != ''
+        if: always() && hashFiles('composer-lock-diff-comment.md') != ''
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: composer-lock-diff
@@ -77,51 +94,12 @@ jobs:
           path: composer-lock-diff-comment.md
 
       - name: Delete composer lock diff comment
-        if: hashFiles('composer-lock-diff-comment.md') == ''
+        if: always() && hashFiles('composer-lock-diff-comment.md') == ''
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: composer-lock-diff
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           delete: true
-
-  Composer-Audit:
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ${{ github.workspace }}/.ddev/.drainpipe-composer-cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - uses: ./.github/actions/drainpipe/set-env
-
-      - name: Install and Start DDEV
-        uses: ./.github/actions/drainpipe/ddev
-        with:
-          git-name: Drainpipe Bot
-          git-email: no-reply@example.com
-
-      - name: Build Project
-        run: |
-          ddev composer install
-
-      - name: Run composer audit
-        run: ddev exec bash ./vendor/lullabot/drainpipe/scripts/composer-audit.sh
-
-      - name: Post comment
-        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
-        with:
-          header: composer-security-audit
-          path: comment.md
 
   Npm-Audit:
     if: github.event_name == 'pull_request'
