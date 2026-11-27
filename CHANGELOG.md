@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.4.1](https://github.com/Lullabot/drainpipe/compare/v6.4.0...v6.4.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* **snapshot:** reduce disk usage when staging snapshots ([#1373](https://github.com/Lullabot/drainpipe/issues/1373)) ([9853811](https://github.com/Lullabot/drainpipe/commit/98538115ebe3269906740e6fcf51affcef838b10))
+
 ## [6.4.0](https://github.com/Lullabot/drainpipe/compare/v6.3.1...v6.4.0) (2026-11-26)
 
 
