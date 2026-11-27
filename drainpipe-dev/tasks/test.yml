@@ -19,6 +19,12 @@ vars:
     for DIR in "${DIRS_ARR[@]}"; do
       mkdir -p $DIR
     done
+  # Space-separated list of directories that contain a front-end toolchain
+  # (e.g. a theme that is a Yarn/npm workspace). Prettier, Stylelint and ESLint
+  # are run from inside each directory, so their config files are resolved
+  # relative to it. Defaults to the repository root. See
+  # ../scripts/frontend-lint.sh.
+  FRONTEND_DIRS: '{{ default "." .FRONTEND_DIRS }}'
 
 tasks:
   static:
@@ -51,7 +57,7 @@ tasks:
           ./vendor/bin/composer-lock-diff --from "$DIFF_FROM" --md
         fi
   lint:
-    desc: Runs lint on composer, YAML, and Twig files
+    desc: Runs lint on composer, YAML, Twig, and front-end (Prettier, Stylelint, ESLint) files
     # @todo JUnit output
     cmds:
       - composer validate
@@ -70,23 +76,7 @@ tasks:
           fi
         done
       - |
-        if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn prettier --check --cache-location=.prettiercache .
-        elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
-          npm run prettier --check .
-        fi
-      - |
-        if [ -f ".stylelintrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn stylelint "**/*.{css,scss,sass}"
-        elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
-          npm run stylelint "**/*.{css,scss,sass}"
-        fi
-      - |
-        if [ -f ".eslintrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn eslint .
-        elif [ -f ".eslintrc.json" ] && [ -f "package-lock.json" ]; then
-          npm run eslint .
-        fi
+        bash "{{.TASKFILE_DIR}}/../scripts/frontend-lint.sh" check {{.FRONTEND_DIRS}}
   config:
     desc: "Verifies that exported config matches the config in Drupal. Run with format=short to skip showing the full table of diffs."
     # @todo JUnit output
@@ -175,17 +165,7 @@ tasks:
         {{ .FUNC_ENSURE_DIRS }}
       - ./vendor/bin/phpcbf
       - |
-        if [ -f ".prettierrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn prettier --write --cache-location=.prettiercache .
-        elif [ -f ".prettierrc.json" ] && [ -f "package-lock.json" ]; then
-          npm run prettier --write .
-        fi
-      - |
-        if [ -f ".stylelintrc.json" ] && [ -f "yarn.lock" ]; then
-          yarn stylelint "**/*.{css,scss,sass}" --fix
-        elif [ -f ".stylelintrc.json" ] && [ -f "package-lock.json" ]; then
-          npm run stylelint "**/*.{css,scss,sass}" --fix
-        fi
+        bash "{{.TASKFILE_DIR}}/../scripts/frontend-lint.sh" fix {{.FRONTEND_DIRS}}
       - |
         DIRS_ARR=({{.TWIG_DIRS}})
         for DIR in "${DIRS_ARR[@]}"; do
