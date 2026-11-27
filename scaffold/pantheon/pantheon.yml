@@ -4,3 +4,9 @@ php_version: 8.4
 database:
   version: 10.6
 build_step: false
+# Block web access to the Drupal installer and update.php. Run database
+# updates with `drush updatedb` instead.
+protected_web_paths:
+  - /core/install.php
+  - /install.php
+  - /update.php
