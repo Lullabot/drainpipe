@@ -68,6 +68,9 @@ jobs:
           ddev composer require lullabot/drainpipe "consolidation/robo:5.1.*" --with-all-dependencies
           ddev restart
 
+          # Drainpipe blocks install.php and update.php in .htaccess.
+          grep -q "BEGIN Drainpipe protected web paths" docroot/.htaccess
+
           # Acquia recommended settings before DDEV settings.
           sed -i '/\/\/ Automatically generated include for settings managed by ddev./i require DRUPAL_ROOT . \
             "/../vendor/acquia/drupal-recommended-settings/settings/acquia-recommended.settings.php";' \

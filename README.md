@@ -457,6 +457,19 @@ ddev ssh
 terminus site:upstream:set [site_name] empty
 ```
 
+The scaffolded `pantheon.yml` blocks web access to the Drupal installer and
+`update.php` with [`protected_web_paths`](https://docs.pantheon.io/pantheon-yml#protected-web-paths),
+as recommended in [Securing the installer](https://www.drupal.org/docs/administering-a-drupal-site/security-in-drupal/securing-the-installer-installphp).
+Run database updates with `drush updatedb` (or `task drupal:update`) instead.
+Drainpipe never modifies an existing `pantheon.yml`, but it warns when these
+paths are missing:
+```yml
+protected_web_paths:
+  - /core/install.php
+  - /install.php
+  - /update.php
+```
+
 #### Pantheon Systems: Drupal Integrations
 
 `pantheon-systems/drupal-integrations` is a package that provides essential Pantheon functionality. It is strongly recommended to install it.
@@ -488,6 +501,28 @@ To enable auto configuration of Acquia Cloud settings:
         "acquia": {
             "settings": true
         },
+    }
+}
+```
+
+#### Protected web paths
+
+When Acquia is configured (`extra.drainpipe.acquia`, or Acquia GitHub Actions
+or Bitbucket Pipelines), Drainpipe adds a managed block to the top of the web
+root `.htaccess` that returns 403 for `/core/install.php`, `/install.php` and
+`/update.php`, as recommended in [Securing the installer](https://www.drupal.org/docs/administering-a-drupal-site/security-in-drupal/securing-the-installer-installphp).
+Run database updates with `drush updatedb` (or `task drupal:update`) instead.
+
+The block is re-applied after `drupal/core-composer-scaffold` rewrites
+`.htaccess` on every `composer install` and `composer update`. Running
+`composer drupal:scaffold` on its own removes it until the next install. To
+opt out (this also removes an existing block):
+```json
+"extra": {
+    "drainpipe": {
+        "acquia": {
+            "protected-web-paths": false
+        }
     }
 }
 ```

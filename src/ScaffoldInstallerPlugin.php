@@ -75,10 +75,74 @@ class ScaffoldInstallerPlugin implements PluginInterface, EventSubscriberInterfa
      */
     public static function getSubscribedEvents()
     {
+        // protectWebPaths() runs at a low priority so it edits .htaccess
+        // after drupal/core-composer-scaffold has (re)written it.
         return [
-            ScriptEvents::POST_INSTALL_CMD => 'onPostInstallCmd',
-            ScriptEvents::POST_UPDATE_CMD => 'onPostUpdateCmd',
+            ScriptEvents::POST_INSTALL_CMD => [
+                ['onPostInstallCmd', 0],
+                ['protectWebPaths', -100],
+            ],
+            ScriptEvents::POST_UPDATE_CMD => [
+                ['onPostUpdateCmd', 0],
+                ['protectWebPaths', -100],
+            ],
         ];
+    }
+
+    /**
+     * Blocks web access to install.php and update.php on Acquia.
+     *
+     * Adds a managed block to the web root .htaccess file. Set
+     * extra.drainpipe.acquia.protected-web-paths to false to opt out, which
+     * also removes a previously added block.
+     */
+    public function protectWebPaths(Event $event): void
+    {
+        if (!$this->hasAnyAcquiaConfig()) {
+            return;
+        }
+
+        $webRoot = rtrim($this->extra['drupal-scaffold']['locations']['web-root'] ?? 'web', '/');
+        $htaccessPath = "./$webRoot/.htaccess";
+        if (!is_file($htaccessPath)) {
+            $this->io->warning("🪠 [Drainpipe] $htaccessPath not found; could not block web access to install.php and update.php.");
+            return;
+        }
+
+        $contents = file_get_contents($htaccessPath);
+        $enabled = ($this->extra['drainpipe']['acquia']['protected-web-paths'] ?? true) !== false;
+        $updated = $enabled
+            ? ProtectedWebPaths::applyToHtaccess($contents)
+            : ProtectedWebPaths::removeFromHtaccess($contents);
+
+        if ($updated !== $contents) {
+            file_put_contents($htaccessPath, $updated);
+            $this->io->write($enabled
+                ? "🪠 [Drainpipe] Blocked web access to install.php and update.php in $htaccessPath"
+                : "🪠 [Drainpipe] Removed install.php and update.php protection from $htaccessPath");
+        }
+    }
+
+    /**
+     * Returns true if the project is configured for Acquia hosting.
+     */
+    private function hasAnyAcquiaConfig(): bool
+    {
+        if (isset($this->extra['drainpipe']['acquia'])) {
+            return true;
+        }
+        if (!empty($this->extra['drainpipe']['github']['acquia'])) {
+            return true;
+        }
+        $bitbucket = $this->extra['drainpipe']['bitbucket'] ?? [];
+        if (is_array($bitbucket)) {
+            foreach ($bitbucket as $pipeline) {
+                if (is_string($pipeline) && str_starts_with($pipeline, 'Acquia')) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -492,6 +556,23 @@ EOT;
         // pantheon.yml
         if (!file_exists('./pantheon.yml')) {
             $fs->copy("$scaffoldPath/pantheon/pantheon.yml", './pantheon.yml');
+        }
+        else {
+            // Existing pantheon.yml files are never modified; recommend the
+            // protected paths instead.
+            try {
+                $pantheonYml = Yaml::parseFile('./pantheon.yml');
+                $missing = ProtectedWebPaths::missingPantheonPaths(is_array($pantheonYml) ? $pantheonYml : []);
+                if (!empty($missing)) {
+                    $this->io->warning(
+                        "🪠 [Drainpipe] pantheon.yml does not protect these paths from web access. Add them under 'protected_web_paths': " .
+                        implode(', ', $missing)
+                    );
+                }
+            }
+            catch (\Exception $e) {
+                // Leave pantheon.yml validation to Pantheon.
+            }
         }
     }
 
